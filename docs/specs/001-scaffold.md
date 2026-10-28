@@ -22,13 +22,13 @@ None. `supabase/` initialized (config + empty migrations).
   - [x] `pnpm typecheck`, `pnpm lint`, `pnpm build` green
   - [x] existing `.gitignore`, `.env.example`, `CLAUDE.md`, `docs/` untouched
 
-### [ ] 2. Tokens + shadcn
+### [x] 2. Tokens + shadcn
 - **Build:** `shadcn init`; tokens (colors, radius, spacing, fonts with Cyrillic) in `src/app/globals.css`; `cn()`; base layer with pointer cursor for native controls; button, input, label, card added. Placeholder look: shadcn neutral palette + one calm accent; font chosen by the designer for the niche and current trends (good Cyrillic, tabular numbers, via `next/font`) — all swapped later via tokens only. **Light + dark** themes: tokens for both, following the system preference plus a theme switch (no flash on load). A `/design` page showing tokens and primitives in both themes (noindex).
 - **Files:** `src/app/globals.css`, `src/components/ui/*`, `src/lib/utils.ts`, `src/app/design/page.tsx`
 - **Agent:** designer
 - **Accept:**
   - [x] no raw colors outside `globals.css`
-  - [ ] `/design` renders at 375px without horizontal scroll
+  - [x] `/design` renders at 375px without horizontal scroll
   - [x] light and dark both meet WCAG AA contrast; theme switch works without a flash of the wrong theme
 
 ### [ ] 3. Cloudflare (OpenNext)
@@ -47,12 +47,12 @@ None. `supabase/` initialized (config + empty migrations).
   - [x] importing `admin.ts` from a client component fails the build
   - [x] build green with empty env (no crash at import time)
 
-### [ ] 5. Playwright UI check
+### [x] 5. Playwright UI check
 - **Build:** port `ui-check` from `doc-spread/apps/web` (`playwright.config.ts`, `e2e/ui-check.spec.ts`): `next dev` on port 3199, `SPEC`/`ROUTES` env, 375/1280 viewports, light + dark themes, Chromium only, fail on console errors and horizontal scroll, screenshots to `e2e/screenshots/<spec>/`.
 - **Files:** `playwright.config.ts`, `e2e/ui-check.spec.ts`, `package.json`
 - **Model:** haiku
 - **Accept:**
-  - [ ] `SPEC=001 ROUTES=root,design pnpm ui-check` passes and writes screenshots
+  - [x] `SPEC=001 ROUTES=root,design pnpm ui-check` passes and writes screenshots
 
 ## External needs
 - **`pnpm preview` on this Windows machine:** the OpenNext build fails with `EPERM: operation not permitted, symlink` (`copyTracedFiles`, `@opennextjs/aws` 4.1.12). Enable Windows Developer Mode (lets non-admin users create symlinks) or run preview in WSL/Linux CI, then re-run `pnpm preview` to close slice 3.
@@ -72,3 +72,5 @@ None. `supabase/` initialized (config + empty migrations).
 | 2026-10-28 | 2 | built; 375px pending UI check (step 8) | Font Manrope (latin+cyrillic, `--font-sans`); accent deep teal; light+dark via inline head script + `lyndrik-theme` localStorage + `ThemeToggle`; AA ratios computed (lowest: control outline 4.3, focus ring 4.6). Added `--control` token (shadcn `--input` too faint). shadcn CLI wrote `cn` npm import — replaced with `@/lib/utils`. Deps: radix-ui, cva, clsx, tailwind-merge, lucide-react, tw-animate-css; `shadcn` (dev, for its CSS). `components.json`, `globals.css`, `layout.tsx`, `design/page.tsx`, `lib/utils.ts`, `lib/theme.ts`, `components/theme-toggle.tsx`, `components/ui/*` |
 | 2026-10-28 | 3 | built; preview **blocked** (Windows symlink EPERM in OpenNext build) | `@opennextjs/cloudflare` 1.20.13, wrangler 4.154.0; `wrangler.jsonc` (`lyndrik-web`, compat 2026-10-01, `nodejs_compat`), `open-next.config.ts`, `next.config.ts` (`initOpenNextCloudflareForDev`), scripts `preview`/`deploy`/`cf-typegen`, `pnpm-workspace.yaml` (`onlyBuiltDependencies: workerd, esbuild`), eslint ignores, `.env.example` comment; `cloudflare-env.d.ts` git-ignored (regenerate with `pnpm cf-typegen`). No deploy run. |
 | 2026-10-28 | 4 | done | `@supabase/ssr` 0.12.7, `@supabase/supabase-js` 2.118.0, zod 4.6.7, server-only, supabase CLI 2.98.0 (dev). `src/lib/supabase/{env,server,client,admin,middleware,database.types}.ts`, `src/middleware.ts` (matcher `/admin/:path*`, pass-through with empty env), `supabase/config.toml` (`project_id = "lyndrik"`), `supabase/migrations/.gitkeep`, `db:types` script; types generated from local Supabase (empty schema). Leak test: build fails with the `server-only` error. |
+| 2026-10-28 | 5 | done | `@playwright/test` 1.64.1, `playwright.config.ts` (next dev :3199, Chromium), `e2e/ui-check.spec.ts` (375/1280 × light/dark), `ui-check` script. `AGENTS.md` committed (written by `next dev`, re-created if removed). |
+| 2026-10-28 | UI check | 8/8 passed | `root`, `design` × mobile/desktop × light/dark; screenshots reviewed: both themes, Cyrillic (ґ ї є), tabular prices, no overflow. Closes slice 2's 375px criterion. Spec stays `in-progress` until slice 3's preview runs. |
