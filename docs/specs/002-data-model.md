@@ -1,6 +1,6 @@
 # 002 — Data model (Supabase)
 
-**Status:** ready · **Depends on:** 001 · **Route(s):** —
+**Status:** in-progress · **Depends on:** 001 · **Route(s):** —
 
 ## Goal
 The tables everything else reads and writes — properties, photos, agents, leads, pages, settings — with RLS, generated types and seed data, so the site works without Plektan. Every column later specs (003–010) need exists now, so they don't have to reshape applied migrations.
@@ -24,13 +24,13 @@ Small stable value sets are **Postgres enums** (exact unions in the generated ty
 
 ## Slices
 
-### [ ] 1. Agents, properties, photos
+### [x] 1. Agents, properties, photos
 - **Build:** migration with the enums above, `agents`, `properties`, `property_photos`; indexes for catalog filters (status + deal + property_type, price_usd, area_total, room_count, district, published_at) and `updated_at` triggers; RLS (anon/authenticated read only `published` properties, their photos, active agents; no writes). `src/lib/supabase/public.ts`. Types regenerated (`pnpm db:types`). `src/lib/db/properties.ts`: filters zod schema, `getPublishedProperties(filters, page)` (paginated, total count, sort by price/area/newest, photos + agent), `getPropertyBySlug(slug)`; cache tag constants. `src/lib/photos/photo-url.ts`: `photoUrl(key)` = `NEXT_PUBLIC_R2_PUBLIC_URL/key`, or `/key` (served from `public/`) when empty.
 - **Files:** `supabase/migrations/*_properties.sql`, `src/lib/supabase/public.ts`, `src/lib/supabase/database.types.ts`, `src/lib/db/properties.ts`, `src/lib/db/cache-tags.ts`, `src/lib/photos/photo-url.ts`
 - **Agent:** backend
 - **Accept:**
-  - [ ] anon key can't read hidden properties (or their photos) or write anything
-  - [ ] types regenerated; typecheck/lint/build green
+  - [x] anon key can't read hidden properties (or their photos) or write anything
+  - [x] types regenerated; typecheck/lint/build green
 
 ### [ ] 2. Leads, pages, settings
 - **Build:** migration + RLS (leads: RLS on, no policies for anon/authenticated; pages: public read; settings: no public access, single row enforced and inserted by the migration). `src/lib/db/leads.ts`: `createLead` (service role, server-only, idempotent on `client_request_id`); `src/lib/db/pages.ts`: `getPage(slug)` (cached, tag `pages`); `src/lib/db/settings.ts`: `getSettings()` (server-only). Types regenerated.
@@ -66,3 +66,4 @@ Small stable value sets are **Postgres enums** (exact unions in the generated ty
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
+| 2026-10-28 | 1 | done | Migration `20261028120000_properties.sql` (5 enums, `agents`, `properties`, `property_photos`, `set_updated_at()` trigger, catalog indexes, select-only RLS). RLS checked on local with the anon key: only the published property, its photo and the active agent are visible; insert → 42501, update/delete → 0 rows. `status` defaults to `hidden`. Filters take USD-normalized price bounds (caller converts). `src/lib/supabase/public.ts`, `src/lib/db/{properties,property-values,cache-tags}.ts`, `src/lib/photos/photo-url.ts`, `database.types.ts` |

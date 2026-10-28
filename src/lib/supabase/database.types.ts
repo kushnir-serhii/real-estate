@@ -34,7 +34,226 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      agents: {
+        Row: {
+          created_at: string
+          email: string | null
+          external_id: string | null
+          id: string
+          is_active: boolean
+          name: string
+          phones: string[]
+          photo_url: string | null
+          source: Database["public"]["Enums"]["property_source"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          external_id?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          phones?: string[]
+          photo_url?: string | null
+          source: Database["public"]["Enums"]["property_source"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          external_id?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          phones?: string[]
+          photo_url?: string | null
+          source?: Database["public"]["Enums"]["property_source"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      properties: {
+        Row: {
+          agent_id: string | null
+          area_kitchen: number | null
+          area_life: number | null
+          area_lot: number | null
+          area_total: number | null
+          created_at: string
+          currency: Database["public"]["Enums"]["currency"] | null
+          deal: Database["public"]["Enums"]["deal"]
+          description: string | null
+          district: string | null
+          external_id: string | null
+          house: string | null
+          housing_class: string | null
+          id: string
+          is_newbuilding: boolean
+          lat: number | null
+          lng: number | null
+          locality: string | null
+          price_amount: number | null
+          price_per_m2: number | null
+          price_usd: number | null
+          prop_kind: string | null
+          property_type: Database["public"]["Enums"]["property_type"]
+          published_at: string | null
+          raw: Json | null
+          repair: string | null
+          room_count: number | null
+          seo_description: string | null
+          seo_title: string | null
+          slug: string
+          source: Database["public"]["Enums"]["property_source"]
+          source_updated_at: string | null
+          status: Database["public"]["Enums"]["property_status"]
+          storey: number | null
+          storeys: number | null
+          street: string | null
+          synced_at: string | null
+          title: string
+          updated_at: string
+          wall_material: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          area_kitchen?: number | null
+          area_life?: number | null
+          area_lot?: number | null
+          area_total?: number | null
+          created_at?: string
+          currency?: Database["public"]["Enums"]["currency"] | null
+          deal: Database["public"]["Enums"]["deal"]
+          description?: string | null
+          district?: string | null
+          external_id?: string | null
+          house?: string | null
+          housing_class?: string | null
+          id?: string
+          is_newbuilding?: boolean
+          lat?: number | null
+          lng?: number | null
+          locality?: string | null
+          price_amount?: number | null
+          price_per_m2?: number | null
+          price_usd?: number | null
+          prop_kind?: string | null
+          property_type: Database["public"]["Enums"]["property_type"]
+          published_at?: string | null
+          raw?: Json | null
+          repair?: string | null
+          room_count?: number | null
+          seo_description?: string | null
+          seo_title?: string | null
+          slug: string
+          source: Database["public"]["Enums"]["property_source"]
+          source_updated_at?: string | null
+          status?: Database["public"]["Enums"]["property_status"]
+          storey?: number | null
+          storeys?: number | null
+          street?: string | null
+          synced_at?: string | null
+          title: string
+          updated_at?: string
+          wall_material?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          area_kitchen?: number | null
+          area_life?: number | null
+          area_lot?: number | null
+          area_total?: number | null
+          created_at?: string
+          currency?: Database["public"]["Enums"]["currency"] | null
+          deal?: Database["public"]["Enums"]["deal"]
+          description?: string | null
+          district?: string | null
+          external_id?: string | null
+          house?: string | null
+          housing_class?: string | null
+          id?: string
+          is_newbuilding?: boolean
+          lat?: number | null
+          lng?: number | null
+          locality?: string | null
+          price_amount?: number | null
+          price_per_m2?: number | null
+          price_usd?: number | null
+          prop_kind?: string | null
+          property_type?: Database["public"]["Enums"]["property_type"]
+          published_at?: string | null
+          raw?: Json | null
+          repair?: string | null
+          room_count?: number | null
+          seo_description?: string | null
+          seo_title?: string | null
+          slug?: string
+          source?: Database["public"]["Enums"]["property_source"]
+          source_updated_at?: string | null
+          status?: Database["public"]["Enums"]["property_status"]
+          storey?: number | null
+          storeys?: number | null
+          street?: string | null
+          synced_at?: string | null
+          title?: string
+          updated_at?: string
+          wall_material?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "properties_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_photos: {
+        Row: {
+          created_at: string
+          height: number | null
+          id: string
+          position: number
+          property_id: string
+          r2_key: string
+          sizes: Json | null
+          source_url: string | null
+          width: number | null
+        }
+        Insert: {
+          created_at?: string
+          height?: number | null
+          id?: string
+          position: number
+          property_id: string
+          r2_key: string
+          sizes?: Json | null
+          source_url?: string | null
+          width?: number | null
+        }
+        Update: {
+          created_at?: string
+          height?: number | null
+          id?: string
+          position?: number
+          property_id?: string
+          r2_key?: string
+          sizes?: Json | null
+          source_url?: string | null
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_photos_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -43,7 +262,11 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      currency: "UAH" | "USD" | "EUR"
+      deal: "sell" | "rent_long" | "rent_day"
+      property_source: "plektan" | "admin"
+      property_status: "published" | "hidden"
+      property_type: "flat" | "house" | "commercial" | "plot"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -173,7 +396,13 @@ export const Constants = {
     Enums: {},
   },
   public: {
-    Enums: {},
+    Enums: {
+      currency: ["UAH", "USD", "EUR"],
+      deal: ["sell", "rent_long", "rent_day"],
+      property_source: ["plektan", "admin"],
+      property_status: ["published", "hidden"],
+      property_type: ["flat", "house", "commercial", "plot"],
+    },
   },
 } as const
 
