@@ -15,6 +15,7 @@ The frame of the public site — header, navigation, footer with the mandatory P
 ## Slices
 
 ### [ ] 1. Layout: header + footer
+- **Build:** logo is a text wordmark in `src/components/layout/logo.tsx` (placeholder until the brand exists).
 - **Agent:** designer
 - **Accept:**
   - [ ] Plektan partner button in the footer of every page (code from the original Plektan doc)
@@ -36,7 +37,7 @@ The frame of the public site — header, navigation, footer with the mandatory P
 - Logo, brand colors, texts (about, contacts, privacy policy), photos of the team/office from Andrii.
 
 ## Open questions
-- Is there a brand/logo, or does the designer make one?
+- ~~Brand/logo?~~ Decided 2026-10-28: not defined yet — text wordmark and placeholder texts/photos; real ones later.
 - Messengers to show (Telegram, Viber, WhatsApp)?
 - Map on contacts: embed or static image?
 

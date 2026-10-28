@@ -47,6 +47,8 @@ The Plektan partner button ("Ми працюємо з Plektan") is mandatory in 
 Build order and status: [roadmap.md](roadmap.md). Later options (client login via Telegram/Google, saved searches with Telegram alerts, price-drop alerts, XML feed to LUN, simple lead pipeline) are in [reference/stack.md](reference/stack.md) → «Можливий функціонал»; not planned yet.
 
 ## Design principles
+**Design status:** brand, logo and visual design are not defined yet. Build with a neutral placeholder look (shadcn neutral palette, one accent, text wordmark "Lyndrik", placeholder photos). Everything visual goes through tokens in `globals.css` and one `logo.tsx`, so the real design replaces it later without touching pages. Don't ask about branding before it exists.
+
 1. Photos first; clean, calm, trustworthy. Neutral palette + one accent.
 2. Mobile-first: catalog, property page and forms must be perfect at 375px.
 3. Price always with currency; tabular numbers.
