@@ -30,7 +30,11 @@ for (const route of ROUTES) {
         const errors: string[] = []
         page.on('pageerror', (error) => errors.push(error.message))
         page.on('console', (message) => {
-          if (message.type() === 'error') errors.push(message.text())
+          if (message.type() !== 'error') return
+          // a 404 route answers with status 404 on purpose; Chrome logs that for the document itself
+          const isOwnDocument404 =
+            message.text().includes('status of 404') && message.location().url === page.url()
+          if (!isOwnDocument404) errors.push(message.text())
         })
 
         await page.setViewportSize({ width: viewport.width, height: viewport.height })
@@ -44,6 +48,15 @@ for (const route of ROUTES) {
         }, theme)
 
         await page.goto(route)
+        await page.waitForLoadState('networkidle')
+        // scroll through the page so lazy images load before the full-page screenshot
+        await page.evaluate(async () => {
+          for (let y = 0; y < document.body.scrollHeight; y += window.innerHeight) {
+            window.scrollTo(0, y)
+            await new Promise((resolve) => setTimeout(resolve, 100))
+          }
+          window.scrollTo(0, 0)
+        })
         await page.waitForLoadState('networkidle')
 
         await page.screenshot({
