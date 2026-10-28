@@ -68,7 +68,7 @@ Arguments: none (next slice from the plan) · `005` (next open slice of that spe
    ```
    For UI slices also check 375px width and every state in the slice. For schema slices check that every new table has RLS and the types were regenerated. Send problems back to the agent with specifics; after two rounds, report what still fails.
 6. **Record.** In the spec: mark the criteria and the slice `[x]`, add one **Log** row (date, slice, result, files touched), add new **Open questions** and **External needs**. Update the status in the spec header and in [roadmap.md](roadmap.md).
-7. **Commit and go on.** Work on a branch per spec (`spec/<NNN>-<slug>`). Commit the slice (`feat: <spec #> slice <n> — <summary>`) and start the next `[ ]` slice at step 3, without stopping.
+7. **Commit and go on.** Work on a branch per spec (`spec/<NNN>-<slug>`). Create it from the **previous spec's branch** (the last spec built), not from `main`, so it already has the work that isn't merged yet; only the first spec branches from `main`. In `parallel` mode every spec of the batch branches from that same previous branch. Commit the slice (`feat: <spec #> slice <n> — <summary>`) and start the next `[ ]` slice at step 3, without stopping.
 8. **UI check (end of spec, Playwright).** After the last slice of a spec that changes UI:
    ```sh
    SPEC=<spec #> ROUTES=<route>,<route> pnpm ui-check
