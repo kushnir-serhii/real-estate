@@ -1,0 +1,31 @@
+# dependencies
+node_modules/
+
+# builds
+.next/
+.open-next/
+.wrangler/
+out/
+
+# env / secrets
+.env
+.env.*
+!.env.example
+.dev.vars
+
+# logs
+*.log
+
+# playwright
+e2e/.output/
+e2e/screenshots/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+
+# supabase local
+supabase/.temp/
+supabase/.branches/
