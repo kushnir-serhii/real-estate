@@ -1,6 +1,6 @@
 # 004 — Site shell + static pages
 
-**Status:** ready · **Depends on:** 001 · **Route(s):** `/`, `/about`, `/contacts`, `/privacy`, 404
+**Status:** in-progress · **Depends on:** 001 · **Route(s):** `/`, `/about`, `/contacts`, `/privacy`, 404
 
 ## Goal
 The frame of the public site — header, navigation, footer with the mandatory Plektan button — and the static pages, so the site looks like the agency from day one and the home quick search leads visitors into the catalog.
@@ -18,14 +18,14 @@ The frame of the public site — header, navigation, footer with the mandatory P
 
 ## Slices
 
-### [ ] 1. Layout: header + footer
+### [x] 1. Layout: header + footer
 - **Build:** `src/app/(site)/layout.tsx` with header + footer; existing `/` moves into `(site)`, `/design` stays outside. Logo is a text wordmark in `src/components/layout/logo.tsx` (placeholder until the brand exists). `src/lib/site-config.ts`. Nav: Купити (`/catalog?deal=sell`), Орендувати (`/catalog?deal=rent_long`), Про нас, Контакти; phone (`tel:`), theme toggle, CTA «Залишити заявку» → `/contacts#zv-yazok`. Mobile menu as a sheet (shadcn Sheet / Radix Dialog). Footer: contacts, Telegram + Viber (WhatsApp supported in config, off), socials hidden while their URL is empty, privacy link, © year, Plektan button. `NEXT_PUBLIC_SITE_URL` + `metadataBase`.
 - **Files:** `src/app/(site)/layout.tsx`, `src/app/(site)/page.tsx` (moved), `src/components/layout/{logo,site-header,mobile-menu,site-footer,plektan-button}.tsx`, `src/lib/site-config.ts`, `src/components/ui/sheet.tsx`, `src/app/layout.tsx`, `.env.example`, `docs/setup.md`
 - **Agent:** designer
 - **Accept:**
-  - [ ] Plektan partner button in the footer of every page: static equivalent of the original snippet (it uses `document.write`) — `<a href="https://plektan.com/" title="plektan.com" target="_blank" rel="noopener">` with `<img src="https://plektan.com/img/btn/work-with-plektan-uk.png" alt="Ми працюємо з PLEKTAN CRM" width="120" height="30">`
-  - [ ] mobile menu works with keyboard, traps focus, closes on Esc and on navigation, 44px targets
-  - [ ] phone and messenger links are tappable (`tel:`, Telegram, Viber)
+  - [x] Plektan partner button in the footer of every page: static equivalent of the original snippet (it uses `document.write`) — `<a href="https://plektan.com/" title="plektan.com" target="_blank" rel="noopener">` with `<img src="https://plektan.com/img/btn/work-with-plektan-uk.png" alt="Ми працюємо з PLEKTAN CRM" width="120" height="30">`
+  - [x] mobile menu works with keyboard, traps focus, closes on Esc and on navigation, 44px targets
+  - [x] phone and messenger links are tappable (`tel:`, Telegram, Viber)
 
 ### [ ] 2. Home
 - **Build:** hero with a placeholder photo from `public/placeholders/`, title and lead from `pages.home` (fallback default); quick search — a plain GET `<form action="/catalog">` that works without JS: deal (`deal`), type (`property_type`), rooms (`rooms`: any, 1–4, 5+), max budget (`price_to`) + currency (`currency`, USD by default); empty fields don't break the URL. Featured block: 6 newest published properties as cards (`src/features/properties/property-card.tsx`, basic; 005 extends it) with `formatPrice` (`src/lib/format/format-price.ts`, `uk-UA`, currency always, `tabular-nums`) and Ukrainian labels for deal/type. About block (body of `pages.home` as Markdown), CTA block (phone + messengers). `react-markdown` added. ISR via the cached reads.
@@ -63,6 +63,9 @@ The frame of the public site — header, navigation, footer with the mandatory P
 - **Decided 2026-10-28:** featured = 6 newest published; basic property card built here, extended in 005.
 - **Decided 2026-10-28:** agents shown on contacts (`getActiveAgents`); privacy at `/privacy` with a draft template.
 
+- «Купити»/«Орендувати» are never marked active in the nav (would need `useSearchParams`); revisit in 005 if wanted.
+
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
+| 2026-10-28 | 1 | done | `(site)` layout with skip link; header (nav, phone, theme toggle, CTA; mobile: phone icon + sheet menu), footer (contacts, Telegram/Viber, privacy link, Plektan badge), `site-config.ts`, `NEXT_PUBLIC_SITE_URL` → `metadataBase` + title template. Playwright: menu traps focus, Esc closes and returns focus, closes on link, all targets ≥ 44px; badge image loads (120×30). `sheet.tsx` written by hand (the shadcn CLI wanted to overwrite `button.tsx`). Files: `src/app/(site)/{layout,page}.tsx`, `src/components/layout/*`, `src/components/ui/sheet.tsx`, `src/lib/site-config.ts`, `src/app/layout.tsx`, `.env.example`, `docs/setup.md` |

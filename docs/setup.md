@@ -12,6 +12,10 @@ Everything so far runs locally (local Supabase in Docker, fixture modes). This f
 | Telegram bot | not connected — fixtures | 006 |
 | LLM | not connected — fixtures | 010 |
 
+## Site URL
+
+Set `NEXT_PUBLIC_SITE_URL` to the production domain (for example `https://lyndrik.example`, no trailing path) in Cloudflare, for **build and runtime** (`NEXT_PUBLIC_*` are inlined at build time). It sets `metadataBase` and canonical URLs. Empty means `http://localhost:3000`, fine for local work only.
+
 ## Supabase
 
 ### 1. Project
