@@ -1,3 +1,5 @@
+# Flat node_modules: the OpenNext build copies node_modules, and pnpm's symlinks fail on Windows without Developer Mode (EPERM).
+nodeLinker: hoisted
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
