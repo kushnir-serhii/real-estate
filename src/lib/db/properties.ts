@@ -123,6 +123,11 @@ const fetchPublishedProperties = async (filters: PropertyFilters): Promise<Prope
     .range(from, from + PAGE_SIZE - 1)
     .overrideTypes<PublishedProperty[], { merge: false }>();
 
+  // PGRST103: the page starts past the last row. Not an error for the visitor: empty page + real total.
+  if (error?.code === "PGRST103" && filters.page > 1) {
+    const first = await fetchPublishedProperties({ ...filters, page: 1 });
+    return { ...first, items: [], page: filters.page };
+  }
   if (error) throw new Error(`getPublishedProperties failed: ${error.message}`);
   const total = count ?? 0;
   return {
@@ -157,3 +162,26 @@ export const getPropertyBySlug = (slug: string): Promise<PublishedProperty | nul
   unstable_cache(fetchPropertyBySlug, ["property-by-slug", slug], {
     tags: [CACHE_TAGS.properties, propertyTag(slug)],
   })(slug);
+
+const ukCollator = new Intl.Collator("uk");
+
+const fetchPublishedDistricts = async (): Promise<string[]> => {
+  // PostgREST has no DISTINCT: read the column and dedupe here (bounded by the API row limit).
+  const { data, error } = await createPublicClient()
+    .from("properties")
+    .select("district")
+    .eq("status", "published")
+    .not("district", "is", null);
+  if (error) throw new Error(`getPublishedDistricts failed: ${error.message}`);
+  const names = new Set<string>();
+  for (const row of data) {
+    const name = row.district?.trim();
+    if (name) names.add(name);
+  }
+  return [...names].sort(ukCollator.compare);
+};
+
+/** Distinct districts of published properties, sorted for Ukrainian. Cached under `properties`. */
+export const getPublishedDistricts = unstable_cache(fetchPublishedDistricts, ["published-districts"], {
+  tags: [CACHE_TAGS.properties],
+});

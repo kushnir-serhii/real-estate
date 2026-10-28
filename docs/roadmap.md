@@ -12,7 +12,7 @@ Stage 1 (≈7–9 weeks): base site + admin + AI assistant — see [reference/st
 | 002 | [Data model (Supabase)](specs/002-data-model.md) | done | 001 |
 | 003 | [Plektan sync](specs/003-plektan-sync.md) | done | 002 |
 | 004 | [Site shell + static pages](specs/004-site-shell.md) | done | 001 |
-| 005 | [Catalog + property page](specs/005-catalog.md) | ready | 002, 004 |
+| 005 | [Catalog + property page](specs/005-catalog.md) | in-progress | 002, 004 |
 | 006 | [Leads: forms → Supabase → Plektan → Telegram](specs/006-leads.md) | draft | 002, 004 |
 | 007 | [Admin: sign-in + leads](specs/007-admin-leads.md) | draft | 002, 006 |
 | 008 | [Admin: properties + photos](specs/008-admin-properties.md) | draft | 003, 007 |

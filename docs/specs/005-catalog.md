@@ -1,6 +1,6 @@
 # 005 — Catalog + property page
 
-**Status:** ready · **Depends on:** 002, 004 · **Route(s):** `/catalog`, `/catalog/[slug]`, `/favorites`
+**Status:** in-progress · **Depends on:** 002, 004 · **Route(s):** `/catalog`, `/catalog/[slug]`, `/favorites`
 
 ## Goal
 Visitors (mostly on phones) find a property with filters, open its page with a good gallery, facts and an approximate location, save favorites, and reach the agent or agency in one tap. A property that was just sold keeps a "sold" page for a week instead of a dead link.
@@ -18,15 +18,15 @@ Visitors (mostly on phones) find a property with filters, open its page with a g
 
 ## Slices
 
-### [ ] 1. Catalog list + card
+### [x] 1. Catalog list + card
 - **Build:** `/catalog` page: title by filters («Продаж квартир», «Оренда», «Усі об'єкти»), result count, filters as a plain GET form (works without JS): deal, type, kind (only when a type is chosen), rooms (1–4, 5+), price from/to + currency (USD default), area from/to, district (options = districts of published properties, cached); desktop: sidebar; mobile: «Фільтри (N)» button opening a sheet with «Показати» and «Скинути». Sort select (newest, price ↑↓, area ↑↓) applies on change (tiny client enhancement; without JS a button). Numbered pagination (12 per page) keeping the filters. Card extended from 004 (photo, price, title, facts, deal/type badge) — reused by home. `loading.tsx` skeleton grid, `error.tsx` with retry. Data cached by tag; `generateMetadata` (title by filters, canonical `/catalog` without params).
 - **Files:** `src/app/(site)/catalog/{page,loading,error}.tsx`, `src/features/catalog/*`, `src/features/properties/property-card.tsx`, `src/lib/db/{properties,settings}.ts` (cached rates, districts)
 - **Agent:** designer
 - **Accept:**
-  - [ ] reload keeps filters; back button works
-  - [ ] empty result explains and offers to reset filters
-  - [ ] the home quick search URL (`deal`, `property_type`, `rooms`, `price_to`, `currency`) lands on correctly filtered results
-  - [ ] 375px: filters in a sheet, no horizontal scroll, 44px targets
+  - [x] reload keeps filters; back button works
+  - [x] empty result explains and offers to reset filters
+  - [x] the home quick search URL (`deal`, `property_type`, `rooms`, `price_to`, `currency`) lands on correctly filtered results
+  - [x] 375px: filters in a sheet, no horizontal scroll, 44px targets
 
 ### [ ] 2. Property page
 - **Build:** `/catalog/[slug]`: gallery (CSS scroll-snap, swipe, arrow buttons + keyboard ←/→, counter, fullscreen view in a dialog, explicit sizes from `width`/`height`, `srcset` from `sizes`, first photo eager, rest lazy; «Фото незабаром» placeholder), price (+ per m² when present), key facts (rooms, areas, floor/floors, kind, repair, wall material, class, new build — Ukrainian labels), description (plain text with paragraphs), location text (locality, district, street — no house number), contact card: the property's agent (name, photo or avatar, phone `tel:`) or the agency when there's none, plus agency Telegram/Viber; CTA «Залишити заявку» → the contact block (006 replaces with the form); sticky bottom bar on mobile (call + CTA). Similar: same deal + type, price ±30% (`price_usd`), up to 4, excluding itself. `generateMetadata` (title, description from the text, canonical, first photo as OG image). `loading.tsx`, `error.tsx`.
@@ -74,7 +74,12 @@ Visitors (mostly on phones) find a property with filters, open its page with a g
 - **Decided 2026-10-28:** contact = the property's agent when present, else the agency; agency messengers always.
 - **Decided 2026-10-28:** GET filter form (works without JS), sheet on mobile; price filter in a chosen currency (USD default) converted with `settings.exchange_rates`; cards in the property's own currency; districts from published properties; numbered pagination; gallery without a library; similar = same deal + type, ±30% price, up to 4; CTA → contact block until 006; favorites on the device.
 - Plektan doesn't say why a property vanished (sold, deferred, withdrawn): the sold page says «Продано» / «Вже здано» for every hidden property.
+- Without JS at all the catalog shows the streaming skeleton (the `(site)` `loading.tsx`); the GET form itself works before JS loads. Kept on purpose: streaming skeleton > blocking page; crawlers render JS.
+- Indexing (for 009): plain `/catalog` and `/catalog?deal=X` are indexed (canonical = themselves); any other params → `noindex, follow`, canonical `/catalog`.
+- `getPublishedDistricts` dedupes in code and is capped by PostgREST's 1000 rows: needs a view/RPC above ~1000 published properties.
+- Header «Купити» / «Орендувати» are never highlighted (reading the query in the shared header would make static pages dynamic).
 
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
+| 2026-10-28 | 1 | done | `/catalog` (`page`, `loading`, `error`), `src/features/catalog/*` (params parsing + tests, filters form in sidebar / mobile sheet, sort on change, pagination, empty / out-of-range states, skeleton), `property-card.tsx` (article + stretched link, `srcset` from `sizes`, plots in сот.), `property-labels.ts` (all `prop_kind` labels), `getExchangeRates()` (cached, tag `settings`, falls back to default rates), `getPublishedDistricts()`, out-of-range page → empty page with the real total. Empty-param URLs redirect to a clean URL (replace). Rooms/area hidden for plots. UI check: catalog, filtered, quick-search URL, root — pass; screenshots reviewed. |

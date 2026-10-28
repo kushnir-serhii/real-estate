@@ -3,6 +3,7 @@ export const CACHE_TAGS = {
   properties: "properties",
   pages: "pages",
   agents: "agents",
+  settings: "settings",
 } as const;
 
 export const pageTag = (slug: string) => `page:${slug}` as const;
