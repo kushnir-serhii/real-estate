@@ -1,6 +1,6 @@
 # 001 — Scaffold: Next.js on Cloudflare
 
-**Status:** in-progress · **Depends on:** — · **Route(s):** `/`
+**Status:** done · **Depends on:** — · **Route(s):** `/`
 
 ## Goal
 An empty Next.js app that builds, lints, previews in the Cloudflare runtime and has the tooling every later spec relies on (tokens, shadcn, Supabase clients, UI check).
@@ -31,17 +31,17 @@ None. `supabase/` initialized (config + empty migrations).
   - [x] `/design` renders at 375px without horizontal scroll
   - [x] light and dark both meet WCAG AA contrast; theme switch works without a flash of the wrong theme
 
-### [ ] 3. Cloudflare (OpenNext)
+### [x] 3. Cloudflare (OpenNext)
 - **Build:** `@opennextjs/cloudflare` + `wrangler.jsonc`; worker name `lyndrik-web`; scripts `preview` (build + run in workerd) and `deploy` (used by the user only, never run by agents). `.dev.vars` documented in `.env.example`.
 - **Files:** `wrangler.jsonc`, `open-next.config.ts`, `package.json`
 - **Agent:** backend
 - **Accept:**
-  - [ ] `pnpm preview` serves the home page locally in workerd (if it can't run on native Windows, the criterion is reported as blocked, not worked around)
+  - [x] `pnpm preview` serves the home page locally in workerd (if it can't run on native Windows, the criterion is reported as blocked, not worked around)
   - [x] no deploy was run
 
 ### [x] 4. Supabase clients
-- **Build:** `@supabase/ssr` clients `server.ts`, `client.ts`, `admin.ts` (`server-only`); session refresh in `src/proxy.ts` (Next 16) if OpenNext supports it, otherwise `src/middleware.ts`, matching only `/admin/:path*` (public pages stay static; no visitor sessions in stage 1); `supabase` CLI as a devDependency; `supabase init`; `db:types` script generating `database.types.ts` from the local DB (local Supabase in Docker; generated once now from the empty schema).
-- **Files:** `src/lib/supabase/*`, `src/proxy.ts` or `src/middleware.ts`, `supabase/config.toml`, `package.json`
+- **Build:** `@supabase/ssr` clients `server.ts`, `client.ts`, `admin.ts` (`server-only`); session refresh in `src/proxy.ts` (Next 16), matching only `/admin/:path*` (public pages stay static; no visitor sessions in stage 1); `supabase` CLI as a devDependency; `supabase init`; `db:types` script generating `database.types.ts` from the local DB (local Supabase in Docker; generated once now from the empty schema).
+- **Files:** `src/lib/supabase/*`, `src/proxy.ts`, `supabase/config.toml`, `package.json`
 - **Agent:** backend
 - **Accept:**
   - [x] importing `admin.ts` from a client component fails the build
@@ -55,11 +55,10 @@ None. `supabase/` initialized (config + empty migrations).
   - [x] `SPEC=001 ROUTES=root,design pnpm ui-check` passes and writes screenshots
 
 ## External needs
-- **`pnpm preview` on this Windows machine:** the OpenNext build fails with `EPERM: operation not permitted, symlink` (`copyTracedFiles`, `@opennextjs/aws` 4.1.12). Enable Windows Developer Mode (lets non-admin users create symlinks) or run preview in WSL/Linux CI, then re-run `pnpm preview` to close slice 3.
 - None for local work. Later: Cloudflare account + Supabase project on the client (see stack.md → Відкриті питання).
 
 ## Open questions
-- `src/middleware.ts` (edge) instead of Next 16 `src/proxy.ts`: OpenNext 1.20 bundles Node-runtime proxy only experimentally (unsupported). `next build` warns that `middleware` is deprecated. Switch to `proxy.ts` once OpenNext supports it.
+- **Decided 2026-10-28:** session refresh in Next 16 `src/proxy.ts` (user's call). OpenNext 1.20 builds it with a warning that Node.js middleware support is experimental and not maintained by the OpenNext team; checked working in workerd. If a future OpenNext upgrade breaks it, fall back to edge `src/middleware.ts`.
 - `supabase` CLI pinned at 2.98.0: installing 2.122.0 crashed pnpm with a heap OOM. Retry an upgrade later.
 - ~~Light only, or light + dark?~~ **Decided 2026-10-28:** light + dark; the UI check runs both themes.
 - ~~Fonts / colors?~~ **Decided 2026-10-28:** no design yet — neutral placeholder palette + one accent; the font is the designer's pick for the niche and current trends (answer in the 001 questions round, replacing the earlier "Inter"); the real design replaces the tokens later.
@@ -74,3 +73,4 @@ None. `supabase/` initialized (config + empty migrations).
 | 2026-10-28 | 4 | done | `@supabase/ssr` 0.12.7, `@supabase/supabase-js` 2.118.0, zod 4.6.7, server-only, supabase CLI 2.98.0 (dev). `src/lib/supabase/{env,server,client,admin,middleware,database.types}.ts`, `src/middleware.ts` (matcher `/admin/:path*`, pass-through with empty env), `supabase/config.toml` (`project_id = "lyndrik"`), `supabase/migrations/.gitkeep`, `db:types` script; types generated from local Supabase (empty schema). Leak test: build fails with the `server-only` error. |
 | 2026-10-28 | 5 | done | `@playwright/test` 1.64.1, `playwright.config.ts` (next dev :3199, Chromium), `e2e/ui-check.spec.ts` (375/1280 × light/dark), `ui-check` script. `AGENTS.md` committed (written by `next dev`, re-created if removed). |
 | 2026-10-28 | UI check | 8/8 passed | `root`, `design` × mobile/desktop × light/dark; screenshots reviewed: both themes, Cyrillic (ґ ї є), tabular prices, no overflow. Closes slice 2's 375px criterion. Spec stays `in-progress` until slice 3's preview runs. |
+| 2026-10-28 | 3 + fix | done | Windows symlink EPERM fixed in the project: `nodeLinker: hoisted` in `pnpm-workspace.yaml` (flat node_modules, no symlinks to copy). `src/middleware.ts` → `src/proxy.ts`, `src/lib/supabase/middleware.ts` → `proxy.ts`; conventions updated. `pnpm preview` in workerd: `/` 200, `/design` 200, `/admin` 404 through the proxy (no route yet). UI check 8/8 again. Spec done. |

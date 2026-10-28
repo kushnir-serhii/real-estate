@@ -18,7 +18,7 @@ export const createClient = async () => {
           }
         } catch {
           // Called from a Server Component: cookies are read-only there.
-          // Safe to ignore, the middleware refreshes the session.
+          // Safe to ignore, the proxy refreshes the session.
         }
       },
     },

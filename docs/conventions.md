@@ -11,7 +11,7 @@ Next.js (App Router) · React · TypeScript (strict) · Tailwind 4 · shadcn/ui 
 | What | Where | Inside |
 | --- | --- | --- |
 | Route | `src/app/(site)/catalog/[slug]/page.tsx` | `const PropertyPage = async (…) => …` + `export default` |
-| Admin route | `src/app/admin/…` | same; protected by the admin layout + middleware |
+| Admin route | `src/app/admin/…` | same; protected by the admin layout + `src/proxy.ts` |
 | API / cron / webhooks | `src/app/api/<name>/route.ts` | |
 | Server actions | `src/features/<domain>/actions.ts` | `'use server'` at the top |
 | Component | `src/features/<domain>/property-card.tsx` | `export const PropertyCard = …` |
