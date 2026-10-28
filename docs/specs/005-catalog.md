@@ -28,14 +28,14 @@ Visitors (mostly on phones) find a property with filters, open its page with a g
   - [x] the home quick search URL (`deal`, `property_type`, `rooms`, `price_to`, `currency`) lands on correctly filtered results
   - [x] 375px: filters in a sheet, no horizontal scroll, 44px targets
 
-### [ ] 2. Property page
+### [x] 2. Property page
 - **Build:** `/catalog/[slug]`: gallery (CSS scroll-snap, swipe, arrow buttons + keyboard ←/→, counter, fullscreen view in a dialog, explicit sizes from `width`/`height`, `srcset` from `sizes`, first photo eager, rest lazy; «Фото незабаром» placeholder), price (+ per m² when present), key facts (rooms, areas, floor/floors, kind, repair, wall material, class, new build — Ukrainian labels), description (plain text with paragraphs), location text (locality, district, street — no house number), contact card: the property's agent (name, photo or avatar, phone `tel:`) or the agency when there's none, plus agency Telegram/Viber; CTA «Залишити заявку» → the contact block (006 replaces with the form); sticky bottom bar on mobile (call + CTA). Similar: same deal + type, price ±30% (`price_usd`), up to 4, excluding itself. `generateMetadata` (title, description from the text, canonical, first photo as OG image). `loading.tsx`, `error.tsx`.
 - **Files:** `src/app/(site)/catalog/[slug]/{page,loading,error}.tsx`, `src/features/property/*`, `src/lib/db/properties.ts` (`getSimilarProperties`)
 - **Agent:** designer
 - **Accept:**
-  - [ ] no layout shift on images; missing photos handled
-  - [ ] gallery works with swipe, keyboard and in fullscreen; focus returns on close
-  - [ ] property without agent shows the agency contact; long title/description wrap
+  - [x] no layout shift on images; missing photos handled
+  - [x] gallery works with swipe, keyboard and in fullscreen; focus returns on close
+  - [x] property without agent shows the agency contact; long title/description wrap
 
 ### [ ] 3. Sold page + custom 404
 - **Build:** migration: `properties.hidden_at timestamptz` + trigger (set to `now()` when `status` becomes `hidden`, cleared when it becomes `published`; backfill existing hidden rows with `updated_at`); RLS: the public may also read properties (and their photos) hidden less than 7 days ago; column grant for `hidden_at`; types regenerated. `getPublishedProperties` / similar keep filtering `status = 'published'`. `getPropertyBySlug` returns published or recently hidden. Page: hidden ≤ 7 days → a "sold" design: status banner «Продано» (sell) / «Вже здано» (rents), the first photo muted, title, last price struck through or labelled, short facts, no contact-for-this-property CTA but «Підберемо схожий» → contact block, similar properties; `robots: noindex`; page revalidates at most hourly so the 7-day limit is honored. After 7 days or unknown slug → custom 404 for the property segment: «Цей об'єкт уже продано або знято з продажу», newest properties, links to the catalog and contacts (HTTP 404).
@@ -78,8 +78,12 @@ Visitors (mostly on phones) find a property with filters, open its page with a g
 - Indexing (for 009): plain `/catalog` and `/catalog?deal=X` are indexed (canonical = themselves); any other params → `noindex, follow`, canonical `/catalog`.
 - `getPublishedDistricts` dedupes in code and is capped by PostgREST's 1000 rows: needs a view/RPC above ~1000 published properties.
 - Header «Купити» / «Орендувати» are never highlighted (reading the query in the shared header would make static pages dynamic).
+- Price per m² shown for sales and long rent («за м² / міс»), not for daily rent.
+- An inactive agent isn't readable by the public (RLS), so its properties show the agency contact — no extra logic needed.
+- Wall material labels for the agency to check: `poroterm` → «Керамоблок», `monolit_carcas` → «Монолітно-каркасний».
 
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
 | 2026-10-28 | 1 | done | `/catalog` (`page`, `loading`, `error`), `src/features/catalog/*` (params parsing + tests, filters form in sidebar / mobile sheet, sort on change, pagination, empty / out-of-range states, skeleton), `property-card.tsx` (article + stretched link, `srcset` from `sizes`, plots in сот.), `property-labels.ts` (all `prop_kind` labels), `getExchangeRates()` (cached, tag `settings`, falls back to default rates), `getPublishedDistricts()`, out-of-range page → empty page with the real total. Empty-param URLs redirect to a clean URL (replace). Rooms/area hidden for plots. UI check: catalog, filtered, quick-search URL, root — pass; screenshots reviewed. |
+| 2026-10-28 | 2 | done | `/catalog/[slug]` (`page`, `loading`, `error`; on-demand ISR, unknown slug → 404), `src/features/property/*` (gallery: scroll-snap, ←/→, swipe, counter, fullscreen Radix Dialog with focus return, CLS 0; facts `<dl>`, price + per m², description paragraphs, location text with a map slot, contact card agent / agency + messengers, mobile sticky call + request bar, similar ±30% `price_usd`), `getSimilarProperties`, `photo-src-set.ts`, `to-tel.ts`, labels for repair / walls / class, `--viewer` token + `scrollbar-none`. `generateMetadata`: SEO title or title, description fallback, canonical, OG = widest first photo. UI check on 3 slugs 12/12; screenshots reviewed. |

@@ -1,16 +1,11 @@
 import { User } from "lucide-react";
 
 import type { Agent } from "@/lib/db/agents";
+import { toTel } from "@/lib/format/to-tel";
 import { photoUrl } from "@/lib/photos/photo-url";
 
 const LINK_CLASS =
   "inline-flex min-h-11 items-center rounded-md break-all text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50";
-
-/** Keeps only digits and a leading plus, so the value is valid in `tel:`. */
-const toTel = (phone: string): string => {
-  const digits = phone.replace(/\D/g, "");
-  return phone.trim().startsWith("+") ? `+${digits}` : digits;
-};
 
 export const AgentCard = ({ agent }: { agent: Agent }) => (
   <li className="flex gap-4 rounded-xl bg-card p-4 ring-1 ring-foreground/10">

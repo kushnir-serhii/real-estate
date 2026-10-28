@@ -163,6 +163,51 @@ export const getPropertyBySlug = (slug: string): Promise<PublishedProperty | nul
     tags: [CACHE_TAGS.properties, propertyTag(slug)],
   })(slug);
 
+export const SIMILAR_LIMIT = 4;
+const SIMILAR_PRICE_RANGE = 0.3;
+
+type SimilarTo = Pick<PublishedProperty, "id" | "deal" | "property_type" | "price_usd">;
+
+const fetchSimilarProperties = async (target: SimilarTo): Promise<PublishedProperty[]> => {
+  let query = createPublicClient()
+    .from("properties")
+    .select(SELECT)
+    .eq("status", "published")
+    .eq("deal", target.deal)
+    .eq("property_type", target.property_type)
+    .neq("id", target.id);
+  // Unknown price: same deal + type only (newest first).
+  if (target.price_usd !== null) {
+    query = query
+      .gte("price_usd", Math.floor(target.price_usd * (1 - SIMILAR_PRICE_RANGE)))
+      .lte("price_usd", Math.ceil(target.price_usd * (1 + SIMILAR_PRICE_RANGE)));
+  }
+  const { data, error } = await query
+    .order("published_at", { ascending: false, nullsFirst: false })
+    .order("id")
+    .order("position", { referencedTable: "property_photos" })
+    .limit(SIMILAR_LIMIT)
+    .overrideTypes<PublishedProperty[], { merge: false }>();
+  if (error) throw new Error(`getSimilarProperties failed: ${error.message}`);
+  return data;
+};
+
+/**
+ * Up to 4 published properties with the same deal + type and `price_usd` within ±30%
+ * (any price when the target's is unknown), excluding the target. Cached under `properties`.
+ */
+export const getSimilarProperties = (property: SimilarTo): Promise<PublishedProperty[]> => {
+  const target: SimilarTo = {
+    id: property.id,
+    deal: property.deal,
+    property_type: property.property_type,
+    price_usd: property.price_usd,
+  };
+  return unstable_cache(fetchSimilarProperties, ["similar-properties", JSON.stringify(target)], {
+    tags: [CACHE_TAGS.properties],
+  })(target);
+};
+
 const ukCollator = new Intl.Collator("uk");
 
 const fetchPublishedDistricts = async (): Promise<string[]> => {

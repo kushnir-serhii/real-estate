@@ -1,4 +1,11 @@
-import type { DEALS, PROP_KINDS, PROPERTY_TYPES } from "@/lib/db/property-values";
+import type {
+  DEALS,
+  HOUSING_CLASSES,
+  PROP_KINDS,
+  PROPERTY_TYPES,
+  REPAIRS,
+  WALL_MATERIALS,
+} from "@/lib/db/property-values";
 
 export const DEAL_LABELS: Record<(typeof DEALS)[number], string> = {
   sell: "Продаж",
@@ -77,4 +84,42 @@ export const PROP_KIND_LABELS: Record<(typeof PROP_KINDS)[number], string> = {
   "agricultural object": "Сільськогосподарський об'єкт",
   other_infrastructure: "Інша інфраструктура",
   unfinished_object: "Недобудований об'єкт",
+};
+
+export const REPAIR_LABELS: Record<(typeof REPAIRS)[number], string> = {
+  without_repair: "Без ремонту",
+  no_internal_works: "Без внутрішніх робіт",
+  without_finishing: "Без оздоблення",
+  cosmetic: "Косметичний",
+  partial: "Частковий",
+  major: "Капітальний",
+  evro: "Євроремонт",
+  architectural_design: "Дизайнерський",
+};
+
+export const WALL_MATERIAL_LABELS: Record<(typeof WALL_MATERIALS)[number], string> = {
+  panel: "Панель",
+  brick: "Цегла",
+  gas_block: "Газоблок",
+  cinder_block: "Шлакоблок",
+  monolit_carcas: "Монолітно-каркасний",
+  foam_concrete: "Піноблок",
+  keramzit_concrete: "Керамзитобетон",
+  poroterm: "Керамоблок",
+  rakushnik_brick: "Черепашник",
+  wood_brick: "Дерево й цегла",
+  wood: "Дерево",
+};
+
+export const HOUSING_CLASS_LABELS: Record<(typeof HOUSING_CLASSES)[number], string> = {
+  econom: "Економ",
+  business: "Бізнес",
+  elit: "Елітний",
+};
+
+/** Label for a stored text value (`prop_kind`, `repair`, …); unknown or empty values → null (row hidden). */
+export const labelOf = <K extends string>(labels: Record<K, string>, value: string | null): string | null => {
+  if (value === null || !Object.hasOwn(labels, value)) return null;
+  // as: Object.hasOwn above proved `value` is a key of `labels`
+  return labels[value as K];
 };

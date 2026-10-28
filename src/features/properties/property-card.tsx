@@ -1,8 +1,9 @@
 import { Building2 } from "lucide-react";
 import Link from "next/link";
 
-import type { PropertyPhoto, PublishedProperty } from "@/lib/db/properties";
+import type { PublishedProperty } from "@/lib/db/properties";
 import { formatPrice } from "@/lib/format/format-price";
+import { photoSrcSet } from "@/lib/photos/photo-src-set";
 import { photoUrl } from "@/lib/photos/photo-url";
 import { DEAL_LABELS, PROPERTY_TYPE_LABELS } from "./property-labels";
 
@@ -21,16 +22,6 @@ const FALLBACK_HEIGHT = 480;
 const DEFAULT_IMAGE_SIZES = "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw";
 
 const numberFormat = new Intl.NumberFormat("uk-UA", { maximumFractionDigits: 1 });
-
-/** `sizes` json is `{ "<width>": "<r2 key>" }` (sync); anything else is ignored. */
-const buildSrcSet = (sizes: PropertyPhoto["sizes"]): string | undefined => {
-  if (typeof sizes !== "object" || sizes === null || Array.isArray(sizes)) return undefined;
-  const entries = Object.entries(sizes)
-    .map(([width, key]) => [Number(width), key] as const)
-    .filter((e): e is readonly [number, string] => Number.isInteger(e[0]) && e[0] > 0 && typeof e[1] === "string")
-    .sort((a, b) => a[0] - b[0]);
-  return entries.length ? entries.map(([w, key]) => `${photoUrl(key)} ${w}w`).join(", ") : undefined;
-};
 
 const buildFacts = (p: PublishedProperty): string[] => {
   const area =
@@ -67,7 +58,7 @@ export const PropertyCard = ({
     property.price_amount !== null && property.currency !== null
       ? formatPrice(property.price_amount, property.currency, property.deal)
       : formatPrice(null, "USD");
-  const srcSet = photo ? buildSrcSet(photo.sizes) : undefined;
+  const srcSet = photo ? photoSrcSet(photo.sizes) : undefined;
 
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-xl bg-card text-card-foreground ring-1 ring-foreground/10 transition-shadow hover:ring-foreground/25 has-focus-visible:ring-3 has-focus-visible:ring-ring">
