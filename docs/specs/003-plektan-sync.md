@@ -1,6 +1,6 @@
 # 003 — Plektan sync
 
-**Status:** ready · **Depends on:** 002 · **Route(s):** `/api/cron/revalidate`
+**Status:** in-progress · **Depends on:** 002 · **Route(s):** `/api/cron/revalidate`
 
 ## Goal
 The agency keeps working only in Plektan: its properties appear on the site within the sync interval, with photos copied to R2 as WebP, approximate coordinates and parsed prices; properties that vanish from Plektan get hidden. The site keeps everything (Supabase + R2), so it survives Plektan being switched off.
@@ -20,13 +20,13 @@ How it runs:
 
 ## Slices
 
-### [ ] 1. Plektan client
+### [x] 1. Plektan client
 - **Build:** `src/lib/plektan/` — `search` (one page, ≤20 rows, typed params incl. arrays like `prop_kind[]`), `searchAll` (iterates pages), `view`, `getContactPersons`, `getDistricts`. `POST https://re.plektan.com/uk/<section>/<command>`, `x-auth-token`, `version=1.1`; zod schemas for every response (lenient: unknown fields pass through into `raw`); timeout + retry with backoff on network/5xx. Fixture mode when `PLEKTAN_API_KEY` is empty: recorded-shape responses in `src/lib/plektan/fixtures/` — two snapshots (`base` and `next`: in `next` one property is gone, one changed price, one added) selected by `PLEKTAN_FIXTURE_SET`; ~12 properties covering all 4 types, 3 deals, 3 currencies, one `is_mls`, one without photos, varied price texts (`&asymp;`, spaces, `грн`, `$`, `€`, per m²). Dev tooling: `vitest` (`pnpm test`) and `tsx`.
 - **Files:** `src/lib/plektan/*`, `src/lib/plektan/fixtures/*`, `package.json`, `vitest.config.ts`
 - **Agent:** backend
 - **Accept:**
-  - [ ] runs fully on fixtures without a key (`pnpm test` covers search pagination, view, contact persons)
-  - [ ] invalid response shape → typed error, not a crash with `undefined`
+  - [x] runs fully on fixtures without a key (`pnpm test` covers search pagination, view, contact persons)
+  - [x] invalid response shape → typed error, not a crash with `undefined`
 
 ### [ ] 2. Mapping
 - **Build:** pure functions in `src/lib/sync/`: Plektan item (+ `view`) → `properties` insert/update row: price text parsing (HTML entities like `&asymp;`, spaces, currency sign/word → `price_amount` + `currency`; `price_per_m2`), `price_usd` from `settings.exchange_rates`, enums and the Plektan text lists, areas/rooms/storeys, address (`locality`, `district`, `street`, `house` = `housestr`), description = `promo_text` as plain text, generated Ukrainian title («2-кімнатна квартира, Оболонь», «Будинок 240 м², Козин», «Ділянка 12 сот., Ірпінь», «Офіс 85 м², Печерськ» — commercial label from `prop_kind`), slug = transliterated title + 6-char suffix (only for new rows; never changed), `source_updated_at` from `date_mod`, `raw` = original payload. `is_mls` and non-`actual` → skipped.
@@ -81,3 +81,4 @@ How it runs:
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
+| 2026-10-28 | 1 | done | `src/lib/plektan/` (`client.ts`, `schemas.ts`, `errors.ts`, `encode-form.ts`, `index.ts`, `fixtures/{data,transport}.ts`, `client.test.ts` — 27 tests), `vitest.config.ts`, `tsx` + `vitest` dev deps, `pnpm test`, `.env.example`. Fixtures: `base` 12 properties (adid 1001–1012), `next` drops 1002, changes 1001's price, adds 1013; agents 501–503. Unverified until the key exists: form-encoded body, 1-based `currentPage`, `view`/`getContactPersons`/`getDistricts` envelopes, `price.kind` / `currency_id` codes (mapping relies on the price text). |

@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
     "ui-check": "playwright test",
     "lint": "eslint .",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
@@ -42,7 +43,9 @@
     "shadcn": "^4.23.0",
     "supabase": "2.98.0",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5",
+    "vitest": "^5.0.5",
     "wrangler": "^4.154.0"
   },
   "packageManager": "pnpm@10.28.2"
