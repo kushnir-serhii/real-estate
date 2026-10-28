@@ -27,9 +27,9 @@ None. `supabase/` initialized (config + empty migrations).
 - **Files:** `src/app/globals.css`, `src/components/ui/*`, `src/lib/utils.ts`, `src/app/design/page.tsx`
 - **Agent:** designer
 - **Accept:**
-  - [ ] no raw colors outside `globals.css`
+  - [x] no raw colors outside `globals.css`
   - [ ] `/design` renders at 375px without horizontal scroll
-  - [ ] light and dark both meet WCAG AA contrast; theme switch works without a flash of the wrong theme
+  - [x] light and dark both meet WCAG AA contrast; theme switch works without a flash of the wrong theme
 
 ### [ ] 3. Cloudflare (OpenNext)
 - **Build:** `@opennextjs/cloudflare` + `wrangler.jsonc`; worker name `lyndrik-web`; scripts `preview` (build + run in workerd) and `deploy` (used by the user only, never run by agents). `.dev.vars` documented in `.env.example`.
@@ -66,3 +66,4 @@ None. `supabase/` initialized (config + empty migrations).
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
 | 2026-10-28 | 1 | done | next 16.4.3, react 19.3.0, typescript 5.9.3, tailwindcss 4.3.3, eslint 9.39.5, pnpm 10.28.2. Template's `cacheComponents`/`partialPrefetching` dropped (conflict with ISR + `revalidateTag`). `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `tsconfig.json`, `eslint.config.mjs`, `next.config.ts`, `src/app/*`, `.gitignore` (+2 entries) |
+| 2026-10-28 | 2 | built; 375px pending UI check (step 8) | Font Manrope (latin+cyrillic, `--font-sans`); accent deep teal; light+dark via inline head script + `lyndrik-theme` localStorage + `ThemeToggle`; AA ratios computed (lowest: control outline 4.3, focus ring 4.6). Added `--control` token (shadcn `--input` too faint). shadcn CLI wrote `cn` npm import — replaced with `@/lib/utils`. Deps: radix-ui, cva, clsx, tailwind-merge, lucide-react, tw-animate-css; `shadcn` (dev, for its CSS). `components.json`, `globals.css`, `layout.tsx`, `design/page.tsx`, `lib/utils.ts`, `lib/theme.ts`, `components/theme-toggle.tsx`, `components/ui/*` |
