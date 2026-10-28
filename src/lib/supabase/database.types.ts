@@ -73,6 +73,116 @@ export type Database = {
         }
         Relationships: []
       }
+      leads: {
+        Row: {
+          client_request_id: string
+          consent_at: string
+          created_at: string
+          email: string | null
+          id: string
+          kind: Database["public"]["Enums"]["lead_kind"]
+          message: string | null
+          name: string
+          page_url: string | null
+          payload: Json | null
+          phone: string
+          plektan_attempts: number
+          plektan_error: string | null
+          plektan_item_id: string | null
+          plektan_status: Database["public"]["Enums"]["delivery_status"]
+          property_id: string | null
+          telegram_attempts: number
+          telegram_error: string | null
+          telegram_status: Database["public"]["Enums"]["delivery_status"]
+          updated_at: string
+          utm: Json | null
+        }
+        Insert: {
+          client_request_id: string
+          consent_at: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["lead_kind"]
+          message?: string | null
+          name: string
+          page_url?: string | null
+          payload?: Json | null
+          phone: string
+          plektan_attempts?: number
+          plektan_error?: string | null
+          plektan_item_id?: string | null
+          plektan_status?: Database["public"]["Enums"]["delivery_status"]
+          property_id?: string | null
+          telegram_attempts?: number
+          telegram_error?: string | null
+          telegram_status?: Database["public"]["Enums"]["delivery_status"]
+          updated_at?: string
+          utm?: Json | null
+        }
+        Update: {
+          client_request_id?: string
+          consent_at?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["lead_kind"]
+          message?: string | null
+          name?: string
+          page_url?: string | null
+          payload?: Json | null
+          phone?: string
+          plektan_attempts?: number
+          plektan_error?: string | null
+          plektan_item_id?: string | null
+          plektan_status?: Database["public"]["Enums"]["delivery_status"]
+          property_id?: string | null
+          telegram_attempts?: number
+          telegram_error?: string | null
+          telegram_status?: Database["public"]["Enums"]["delivery_status"]
+          updated_at?: string
+          utm?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pages: {
+        Row: {
+          body: string
+          created_at: string
+          seo_description: string | null
+          seo_title: string | null
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          seo_description?: string | null
+          seo_title?: string | null
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          seo_description?: string | null
+          seo_title?: string | null
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       properties: {
         Row: {
           agent_id: string | null
@@ -254,6 +364,33 @@ export type Database = {
           },
         ]
       }
+      settings: {
+        Row: {
+          exchange_rates: Json
+          id: boolean
+          last_sync_at: string | null
+          properties_source: Database["public"]["Enums"]["property_source"]
+          sync_cursor: string | null
+          updated_at: string
+        }
+        Insert: {
+          exchange_rates?: Json
+          id?: boolean
+          last_sync_at?: string | null
+          properties_source?: Database["public"]["Enums"]["property_source"]
+          sync_cursor?: string | null
+          updated_at?: string
+        }
+        Update: {
+          exchange_rates?: Json
+          id?: boolean
+          last_sync_at?: string | null
+          properties_source?: Database["public"]["Enums"]["property_source"]
+          sync_cursor?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -264,6 +401,8 @@ export type Database = {
     Enums: {
       currency: "UAH" | "USD" | "EUR"
       deal: "sell" | "rent_long" | "rent_day"
+      delivery_status: "pending" | "sent" | "failed" | "skipped"
+      lead_kind: "property_request" | "general" | "ai"
       property_source: "plektan" | "admin"
       property_status: "published" | "hidden"
       property_type: "flat" | "house" | "commercial" | "plot"
@@ -399,6 +538,8 @@ export const Constants = {
     Enums: {
       currency: ["UAH", "USD", "EUR"],
       deal: ["sell", "rent_long", "rent_day"],
+      delivery_status: ["pending", "sent", "failed", "skipped"],
+      lead_kind: ["property_request", "general", "ai"],
       property_source: ["plektan", "admin"],
       property_status: ["published", "hidden"],
       property_type: ["flat", "house", "commercial", "plot"],

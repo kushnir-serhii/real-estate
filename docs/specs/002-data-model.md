@@ -32,14 +32,14 @@ Small stable value sets are **Postgres enums** (exact unions in the generated ty
   - [x] anon key can't read hidden properties (or their photos) or write anything
   - [x] types regenerated; typecheck/lint/build green
 
-### [ ] 2. Leads, pages, settings
+### [x] 2. Leads, pages, settings
 - **Build:** migration + RLS (leads: RLS on, no policies for anon/authenticated; pages: public read; settings: no public access, single row enforced and inserted by the migration). `src/lib/db/leads.ts`: `createLead` (service role, server-only, idempotent on `client_request_id`); `src/lib/db/pages.ts`: `getPage(slug)` (cached, tag `pages`); `src/lib/db/settings.ts`: `getSettings()` (server-only). Types regenerated.
 - **Files:** `supabase/migrations/*_leads_pages_settings.sql`, `src/lib/db/{leads,pages,settings}.ts`, `src/lib/supabase/database.types.ts`
 - **Agent:** backend
 - **Accept:**
-  - [ ] anon key can't read or insert leads, or read settings
-  - [ ] `settings` has exactly one row (a second insert fails)
-  - [ ] `createLead` called twice with the same `client_request_id` gives one lead
+  - [x] anon key can't read or insert leads, or read settings
+  - [x] `settings` has exactly one row (a second insert fails)
+  - [x] `createLead` called twice with the same `client_request_id` gives one lead
 
 ### [ ] 3. Seed
 - **Build:** `supabase/seed.sql` with ~30 realistic Kyiv properties (all 4 types, sale + both rents, UAH/USD/EUR, real Kyiv districts, several without photos, a few very long titles/descriptions, a couple `hidden`), 3 agents, pages `home`/`about`/`contacts`, settings exchange rates. ~10 free-to-use photos (Unsplash licence) downloaded once as WebP into `public/placeholders/`, referenced by `r2_key = placeholders/<file>.webp`.
@@ -67,3 +67,4 @@ Small stable value sets are **Postgres enums** (exact unions in the generated ty
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
 | 2026-10-28 | 1 | done | Migration `20261028120000_properties.sql` (5 enums, `agents`, `properties`, `property_photos`, `set_updated_at()` trigger, catalog indexes, select-only RLS). RLS checked on local with the anon key: only the published property, its photo and the active agent are visible; insert → 42501, update/delete → 0 rows. `status` defaults to `hidden`. Filters take USD-normalized price bounds (caller converts). `src/lib/supabase/public.ts`, `src/lib/db/{properties,property-values,cache-tags}.ts`, `src/lib/photos/photo-url.ts`, `database.types.ts` |
+| 2026-10-28 | 2 | done | Migration `20261028130000_leads_pages_settings.sql` (`lead_kind`, `delivery_status`; `leads` + `settings` RLS on, no policies, revoked from anon/authenticated; `pages` public read; settings row inserted, `id boolean check (id)`). Local checks: anon select/insert leads and select settings → 42501; second settings insert → 23505 / 23514; same `client_request_id` twice → one row, same id. Default rates UAH 41.5 / EUR 0.92 per USD. `src/lib/db/{leads,pages,settings,cache-tags}.ts`, `database.types.ts` |

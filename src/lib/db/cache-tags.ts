@@ -5,4 +5,6 @@ export const CACHE_TAGS = {
   agents: "agents",
 } as const;
 
-export const propertyTag = (slug: string) => `property:${slug}` as const;
+export const pageTag = (slug: string) => `page:${slug}` as const;
+
+export const propertyTag =(slug: string) => `property:${slug}` as const;
