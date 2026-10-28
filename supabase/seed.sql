@@ -281,7 +281,7 @@ insert into public.properties (
 ('admin', null, 'published', 'sell', 'plot', 'dacha',
   650000, 'UAH', null, null, null, 6,
   null, null, null, null, null, null, false,
-  'Вишневе', null, 'вул. Садова', '17', 50.3946, 30.3598,
+  'Вишневе', null, 'вул. Садова', '17', null, null,
   'Дачна ділянка 6 соток у Вишневому',
   'Дачна ділянка 6 соток з невеликим садовим будиночком. Є світло, колодязь, фруктові дерева. Тихий дачний кооператив, до траси 5 хвилин.',
   'dachna-dilianka-6-sotok-vyshneve-a97e24', '00000000-0000-4000-8000-0000000000a3', null, now() - interval '30 days');

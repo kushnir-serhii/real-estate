@@ -50,6 +50,7 @@ Migrations to apply (in order; add new ones here when a spec adds them):
 | `20261028120000_properties.sql` | 002 | [ ] |
 | `20261028130000_leads_pages_settings.sql` | 002 | [ ] |
 | `20261028140000_hide_private_property_columns.sql` | 003 | [ ] |
+| `20261028150000_property_hidden_at.sql` | 005 | [ ] |
 
 ### 4. Check
 - Dashboard → Advisors → Security: no "RLS disabled" warnings.

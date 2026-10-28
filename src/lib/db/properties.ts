@@ -8,6 +8,13 @@ import { DEALS, PROP_KINDS, PROPERTY_TYPES } from "./property-values";
 
 export const PAGE_SIZE = 12;
 
+/**
+ * How long a hidden property stays reachable at its URL as a «sold» page (product decision, spec 005).
+ * Mirrors the interval in the RLS policies of migration property_hidden_at.
+ */
+export const SOLD_PAGE_DAYS = 7;
+const SOLD_PAGE_MS = SOLD_PAGE_DAYS * 24 * 60 * 60 * 1000;
+
 export const ROOM_OPTIONS = ["1", "2", "3", "4", "5+"] as const;
 export const SORTS = ["price_asc", "price_desc", "area_asc", "area_desc", "newest"] as const;
 
@@ -77,7 +84,7 @@ const PROPERTY_COLUMNS = [
   "room_count", "storey", "storeys", "repair", "wall_material", "housing_class", "is_newbuilding",
   "locality", "district", "street", "lat", "lng", "title", "description", "slug",
   "seo_title", "seo_description", "source_updated_at", "synced_at", "published_at", "created_at",
-  "updated_at",
+  "updated_at", "hidden_at",
 ].join(",");
 
 const SELECT = `${PROPERTY_COLUMNS}, property_photos(id,position,r2_key,width,height,sizes), agent:agents(id,name,phones,email,photo_url)`;
@@ -123,6 +130,11 @@ const fetchPublishedProperties = async (filters: PropertyFilters): Promise<Prope
     .range(from, from + PAGE_SIZE - 1)
     .overrideTypes<PublishedProperty[], { merge: false }>();
 
+  // PGRST103: the page starts past the last row. Not an error for the visitor: empty page + real total.
+  if (error?.code === "PGRST103" && filters.page > 1) {
+    const first = await fetchPublishedProperties({ ...filters, page: 1 });
+    return { ...first, items: [], page: filters.page };
+  }
   if (error) throw new Error(`getPublishedProperties failed: ${error.message}`);
   const total = count ?? 0;
   return {
@@ -139,21 +151,138 @@ export const getPublishedProperties = (filters: PropertyFilters): Promise<Proper
     tags: [CACHE_TAGS.properties],
   })(filters);
 
-const fetchPropertyBySlug = async (slug: string): Promise<PublishedProperty | null> => {
+/** `published`: normal page. `sold`: hidden less than SOLD_PAGE_DAYS ago (page says it is sold, noindex). */
+export type PropertyBySlug =
+  | { kind: "published"; property: PublishedProperty }
+  | { kind: "sold"; property: PublishedProperty };
+
+const fetchPropertyBySlug = async (slug: string): Promise<PropertyBySlug | null> => {
   const { data, error } = await createPublicClient()
     .from("properties")
     .select(SELECT)
     .eq("slug", slug)
-    .eq("status", "published")
+    .in("status", ["published", "hidden"])
     .order("position", { referencedTable: "property_photos" })
     .maybeSingle()
     .overrideTypes<PublishedProperty, { merge: false }>();
   if (error) throw new Error(`getPropertyBySlug failed: ${error.message}`);
+  if (!data) return null;
+  if (data.status === "published") return { kind: "published", property: data };
+  // Re-check the window: RLS already filters, but the cached result can outlive it.
+  const hiddenAt = data.hidden_at ? Date.parse(data.hidden_at) : NaN;
+  if (Number.isNaN(hiddenAt) || Date.now() - hiddenAt >= SOLD_PAGE_MS) return null;
+  return { kind: "sold", property: data };
+};
+
+/**
+ * One property by slug: published, recently hidden («sold»), or null (unknown / hidden longer ago).
+ * Cached under `property:<slug>`; revalidates hourly so the 7-day cut-off is honored.
+ */
+export const getPropertyBySlug = (slug: string): Promise<PropertyBySlug | null> =>
+  unstable_cache(
+    async (s: string) => fetchPropertyBySlug(s),
+    ["property-by-slug", slug],
+    { tags: [CACHE_TAGS.properties, propertyTag(slug)], revalidate: 3600 },
+  )(slug);
+
+export type FavoriteProperty = PropertyBySlug;
+
+/**
+ * Saved properties for /favorites: published or hidden less than SOLD_PAGE_DAYS ago, in the order of `ids`.
+ * Unknown / removed ids are simply absent. Not cached: a small POST keyed by the visitor's own list.
+ */
+export const getPropertiesByIds = async (ids: string[]): Promise<FavoriteProperty[]> => {
+  if (ids.length === 0) return [];
+  const { data, error } = await createPublicClient()
+    .from("properties")
+    .select(SELECT)
+    .in("id", ids)
+    .in("status", ["published", "hidden"])
+    .order("position", { referencedTable: "property_photos" })
+    .overrideTypes<PublishedProperty[], { merge: false }>();
+  if (error) throw new Error(`getPropertiesByIds failed: ${error.message}`);
+  const byId = new Map(data.map((row) => [row.id, row]));
+  const result: FavoriteProperty[] = [];
+  for (const id of ids) {
+    const row = byId.get(id);
+    if (!row) continue;
+    if (row.status === "published") {
+      result.push({ kind: "published", property: row });
+      continue;
+    }
+    // Same window check as getPropertyBySlug (RLS already filters).
+    const hiddenAt = row.hidden_at ? Date.parse(row.hidden_at) : NaN;
+    if (!Number.isNaN(hiddenAt) && Date.now() - hiddenAt < SOLD_PAGE_MS) {
+      result.push({ kind: "sold", property: row });
+    }
+  }
+  return result;
+};
+
+export const SIMILAR_LIMIT = 4;
+const SIMILAR_PRICE_RANGE = 0.3;
+
+type SimilarTo = Pick<PublishedProperty, "id" | "deal" | "property_type" | "price_usd">;
+
+const fetchSimilarProperties = async (target: SimilarTo): Promise<PublishedProperty[]> => {
+  let query = createPublicClient()
+    .from("properties")
+    .select(SELECT)
+    .eq("status", "published")
+    .eq("deal", target.deal)
+    .eq("property_type", target.property_type)
+    .neq("id", target.id);
+  // Unknown price: same deal + type only (newest first).
+  if (target.price_usd !== null) {
+    query = query
+      .gte("price_usd", Math.floor(target.price_usd * (1 - SIMILAR_PRICE_RANGE)))
+      .lte("price_usd", Math.ceil(target.price_usd * (1 + SIMILAR_PRICE_RANGE)));
+  }
+  const { data, error } = await query
+    .order("published_at", { ascending: false, nullsFirst: false })
+    .order("id")
+    .order("position", { referencedTable: "property_photos" })
+    .limit(SIMILAR_LIMIT)
+    .overrideTypes<PublishedProperty[], { merge: false }>();
+  if (error) throw new Error(`getSimilarProperties failed: ${error.message}`);
   return data;
 };
 
-/** One published property with its photos and agent, or null. Cached under `property:<slug>`. */
-export const getPropertyBySlug = (slug: string): Promise<PublishedProperty | null> =>
-  unstable_cache(fetchPropertyBySlug, ["property-by-slug", slug], {
-    tags: [CACHE_TAGS.properties, propertyTag(slug)],
-  })(slug);
+/**
+ * Up to 4 published properties with the same deal + type and `price_usd` within ±30%
+ * (any price when the target's is unknown), excluding the target. Cached under `properties`.
+ */
+export const getSimilarProperties = (property: SimilarTo): Promise<PublishedProperty[]> => {
+  const target: SimilarTo = {
+    id: property.id,
+    deal: property.deal,
+    property_type: property.property_type,
+    price_usd: property.price_usd,
+  };
+  return unstable_cache(fetchSimilarProperties, ["similar-properties", JSON.stringify(target)], {
+    tags: [CACHE_TAGS.properties],
+  })(target);
+};
+
+const ukCollator = new Intl.Collator("uk");
+
+const fetchPublishedDistricts = async (): Promise<string[]> => {
+  // PostgREST has no DISTINCT: read the column and dedupe here (bounded by the API row limit).
+  const { data, error } = await createPublicClient()
+    .from("properties")
+    .select("district")
+    .eq("status", "published")
+    .not("district", "is", null);
+  if (error) throw new Error(`getPublishedDistricts failed: ${error.message}`);
+  const names = new Set<string>();
+  for (const row of data) {
+    const name = row.district?.trim();
+    if (name) names.add(name);
+  }
+  return [...names].sort(ukCollator.compare);
+};
+
+/** Distinct districts of published properties, sorted for Ukrainian. Cached under `properties`. */
+export const getPublishedDistricts = unstable_cache(fetchPublishedDistricts, ["published-districts"], {
+  tags: [CACHE_TAGS.properties],
+});

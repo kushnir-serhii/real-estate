@@ -30,6 +30,7 @@
   --color-ring: var(--ring);
   --color-scrim: var(--scrim);
   --color-on-scrim: var(--on-scrim);
+  --color-viewer: var(--viewer);
 
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
@@ -68,6 +69,8 @@
   /* dark veil over photos, same in both themes; text on it uses on-scrim */
   --scrim: oklch(0.16 0 0 / 62%);
   --on-scrim: oklch(0.985 0 0);
+  /* fullscreen photo viewer backdrop, same in both themes; text and controls use on-scrim */
+  --viewer: oklch(0.12 0 0);
 }
 
 .dark {
@@ -92,6 +95,14 @@
   --input: oklch(1 0 0 / 15%);
   --control: oklch(0.65 0 0);
   --ring: oklch(0.72 0.1 190);
+}
+
+/* Scrollable strips (gallery) that draw their own controls */
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @layer base {

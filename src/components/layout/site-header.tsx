@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Phone } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { FavoritesLink } from "@/components/layout/favorites-link";
 import { Logo } from "@/components/layout/logo";
 import { MobileMenu } from "@/components/layout/mobile-menu";
 import { NavLink } from "@/components/layout/nav-link";
@@ -34,6 +35,7 @@ export const SiteHeader = () => (
           <Phone className="size-4" aria-hidden="true" />
           <span className="tabular-nums">{CONTACTS.phone.display}</span>
         </a>
+        <FavoritesLink />
         <ThemeToggle />
         <Button asChild>
           <Link href={CTA_LINK.href}>{CTA_LINK.label}</Link>
@@ -41,6 +43,7 @@ export const SiteHeader = () => (
       </div>
 
       <div className="flex items-center gap-1 lg:hidden">
+        <FavoritesLink />
         <Button asChild variant="ghost" size="icon">
           <a
             href={CONTACTS.phone.href}
