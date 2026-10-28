@@ -9,7 +9,7 @@ Stage 1 (≈7–9 weeks): base site + admin + AI assistant — see [reference/st
 | # | Spec | Status | Depends on |
 | --- | --- | --- | --- |
 | 001 | [Scaffold: Next.js on Cloudflare](specs/001-scaffold.md) | done | — |
-| 002 | [Data model (Supabase)](specs/002-data-model.md) | draft | 001 |
+| 002 | [Data model (Supabase)](specs/002-data-model.md) | ready | 001 |
 | 003 | [Plektan sync](specs/003-plektan-sync.md) | draft | 002 |
 | 004 | [Site shell + static pages](specs/004-site-shell.md) | draft | 001 |
 | 005 | [Catalog + property page](specs/005-catalog.md) | draft | 002, 004 |
