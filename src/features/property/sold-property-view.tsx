@@ -61,8 +61,8 @@ export const SoldPropertyView = ({ property }: SoldPropertyViewProps) => {
           </header>
         </div>
 
-        <aside aria-label="Контакти агентства" className="mt-8 lg:sticky lg:top-24 lg:mt-0">
-          <SoldContactBlock />
+        <aside aria-label="Підберемо схожий" className="mt-8 lg:mt-0">
+          <SoldContactBlock propertyId={property.id} deal={property.deal} />
         </aside>
       </div>
 

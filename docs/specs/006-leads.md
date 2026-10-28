@@ -1,6 +1,6 @@
 # 006 — Leads: forms → Supabase → Plektan → Telegram
 
-**Status:** ready · **Depends on:** 002, 004 · **Route(s):** forms on `/catalog/[slug]` (live and sold), `/contacts`, `/` (home CTA)
+**Status:** in-progress · **Depends on:** 002, 004 · **Route(s):** forms on `/catalog/[slug]` (live and sold), `/contacts`, `/` (home CTA)
 
 ## Goal
 Every request a visitor sends is saved, reaches Plektan as a lead and pings the manager in Telegram within seconds — and is never lost if Plektan or Telegram fails. The pipeline is reused by the admin (007, manual retry) and the AI assistant (010).
@@ -24,15 +24,15 @@ Every request a visitor sends is saved, reaches Plektan as a lead and pings the 
 
 ## Slices
 
-### [ ] 1. Forms + save
+### [x] 1. Forms + save
 - **Build:** backend: `src/lib/turnstile` (verify, fixture when the secret is empty), phone normalize/validate, `submitLead` server action (zod: name, phone, optional email, optional message, consent required, honeypot, turnstile token, kind-specific fields) → `createLead`; returns a discriminated result (`ok` | `invalid` with field errors | `error`). UI: `PropertyRequestForm` in the property page aside (replaces the «Залишити заявку» target; the desktop CTA and the mobile bar scroll to it; the contact card stays below it) and `GeneralRequestForm` (deal: купити / орендувати, type, name, phone, email, message) on `/contacts`, in the home CTA and in the sold page's «Підберемо схожий». Fields with labels, inline errors (`role="alert"`), pending state, success state («Дякуємо! Зателефонуємо найближчим часом» + «Надіслати ще одну») announced with `role="status"`, error state keeps the input and offers retry. Turnstile widget + consent checkbox with a `/privacy` link. Works at 375px.
 - **Files:** `src/features/leads/*`, `src/lib/turnstile/*`, `src/features/property/{property-view,property-mobile-bar,sold-contact-block}.tsx`, `src/features/home/home-cta.tsx`, `src/app/(site)/contacts/page.tsx`, `.env.example`
 - **Agent:** backend (turnstile, phone, action) → designer (forms and placement)
 - **Accept:**
-  - [ ] the lead is in Supabase even with Plektan/Telegram/Turnstile keys empty
-  - [ ] double submit doesn't create two leads
-  - [ ] invalid phone, missing name or consent show a field error and nothing is saved
-  - [ ] success, error and pending states are designed and announced; 375px without horizontal scroll
+  - [x] the lead is in Supabase even with Plektan/Telegram/Turnstile keys empty
+  - [x] double submit doesn't create two leads
+  - [x] invalid phone, missing name or consent show a field error and nothing is saved
+  - [x] success, error and pending states are designed and announced; 375px without horizontal scroll
 
 ### [ ] 2. Delivery: Plektan + Telegram
 - **Build:** `addAdvert` in the Plektan client (zod on the `{ result, item_id, message }` answer; fixture transport `ok`/`fail` from `PLEKTAN_LEADS_FIXTURE`), `src/lib/telegram` (`sendMessage`, timeout, fixture from `TELEGRAM_FIXTURE`, HTML-escaped text), `deliverLead(id)` in `src/features/leads/` (server-only): runs each channel that is `pending`/`failed`, independently, and records status / error (no personal data in the error) / attempts / `plektan_item_id`; empty key → `skipped`. The action calls it via `after()`.
@@ -67,3 +67,4 @@ Every request a visitor sends is saved, reaches Plektan as a lead and pings the 
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
+| 2026-10-28 | 1 | done | Turnstile client (fixture on empty secret), phone normalize/mask, `submitLead` action (honeypot → zod → Turnstile → published-property check → `createLead`); shared `LeadForm` (submits via transition so input survives errors; network failure → error state), `PropertyRequestForm` in the property aside (`#zayavka`, CTA + mobile bar point to it; aside no longer sticky), `GeneralRequestForm` on `/contacts`, home CTA, sold page (`similar_to`, deal preselected). shadcn `textarea`. Files: `src/features/leads/*`, `src/lib/turnstile/*`, `src/components/ui/textarea.tsx`, `src/features/property/*`, `src/features/home/home-cta.tsx`, `src/app/(site)/contacts/page.tsx`, `.env.example` |

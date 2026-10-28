@@ -4,6 +4,7 @@ import { Suspense } from "react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { FavoriteButton } from "@/features/favorites/favorite-button";
+import { PropertyRequestForm } from "@/features/leads/property-request-form";
 import { DEAL_LABELS, PROPERTY_TYPE_LABELS } from "@/features/properties/property-labels";
 import type { PublishedProperty } from "@/lib/db/properties";
 import { photoSrcSet } from "@/lib/photos/photo-src-set";
@@ -11,12 +12,12 @@ import { photoUrl } from "@/lib/photos/photo-url";
 import { cn } from "@/lib/utils";
 import { PropertyContactCard } from "./property-contact-card";
 import {
-  CONTACT_ANCHOR,
   contactPhone,
   factRows,
   locationText,
   perSquareMeterText,
   priceText,
+  REQUEST_ANCHOR,
   shortFacts,
 } from "./property-details";
 import { PropertyDescription } from "./property-description";
@@ -87,7 +88,7 @@ export const PropertyView = ({ property }: PropertyViewProps) => {
           <PropertyLocation text={location} coordinates={mapCoordinates(property)} />
         </div>
 
-        <aside aria-label="Ціна та контакти" className="mt-8 flex flex-col gap-4 lg:sticky lg:top-24 lg:mt-0">
+        <aside aria-label="Ціна, заявка та контакти" className="mt-8 flex flex-col gap-4 lg:mt-0">
           <div className="hidden rounded-xl bg-card p-5 text-card-foreground ring-1 ring-foreground/10 lg:block">
             <PropertyPrice
               price={price}
@@ -95,11 +96,16 @@ export const PropertyView = ({ property }: PropertyViewProps) => {
               facts={facts}
               action={<FavoriteButton propertyId={property.id} variant="page" />}
             />
-            {/* Until spec 006 the CTA leads to the contact card; 006 opens the request form instead. */}
-            <a href={`#${CONTACT_ANCHOR}`} className={cn(buttonVariants({ size: "lg" }), "mt-5 w-full")}>
+            <a href={`#${REQUEST_ANCHOR}`} className={cn(buttonVariants({ size: "lg" }), "mt-5 w-full")}>
               Залишити заявку
             </a>
           </div>
+          <section
+            id={REQUEST_ANCHOR}
+            className="scroll-mt-24 rounded-xl bg-card p-5 text-card-foreground ring-1 ring-foreground/10"
+          >
+            <PropertyRequestForm propertyId={property.id} />
+          </section>
           <PropertyContactCard agent={property.agent} />
         </aside>
       </div>
