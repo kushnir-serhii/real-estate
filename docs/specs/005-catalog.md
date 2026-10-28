@@ -37,14 +37,14 @@ Visitors (mostly on phones) find a property with filters, open its page with a g
   - [x] gallery works with swipe, keyboard and in fullscreen; focus returns on close
   - [x] property without agent shows the agency contact; long title/description wrap
 
-### [ ] 3. Sold page + custom 404
+### [x] 3. Sold page + custom 404
 - **Build:** migration: `properties.hidden_at timestamptz` + trigger (set to `now()` when `status` becomes `hidden`, cleared when it becomes `published`; backfill existing hidden rows with `updated_at`); RLS: the public may also read properties (and their photos) hidden less than 7 days ago; column grant for `hidden_at`; types regenerated. `getPublishedProperties` / similar keep filtering `status = 'published'`. `getPropertyBySlug` returns published or recently hidden. Page: hidden ≤ 7 days → a "sold" design: status banner «Продано» (sell) / «Вже здано» (rents), the first photo muted, title, last price struck through or labelled, short facts, no contact-for-this-property CTA but «Підберемо схожий» → contact block, similar properties; `robots: noindex`; page revalidates at most hourly so the 7-day limit is honored. After 7 days or unknown slug → custom 404 for the property segment: «Цей об'єкт уже продано або знято з продажу», newest properties, links to the catalog and contacts (HTTP 404).
 - **Files:** `supabase/migrations/*_property_hidden_at.sql`, `src/lib/supabase/database.types.ts`, `src/lib/db/properties.ts`, `src/app/(site)/catalog/[slug]/{page,not-found}.tsx`, `src/features/property/sold-*.tsx`, `docs/setup.md`
 - **Agent:** backend (migration, data) then designer (pages)
 - **Accept:**
-  - [ ] a property hidden today shows the sold page (noindex); hidden 8 days ago → 404 page; unknown slug → 404 page
-  - [ ] anon can read a property hidden 3 days ago but not one hidden 8 days ago (checked locally); catalog and similar never show hidden ones
-  - [ ] re-publishing clears `hidden_at`
+  - [x] a property hidden today shows the sold page (noindex); hidden 8 days ago → 404 page; unknown slug → 404 page
+  - [x] anon can read a property hidden 3 days ago but not one hidden 8 days ago (checked locally); catalog and similar never show hidden ones
+  - [x] re-publishing clears `hidden_at`
 
 ### [ ] 4. Map
 - **Build:** `leaflet` (no react-leaflet), loaded only when the location block scrolls into view (dynamic import), OSM tiles, a ~300 m circle around the rounded `lat/lng` (not a pin), «© OpenStreetMap contributors» attribution, zoom controls, no scroll-zoom hijack on mobile; no map when coordinates are empty (the address text stays). Fixed-height box so nothing shifts.
@@ -81,9 +81,13 @@ Visitors (mostly on phones) find a property with filters, open its page with a g
 - Price per m² shown for sales and long rent («за м² / міс»), not for daily rent.
 - An inactive agent isn't readable by the public (RLS), so its properties show the agency contact — no extra logic needed.
 - Wall material labels for the agency to check: `poroterm` → «Керамоблок», `monolit_carcas` → «Монолітно-каркасний».
+- RLS now lets properties hidden < 7 days through: every public list/count read must filter `status = 'published'` explicitly (all current ones do).
+- When the migration is applied in production, existing hidden rows get `hidden_at = updated_at`, so those hidden more than 7 days ago are 404 right away (expected).
+- The property 404's content is streamed (inside the `(site)` loading boundary): correct 404 status and title, but the heading isn't in the initial HTML. Same trade-off as the catalog.
 
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
 | 2026-10-28 | 1 | done | `/catalog` (`page`, `loading`, `error`), `src/features/catalog/*` (params parsing + tests, filters form in sidebar / mobile sheet, sort on change, pagination, empty / out-of-range states, skeleton), `property-card.tsx` (article + stretched link, `srcset` from `sizes`, plots in сот.), `property-labels.ts` (all `prop_kind` labels), `getExchangeRates()` (cached, tag `settings`, falls back to default rates), `getPublishedDistricts()`, out-of-range page → empty page with the real total. Empty-param URLs redirect to a clean URL (replace). Rooms/area hidden for plots. UI check: catalog, filtered, quick-search URL, root — pass; screenshots reviewed. |
 | 2026-10-28 | 2 | done | `/catalog/[slug]` (`page`, `loading`, `error`; on-demand ISR, unknown slug → 404), `src/features/property/*` (gallery: scroll-snap, ←/→, swipe, counter, fullscreen Radix Dialog with focus return, CLS 0; facts `<dl>`, price + per m², description paragraphs, location text with a map slot, contact card agent / agency + messengers, mobile sticky call + request bar, similar ±30% `price_usd`), `getSimilarProperties`, `photo-src-set.ts`, `to-tel.ts`, labels for repair / walls / class, `--viewer` token + `scrollbar-none`. `generateMetadata`: SEO title or title, description fallback, canonical, OG = widest first photo. UI check on 3 slugs 12/12; screenshots reviewed. |
+| 2026-10-28 | 3 | done | Migration `20261028150000_property_hidden_at.sql` (`hidden_at` + trigger, backfill without bumping `updated_at`, RLS for properties + photos: published or hidden < 7 days, column grant, partial index). `getPropertyBySlug` → `{kind: 'published' \| 'sold', property} \| null` (window re-checked in code, `revalidate: 3600`), `SOLD_PAGE_DAYS`. Pages: `sold-property-view` («Продано» / «Вже здано», muted photo, «Остання ціна», short facts, agency «Підберемо схожий», similar, noindex), segment `not-found.tsx` (newest 3, buttons to catalog / contacts), route `revalidate = 3600`. Prod build: sold → 200 + noindex, 8 days → 404, unknown → 404. Local anon: 3 days visible (+ photos), 8 days not; catalog shows 28 of 30 anon-visible. UI check 12/12; screenshots reviewed. |

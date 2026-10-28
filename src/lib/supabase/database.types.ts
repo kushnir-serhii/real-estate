@@ -196,6 +196,7 @@ export type Database = {
           description: string | null
           district: string | null
           external_id: string | null
+          hidden_at: string | null
           house: string | null
           housing_class: string | null
           id: string
@@ -238,6 +239,7 @@ export type Database = {
           description?: string | null
           district?: string | null
           external_id?: string | null
+          hidden_at?: string | null
           house?: string | null
           housing_class?: string | null
           id?: string
@@ -280,6 +282,7 @@ export type Database = {
           description?: string | null
           district?: string | null
           external_id?: string | null
+          hidden_at?: string | null
           house?: string | null
           housing_class?: string | null
           id?: string

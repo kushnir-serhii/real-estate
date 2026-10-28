@@ -8,6 +8,13 @@ import { DEALS, PROP_KINDS, PROPERTY_TYPES } from "./property-values";
 
 export const PAGE_SIZE = 12;
 
+/**
+ * How long a hidden property stays reachable at its URL as a «sold» page (product decision, spec 005).
+ * Mirrors the interval in the RLS policies of migration property_hidden_at.
+ */
+export const SOLD_PAGE_DAYS = 7;
+const SOLD_PAGE_MS = SOLD_PAGE_DAYS * 24 * 60 * 60 * 1000;
+
 export const ROOM_OPTIONS = ["1", "2", "3", "4", "5+"] as const;
 export const SORTS = ["price_asc", "price_desc", "area_asc", "area_desc", "newest"] as const;
 
@@ -77,7 +84,7 @@ const PROPERTY_COLUMNS = [
   "room_count", "storey", "storeys", "repair", "wall_material", "housing_class", "is_newbuilding",
   "locality", "district", "street", "lat", "lng", "title", "description", "slug",
   "seo_title", "seo_description", "source_updated_at", "synced_at", "published_at", "created_at",
-  "updated_at",
+  "updated_at", "hidden_at",
 ].join(",");
 
 const SELECT = `${PROPERTY_COLUMNS}, property_photos(id,position,r2_key,width,height,sizes), agent:agents(id,name,phones,email,photo_url)`;
@@ -144,24 +151,39 @@ export const getPublishedProperties = (filters: PropertyFilters): Promise<Proper
     tags: [CACHE_TAGS.properties],
   })(filters);
 
-const fetchPropertyBySlug = async (slug: string): Promise<PublishedProperty | null> => {
+/** `published`: normal page. `sold`: hidden less than SOLD_PAGE_DAYS ago (page says it is sold, noindex). */
+export type PropertyBySlug =
+  | { kind: "published"; property: PublishedProperty }
+  | { kind: "sold"; property: PublishedProperty };
+
+const fetchPropertyBySlug = async (slug: string): Promise<PropertyBySlug | null> => {
   const { data, error } = await createPublicClient()
     .from("properties")
     .select(SELECT)
     .eq("slug", slug)
-    .eq("status", "published")
+    .in("status", ["published", "hidden"])
     .order("position", { referencedTable: "property_photos" })
     .maybeSingle()
     .overrideTypes<PublishedProperty, { merge: false }>();
   if (error) throw new Error(`getPropertyBySlug failed: ${error.message}`);
-  return data;
+  if (!data) return null;
+  if (data.status === "published") return { kind: "published", property: data };
+  // Re-check the window: RLS already filters, but the cached result can outlive it.
+  const hiddenAt = data.hidden_at ? Date.parse(data.hidden_at) : NaN;
+  if (Number.isNaN(hiddenAt) || Date.now() - hiddenAt >= SOLD_PAGE_MS) return null;
+  return { kind: "sold", property: data };
 };
 
-/** One published property with its photos and agent, or null. Cached under `property:<slug>`. */
-export const getPropertyBySlug = (slug: string): Promise<PublishedProperty | null> =>
-  unstable_cache(fetchPropertyBySlug, ["property-by-slug", slug], {
-    tags: [CACHE_TAGS.properties, propertyTag(slug)],
-  })(slug);
+/**
+ * One property by slug: published, recently hidden («sold»), or null (unknown / hidden longer ago).
+ * Cached under `property:<slug>`; revalidates hourly so the 7-day cut-off is honored.
+ */
+export const getPropertyBySlug = (slug: string): Promise<PropertyBySlug | null> =>
+  unstable_cache(
+    async (s: string) => fetchPropertyBySlug(s),
+    ["property-by-slug", slug],
+    { tags: [CACHE_TAGS.properties, propertyTag(slug)], revalidate: 3600 },
+  )(slug);
 
 export const SIMILAR_LIMIT = 4;
 const SIMILAR_PRICE_RANGE = 0.3;

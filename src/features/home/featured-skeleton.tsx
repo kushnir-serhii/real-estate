@@ -3,9 +3,11 @@ import { FeaturedGrid } from "./featured-grid";
 
 const SKELETON_KEYS = ["a", "b", "c", "d", "e", "f"] as const;
 
-export const FeaturedSkeleton = () => (
+type FeaturedSkeletonProps = { count?: number };
+
+export const FeaturedSkeleton = ({ count = SKELETON_KEYS.length }: FeaturedSkeletonProps) => (
   <FeaturedGrid>
-    {SKELETON_KEYS.map((key) => (
+    {SKELETON_KEYS.slice(0, count).map((key) => (
       <li key={key} className="overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
         <Skeleton className="aspect-4/3 w-full rounded-none" />
         <div className="flex flex-col gap-3 p-4">
