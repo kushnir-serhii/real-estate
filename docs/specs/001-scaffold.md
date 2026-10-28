@@ -1,6 +1,6 @@
 # 001 — Scaffold: Next.js on Cloudflare
 
-**Status:** ready · **Depends on:** — · **Route(s):** `/`
+**Status:** in-progress · **Depends on:** — · **Route(s):** `/`
 
 ## Goal
 An empty Next.js app that builds, lints, previews in the Cloudflare runtime and has the tooling every later spec relies on (tokens, shadcn, Supabase clients, UI check).
@@ -14,13 +14,13 @@ None. `supabase/` initialized (config + empty migrations).
 
 ## Slices
 
-### [ ] 1. Next.js app + tooling
+### [x] 1. Next.js app + tooling
 - **Build:** `create-next-app` in a temp folder, then move into the root (it refuses a non-empty folder; keep our `.gitignore` and merge any new entries) (App Router, TS, Tailwind, ESLint, `src/`, `@/` alias, pnpm). Versions: Next 16.4.x, React 19, Tailwind 4, `@opennextjs/cloudflare` 1.20.x (supports `next >=16.4.1`); exact versions recorded in the Log. Scripts `dev`, `build`, `typecheck` (`tsc --noEmit`), `lint` (`eslint .`). Strict TS (+ `noUnusedLocals`, `noUnusedParameters`). Pin `packageManager` (`pnpm@10.28.2`). Placeholder home page.
 - **Files:** `package.json`, `tsconfig.json`, `eslint.config.mjs`, `next.config.ts`, `src/app/**`
 - **Agent:** backend
 - **Accept:**
-  - [ ] `pnpm typecheck`, `pnpm lint`, `pnpm build` green
-  - [ ] existing `.gitignore`, `.env.example`, `CLAUDE.md`, `docs/` untouched
+  - [x] `pnpm typecheck`, `pnpm lint`, `pnpm build` green
+  - [x] existing `.gitignore`, `.env.example`, `CLAUDE.md`, `docs/` untouched
 
 ### [ ] 2. Tokens + shadcn
 - **Build:** `shadcn init`; tokens (colors, radius, spacing, fonts with Cyrillic) in `src/app/globals.css`; `cn()`; base layer with pointer cursor for native controls; button, input, label, card added. Placeholder look: shadcn neutral palette + one calm accent; font chosen by the designer for the niche and current trends (good Cyrillic, tabular numbers, via `next/font`) — all swapped later via tokens only. **Light + dark** themes: tokens for both, following the system preference plus a theme switch (no flash on load). A `/design` page showing tokens and primitives in both themes (noindex).
@@ -65,3 +65,4 @@ None. `supabase/` initialized (config + empty migrations).
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
+| 2026-10-28 | 1 | done | next 16.4.3, react 19.3.0, typescript 5.9.3, tailwindcss 4.3.3, eslint 9.39.5, pnpm 10.28.2. Template's `cacheComponents`/`partialPrefetching` dropped (conflict with ISR + `revalidateTag`). `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `tsconfig.json`, `eslint.config.mjs`, `next.config.ts`, `src/app/*`, `.gitignore` (+2 entries) |

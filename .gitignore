@@ -29,3 +29,7 @@ Thumbs.db
 # supabase local
 supabase/.temp/
 supabase/.branches/
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
