@@ -1,0 +1,3 @@
+/* Leaflet's stylesheet, loaded only with the lazy map chunk (property-map-leaflet.ts).
+   Put in the `base` layer so our Tailwind utilities (tokens) override its colors and sizes. */
+@import "leaflet/dist/leaflet.css" layer(base);

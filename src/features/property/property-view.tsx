@@ -42,6 +42,9 @@ const toGalleryPhotos = (property: PublishedProperty): GalleryPhoto[] =>
     height: photo.height ?? FALLBACK_HEIGHT,
   }));
 
+// both or nothing: a half-filled pair is treated as no coordinates
+const mapCoordinates = ({ lat, lng }: PublishedProperty) => (lat !== null && lng !== null ? { lat, lng } : null);
+
 /** Page of a published property. Spec 005 slice 3 adds a separate «sold» view next to this one. */
 export const PropertyView = ({ property }: PropertyViewProps) => {
   const price = priceText(property);
@@ -74,7 +77,7 @@ export const PropertyView = ({ property }: PropertyViewProps) => {
 
           <PropertyFacts rows={factRows(property)} />
           <PropertyDescription text={property.description} />
-          <PropertyLocation text={location} />
+          <PropertyLocation text={location} coordinates={mapCoordinates(property)} />
         </div>
 
         <aside aria-label="Ціна та контакти" className="mt-8 flex flex-col gap-4 lg:sticky lg:top-24 lg:mt-0">
