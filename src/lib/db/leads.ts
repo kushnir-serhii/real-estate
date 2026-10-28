@@ -69,3 +69,70 @@ export const createLead = async (input: CreateLeadInput): Promise<CreateLeadResu
   if (readError) throw new Error(`createLead failed: ${readError.message}`);
   return { id: existing.id, created: false };
 };
+
+type DeliveryStatus = Enums["delivery_status"];
+
+/** A lead with the property data delivery needs (Plektan mapping, Telegram text). */
+export type LeadForDelivery = {
+  id: string;
+  kind: Enums["lead_kind"];
+  name: string;
+  phone: string;
+  email: string | null;
+  message: string | null;
+  payload: unknown;
+  page_url: string | null;
+  plektan_status: DeliveryStatus;
+  plektan_attempts: number;
+  telegram_status: DeliveryStatus;
+  telegram_attempts: number;
+  property: {
+    slug: string;
+    title: string;
+    source: Enums["property_source"];
+    external_id: string | null;
+    deal: Enums["deal"];
+    property_type: Enums["property_type"];
+    prop_kind: string | null;
+  } | null;
+};
+
+/** Service role. Returns null when the lead doesn't exist. */
+export const getLeadForDelivery = async (id: string): Promise<LeadForDelivery | null> => {
+  const { data, error } = await createAdminClient()
+    .from("leads")
+    .select(
+      `id,kind,name,phone,email,message,payload,page_url,plektan_status,plektan_attempts,telegram_status,telegram_attempts,
+      property:properties(slug,title,source,external_id,deal,property_type,prop_kind)`,
+    )
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw new Error(`getLeadForDelivery failed: ${error.message}`);
+  return data;
+};
+
+export type LeadDeliveryUpdate =
+  | {
+      channel: "plektan";
+      status: DeliveryStatus;
+      error: string | null;
+      attempts: number;
+      /** Only set on success; omitted keeps the stored value. */
+      itemId?: string | null;
+    }
+  | { channel: "telegram"; status: DeliveryStatus; error: string | null; attempts: number };
+
+/** Writes one channel's result. `error` must hold no personal data. */
+export const updateLeadDelivery = async (id: string, update: LeadDeliveryUpdate): Promise<void> => {
+  const patch: Database["public"]["Tables"]["leads"]["Update"] =
+    update.channel === "plektan"
+      ? {
+          plektan_status: update.status,
+          plektan_error: update.error,
+          plektan_attempts: update.attempts,
+          ...(update.itemId === undefined ? {} : { plektan_item_id: update.itemId }),
+        }
+      : { telegram_status: update.status, telegram_error: update.error, telegram_attempts: update.attempts };
+  const { error } = await createAdminClient().from("leads").update(patch).eq("id", id);
+  if (error) throw new Error(`updateLeadDelivery failed: ${error.message}`);
+};

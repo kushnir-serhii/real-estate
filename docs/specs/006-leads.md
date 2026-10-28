@@ -34,14 +34,14 @@ Every request a visitor sends is saved, reaches Plektan as a lead and pings the 
   - [x] invalid phone, missing name or consent show a field error and nothing is saved
   - [x] success, error and pending states are designed and announced; 375px without horizontal scroll
 
-### [ ] 2. Delivery: Plektan + Telegram
+### [x] 2. Delivery: Plektan + Telegram
 - **Build:** `addAdvert` in the Plektan client (zod on the `{ result, item_id, message }` answer; fixture transport `ok`/`fail` from `PLEKTAN_LEADS_FIXTURE`), `src/lib/telegram` (`sendMessage`, timeout, fixture from `TELEGRAM_FIXTURE`, HTML-escaped text), `deliverLead(id)` in `src/features/leads/` (server-only): runs each channel that is `pending`/`failed`, independently, and records status / error (no personal data in the error) / attempts / `plektan_item_id`; empty key → `skipped`. The action calls it via `after()`.
 - **Files:** `src/lib/plektan/*`, `src/lib/telegram/*`, `src/features/leads/deliver-lead.ts`, `src/lib/db/leads.ts`, `.env.example`, `docs/setup.md`
 - **Agent:** backend
 - **Accept:**
-  - [ ] a Plektan error leaves `plektan_status = failed` and the Telegram message still goes out
-  - [ ] with empty keys and no fixture flags both channels are `skipped`
-  - [ ] quick request vs regular request is chosen as in **Data**; unit tests for the mapping and the message text
+  - [x] a Plektan error leaves `plektan_status = failed` and the Telegram message still goes out
+  - [x] with empty keys and no fixture flags both channels are `skipped`
+  - [x] quick request vs regular request is chosen as in **Data**; unit tests for the mapping and the message text
 
 ### [ ] 3. Retry
 - **Build:** migration adding `plektan_next_attempt_at` / `telegram_next_attempt_at` (or one shared column if simpler; index on due failed leads); `POST /api/cron/leads` (checks `CRON_SECRET` like `/api/cron/revalidate`) picks due failed deliveries (attempts < 5), runs `deliverLead`, sets the next attempt by the backoff; after the last failed Plektan attempt sends the one-time Telegram alert. A step in `sync.yml` calls it on every run. Types regenerated; migration listed in `docs/setup.md`.
@@ -62,9 +62,11 @@ Every request a visitor sends is saved, reaches Plektan as a lead and pings the 
 - **Decided:** one Telegram chat for all managers.
 - **Decided:** empty keys = `skipped`; local fixtures behind per-channel flags.
 - **Decided:** forms on the property page, `/contacts`, the home CTA and the sold page.
+- `rent_day` properties map to Plektan `hire_day`; a general lead without a type goes to Plektan as `flat`; quick requests also send `property`/`prop_kind`. Confirm with Plektan once the key exists.
 - **Decided:** retry runs from `sync.yml`; phone accepts UA + international; Turnstile + honeypot; max 5 attempts.
 
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
 | 2026-10-28 | 1 | done | Turnstile client (fixture on empty secret), phone normalize/mask, `submitLead` action (honeypot → zod → Turnstile → published-property check → `createLead`); shared `LeadForm` (submits via transition so input survives errors; network failure → error state), `PropertyRequestForm` in the property aside (`#zayavka`, CTA + mobile bar point to it; aside no longer sticky), `GeneralRequestForm` on `/contacts`, home CTA, sold page (`similar_to`, deal preselected). shadcn `textarea`. Files: `src/features/leads/*`, `src/lib/turnstile/*`, `src/components/ui/textarea.tsx`, `src/features/property/*`, `src/features/home/home-cta.tsx`, `src/app/(site)/contacts/page.tsx`, `.env.example` |
+| 2026-10-28 | 2 | done | Plektan `addAdvert` (no auto-retry, zod answer, `PLEKTAN_LEADS_FIXTURE`), `src/lib/telegram` (`TELEGRAM_FIXTURE`, errors without the token), pure builders for the Telegram text / `advert_info` / Plektan request, `deliverLead` (channels independent, kind-only errors, attempts, `plektan_item_id`; empty keys = `skipped`), wired via `after()` for new leads. Files: `src/lib/plektan/*`, `src/lib/telegram/*`, `src/features/leads/{deliver-lead,lead-delivery-content,submit-lead}.ts`, `src/lib/db/leads.ts`, `.env.example`, `docs/setup.md` |

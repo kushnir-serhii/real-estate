@@ -1,5 +1,7 @@
 import "server-only";
 
+import { after } from "next/server";
+
 import { createLead, type CreateLeadInput } from "@/lib/db/leads";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { verifyTurnstile } from "@/lib/turnstile";
@@ -11,6 +13,7 @@ import {
   parseUtm,
   TURNSTILE_FIELD,
 } from "./lead-form-schema";
+import { deliverLead } from "./deliver-lead";
 import { LEAD_FIELDS, type LeadField, type LeadFormState } from "./lead-state";
 
 const PAGE_URL_MAX = 2048;
@@ -41,6 +44,15 @@ const findSimilarTo = async (id: string): Promise<{ id: string; slug: string; ti
     .maybeSingle();
   if (error) throw new Error(`lead similar_to lookup failed: ${error.message}`);
   return data ? { id: data.id, slug: data.slug, title: data.title } : null;
+};
+
+/** Never throws out of `after()`; the error text may carry personal data, so only a fixed line is logged. */
+const deliverInBackground = async (id: string): Promise<void> => {
+  try {
+    await deliverLead(id);
+  } catch {
+    console.error("deliverLead: delivery failed");
+  }
 };
 
 /**
@@ -98,8 +110,9 @@ export const processLeadSubmission = async (
       utm: parseUtm(raw.utm),
       ...(data.kind === "property_request" ? { property_id: data.property_id } : { payload }),
     };
-    await createLead(input);
-    // Slice 2: after(() => deliverLead(id)) goes here (Plektan + Telegram run after the response).
+    const { id, created } = await createLead(input);
+    // Plektan + Telegram run after the response; a failure is recorded on the lead and left to the cron.
+    if (created) after(() => deliverInBackground(id));
     return { status: "ok" };
   } catch {
     // The error text may carry personal data (row values): log nothing from it.

@@ -271,3 +271,15 @@ export const districtsResponseSchema = z
   .unknown()
   .transform((body) => toList(unwrapData(body)))
   .pipe(z.array(districtSchema));
+
+/** `API_view/addAdvert` answer: `{ result: ADDED | PARSE_ERROR | ..., item_id, message }`. */
+export const addAdvertResponseSchema = z.object({
+  result: z.string(),
+  item_id: z
+    .union([z.string(), z.number()])
+    .optional()
+    .transform((value) => (value === undefined ? null : String(value))),
+  message: z.string().optional(),
+});
+
+export type PlektanAddAdvertResult = { itemId: string | null };
