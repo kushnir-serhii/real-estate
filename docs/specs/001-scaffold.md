@@ -39,13 +39,13 @@ None. `supabase/` initialized (config + empty migrations).
   - [ ] `pnpm preview` serves the home page locally in workerd (if it can't run on native Windows, the criterion is reported as blocked, not worked around)
   - [x] no deploy was run
 
-### [ ] 4. Supabase clients
+### [x] 4. Supabase clients
 - **Build:** `@supabase/ssr` clients `server.ts`, `client.ts`, `admin.ts` (`server-only`); session refresh in `src/proxy.ts` (Next 16) if OpenNext supports it, otherwise `src/middleware.ts`, matching only `/admin/:path*` (public pages stay static; no visitor sessions in stage 1); `supabase` CLI as a devDependency; `supabase init`; `db:types` script generating `database.types.ts` from the local DB (local Supabase in Docker; generated once now from the empty schema).
 - **Files:** `src/lib/supabase/*`, `src/proxy.ts` or `src/middleware.ts`, `supabase/config.toml`, `package.json`
 - **Agent:** backend
 - **Accept:**
-  - [ ] importing `admin.ts` from a client component fails the build
-  - [ ] build green with empty env (no crash at import time)
+  - [x] importing `admin.ts` from a client component fails the build
+  - [x] build green with empty env (no crash at import time)
 
 ### [ ] 5. Playwright UI check
 - **Build:** port `ui-check` from `doc-spread/apps/web` (`playwright.config.ts`, `e2e/ui-check.spec.ts`): `next dev` on port 3199, `SPEC`/`ROUTES` env, 375/1280 viewports, light + dark themes, Chromium only, fail on console errors and horizontal scroll, screenshots to `e2e/screenshots/<spec>/`.
@@ -59,6 +59,8 @@ None. `supabase/` initialized (config + empty migrations).
 - None for local work. Later: Cloudflare account + Supabase project on the client (see stack.md → Відкриті питання).
 
 ## Open questions
+- `src/middleware.ts` (edge) instead of Next 16 `src/proxy.ts`: OpenNext 1.20 bundles Node-runtime proxy only experimentally (unsupported). `next build` warns that `middleware` is deprecated. Switch to `proxy.ts` once OpenNext supports it.
+- `supabase` CLI pinned at 2.98.0: installing 2.122.0 crashed pnpm with a heap OOM. Retry an upgrade later.
 - ~~Light only, or light + dark?~~ **Decided 2026-10-28:** light + dark; the UI check runs both themes.
 - ~~Fonts / colors?~~ **Decided 2026-10-28:** no design yet — neutral placeholder palette + one accent; the font is the designer's pick for the niche and current trends (answer in the 001 questions round, replacing the earlier "Inter"); the real design replaces the tokens later.
 - Image resizing to WebP sizes: `sharp` can't run in Workers. Options: resize in the sync job running in Node (GitHub Actions), Cloudflare Images, or a Workers image library. **Decided 2026-10-28:** decide in 003.
@@ -69,3 +71,4 @@ None. `supabase/` initialized (config + empty migrations).
 | 2026-10-28 | 1 | done | next 16.4.3, react 19.3.0, typescript 5.9.3, tailwindcss 4.3.3, eslint 9.39.5, pnpm 10.28.2. Template's `cacheComponents`/`partialPrefetching` dropped (conflict with ISR + `revalidateTag`). `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `tsconfig.json`, `eslint.config.mjs`, `next.config.ts`, `src/app/*`, `.gitignore` (+2 entries) |
 | 2026-10-28 | 2 | built; 375px pending UI check (step 8) | Font Manrope (latin+cyrillic, `--font-sans`); accent deep teal; light+dark via inline head script + `lyndrik-theme` localStorage + `ThemeToggle`; AA ratios computed (lowest: control outline 4.3, focus ring 4.6). Added `--control` token (shadcn `--input` too faint). shadcn CLI wrote `cn` npm import — replaced with `@/lib/utils`. Deps: radix-ui, cva, clsx, tailwind-merge, lucide-react, tw-animate-css; `shadcn` (dev, for its CSS). `components.json`, `globals.css`, `layout.tsx`, `design/page.tsx`, `lib/utils.ts`, `lib/theme.ts`, `components/theme-toggle.tsx`, `components/ui/*` |
 | 2026-10-28 | 3 | built; preview **blocked** (Windows symlink EPERM in OpenNext build) | `@opennextjs/cloudflare` 1.20.13, wrangler 4.154.0; `wrangler.jsonc` (`lyndrik-web`, compat 2026-10-01, `nodejs_compat`), `open-next.config.ts`, `next.config.ts` (`initOpenNextCloudflareForDev`), scripts `preview`/`deploy`/`cf-typegen`, `pnpm-workspace.yaml` (`onlyBuiltDependencies: workerd, esbuild`), eslint ignores, `.env.example` comment; `cloudflare-env.d.ts` git-ignored (regenerate with `pnpm cf-typegen`). No deploy run. |
+| 2026-10-28 | 4 | done | `@supabase/ssr` 0.12.7, `@supabase/supabase-js` 2.118.0, zod 4.6.7, server-only, supabase CLI 2.98.0 (dev). `src/lib/supabase/{env,server,client,admin,middleware,database.types}.ts`, `src/middleware.ts` (matcher `/admin/:path*`, pass-through with empty env), `supabase/config.toml` (`project_id = "lyndrik"`), `supabase/migrations/.gitkeep`, `db:types` script; types generated from local Supabase (empty schema). Leak test: build fails with the `server-only` error. |

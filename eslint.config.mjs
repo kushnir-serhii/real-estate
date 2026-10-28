@@ -15,6 +15,7 @@ const eslintConfig = defineConfig([
     ".open-next/**",
     ".wrangler/**",
     "cloudflare-env.d.ts",
+    "src/lib/supabase/database.types.ts",
   ]),
 ]);
 
