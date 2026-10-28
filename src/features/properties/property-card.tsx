@@ -5,6 +5,8 @@ import type { PublishedProperty } from "@/lib/db/properties";
 import { formatPrice } from "@/lib/format/format-price";
 import { photoSrcSet } from "@/lib/photos/photo-src-set";
 import { photoUrl } from "@/lib/photos/photo-url";
+import { FavoriteButton } from "@/features/favorites/favorite-button";
+import { cn } from "@/lib/utils";
 import { DEAL_LABELS, PROPERTY_TYPE_LABELS } from "./property-labels";
 
 type PropertyCardProps = {
@@ -13,6 +15,8 @@ type PropertyCardProps = {
   imageSizes?: string;
   /** Load the photo eagerly (first row above the fold). */
   priority?: boolean;
+  /** Set for a recently hidden property (sold / rented): muted photo and a status badge instead of the deal badge. */
+  soldLabel?: string;
 };
 
 // Fallback intrinsic size when a photo has no stored dimensions; the box is a fixed 4:3 anyway.
@@ -43,13 +47,14 @@ const buildFacts = (p: PublishedProperty): string[] => {
 };
 
 /**
- * Card is an `article` with the title link stretched over it, so a favorites button
- * (slice 5, top-right of the photo) can sit inside without nesting interactive elements.
+ * Card is an `article` with the title link stretched over it, so the favorites button
+ * (top-right of the photo, above the link) can sit inside without nesting interactive elements.
  */
 export const PropertyCard = ({
   property,
   imageSizes = DEFAULT_IMAGE_SIZES,
   priority = false,
+  soldLabel,
 }: PropertyCardProps) => {
   const photo = property.property_photos[0];
   const facts = buildFacts(property);
@@ -75,7 +80,7 @@ export const PropertyCard = ({
             loading={priority ? "eager" : "lazy"}
             fetchPriority={priority ? "high" : undefined}
             decoding="async"
-            className="size-full object-cover"
+            className={cn("size-full object-cover", soldLabel && "opacity-60 grayscale")}
           />
         ) : (
           <div className="flex size-full flex-col items-center justify-center gap-2 text-muted-foreground">
@@ -84,8 +89,9 @@ export const PropertyCard = ({
           </div>
         )}
         <span className="absolute top-3 left-3 max-w-[calc(100%-4.5rem)] truncate rounded-md bg-background/90 px-2 py-1 text-xs font-medium text-foreground">
-          {DEAL_LABELS[property.deal]} · {PROPERTY_TYPE_LABELS[property.property_type]}
+          {soldLabel ?? `${DEAL_LABELS[property.deal]} · ${PROPERTY_TYPE_LABELS[property.property_type]}`}
         </span>
+        <FavoriteButton propertyId={property.id} />
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
         <p className="text-xl font-bold tabular-nums">{price}</p>

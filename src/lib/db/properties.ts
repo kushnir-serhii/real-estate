@@ -185,6 +185,40 @@ export const getPropertyBySlug = (slug: string): Promise<PropertyBySlug | null> 
     { tags: [CACHE_TAGS.properties, propertyTag(slug)], revalidate: 3600 },
   )(slug);
 
+export type FavoriteProperty = PropertyBySlug;
+
+/**
+ * Saved properties for /favorites: published or hidden less than SOLD_PAGE_DAYS ago, in the order of `ids`.
+ * Unknown / removed ids are simply absent. Not cached: a small POST keyed by the visitor's own list.
+ */
+export const getPropertiesByIds = async (ids: string[]): Promise<FavoriteProperty[]> => {
+  if (ids.length === 0) return [];
+  const { data, error } = await createPublicClient()
+    .from("properties")
+    .select(SELECT)
+    .in("id", ids)
+    .in("status", ["published", "hidden"])
+    .order("position", { referencedTable: "property_photos" })
+    .overrideTypes<PublishedProperty[], { merge: false }>();
+  if (error) throw new Error(`getPropertiesByIds failed: ${error.message}`);
+  const byId = new Map(data.map((row) => [row.id, row]));
+  const result: FavoriteProperty[] = [];
+  for (const id of ids) {
+    const row = byId.get(id);
+    if (!row) continue;
+    if (row.status === "published") {
+      result.push({ kind: "published", property: row });
+      continue;
+    }
+    // Same window check as getPropertyBySlug (RLS already filters).
+    const hiddenAt = row.hidden_at ? Date.parse(row.hidden_at) : NaN;
+    if (!Number.isNaN(hiddenAt) && Date.now() - hiddenAt < SOLD_PAGE_MS) {
+      result.push({ kind: "sold", property: row });
+    }
+  }
+  return result;
+};
+
 export const SIMILAR_LIMIT = 4;
 const SIMILAR_PRICE_RANGE = 0.3;
 

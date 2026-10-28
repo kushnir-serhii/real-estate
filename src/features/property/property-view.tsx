@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { buttonVariants } from "@/components/ui/button";
+import { FavoriteButton } from "@/features/favorites/favorite-button";
 import { DEAL_LABELS, PROPERTY_TYPE_LABELS } from "@/features/properties/property-labels";
 import type { PublishedProperty } from "@/lib/db/properties";
 import { photoSrcSet } from "@/lib/photos/photo-src-set";
@@ -72,7 +73,13 @@ export const PropertyView = ({ property }: PropertyViewProps) => {
             </p>
             <h1 className="text-2xl font-bold break-words text-balance sm:text-3xl">{property.title}</h1>
             {location && <p className="break-words text-muted-foreground">{location}</p>}
-            <PropertyPrice price={price} perSquareMeter={perSquareMeter} facts={facts} className="mt-2 lg:hidden" />
+            <PropertyPrice
+              price={price}
+              perSquareMeter={perSquareMeter}
+              facts={facts}
+              action={<FavoriteButton propertyId={property.id} variant="page" />}
+              className="mt-2 lg:hidden"
+            />
           </header>
 
           <PropertyFacts rows={factRows(property)} />
@@ -82,7 +89,12 @@ export const PropertyView = ({ property }: PropertyViewProps) => {
 
         <aside aria-label="Ціна та контакти" className="mt-8 flex flex-col gap-4 lg:sticky lg:top-24 lg:mt-0">
           <div className="hidden rounded-xl bg-card p-5 text-card-foreground ring-1 ring-foreground/10 lg:block">
-            <PropertyPrice price={price} perSquareMeter={perSquareMeter} facts={facts} />
+            <PropertyPrice
+              price={price}
+              perSquareMeter={perSquareMeter}
+              facts={facts}
+              action={<FavoriteButton propertyId={property.id} variant="page" />}
+            />
             {/* Until spec 006 the CTA leads to the contact card; 006 opens the request form instead. */}
             <a href={`#${CONTACT_ANCHOR}`} className={cn(buttonVariants({ size: "lg" }), "mt-5 w-full")}>
               Залишити заявку
