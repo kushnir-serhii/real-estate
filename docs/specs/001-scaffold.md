@@ -37,7 +37,7 @@ None. `supabase/` initialized (config + empty migrations).
 - **Agent:** backend
 - **Accept:**
   - [ ] `pnpm preview` serves the home page locally in workerd (if it can't run on native Windows, the criterion is reported as blocked, not worked around)
-  - [ ] no deploy was run
+  - [x] no deploy was run
 
 ### [ ] 4. Supabase clients
 - **Build:** `@supabase/ssr` clients `server.ts`, `client.ts`, `admin.ts` (`server-only`); session refresh in `src/proxy.ts` (Next 16) if OpenNext supports it, otherwise `src/middleware.ts`, matching only `/admin/:path*` (public pages stay static; no visitor sessions in stage 1); `supabase` CLI as a devDependency; `supabase init`; `db:types` script generating `database.types.ts` from the local DB (local Supabase in Docker; generated once now from the empty schema).
@@ -55,6 +55,7 @@ None. `supabase/` initialized (config + empty migrations).
   - [ ] `SPEC=001 ROUTES=root,design pnpm ui-check` passes and writes screenshots
 
 ## External needs
+- **`pnpm preview` on this Windows machine:** the OpenNext build fails with `EPERM: operation not permitted, symlink` (`copyTracedFiles`, `@opennextjs/aws` 4.1.12). Enable Windows Developer Mode (lets non-admin users create symlinks) or run preview in WSL/Linux CI, then re-run `pnpm preview` to close slice 3.
 - None for local work. Later: Cloudflare account + Supabase project on the client (see stack.md → Відкриті питання).
 
 ## Open questions
@@ -67,3 +68,4 @@ None. `supabase/` initialized (config + empty migrations).
 | --- | --- | --- | --- |
 | 2026-10-28 | 1 | done | next 16.4.3, react 19.3.0, typescript 5.9.3, tailwindcss 4.3.3, eslint 9.39.5, pnpm 10.28.2. Template's `cacheComponents`/`partialPrefetching` dropped (conflict with ISR + `revalidateTag`). `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `tsconfig.json`, `eslint.config.mjs`, `next.config.ts`, `src/app/*`, `.gitignore` (+2 entries) |
 | 2026-10-28 | 2 | built; 375px pending UI check (step 8) | Font Manrope (latin+cyrillic, `--font-sans`); accent deep teal; light+dark via inline head script + `lyndrik-theme` localStorage + `ThemeToggle`; AA ratios computed (lowest: control outline 4.3, focus ring 4.6). Added `--control` token (shadcn `--input` too faint). shadcn CLI wrote `cn` npm import — replaced with `@/lib/utils`. Deps: radix-ui, cva, clsx, tailwind-merge, lucide-react, tw-animate-css; `shadcn` (dev, for its CSS). `components.json`, `globals.css`, `layout.tsx`, `design/page.tsx`, `lib/utils.ts`, `lib/theme.ts`, `components/theme-toggle.tsx`, `components/ui/*` |
+| 2026-10-28 | 3 | built; preview **blocked** (Windows symlink EPERM in OpenNext build) | `@opennextjs/cloudflare` 1.20.13, wrangler 4.154.0; `wrangler.jsonc` (`lyndrik-web`, compat 2026-10-01, `nodejs_compat`), `open-next.config.ts`, `next.config.ts` (`initOpenNextCloudflareForDev`), scripts `preview`/`deploy`/`cf-typegen`, `pnpm-workspace.yaml` (`onlyBuiltDependencies: workerd, esbuild`), eslint ignores, `.env.example` comment; `cloudflare-env.d.ts` git-ignored (regenerate with `pnpm cf-typegen`). No deploy run. |
