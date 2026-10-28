@@ -15,7 +15,7 @@ Visitors find a property with filters, open its page with a good gallery and fac
 ## Slices
 
 ### [ ] 1. Catalog list + card
-- **Build:** filters (deal, type, kind, rooms, price from/to + currency, area, district), sort (price, area, newest), pagination; all in `searchParams`; ISR with revalidate tag.
+- **Build:** filters (deal, type, kind, rooms, price from/to + currency, area, district; URL params `deal`, `property_type`, `rooms`, `price_from`/`price_to` + `currency` as the home quick search in 004 builds them — converted to `price_usd_*` with the exchange rates), sort (price, area, newest), pagination; all in `searchParams`; ISR with revalidate tag.
 - **Agent:** designer
 - **Accept:**
   - [ ] reload keeps filters; back button works
@@ -42,6 +42,7 @@ Visitors find a property with filters, open its page with a good gallery and fac
 
 ## External needs
 - Map provider key if not OSM.
+- From 003: property `lat`/`lng` are rounded to ~100 m (show an approximate area, not a pin; `house` isn't public). Coordinates come from OpenStreetMap (Nominatim): show "© OpenStreetMap contributors" with the map.
 
 ## Open questions
 - URL structure for SEO: `/catalog?deal=sell&type=flat` vs `/prodazh/kvartyry/…` landing URLs? (Recommended: decide with 009; landing URLs for main combos.)

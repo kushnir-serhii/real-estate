@@ -11,11 +11,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { BRAND } from "@/constants/brand";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export const metadata: Metadata = {
-  title: "Дизайн-система — Lyndrik",
+  title: `Дизайн-система — ${BRAND.name}`,
   robots: { index: false },
 };
 
@@ -69,7 +70,7 @@ const DesignPage = () => (
   <main className="mx-auto flex w-full max-w-3xl flex-col gap-10 px-4 py-8">
     <header className="flex flex-wrap items-center justify-between gap-4">
       <div className="min-w-0">
-        <h1 className="text-3xl font-bold">Lyndrik</h1>
+        <h1 className="text-3xl font-bold">{BRAND.name}</h1>
         <p className="text-muted-foreground">Дизайн-система (заглушка)</p>
       </div>
       <ThemeToggle />

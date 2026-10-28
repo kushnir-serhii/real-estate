@@ -50,7 +50,7 @@ Small stable value sets are **Postgres enums** (exact unions in the generated ty
   - [x] placeholder photos are under ~200 KB each
 
 ## External needs
-- The user applies migrations `20261028120000_properties.sql` and `20261028130000_leads_pages_settings.sql` to the client's Supabase project (`seed.sql` is local-only demo data, don't run it on production).
+- Supabase isn't connected yet (the user connects it later). Steps, keys and the two migrations to apply: [../setup.md](../setup.md) → Supabase. `seed.sql` is local-only demo data, don't run it on production.
 
 ## Open questions
 - **Decided 2026-10-28:** separate `agents` table (FK from properties), reused on the contacts page.

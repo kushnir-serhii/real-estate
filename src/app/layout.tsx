@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 
+import { BRAND } from "@/constants/brand";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
@@ -10,8 +11,20 @@ const manrope = Manrope({
   display: "swap",
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
+const getMetadataBase = () => {
+  try {
+    return new URL(SITE_URL);
+  } catch {
+    return new URL("http://localhost:3000");
+  }
+};
+
 export const metadata: Metadata = {
-  title: "Lyndrik",
+  metadataBase: getMetadataBase(),
+  title: { default: BRAND.siteTitle, template: `%s — ${BRAND.name}` },
+  description: BRAND.siteDescription,
 };
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => (

@@ -47,6 +47,8 @@ The Plektan partner button ("Ми працюємо з Plektan") is mandatory in 
 Build order and status: [roadmap.md](roadmap.md). Later options (client login via Telegram/Google, saved searches with Telegram alerts, price-drop alerts, XML feed to LUN, simple lead pipeline) are in [reference/stack.md](reference/stack.md) → «Можливий функціонал»; not planned yet.
 
 ## Design principles
+**Template, mock data:** for now the site is a template for the real project. All agency data (name, contacts, messengers, texts, coordinates) is mock and lives only as consts in `src/constants/`, so the real agency's data replaces it in one place. Components never hardcode agency data. The seed (`supabase/seed.sql`) is demo data too.
+
 **Design status:** brand, logo and visual design are not defined yet. Build with a neutral placeholder look (shadcn neutral palette, one accent, text wordmark "Lyndrik", placeholder photos). Everything visual goes through tokens in `globals.css` and one `logo.tsx`, so the real design replaces it later without touching pages. Don't ask about branding before it exists.
 
 1. Photos first; clean, calm, trustworthy. Neutral palette + one accent.

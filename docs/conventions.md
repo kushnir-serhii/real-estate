@@ -17,6 +17,7 @@ Next.js (App Router) · React · TypeScript (strict) · Tailwind 4 · shadcn/ui 
 | Component | `src/features/<domain>/property-card.tsx` | `export const PropertyCard = …` |
 | Shared UI | `src/components/layout/`, `src/components/` | |
 | shadcn primitive | `src/components/ui/button.tsx` | as the CLI generated it |
+| Agency-specific data | `src/constants/<topic>.ts` (`contacts`, `brand`, `home`, `pages`, …) | `UPPER_SNAKE_CASE` consts `as const`; mock values until the real agency's data arrives |
 | Data access | `src/lib/db/<domain>.ts` | `getPublishedProperties(…)` |
 | External client | `src/lib/plektan/`, `src/lib/telegram/`, `src/lib/r2/`, `src/lib/turnstile/`, `src/lib/geocode/`, `src/lib/llm/` | |
 | Supabase clients | `src/lib/supabase/server.ts`, `client.ts`, `admin.ts` | |
