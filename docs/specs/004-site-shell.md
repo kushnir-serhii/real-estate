@@ -1,6 +1,6 @@
 # 004 — Site shell + static pages
 
-**Status:** in-progress · **Depends on:** 001 · **Route(s):** `/`, `/about`, `/contacts`, `/privacy`, 404
+**Status:** done · **Depends on:** 001 · **Route(s):** `/`, `/about`, `/contacts`, `/privacy`, 404
 
 ## Goal
 The frame of the public site — header, navigation, footer with the mandatory Plektan button — and the static pages, so the site looks like the agency from day one and the home quick search leads visitors into the catalog.
@@ -36,14 +36,14 @@ The frame of the public site — header, navigation, footer with the mandatory P
   - [x] all states: loading skeleton, no featured properties (and Supabase not configured), error with retry, missing photo, long titles
   - [x] card images have explicit size, no layout shift
 
-### [ ] 3. About, contacts, privacy, 404
+### [x] 3. About, contacts, privacy, 404
 - **Build:** `/about` (`pages.about` + fallback); `/contacts` (`pages.contacts` + fallback, contact block with id `zv-yazok`: phone, email, messengers, hours; active agents with "no photo" avatar; lazy OpenStreetMap iframe + «Відкрити в Google Maps» link); `/privacy` (generic Ukrainian template per the Law of Ukraine «Про захист персональних даних», marked as a draft for the client/lawyer; `privacy` row added to `supabase/seed.sql`); 404 inside the site shell with links home / to the catalog. `getActiveAgents()`. `generateMetadata` from the page SEO fields, canonical set.
 - **Files:** `src/app/(site)/{about,contacts,privacy}/page.tsx`, `src/app/not-found.tsx` (or a site catch-all), `src/lib/db/agents.ts`, `src/features/contacts/*`, `supabase/seed.sql`
 - **Agent:** designer · **Model:** sonnet
 - **Accept:**
-  - [ ] phone and messenger links are tappable (`tel:`, Telegram/Viber)
-  - [ ] unknown URL → 404 with header and footer
-  - [ ] map doesn't load until scrolled near (`loading="lazy"`) and has a title
+  - [x] phone and messenger links are tappable (`tel:`, Telegram/Viber)
+  - [x] unknown URL → 404 with header and footer
+  - [x] map doesn't load until scrolled near (`loading="lazy"`) and has a title
 
 ## External needs
 - Logo, brand colors, texts (about, contacts, privacy policy), photos of the team/office from Andrii.
@@ -66,9 +66,13 @@ The frame of the public site — header, navigation, footer with the mandatory P
 - «Купити»/«Орендувати» are never marked active in the nav (would need `useSearchParams`); revisit in 005 if wanted.
 - `property_photos.sizes` has no defined shape yet (null in the seed), so cards have no `srcSet` — define it in 003.
 - `pnpm typecheck` fails on Next's generated `.next/dev/types/validator.ts` (`noUnusedLocals`) after a dev server ran while the app has no route handlers; deleting `.next/dev` fixes it. Goes away once route handlers exist (006).
+- Privacy page shows a «Чернетка» note from `IS_DRAFT = true` in `src/app/(site)/privacy/page.tsx`; set it to `false` once the text is reviewed (until 009 it's a code constant).
+- `src/app/not-found.tsx` repeats the shell wrapper (skip link, header, footer) of `(site)/layout.tsx`; could become a shared component later.
 
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
 | 2026-10-28 | 1 | done | `(site)` layout with skip link; header (nav, phone, theme toggle, CTA; mobile: phone icon + sheet menu), footer (contacts, Telegram/Viber, privacy link, Plektan badge), `site-config.ts`, `NEXT_PUBLIC_SITE_URL` → `metadataBase` + title template. Playwright: menu traps focus, Esc closes and returns focus, closes on link, all targets ≥ 44px; badge image loads (120×30). `sheet.tsx` written by hand (the shadcn CLI wanted to overwrite `button.tsx`). Files: `src/app/(site)/{layout,page}.tsx`, `src/components/layout/*`, `src/components/ui/sheet.tsx`, `src/lib/site-config.ts`, `src/app/layout.tsx`, `.env.example`, `docs/setup.md` |
 | 2026-10-28 | 2 | done | Hero (placeholder photo, `scrim`/`on-scrim` tokens so it stays dark in both themes), GET quick search (checked: `/catalog?deal=rent_long&property_type=flat&rooms=2&price_to=20000&currency=UAH`), 6 newest in `<Suspense>` with skeleton / empty (also no Supabase) / error + retry, about (Markdown), CTA. `react-markdown` added; `getPageContent` falls back to built-in defaults and never throws; `formatPrice`; basic `PropertyCard` (fixed 4:3 box, explicit size, «Фото незабаром»). Home is ISR (5 min). Files: `src/app/(site)/page.tsx`, `src/features/{home,pages,properties}/*`, `src/lib/format/format-price.ts`, `src/components/ui/skeleton.tsx`, `src/app/globals.css`, `package.json` |
+| 2026-10-28 | 3 | done | `/about`, `/contacts` (contact block `#zv-yazok`, active agents with no-photo avatar, lazy OSM iframe + Google Maps link — checked it loads), `/privacy` (9-section draft template + note; `privacy` row in seed), root `not-found.tsx` inside the shell (HTTP 404), `(site)/error.tsx` + `loading.tsx`, `getActiveAgents()`. Fixed a missing `)` in the seed from the agent and replaced the `contacts` body (it repeated the contact block and promised a form that doesn't exist yet). Local `db reset` OK: 4 pages, 28 published. Files: `src/app/(site)/{about,contacts,privacy}/page.tsx`, `src/app/(site)/{error,loading}.tsx`, `src/app/not-found.tsx`, `src/features/contacts/*`, `src/features/pages/default-pages.ts`, `src/lib/db/agents.ts`, `supabase/seed.sql` |
+| 2026-10-28 | UI check | pass | `SPEC=004 ROUTES=root,about,contacts,privacy,nope` — 20/20 (375 + 1280, light + dark); screenshots reviewed. `ui-check.spec.ts`: scrolls the page so lazy images load before the screenshot; ignores the console 404 of the page's own document (404 route). Spec done. |
