@@ -28,6 +28,8 @@
   --color-input: var(--input);
   --color-control: var(--control);
   --color-ring: var(--ring);
+  --color-scrim: var(--scrim);
+  --color-on-scrim: var(--on-scrim);
 
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
@@ -63,6 +65,9 @@
   /* form control outline, needs 3:1 against the page */
   --control: oklch(0.58 0 0);
   --ring: oklch(0.55 0.1 195);
+  /* dark veil over photos, same in both themes; text on it uses on-scrim */
+  --scrim: oklch(0.16 0 0 / 62%);
+  --on-scrim: oklch(0.985 0 0);
 }
 
 .dark {

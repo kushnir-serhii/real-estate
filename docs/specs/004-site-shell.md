@@ -27,14 +27,14 @@ The frame of the public site — header, navigation, footer with the mandatory P
   - [x] mobile menu works with keyboard, traps focus, closes on Esc and on navigation, 44px targets
   - [x] phone and messenger links are tappable (`tel:`, Telegram, Viber)
 
-### [ ] 2. Home
+### [x] 2. Home
 - **Build:** hero with a placeholder photo from `public/placeholders/`, title and lead from `pages.home` (fallback default); quick search — a plain GET `<form action="/catalog">` that works without JS: deal (`deal`), type (`property_type`), rooms (`rooms`: any, 1–4, 5+), max budget (`price_to`) + currency (`currency`, USD by default); empty fields don't break the URL. Featured block: 6 newest published properties as cards (`src/features/properties/property-card.tsx`, basic; 005 extends it) with `formatPrice` (`src/lib/format/format-price.ts`, `uk-UA`, currency always, `tabular-nums`) and Ukrainian labels for deal/type. About block (body of `pages.home` as Markdown), CTA block (phone + messengers). `react-markdown` added. ISR via the cached reads.
 - **Files:** `src/app/(site)/page.tsx`, `src/features/home/*`, `src/features/properties/property-card.tsx`, `src/features/properties/property-labels.ts`, `src/lib/format/format-price.ts`, `src/features/pages/{default-pages.ts,markdown.tsx}`
 - **Agent:** designer
 - **Accept:**
-  - [ ] quick search builds the catalog URL (`/catalog?deal=…&property_type=…&rooms=…&price_to=…&currency=…`)
-  - [ ] all states: loading skeleton, no featured properties (and Supabase not configured), error with retry, missing photo, long titles
-  - [ ] card images have explicit size, no layout shift
+  - [x] quick search builds the catalog URL (`/catalog?deal=…&property_type=…&rooms=…&price_to=…&currency=…`)
+  - [x] all states: loading skeleton, no featured properties (and Supabase not configured), error with retry, missing photo, long titles
+  - [x] card images have explicit size, no layout shift
 
 ### [ ] 3. About, contacts, privacy, 404
 - **Build:** `/about` (`pages.about` + fallback); `/contacts` (`pages.contacts` + fallback, contact block with id `zv-yazok`: phone, email, messengers, hours; active agents with "no photo" avatar; lazy OpenStreetMap iframe + «Відкрити в Google Maps» link); `/privacy` (generic Ukrainian template per the Law of Ukraine «Про захист персональних даних», marked as a draft for the client/lawyer; `privacy` row added to `supabase/seed.sql`); 404 inside the site shell with links home / to the catalog. `getActiveAgents()`. `generateMetadata` from the page SEO fields, canonical set.
@@ -64,8 +64,11 @@ The frame of the public site — header, navigation, footer with the mandatory P
 - **Decided 2026-10-28:** agents shown on contacts (`getActiveAgents`); privacy at `/privacy` with a draft template.
 
 - «Купити»/«Орендувати» are never marked active in the nav (would need `useSearchParams`); revisit in 005 if wanted.
+- `property_photos.sizes` has no defined shape yet (null in the seed), so cards have no `srcSet` — define it in 003.
+- `pnpm typecheck` fails on Next's generated `.next/dev/types/validator.ts` (`noUnusedLocals`) after a dev server ran while the app has no route handlers; deleting `.next/dev` fixes it. Goes away once route handlers exist (006).
 
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
 | 2026-10-28 | 1 | done | `(site)` layout with skip link; header (nav, phone, theme toggle, CTA; mobile: phone icon + sheet menu), footer (contacts, Telegram/Viber, privacy link, Plektan badge), `site-config.ts`, `NEXT_PUBLIC_SITE_URL` → `metadataBase` + title template. Playwright: menu traps focus, Esc closes and returns focus, closes on link, all targets ≥ 44px; badge image loads (120×30). `sheet.tsx` written by hand (the shadcn CLI wanted to overwrite `button.tsx`). Files: `src/app/(site)/{layout,page}.tsx`, `src/components/layout/*`, `src/components/ui/sheet.tsx`, `src/lib/site-config.ts`, `src/app/layout.tsx`, `.env.example`, `docs/setup.md` |
+| 2026-10-28 | 2 | done | Hero (placeholder photo, `scrim`/`on-scrim` tokens so it stays dark in both themes), GET quick search (checked: `/catalog?deal=rent_long&property_type=flat&rooms=2&price_to=20000&currency=UAH`), 6 newest in `<Suspense>` with skeleton / empty (also no Supabase) / error + retry, about (Markdown), CTA. `react-markdown` added; `getPageContent` falls back to built-in defaults and never throws; `formatPrice`; basic `PropertyCard` (fixed 4:3 box, explicit size, «Фото незабаром»). Home is ISR (5 min). Files: `src/app/(site)/page.tsx`, `src/features/{home,pages,properties}/*`, `src/lib/format/format-price.ts`, `src/components/ui/skeleton.tsx`, `src/app/globals.css`, `package.json` |
