@@ -1,6 +1,7 @@
 import { User } from "lucide-react";
 
 import type { Agent } from "@/lib/db/agents";
+import { photoUrl } from "@/lib/photos/photo-url";
 
 const LINK_CLASS =
   "inline-flex min-h-11 items-center rounded-md break-all text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50";
@@ -16,7 +17,7 @@ export const AgentCard = ({ agent }: { agent: Agent }) => (
     {agent.photo_url ? (
       // eslint-disable-next-line @next/next/no-img-element -- external photo in a fixed-size box
       <img
-        src={agent.photo_url}
+        src={photoUrl(agent.photo_url)}
         alt={agent.name}
         width={64}
         height={64}

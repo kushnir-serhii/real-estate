@@ -1,7 +1,8 @@
 /**
  * Recorded-shape Plektan data for fixture mode (no API key). Two snapshots:
  * `base`, and `next` where 1002 is gone, 1001 has a new price and 1013 is new.
- * Photo names match files in public/placeholders/ (slice 4 maps them).
+ * Photo names match files in public/placeholders/ (the sync's photo step reads them in fixture mode).
+ * `next` also drops 1001's kitchen photo.
  */
 
 export type FixtureDef = {
@@ -378,6 +379,8 @@ const NEXT_DEFS: FixtureDef[] = [
       ? {
           ...def,
           date_mod: "2026-10-27 14:30:00",
+          // The kitchen photo is gone: the bedroom one moves up (exercises delete + reorder).
+          photos: ["flat-living-1", "flat-bedroom-1"],
           price: { ...def.price, value: "&asymp; 82 000 $", value_m2: "&asymp; 1 206 $/м²" },
         }
       : def,

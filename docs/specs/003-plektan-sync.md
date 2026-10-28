@@ -47,14 +47,14 @@ How it runs:
   - [x] anon key can't read `raw` or `house`; the site's pages still render
   - [x] `/api/cron/revalidate` without / with a wrong secret → 401
 
-### [ ] 4. Photos to R2
+### [x] 4. Photos to R2
 - **Build:** `src/lib/r2/` (`@aws-sdk/client-s3` against R2; fixture mode writes to `public/r2-local/`, git-ignored). In the sync: download each new photo (fixture mode: Plektan fixture URLs resolve to files in `public/placeholders/`), `sharp` → WebP at 480 / 960 / 1600 px wide (never upscaled), keys `properties/<property_id>/<hash>-<w>.webp`; `property_photos` rows ordered as in Plektan, `r2_key` = 960 version, `sizes` = `{ "480": key, "960": key, "1600": key }`, `width`/`height` of the largest, `source_url` = Plektan URL. A photo whose `source_url` is already stored is skipped; photos removed in Plektan are deleted (row + R2 objects). Agent photos (`url_small`) copied once into `agents/<id>.webp`. A failed photo is logged and retried next run; it never fails the sync.
 - **Files:** `src/lib/r2/*`, `src/lib/sync/sync-photos.ts`, `src/lib/sync/run-sync.ts`, `.gitignore`
 - **Agent:** backend
 - **Accept:**
-  - [ ] re-sync doesn't re-download or re-upload existing photos
-  - [ ] removing a photo from the fixture removes its row and R2 objects
-  - [ ] locally (fixture mode) synced properties show their photos on the site
+  - [x] re-sync doesn't re-download or re-upload existing photos
+  - [x] removing a photo from the fixture removes its row and R2 objects
+  - [x] locally (fixture mode) synced properties show their photos on the site
 
 ### [ ] 5. Geocoding
 - **Build:** `src/lib/geocode/` — Nominatim (`https://nominatim.openstreetmap.org/search`, `countrycodes=ua`, `accept-language=uk`, User-Agent with `GEOCODER_CONTACT_EMAIL`, ≤1 request/s, timeout). Query from locality, district, street, `housestr`; falls back to street level, then district. Result rounded to 3 decimals (~100 m) before saving — the site shows an approximate area. Called only when the address changed or `lat/lng` are empty. Fixture mode when `GEOCODER_CONTACT_EMAIL` is empty (deterministic coords near the locality).
@@ -80,6 +80,8 @@ How it runs:
 
 - A change of `settings.exchange_rates` doesn't re-price existing Plektan rows until their `date_mod` changes. Fine while Plektan mode has no rate editing; revisit with 008.
 - In Plektan mode the sync owns properties: a hand-hidden property is re-published on the next sync. 008 should make Plektan properties read-only in the admin (one source of truth).
+- If Plektan ever returns an empty `view.media` for a property that has photos, all its photos are removed (the card is authoritative). Watch the first real runs.
+- R2 `putObject` / `deleteObjects` against the real API are untested (no keys): check the first real run.
 
 ## Log
 | Date | Slice | Result | Notes / files |
@@ -87,3 +89,4 @@ How it runs:
 | 2026-10-28 | 1 | done | `src/lib/plektan/` (`client.ts`, `schemas.ts`, `errors.ts`, `encode-form.ts`, `index.ts`, `fixtures/{data,transport}.ts`, `client.test.ts` — 27 tests), `vitest.config.ts`, `tsx` + `vitest` dev deps, `pnpm test`, `.env.example`. Fixtures: `base` 12 properties (adid 1001–1012), `next` drops 1002, changes 1001's price, adds 1013; agents 501–503. Unverified until the key exists: form-encoded body, 1-based `currentPage`, `view`/`getContactPersons`/`getDistricts` envelopes, `price.kind` / `currency_id` codes (mapping relies on the price text). |
 | 2026-10-28 | 2 | done | `src/lib/sync/{map-property,parse-price,property-title,slugify,html-text}.ts` + tests (89 total). `mapProperty(item, view, rates)` → skip (`mls` / `not_actual` / `unsupported`) or row + `agentExternalId`. Per-m² headline price × `area_total` (no area → no price); earliest currency in the text wins; `date_mod` read as Kyiv local time (unverified); unknown Plektan list values → null (original in `raw`). `apartments` titled «N-кімнатна квартира». |
 | 2026-10-28 | 3 | done | `src/lib/sync/{run-sync,sync-cursor}.ts`, `scripts/{sync,check-sync}.ts` (`pnpm sync [--full --no-revalidate --force-hide]`, `pnpm sync:check` — local only, 22 checks, ran 6× green), `src/app/api/cron/revalidate/route.ts` (bearer `CRON_SECRET`, `revalidateTag(tag, { expire: 0 })`), `.github/workflows/sync.yml` (skips without `PLEKTAN_API_KEY`), migration `20261028140000_hide_private_property_columns.sql` (column grants; anon `raw`/`house` → 401), `PROP_KINDS_BY_PROPERTY`, `properties.ts` drops `house`, `setup.md` (secrets, first run). Safety guard: a full sync won't hide when the result is empty or < half of published Plektan rows remain. A failed item → `failed`, exit 1, cursor not advanced. Workflow not run (can't locally). |
+| 2026-10-28 | 4 | done | `src/lib/r2/{client,index}.ts` (S3 API, `WHEN_REQUIRED` checksums; fixture mode → `public/r2-local/`, git-ignored), `src/lib/sync/sync-photos.ts`, `run-sync.ts`, `photo-url.ts` (empty base: `placeholders/…` from `public/`, other keys from `/r2-local/`; absolute URLs pass through), `agent-card.tsx` via `photoUrl()`, fixtures (`next` drops one photo of 1001), `check-sync.ts`. Keys `properties/<id>/<sha1(url)[:10]>-<w>.webp`, `agents/<id>-<hash>.webp` (256 px); widths 480/960/1600 capped at the source width and keyed by the real width; `r2_key` = 960 version. Retry: a property with failed photos gets `source_updated_at = null` → re-viewed next run (+ a retry pass on incremental). Deps: `@aws-sdk/client-s3`, `sharp` (dev; not in the server bundle). Review fix: sizes keyed by real width, not nominal. |

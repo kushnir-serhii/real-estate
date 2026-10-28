@@ -16,6 +16,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { TablesInsert, TablesUpdate } from "@/lib/supabase/database.types";
 import { createSlug, mapProperty, parseKyivDateTime } from "./map-property";
 import { createSyncCursor } from "./sync-cursor";
+import { createPhotoStats, syncAgentPhotos, syncPropertyPhotos, type PhotoStats } from "./sync-photos";
 
 export type SyncMode = "full" | "incremental";
 
@@ -41,6 +42,8 @@ export type SyncSummary = {
   /** Items whose `view` / write failed; the run goes on, the cursor doesn't advance. */
   failed: number;
   agents: { added: number; updated: number; deactivated: number };
+  /** Photo work of this run: a re-run with nothing changed has all zeros. */
+  photos: PhotoStats;
   /** The guard refused to hide vanished properties (see `warnings`). */
   hideBlocked: boolean;
   warnings: string[];
@@ -254,11 +257,23 @@ export const runSync = async (options: RunSyncOptions): Promise<SyncResult> => {
   log(`sync (${mode}): Plektan returned ${items.size} items`);
 
   const agents = await syncAgents(admin, persons);
+  const photoStats = createPhotoStats();
+  const agentPhotosChanged = await syncAgentPhotos(
+    admin,
+    persons.flatMap((person) => {
+      const id = agents.idByExternalId.get(person.user_id);
+      return id === undefined ? [] : [{ id, url: person.url_small }];
+    }),
+    photoStats,
+    log,
+  );
   const existing = await loadExistingProperties(admin);
   const publishedBefore = [...existing.values()].filter((row) => row.status === "published").length;
 
   const nowIso = runStart.toISOString();
   const changedSlugs = new Set<string>();
+  const hiddenIds = new Set<string>();
+  const handled = new Set<string>();
   let added = 0;
   let updated = 0;
   let hidden = 0;
@@ -273,13 +288,17 @@ export const runSync = async (options: RunSyncOptions): Promise<SyncResult> => {
         .update({ status: "hidden" })
         .in("id", group.map((row) => row.id));
       if (error) return fail("hiding properties", error);
-      for (const row of group) changedSlugs.add(row.slug);
+      for (const row of group) {
+        changedSlugs.add(row.slug);
+        hiddenIds.add(row.id);
+      }
     }
     hidden += rows.length;
   };
 
   for (const item of items.values()) {
     const current = existing.get(item.adid);
+    handled.add(item.adid);
     try {
       if (item.is_mls || item.state !== "actual") {
         skipped += 1;
@@ -308,6 +327,8 @@ export const runSync = async (options: RunSyncOptions): Promise<SyncResult> => {
       const agentId =
         mapped.agentExternalId === null ? null : (agents.idByExternalId.get(mapped.agentExternalId) ?? null);
 
+      const photoSources = card.media.map((media) => media.src);
+
       if (current === undefined) {
         const created = await insertWithSlug(
           admin,
@@ -322,12 +343,22 @@ export const runSync = async (options: RunSyncOptions): Promise<SyncResult> => {
         );
         added += 1;
         changedSlugs.add(created.slug);
+        const photos = await syncPropertyPhotos(admin, created.id, photoSources, photoStats, log);
+        if (photos.failed > 0) {
+          // No source_updated_at = "photos incomplete": the next run views it again and retries.
+          const { error } = await admin.from("properties").update({ source_updated_at: null }).eq("id", created.id);
+          if (error) return fail("marking a property for a photo retry", error);
+        }
         continue;
       }
+
+      // Photos first, so a failure can withhold source_updated_at in the same write.
+      const photos = await syncPropertyPhotos(admin, current.id, photoSources, photoStats, log);
 
       // Existing row: slug, published_at (when set), lat/lng and seo_* are never overwritten.
       const patch: PropertyUpdate = {
         ...mapped.row,
+        ...(photos.failed > 0 ? { source_updated_at: null } : {}),
         status: "published",
         synced_at: nowIso,
         ...(current.published_at === null ? { published_at: nowIso } : {}),
@@ -365,7 +396,30 @@ export const runSync = async (options: RunSyncOptions): Promise<SyncResult> => {
     }
   }
 
-  const agentsChanged = agents.added + agents.updated + agents.deactivated > 0;
+  // Properties whose photos were incomplete earlier (source_updated_at null) and that this run didn't
+  // revisit (an incremental run only lists recently modified items): fetch their photos again.
+  for (const row of existing.values()) {
+    if (row.external_id === null || row.source_updated_at !== null || row.status !== "published") continue;
+    if (handled.has(row.external_id) || hiddenIds.has(row.id)) continue;
+    try {
+      const card = await view({ adid: row.external_id });
+      const photos = await syncPropertyPhotos(admin, row.id, card.media.map((media) => media.src), photoStats, log);
+      if (photos.changed) changedSlugs.add(row.slug);
+      if (photos.failed === 0) {
+        const { error } = await admin
+          .from("properties")
+          .update({ source_updated_at: parseKyivDateTime(card.date_mod) })
+          .eq("id", row.id);
+        if (error) return fail("finishing a photo retry", error);
+      }
+    } catch (error) {
+      // Not counted as a failed item: a property gone from Plektan would otherwise block the cursor forever.
+      const reason = isPlektanError(error) ? `Plektan ${error.kind}` : error instanceof Error ? error.message : "unknown error";
+      log(`sync: photo retry for item ${row.external_id} failed: ${reason}`);
+    }
+  }
+
+  const agentsChanged = agents.added + agents.updated + agents.deactivated > 0 || agentPhotosChanged;
   const tags: string[] = [];
   if (changedSlugs.size > 0) tags.push(CACHE_TAGS.properties, ...[...changedSlugs].map(propertyTag));
   if (agentsChanged) tags.push(CACHE_TAGS.agents);
@@ -389,6 +443,7 @@ export const runSync = async (options: RunSyncOptions): Promise<SyncResult> => {
     skipped,
     failed,
     agents: { added: agents.added, updated: agents.updated, deactivated: agents.deactivated },
+    photos: photoStats,
     hideBlocked,
     warnings,
   };
