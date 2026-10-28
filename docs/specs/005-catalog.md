@@ -1,6 +1,6 @@
 # 005 — Catalog + property page
 
-**Status:** in-progress · **Depends on:** 002, 004 · **Route(s):** `/catalog`, `/catalog/[slug]`, `/favorites`
+**Status:** done · **Depends on:** 002, 004 · **Route(s):** `/catalog`, `/catalog/[slug]`, `/favorites`
 
 ## Goal
 Visitors (mostly on phones) find a property with filters, open its page with a good gallery, facts and an approximate location, save favorites, and reach the agent or agency in one tap. A property that was just sold keeps a "sold" page for a week instead of a dead link.
@@ -54,13 +54,13 @@ Visitors (mostly on phones) find a property with filters, open its page with a g
   - [x] map loads lazily, doesn't block LCP; no layout shift
   - [x] property without coordinates shows no map and no error
 
-### [ ] 5. Favorites
+### [x] 5. Favorites
 - **Build:** heart button on card and page (`aria-pressed`, label), list of property ids in localStorage with try/catch (storage blocked → the heart still toggles for the session, no crash); `/favorites` page loads the saved ones from the server (published or recently sold; others shown as «Більше недоступний» with «Прибрати»), empty state with a link to the catalog; header shows a favorites link with a count.
 - **Files:** `src/features/favorites/*`, `src/app/(site)/favorites/page.tsx`, `src/app/api/favorites/route.ts` (or a server action), `src/components/layout/*`
 - **Agent:** designer · **Model:** sonnet
 - **Accept:**
-  - [ ] works with storage blocked (no crash)
-  - [ ] removed/unknown ids don't break the page
+  - [x] works with storage blocked (no crash)
+  - [x] removed/unknown ids don't break the page
 
 ## External needs
 - None to build. OSM tiles are used under the OSM tile usage policy (fine for this traffic; switch to a tile provider like MapTiler if traffic grows — needs a key then).
@@ -84,6 +84,7 @@ Visitors (mostly on phones) find a property with filters, open its page with a g
 - RLS now lets properties hidden < 7 days through: every public list/count read must filter `status = 'published'` explicitly (all current ones do).
 - When the migration is applied in production, existing hidden rows get `hidden_at = updated_at`, so those hidden more than 7 days ago are 404 right away (expected).
 - The property 404's content is streamed (inside the `(site)` loading boundary): correct 404 status and title, but the heading isn't in the initial HTML. Same trade-off as the catalog.
+- No heart on the sold page (a saved sold property still shows on `/favorites` with its badge).
 
 ## Log
 | Date | Slice | Result | Notes / files |
@@ -92,3 +93,5 @@ Visitors (mostly on phones) find a property with filters, open its page with a g
 | 2026-10-28 | 2 | done | `/catalog/[slug]` (`page`, `loading`, `error`; on-demand ISR, unknown slug → 404), `src/features/property/*` (gallery: scroll-snap, ←/→, swipe, counter, fullscreen Radix Dialog with focus return, CLS 0; facts `<dl>`, price + per m², description paragraphs, location text with a map slot, contact card agent / agency + messengers, mobile sticky call + request bar, similar ±30% `price_usd`), `getSimilarProperties`, `photo-src-set.ts`, `to-tel.ts`, labels for repair / walls / class, `--viewer` token + `scrollbar-none`. `generateMetadata`: SEO title or title, description fallback, canonical, OG = widest first photo. UI check on 3 slugs 12/12; screenshots reviewed. |
 | 2026-10-28 | 3 | done | Migration `20261028150000_property_hidden_at.sql` (`hidden_at` + trigger, backfill without bumping `updated_at`, RLS for properties + photos: published or hidden < 7 days, column grant, partial index). `getPropertyBySlug` → `{kind: 'published' \| 'sold', property} \| null` (window re-checked in code, `revalidate: 3600`), `SOLD_PAGE_DAYS`. Pages: `sold-property-view` («Продано» / «Вже здано», muted photo, «Остання ціна», short facts, agency «Підберемо схожий», similar, noindex), segment `not-found.tsx` (newest 3, buttons to catalog / contacts), route `revalidate = 3600`. Prod build: sold → 200 + noindex, 8 days → 404, unknown → 404. Local anon: 3 days visible (+ photos), 8 days not; catalog shows 28 of 30 anon-visible. UI check 12/12; screenshots reviewed. |
 | 2026-10-28 | 4 | done | `leaflet` 1.9 (+ `@types/leaflet`), `property-map.tsx` (fixed ratio box, IntersectionObserver 200px → dynamic import, loading / error + retry states), `property-map-leaflet.ts` (lazy chunk: OSM tiles, 300 m accent circle fitted to view, no wheel zoom, one-finger drag off on touch, 44px zoom buttons in tokens, cleanup), `property-map.css` (leaflet CSS in the `base` layer, only in the lazy chunk), `property-location.tsx` (map + «приблизний район» caption + OSM link without a pin). Checked: 0 leaflet/tile requests before scroll, CLS 0; no coords → no map, no errors. Seed: one published plot without coords. UI check 8/8; screenshots reviewed. |
+| 2026-10-28 | 5 | done | `src/features/favorites/*` (`useSyncExternalStore` store over `lyndrik:favorites`, zod per id, cap 100, in-memory fallback, tab sync; heart button 44px with `aria-pressed` + status announcement; list / empty / unavailable / error + retry), `/favorites` (noindex), `POST /api/favorites` (zod ≤100 uuids → `getPropertiesByIds`, published or hidden < 7 days, saved order), heart on cards and next to the price, header favorites link with a count badge (desktop + mobile header). Checked: storage throwing → toggles work, no errors; unknown / junk ids → «Більше недоступний» + «Прибрати». |
+| 2026-10-28 | — | UI check | `root`, `catalog`, filtered, empty result, 3 property pages (photos / no agent / sold), unknown slug, `favorites`: 36/36 pass; screenshots reviewed. Spec done. |
