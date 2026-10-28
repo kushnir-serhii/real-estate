@@ -3,6 +3,7 @@ import { CACHE_TAGS, propertyTag } from "@/lib/db/cache-tags";
 import { DEALS, PROP_KINDS_BY_PROPERTY, PROPERTY_TYPES } from "@/lib/db/property-values";
 import { getSettings } from "@/lib/db/settings";
 import type { ExchangeRates } from "@/lib/db/settings";
+import { geocode, isGeocodeError, resetGeocoder } from "@/lib/geocode";
 import {
   getContactPersons,
   isPlektanError,
@@ -44,10 +45,14 @@ export type SyncSummary = {
   agents: { added: number; updated: number; deactivated: number };
   /** Photo work of this run: a re-run with nothing changed has all zeros. */
   photos: PhotoStats;
+  /** Geocoder lookups of this run: `calls` = addresses looked up, `found` = coordinates saved/confirmed, `failed` = no result or an error. */
+  geocode: GeocodeStats;
   /** The guard refused to hide vanished properties (see `warnings`). */
   hideBlocked: boolean;
   warnings: string[];
 };
+
+export type GeocodeStats = { calls: number; found: number; failed: number };
 
 export type SyncResult =
   | { status: "skipped"; reason: string }
@@ -65,6 +70,12 @@ type ExistingProperty = {
   source_updated_at: string | null;
   published_at: string | null;
   agent_id: string | null;
+  locality: string | null;
+  district: string | null;
+  street: string | null;
+  house: string | null;
+  lat: number | null;
+  lng: number | null;
 };
 
 type ExistingAgent = {
@@ -101,13 +112,65 @@ const loadExistingProperties = async (admin: Admin): Promise<Map<string, Existin
   for (let from = 0; ; from += PAGE) {
     const { data, error } = await admin
       .from("properties")
-      .select("id, external_id, slug, status, source_updated_at, published_at, agent_id")
+      .select("id, external_id, slug, status, source_updated_at, published_at, agent_id, locality, district, street, house, lat, lng")
       .eq("source", "plektan")
       .order("id")
       .range(from, from + PAGE - 1);
     if (error) return fail("loading properties", error);
     for (const row of data) if (row.external_id !== null) out.set(row.external_id, row);
     if (data.length < PAGE) return out;
+  }
+};
+
+// ---- coordinates ---------------------------------------------------------------
+
+type Address = { locality: string | null; district: string | null; street: string | null; house: string | null };
+
+type CoordsOutcome = {
+  /** Columns to write, or null when lat/lng stay as they are. */
+  patch: { lat: number | null; lng: number | null } | null;
+  /** The lookup failed for a reason that may pass (network, 5xx, rate limit): the row is revisited next run. */
+  transient: boolean;
+};
+
+const sameAddress = (a: Address, b: Address): boolean =>
+  a.locality === b.locality && a.district === b.district && a.street === b.street && a.house === b.house;
+
+/**
+ * Geocodes only when the address differs from the stored one or the stored coordinates are empty.
+ * Never throws: a failure leaves the coordinates empty (or clears old ones when the address moved).
+ * A "not found" is final until the address changes or Plektan modifies the property again.
+ */
+const resolveCoords = async (
+  address: Address,
+  stored: (Address & { lat: number | null; lng: number | null }) | null,
+  stats: GeocodeStats,
+  label: string,
+  log: (message: string) => void,
+): Promise<CoordsOutcome> => {
+  const changed = stored === null || !sameAddress(address, stored);
+  const missing = stored === null || stored.lat === null || stored.lng === null;
+  if (!changed && !missing) return { patch: null, transient: false };
+
+  // Old coordinates belong to the old address: when it moved and nothing is found, they are cleared.
+  const clear = changed && stored !== null && (stored.lat !== null || stored.lng !== null);
+  const miss = { lat: null, lng: null };
+  if (address.locality === null) return { patch: clear ? miss : null, transient: false };
+
+  stats.calls += 1;
+  try {
+    const found = await geocode(address);
+    if (found === null) {
+      stats.failed += 1;
+      return { patch: clear ? miss : null, transient: false };
+    }
+    stats.found += 1;
+    if (stored !== null && stored.lat === found.lat && stored.lng === found.lng) return { patch: null, transient: false };
+    return { patch: { lat: found.lat, lng: found.lng }, transient: false };
+  } catch (error) {
+    stats.failed += 1;
+    log(`sync: geocoding item ${label} failed: ${isGeocodeError(error) ? error.kind : "unknown error"}`);
+    return { patch: clear ? miss : null, transient: true };
   }
 };
 
@@ -248,6 +311,8 @@ export const runSync = async (options: RunSyncOptions): Promise<SyncResult> => {
   const admin = createAdminClient();
   const rates: ExchangeRates = settings.exchange_rates;
   const warnings: string[] = [];
+  const geoStats: GeocodeStats = { calls: 0, found: 0, failed: 0 };
+  resetGeocoder();
   const mode: SyncMode = options.mode === "incremental" && settings.sync_cursor !== null ? "incremental" : "full";
   if (options.mode === "incremental" && mode === "full") log("sync: no cursor yet, running as full");
 
@@ -329,11 +394,20 @@ export const runSync = async (options: RunSyncOptions): Promise<SyncResult> => {
 
       const photoSources = card.media.map((media) => media.src);
 
+      const address: Address = {
+        locality: mapped.row.locality ?? null,
+        district: mapped.row.district ?? null,
+        street: mapped.row.street ?? null,
+        house: mapped.row.house ?? null,
+      };
+      const coords = await resolveCoords(address, current ?? null, geoStats, item.adid, log);
+
       if (current === undefined) {
         const created = await insertWithSlug(
           admin,
           {
             ...mapped.row,
+            ...(coords.patch ?? {}),
             status: "published",
             published_at: nowIso,
             synced_at: nowIso,
@@ -344,8 +418,8 @@ export const runSync = async (options: RunSyncOptions): Promise<SyncResult> => {
         added += 1;
         changedSlugs.add(created.slug);
         const photos = await syncPropertyPhotos(admin, created.id, photoSources, photoStats, log);
-        if (photos.failed > 0) {
-          // No source_updated_at = "photos incomplete": the next run views it again and retries.
+        if (photos.failed > 0 || coords.transient) {
+          // No source_updated_at = "photos / coordinates incomplete": the next run views it again and retries.
           const { error } = await admin.from("properties").update({ source_updated_at: null }).eq("id", created.id);
           if (error) return fail("marking a property for a photo retry", error);
         }
@@ -355,10 +429,11 @@ export const runSync = async (options: RunSyncOptions): Promise<SyncResult> => {
       // Photos first, so a failure can withhold source_updated_at in the same write.
       const photos = await syncPropertyPhotos(admin, current.id, photoSources, photoStats, log);
 
-      // Existing row: slug, published_at (when set), lat/lng and seo_* are never overwritten.
+      // Existing row: slug, published_at (when set) and seo_* are never overwritten; lat/lng only by the geocoder above.
       const patch: PropertyUpdate = {
         ...mapped.row,
-        ...(photos.failed > 0 ? { source_updated_at: null } : {}),
+        ...(coords.patch ?? {}),
+        ...(photos.failed > 0 || coords.transient ? { source_updated_at: null } : {}),
         status: "published",
         synced_at: nowIso,
         ...(current.published_at === null ? { published_at: nowIso } : {}),
@@ -397,7 +472,7 @@ export const runSync = async (options: RunSyncOptions): Promise<SyncResult> => {
   }
 
   // Properties whose photos were incomplete earlier (source_updated_at null) and that this run didn't
-  // revisit (an incremental run only lists recently modified items): fetch their photos again.
+  // revisit (an incremental run only lists recently modified items): fetch their photos (and coordinates) again.
   for (const row of existing.values()) {
     if (row.external_id === null || row.source_updated_at !== null || row.status !== "published") continue;
     if (handled.has(row.external_id) || hiddenIds.has(row.id)) continue;
@@ -405,7 +480,13 @@ export const runSync = async (options: RunSyncOptions): Promise<SyncResult> => {
       const card = await view({ adid: row.external_id });
       const photos = await syncPropertyPhotos(admin, row.id, card.media.map((media) => media.src), photoStats, log);
       if (photos.changed) changedSlugs.add(row.slug);
-      if (photos.failed === 0) {
+      const coords = await resolveCoords(row, row, geoStats, row.external_id, log);
+      if (coords.patch !== null) {
+        const { error } = await admin.from("properties").update(coords.patch).eq("id", row.id);
+        if (error) return fail("saving coordinates", error);
+        changedSlugs.add(row.slug);
+      }
+      if (photos.failed === 0 && !coords.transient) {
         const { error } = await admin
           .from("properties")
           .update({ source_updated_at: parseKyivDateTime(card.date_mod) })
@@ -444,6 +525,7 @@ export const runSync = async (options: RunSyncOptions): Promise<SyncResult> => {
     failed,
     agents: { added: agents.added, updated: agents.updated, deactivated: agents.deactivated },
     photos: photoStats,
+    geocode: geoStats,
     hideBlocked,
     warnings,
   };

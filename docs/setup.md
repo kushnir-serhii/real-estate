@@ -75,7 +75,7 @@ GitHub → repo → Settings → Secrets and variables → Actions → New repos
 | `CRON_SECRET` | any long random string (for example `openssl rand -hex 32`); the **same** value must be set as a runtime secret in Cloudflare, where `/api/cron/revalidate` checks it |
 | `NEXT_PUBLIC_SITE_URL` | the production domain, for example `https://lyndrik.example`; the script posts the cache purge to it |
 | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `NEXT_PUBLIC_R2_PUBLIC_URL` | Cloudflare R2 (used by the photo step, spec 003 slice 4) |
-| `GEOCODER_CONTACT_EMAIL` | an email for Nominatim's User-Agent (geocoding, spec 003 slice 5) |
+| `GEOCODER_CONTACT_EMAIL` | a real, monitored email for Nominatim's User-Agent (usage policy: max 1 request/s, identify yourself); empty = fixture mode with fake coordinates, so never leave it empty in production. Coordinates are rounded to ~100 m. Wherever coordinates or a map are shown (spec 005) the page must carry the attribution "© OpenStreetMap contributors" |
 
 ### Run it by hand
 Actions → "Plektan sync" → Run workflow (tick **full** for a full sync). The same works locally: `pnpm sync`, `pnpm sync --full`, with flags `--no-revalidate` and `--force-hide` (hide vanished properties even when the safety guard refuses: it refuses if the result is empty or fewer than half of the published Plektan properties would remain).

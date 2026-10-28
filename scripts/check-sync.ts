@@ -103,6 +103,18 @@ const allKeys = (rows: PhotoRow[]): string[] => rows.flatMap((row) => Object.val
 const agentPhotoKeys = async (): Promise<string[]> =>
   must(await admin.from("agents").select("photo_url").eq("source", "plektan").in("external_id", FIXTURE_USERS.map((user) => user.user_id)), "agent photos").flatMap((row) => (row.photo_url === null ? [] : [row.photo_url]));
 
+type GeoRow = { external_id: string | null; lat: number | null; lng: number | null; street: string | null; updated_at: string };
+
+const geoRows = async (): Promise<Map<string, GeoRow>> => {
+  const rows = must(
+    await admin.from("properties").select("external_id, lat, lng, street, updated_at").eq("source", "plektan").in("external_id", fixtureAdids),
+    "geo rows",
+  );
+  return new Map(rows.map((row) => [row.external_id ?? "", row]));
+};
+
+const rounded = (value: number | null): boolean => value !== null && Math.round(value * 1000) / 1000 === value;
+
 const agentsStamp = async (): Promise<string> =>
   JSON.stringify(
     must(await admin.from("agents").select("external_id, updated_at, is_active").eq("source", "plektan").order("external_id"), "agents"),
@@ -175,6 +187,14 @@ const main = async (): Promise<void> => {
     const baseRows = await snapshot();
     check("base: re-sync after the retry downloads and uploads nothing", baseAgain.photos.downloaded === 0 && baseAgain.photos.uploaded === 0 && baseAgain.updated === 0);
 
+    // 1b. coordinates: rounded to 3 decimals; 1010 has an unknown locality, stays empty, and the sync went on
+    const geo = await geoRows();
+    const withCoords = publishable("base").filter((def) => def.adid !== "1010");
+    check("geocode: first run looked up every publishable address", first.geocode.calls === publishable("base").length && first.geocode.found === withCoords.length && first.geocode.failed === 1, JSON.stringify(first.geocode));
+    check("geocode: coordinates are rounded to 3 decimals", withCoords.every((def) => rounded(geo.get(def.adid)?.lat ?? null) && rounded(geo.get(def.adid)?.lng ?? null)));
+    check("geocode: unresolvable address leaves lat/lng empty, sync not failed", geo.get("1010")?.lat === null && geo.get("1010")?.lng === null && first.failed === 0);
+    check("geocode: re-sync of the same data makes no geocoder call", baseAgain.geocode.calls === 0, JSON.stringify(baseAgain.geocode));
+
     // 2. next: 1002 gone, 1001 price changed, 1013 new
     const second = await sync("next");
     const nextRows = await snapshot();
@@ -194,6 +214,8 @@ const main = async (): Promise<void> => {
       photosNext.map((row) => row.source_url).join() === "https://plektan.example/photos/flat-living-1.jpg,https://plektan.example/photos/flat-bedroom-1.jpg" && photosNext.every((row, i) => row.position === i),
     );
     check("next: summary counts the deleted photo", second.photos.deleted === 1, `${second.photos.deleted}`);
+    check("next: 1001 (price only, same address) is not geocoded again, 1013 is", second.geocode.calls === 1 && second.geocode.found === 1, JSON.stringify(second.geocode));
+    check("next: coordinates of 1001 unchanged, 1013 has some", (await geoRows()).get("1001")?.lat === geo.get("1001")?.lat && (await geoRows()).get("1013")?.lat != null);
     check("next: summary is 1 added / 1 updated / 1 hidden", second.added === 1 && second.updated === 1 && second.hidden === 1, `${second.added}/${second.updated}/${second.hidden}`);
 
     // 3. same again: nothing is written
@@ -208,6 +230,17 @@ const main = async (): Promise<void> => {
     must(await admin.from("properties").update({ source_updated_at: null }).eq("source", "plektan").eq("external_id", "1001").select("id"), "force re-view");
     const reviewed = await sync("next");
     check("rerun: re-viewed property downloads and uploads nothing", reviewed.updated === 1 && reviewed.photos.downloaded === 0 && reviewed.photos.uploaded === 0 && reviewed.photos.deleted === 0);
+    check("rerun: re-viewed property with the same address and coordinates is not geocoded", reviewed.geocode.calls === 0, JSON.stringify(reviewed.geocode));
+
+    // A changed address is geocoded again (exactly one call); missing coordinates are looked up once.
+    const before1001 = (await geoRows()).get("1001");
+    must(await admin.from("properties").update({ street: "вулиця Інша", source_updated_at: null }).eq("source", "plektan").eq("external_id", "1001").select("id"), "move 1001");
+    const moved = await sync("next");
+    const after1001 = (await geoRows()).get("1001");
+    check("geocode: changed address -> exactly one call, address and rounded coordinates restored", moved.geocode.calls === 1 && moved.geocode.found === 1 && after1001?.street === "проспект Оболонський" && after1001?.lat === before1001?.lat && after1001?.lng === before1001?.lng, JSON.stringify(moved.geocode));
+    must(await admin.from("properties").update({ lat: null, lng: null, source_updated_at: null }).eq("source", "plektan").eq("external_id", "1001").select("id"), "clear 1001 coords");
+    const refilled = await sync("next");
+    check("geocode: empty coordinates are looked up once", refilled.geocode.calls === 1 && (await geoRows()).get("1001")?.lat === before1001?.lat, JSON.stringify(refilled.geocode));
     check("rerun: agents untouched", (await agentsStamp()) === agentsBefore);
 
     // 4. incremental with the stored cursor writes nothing either

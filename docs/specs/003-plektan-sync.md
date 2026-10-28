@@ -1,6 +1,6 @@
 # 003 — Plektan sync
 
-**Status:** in-progress · **Depends on:** 002 · **Route(s):** `/api/cron/revalidate`
+**Status:** done · **Depends on:** 002 · **Route(s):** `/api/cron/revalidate`
 
 ## Goal
 The agency keeps working only in Plektan: its properties appear on the site within the sync interval, with photos copied to R2 as WebP, approximate coordinates and parsed prices; properties that vanish from Plektan get hidden. The site keeps everything (Supabase + R2), so it survives Plektan being switched off.
@@ -56,13 +56,13 @@ How it runs:
   - [x] removing a photo from the fixture removes its row and R2 objects
   - [x] locally (fixture mode) synced properties show their photos on the site
 
-### [ ] 5. Geocoding
+### [x] 5. Geocoding
 - **Build:** `src/lib/geocode/` — Nominatim (`https://nominatim.openstreetmap.org/search`, `countrycodes=ua`, `accept-language=uk`, User-Agent with `GEOCODER_CONTACT_EMAIL`, ≤1 request/s, timeout). Query from locality, district, street, `housestr`; falls back to street level, then district. Result rounded to 3 decimals (~100 m) before saving — the site shows an approximate area. Called only when the address changed or `lat/lng` are empty. Fixture mode when `GEOCODER_CONTACT_EMAIL` is empty (deterministic coords near the locality).
 - **Files:** `src/lib/geocode/*`, `src/lib/sync/run-sync.ts`
 - **Agent:** backend
 - **Accept:**
-  - [ ] fixture mode; failures leave `lat/lng` empty, sync continues
-  - [ ] unchanged address → no geocoder call on re-sync
+  - [x] fixture mode; failures leave `lat/lng` empty, sync continues
+  - [x] unchanged address → no geocoder call on re-sync
 
 ## External needs
 - Plektan API key (from the agency) and a test account; then `PLEKTAN_COUNTRY_ID` / `PLEKTAN_REGION_ID` / `PLEKTAN_LOCALITY_ID` for the agency's area.
@@ -82,6 +82,9 @@ How it runs:
 - In Plektan mode the sync owns properties: a hand-hidden property is re-published on the next sync. 008 should make Plektan properties read-only in the admin (one source of truth).
 - If Plektan ever returns an empty `view.media` for a property that has photos, all its photos are removed (the card is authoritative). Watch the first real runs.
 - R2 `putObject` / `deleteObjects` against the real API are untested (no keys): check the first real run.
+- Nominatim "not found" is final until the address changes (no nightly retry of unresolvable addresses). Transient errors (network, 5xx, 429) are retried next run.
+- Real Nominatim quality on Ukrainian addresses and the first full sync duration (~1 request/s → about 20–70 min for 1000 properties; workflow timeout is 90 min) are unchecked until a real run.
+- Local dev: `pnpm sync --no-revalidate` (or `pnpm sync:check`) changes data without purging Next's data cache, so a running dev server can show stale rows / 404 photos. Run without `--no-revalidate` against the dev server, or delete `.next/dev/cache/fetch-cache`.
 
 ## Log
 | Date | Slice | Result | Notes / files |
@@ -90,3 +93,4 @@ How it runs:
 | 2026-10-28 | 2 | done | `src/lib/sync/{map-property,parse-price,property-title,slugify,html-text}.ts` + tests (89 total). `mapProperty(item, view, rates)` → skip (`mls` / `not_actual` / `unsupported`) or row + `agentExternalId`. Per-m² headline price × `area_total` (no area → no price); earliest currency in the text wins; `date_mod` read as Kyiv local time (unverified); unknown Plektan list values → null (original in `raw`). `apartments` titled «N-кімнатна квартира». |
 | 2026-10-28 | 3 | done | `src/lib/sync/{run-sync,sync-cursor}.ts`, `scripts/{sync,check-sync}.ts` (`pnpm sync [--full --no-revalidate --force-hide]`, `pnpm sync:check` — local only, 22 checks, ran 6× green), `src/app/api/cron/revalidate/route.ts` (bearer `CRON_SECRET`, `revalidateTag(tag, { expire: 0 })`), `.github/workflows/sync.yml` (skips without `PLEKTAN_API_KEY`), migration `20261028140000_hide_private_property_columns.sql` (column grants; anon `raw`/`house` → 401), `PROP_KINDS_BY_PROPERTY`, `properties.ts` drops `house`, `setup.md` (secrets, first run). Safety guard: a full sync won't hide when the result is empty or < half of published Plektan rows remain. A failed item → `failed`, exit 1, cursor not advanced. Workflow not run (can't locally). |
 | 2026-10-28 | 4 | done | `src/lib/r2/{client,index}.ts` (S3 API, `WHEN_REQUIRED` checksums; fixture mode → `public/r2-local/`, git-ignored), `src/lib/sync/sync-photos.ts`, `run-sync.ts`, `photo-url.ts` (empty base: `placeholders/…` from `public/`, other keys from `/r2-local/`; absolute URLs pass through), `agent-card.tsx` via `photoUrl()`, fixtures (`next` drops one photo of 1001), `check-sync.ts`. Keys `properties/<id>/<sha1(url)[:10]>-<w>.webp`, `agents/<id>-<hash>.webp` (256 px); widths 480/960/1600 capped at the source width and keyed by the real width; `r2_key` = 960 version. Retry: a property with failed photos gets `source_updated_at = null` → re-viewed next run (+ a retry pass on incremental). Deps: `@aws-sdk/client-s3`, `sharp` (dev; not in the server bundle). Review fix: sizes keyed by real width, not nominal. |
+| 2026-10-28 | 5 | done | `src/lib/geocode/{client,fixture,errors,types,index}.ts` + tests (102 total): Nominatim (`jsonv2`, `countrycodes=ua`, `accept-language=uk`, User-Agent + `email`), fallback house → street → district → locality, ≥1100 ms between calls, 10 s timeout, one retry on network/5xx, 429 stops geocoding for the run; rounded to 3 decimals; fixture mode = table of Kyiv-area centers + stable offset. `run-sync.ts` geocodes only written rows whose address changed or coords are empty; changed address + failure → coords cleared. Fixture 1010 locality → «Невідоме село» (unresolvable path). Workflow timeout 30 → 90 min (first full sync geocodes everything). 005 spec: approximate area + OSM attribution note. UI check (`root`, `contacts`, after `agent-card` → `photoUrl()`): 8/8 pass, screenshots reviewed. Spec done. |

@@ -298,7 +298,8 @@ const BASE_DEFS: FixtureDef[] = [
     date_mod: "2026-09-30 16:00:00",
     price: { value: "1 800 000 грн", kind: "all", currency_id: "1" },
     area_lot: 60,
-    locality: "Козин",
+    // A locality the fixture geocoder doesn't know: exercises "no coordinates, the sync goes on".
+    locality: "Невідоме село",
     street: "",
     housestr: "",
     promo_text: "Земля сільгосппризначення, 60 соток.",

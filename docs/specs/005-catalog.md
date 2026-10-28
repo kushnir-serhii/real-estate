@@ -42,6 +42,7 @@ Visitors find a property with filters, open its page with a good gallery and fac
 
 ## External needs
 - Map provider key if not OSM.
+- From 003: property `lat`/`lng` are rounded to ~100 m (show an approximate area, not a pin; `house` isn't public). Coordinates come from OpenStreetMap (Nominatim): show "© OpenStreetMap contributors" with the map.
 
 ## Open questions
 - URL structure for SEO: `/catalog?deal=sell&type=flat` vs `/prodazh/kvartyry/…` landing URLs? (Recommended: decide with 009; landing URLs for main combos.)
