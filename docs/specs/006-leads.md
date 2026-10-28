@@ -1,6 +1,6 @@
 # 006 — Leads: forms → Supabase → Plektan → Telegram
 
-**Status:** in-progress · **Depends on:** 002, 004 · **Route(s):** forms on `/catalog/[slug]` (live and sold), `/contacts`, `/` (home CTA)
+**Status:** done · **Depends on:** 002, 004 · **Route(s):** forms on `/catalog/[slug]` (live and sold), `/contacts`, `/` (home CTA)
 
 ## Goal
 Every request a visitor sends is saved, reaches Plektan as a lead and pings the manager in Telegram within seconds — and is never lost if Plektan or Telegram fails. The pipeline is reused by the admin (007, manual retry) and the AI assistant (010).
@@ -43,13 +43,13 @@ Every request a visitor sends is saved, reaches Plektan as a lead and pings the 
   - [x] with empty keys and no fixture flags both channels are `skipped`
   - [x] quick request vs regular request is chosen as in **Data**; unit tests for the mapping and the message text
 
-### [ ] 3. Retry
+### [x] 3. Retry
 - **Build:** migration adding `plektan_next_attempt_at` / `telegram_next_attempt_at` (or one shared column if simpler; index on due failed leads); `POST /api/cron/leads` (checks `CRON_SECRET` like `/api/cron/revalidate`) picks due failed deliveries (attempts < 5), runs `deliverLead`, sets the next attempt by the backoff; after the last failed Plektan attempt sends the one-time Telegram alert. A step in `sync.yml` calls it on every run. Types regenerated; migration listed in `docs/setup.md`.
 - **Files:** `supabase/migrations/*`, `src/lib/supabase/database.types.ts`, `src/app/api/cron/leads/route.ts`, `src/features/leads/*`, `.github/workflows/sync.yml`, `docs/setup.md`
 - **Agent:** backend
 - **Accept:**
-  - [ ] a lead that failed is delivered on the next run once the fixture succeeds
-  - [ ] a delivery isn't retried before its next attempt time or after 5 attempts; the alert goes out once
+  - [x] a lead that failed is delivered on the next run once the fixture succeeds
+  - [x] a delivery isn't retried before its next attempt time or after 5 attempts; the alert goes out once
 
 ## External needs
 - Telegram bot token + manager chat id (a group with the managers; the bot must be added to it).
@@ -63,6 +63,8 @@ Every request a visitor sends is saved, reaches Plektan as a lead and pings the 
 - **Decided:** empty keys = `skipped`; local fixtures behind per-channel flags.
 - **Decided:** forms on the property page, `/contacts`, the home CTA and the sold page.
 - `rent_day` properties map to Plektan `hire_day`; a general lead without a type goes to Plektan as `flat`; quick requests also send `property`/`prop_kind`. Confirm with Plektan once the key exists.
+- For 007: `deliverLead` treats a `failed` channel with 5 attempts as final; the admin's manual retry needs an explicit override (or a reset of attempts).
+- `deliverLead` runs every `pending`/`failed` channel of a lead, so when one channel is due the other failed one may be retried a bit before its own time. Harmless; tighten if it matters.
 - **Decided:** retry runs from `sync.yml`; phone accepts UA + international; Turnstile + honeypot; max 5 attempts.
 
 ## Log
@@ -70,3 +72,4 @@ Every request a visitor sends is saved, reaches Plektan as a lead and pings the 
 | --- | --- | --- | --- |
 | 2026-10-28 | 1 | done | Turnstile client (fixture on empty secret), phone normalize/mask, `submitLead` action (honeypot → zod → Turnstile → published-property check → `createLead`); shared `LeadForm` (submits via transition so input survives errors; network failure → error state), `PropertyRequestForm` in the property aside (`#zayavka`, CTA + mobile bar point to it; aside no longer sticky), `GeneralRequestForm` on `/contacts`, home CTA, sold page (`similar_to`, deal preselected). shadcn `textarea`. Files: `src/features/leads/*`, `src/lib/turnstile/*`, `src/components/ui/textarea.tsx`, `src/features/property/*`, `src/features/home/home-cta.tsx`, `src/app/(site)/contacts/page.tsx`, `.env.example` |
 | 2026-10-28 | 2 | done | Plektan `addAdvert` (no auto-retry, zod answer, `PLEKTAN_LEADS_FIXTURE`), `src/lib/telegram` (`TELEGRAM_FIXTURE`, errors without the token), pure builders for the Telegram text / `advert_info` / Plektan request, `deliverLead` (channels independent, kind-only errors, attempts, `plektan_item_id`; empty keys = `skipped`), wired via `after()` for new leads. Files: `src/lib/plektan/*`, `src/lib/telegram/*`, `src/features/leads/{deliver-lead,lead-delivery-content,submit-lead}.ts`, `src/lib/db/leads.ts`, `.env.example`, `docs/setup.md` |
+| 2026-10-28 | 3 | done | Migration `20261028160000_lead_retry.sql` (`*_next_attempt_at`, `plektan_alerted_at`, partial indexes), types regenerated; backoff 5 min / 15 min / 1 h / 3 h, max 5; `POST /api/cron/leads` (shared `isCronAuthorized`) retries due failed and stale pending (>10 min) leads, one-time Plektan alert to Telegram; `leads` job in `sync.yml` with its own concurrency group. Files: `supabase/migrations/*`, `src/lib/supabase/database.types.ts`, `src/app/api/cron/{leads,revalidate}/route.ts`, `src/lib/cron/*`, `src/features/leads/{retry-schedule,retry-leads,deliver-lead}.ts`, `src/lib/db/leads.ts`, `.github/workflows/sync.yml`, `docs/setup.md` |

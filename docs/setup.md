@@ -52,6 +52,7 @@ Migrations to apply (in order; add new ones here when a spec adds them):
 | `20261028130000_leads_pages_settings.sql` | 002 | [ ] |
 | `20261028140000_hide_private_property_columns.sql` | 003 | [ ] |
 | `20261028150000_property_hidden_at.sql` | 005 | [ ] |
+| `20261028160000_lead_retry.sql` | 006 | [ ] |
 
 ### 4. Check
 - Dashboard → Advisors → Security: no "RLS disabled" warnings.
@@ -83,6 +84,8 @@ Leads use the same `PLEKTAN_API_KEY` as the sync; set it as a **runtime secret**
 ## Plektan sync (GitHub Actions)
 
 `.github/workflows/sync.yml` runs `pnpm sync` (spec 003): incremental every 30 minutes 07:00-22:00 Kyiv time, a full sync nightly, and on demand. It writes to Supabase directly and then calls `/api/cron/revalidate` on the site to refresh the cache. Without `PLEKTAN_API_KEY` the job exits early with a notice (fixtures are never synced into production).
+
+The same workflow has a separate `leads` job that runs on every schedule: it calls `/api/cron/leads` to retry failed lead deliveries to Plektan and Telegram (up to 5 attempts, after 5 min, 15 min, 1 h, 3 h) and to pick up leads whose first delivery was lost. After the 5th failed Plektan attempt the manager gets one Telegram alert with the name and phone. It needs `CRON_SECRET` and `NEXT_PUBLIC_SITE_URL` (below) and runs even when `PLEKTAN_API_KEY` is empty; without those two it is skipped with a notice.
 
 ### Repo secrets
 GitHub → repo → Settings → Secrets and variables → Actions → New repository secret:

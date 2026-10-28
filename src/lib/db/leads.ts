@@ -119,8 +119,16 @@ export type LeadDeliveryUpdate =
       attempts: number;
       /** Only set on success; omitted keeps the stored value. */
       itemId?: string | null;
+      /** When the next retry is due; null = none (sent, skipped, or out of attempts). */
+      nextAttemptAt: string | null;
     }
-  | { channel: "telegram"; status: DeliveryStatus; error: string | null; attempts: number };
+  | {
+      channel: "telegram";
+      status: DeliveryStatus;
+      error: string | null;
+      attempts: number;
+      nextAttemptAt: string | null;
+    };
 
 /** Writes one channel's result. `error` must hold no personal data. */
 export const updateLeadDelivery = async (id: string, update: LeadDeliveryUpdate): Promise<void> => {
@@ -130,9 +138,70 @@ export const updateLeadDelivery = async (id: string, update: LeadDeliveryUpdate)
           plektan_status: update.status,
           plektan_error: update.error,
           plektan_attempts: update.attempts,
+          plektan_next_attempt_at: update.nextAttemptAt,
           ...(update.itemId === undefined ? {} : { plektan_item_id: update.itemId }),
         }
-      : { telegram_status: update.status, telegram_error: update.error, telegram_attempts: update.attempts };
+      : {
+          telegram_status: update.status,
+          telegram_error: update.error,
+          telegram_attempts: update.attempts,
+          telegram_next_attempt_at: update.nextAttemptAt,
+        };
   const { error } = await createAdminClient().from("leads").update(patch).eq("id", id);
   if (error) throw new Error(`updateLeadDelivery failed: ${error.message}`);
+};
+
+/**
+ * Leads that cron should deliver now (oldest first): a channel `failed` with attempts left and its
+ * retry time reached, or still `pending` after `staleBefore` (the first delivery was lost).
+ * Fresher pending leads are left to the in-flight first delivery.
+ */
+export const getDueLeadIds = async (params: {
+  now: Date;
+  staleBefore: Date;
+  maxAttempts: number;
+  limit: number;
+}): Promise<string[]> => {
+  const now = params.now.toISOString();
+  const stale = params.staleBefore.toISOString();
+  const max = params.maxAttempts;
+  const { data, error } = await createAdminClient()
+    .from("leads")
+    .select("id")
+    .or(
+      [
+        `and(plektan_status.eq.failed,plektan_attempts.lt.${max},plektan_next_attempt_at.lte.${now})`,
+        `and(telegram_status.eq.failed,telegram_attempts.lt.${max},telegram_next_attempt_at.lte.${now})`,
+        `and(plektan_status.eq.pending,created_at.lt.${stale})`,
+        `and(telegram_status.eq.pending,created_at.lt.${stale})`,
+      ].join(","),
+    )
+    .order("created_at", { ascending: true })
+    .limit(params.limit);
+  if (error) throw new Error(`getDueLeadIds failed: ${error.message}`);
+  return data.map((row) => row.id);
+};
+
+/** A lead whose Plektan delivery ran out of attempts and hasn't been reported to the manager yet. */
+export type LeadToAlert = Pick<LeadForDelivery, "id" | "name" | "phone">;
+
+export const getLeadsToAlert = async (params: { maxAttempts: number; limit: number }): Promise<LeadToAlert[]> => {
+  const { data, error } = await createAdminClient()
+    .from("leads")
+    .select("id,name,phone")
+    .eq("plektan_status", "failed")
+    .gte("plektan_attempts", params.maxAttempts)
+    .is("plektan_alerted_at", null)
+    .order("created_at", { ascending: true })
+    .limit(params.limit);
+  if (error) throw new Error(`getLeadsToAlert failed: ${error.message}`);
+  return data;
+};
+
+export const markPlektanAlerted = async (id: string, at: Date): Promise<void> => {
+  const { error } = await createAdminClient()
+    .from("leads")
+    .update({ plektan_alerted_at: at.toISOString() })
+    .eq("id", id);
+  if (error) throw new Error(`markPlektanAlerted failed: ${error.message}`);
 };

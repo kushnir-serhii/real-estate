@@ -33,6 +33,7 @@ const setup = (over: Partial<DeliverLeadDeps> = {}, lead: LeadForDelivery | null
     telegramMode: () => "live",
     sendToTelegram: vi.fn(async () => undefined),
     siteUrl: () => undefined,
+    now: () => new Date("2026-10-28T12:00:00.000Z"),
     ...over,
   };
   return { deps, saved };
@@ -42,8 +43,8 @@ describe("deliverLeadWith", () => {
   it("records both channels as sent with the Plektan item id", async () => {
     const { deps, saved } = setup();
     expect(await deliverLeadWith(deps, "l1")).toEqual({ found: true, plektan: "sent", telegram: "sent" });
-    expect(saved).toContainEqual({ channel: "plektan", status: "sent", error: null, attempts: 1, itemId: "777" });
-    expect(saved).toContainEqual({ channel: "telegram", status: "sent", error: null, attempts: 1 });
+    expect(saved).toContainEqual({ channel: "plektan", status: "sent", error: null, attempts: 1, itemId: "777", nextAttemptAt: null });
+    expect(saved).toContainEqual({ channel: "telegram", status: "sent", error: null, attempts: 1, nextAttemptAt: null });
   });
 
   it("a Plektan error leaves plektan failed and Telegram still goes out", async () => {
@@ -59,6 +60,7 @@ describe("deliverLeadWith", () => {
       status: "failed",
       error: "api",
       attempts: 1,
+      nextAttemptAt: "2026-10-28T12:05:00.000Z",
     });
   });
 
@@ -69,7 +71,7 @@ describe("deliverLeadWith", () => {
       },
     });
     expect(await deliverLeadWith(deps, "l1")).toMatchObject({ plektan: "sent", telegram: "failed" });
-    expect(saved).toContainEqual({ channel: "telegram", status: "failed", error: "http 502", attempts: 1 });
+    expect(saved).toContainEqual({ channel: "telegram", status: "failed", error: "http 502", attempts: 1, nextAttemptAt: "2026-10-28T12:05:00.000Z" });
   });
 
   it("marks both channels skipped when nothing is configured, without counting an attempt", async () => {
@@ -87,7 +89,21 @@ describe("deliverLeadWith", () => {
     );
     expect(await deliverLeadWith(deps, "l1")).toMatchObject({ plektan: "sent", telegram: "not_due" });
     expect(deps.sendToTelegram).not.toHaveBeenCalled();
-    expect(saved).toEqual([{ channel: "plektan", status: "sent", error: null, attempts: 3, itemId: "777" }]);
+    expect(saved).toEqual([{ channel: "plektan", status: "sent", error: null, attempts: 3, itemId: "777", nextAttemptAt: null }]);
+  });
+
+  it("the 5th failure is final: no next attempt, and a channel out of attempts is not retried", async () => {
+    const failing = {
+      sendToPlektan: async () => {
+        throw new PlektanError({ kind: "api", message: "x" });
+      },
+    };
+    const last = setup(failing, { ...baseLead, plektan_status: "failed", plektan_attempts: 4 });
+    await deliverLeadWith(last.deps, "l1");
+    expect(last.saved.find((u) => u.channel === "plektan")).toMatchObject({ attempts: 5, nextAttemptAt: null });
+
+    const spent = setup(failing, { ...baseLead, plektan_status: "failed", plektan_attempts: 5 });
+    expect(await deliverLeadWith(spent.deps, "l1")).toMatchObject({ plektan: "not_due" });
   });
 
   it("reports a missing lead", async () => {

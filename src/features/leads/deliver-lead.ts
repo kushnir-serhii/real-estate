@@ -14,6 +14,7 @@ import {
   type PlektanLeadsMode,
 } from "@/lib/plektan";
 import { getTelegramMode, isTelegramError, sendTelegramMessage, type TelegramMode } from "@/lib/telegram";
+import { MAX_DELIVERY_ATTEMPTS, nextAttemptAt } from "./retry-schedule";
 import { buildPlektanRequest, buildTelegramText } from "./lead-delivery-content";
 
 /** What happened to one channel in this run. `not_due`: it was already sent or skipped. */
@@ -28,6 +29,7 @@ export type DeliverLeadDeps = {
   telegramMode: () => TelegramMode;
   sendToTelegram: (text: string) => Promise<void>;
   siteUrl: () => string | undefined;
+  now: () => Date;
 };
 
 const defaultDeps: DeliverLeadDeps = {
@@ -38,9 +40,15 @@ const defaultDeps: DeliverLeadDeps = {
   telegramMode: getTelegramMode,
   sendToTelegram: (text) => sendTelegramMessage({ text }),
   siteUrl: () => process.env.NEXT_PUBLIC_SITE_URL,
+  now: () => new Date(),
 };
 
-const isDue = (status: LeadForDelivery["plektan_status"]): boolean => status === "pending" || status === "failed";
+/** Pending, or failed with attempts left (a channel that used all its attempts is final). */
+const isDue = (status: LeadForDelivery["plektan_status"], attempts: number): boolean =>
+  status === "pending" || (status === "failed" && attempts < MAX_DELIVERY_ATTEMPTS);
+
+const retryAt = (failedAttempts: number, deps: DeliverLeadDeps): string | null =>
+  nextAttemptAt(failedAttempts, deps.now())?.toISOString() ?? null;
 
 /** Short, no personal data: the error kind (+ HTTP status). Provider messages can echo the input, so they are dropped. */
 const describeError = (error: unknown): string => {
@@ -57,41 +65,41 @@ type ChannelRun = {
 };
 
 const runPlektan = async (lead: LeadForDelivery, deps: DeliverLeadDeps): Promise<ChannelRun> => {
-  if (!isDue(lead.plektan_status)) return { outcome: "not_due", update: null };
+  if (!isDue(lead.plektan_status, lead.plektan_attempts)) return { outcome: "not_due", update: null };
   if (deps.plektanMode() === "off") {
     return {
       outcome: "skipped",
-      update: { channel: "plektan", status: "skipped", error: null, attempts: lead.plektan_attempts },
+      update: { channel: "plektan", status: "skipped", error: null, attempts: lead.plektan_attempts, nextAttemptAt: null },
     };
   }
   const attempts = lead.plektan_attempts + 1;
   try {
     const { itemId } = await deps.sendToPlektan(buildPlektanRequest(lead, deps.siteUrl()));
-    return { outcome: "sent", update: { channel: "plektan", status: "sent", error: null, attempts, itemId } };
+    return { outcome: "sent", update: { channel: "plektan", status: "sent", error: null, attempts, itemId, nextAttemptAt: null } };
   } catch (error) {
     return {
       outcome: "failed",
-      update: { channel: "plektan", status: "failed", error: describeError(error), attempts },
+      update: { channel: "plektan", status: "failed", error: describeError(error), attempts, nextAttemptAt: retryAt(attempts, deps) },
     };
   }
 };
 
 const runTelegram = async (lead: LeadForDelivery, deps: DeliverLeadDeps): Promise<ChannelRun> => {
-  if (!isDue(lead.telegram_status)) return { outcome: "not_due", update: null };
+  if (!isDue(lead.telegram_status, lead.telegram_attempts)) return { outcome: "not_due", update: null };
   if (deps.telegramMode() === "off") {
     return {
       outcome: "skipped",
-      update: { channel: "telegram", status: "skipped", error: null, attempts: lead.telegram_attempts },
+      update: { channel: "telegram", status: "skipped", error: null, attempts: lead.telegram_attempts, nextAttemptAt: null },
     };
   }
   const attempts = lead.telegram_attempts + 1;
   try {
     await deps.sendToTelegram(buildTelegramText(lead, deps.siteUrl()));
-    return { outcome: "sent", update: { channel: "telegram", status: "sent", error: null, attempts } };
+    return { outcome: "sent", update: { channel: "telegram", status: "sent", error: null, attempts, nextAttemptAt: null } };
   } catch (error) {
     return {
       outcome: "failed",
-      update: { channel: "telegram", status: "failed", error: describeError(error), attempts },
+      update: { channel: "telegram", status: "failed", error: describeError(error), attempts, nextAttemptAt: retryAt(attempts, deps) },
     };
   }
 };
