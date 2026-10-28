@@ -1,6 +1,6 @@
 # 002 — Data model (Supabase)
 
-**Status:** in-progress · **Depends on:** 001 · **Route(s):** —
+**Status:** done · **Depends on:** 001 · **Route(s):** —
 
 ## Goal
 The tables everything else reads and writes — properties, photos, agents, leads, pages, settings — with RLS, generated types and seed data, so the site works without Plektan. Every column later specs (003–010) need exists now, so they don't have to reshape applied migrations.
@@ -41,16 +41,16 @@ Small stable value sets are **Postgres enums** (exact unions in the generated ty
   - [x] `settings` has exactly one row (a second insert fails)
   - [x] `createLead` called twice with the same `client_request_id` gives one lead
 
-### [ ] 3. Seed
+### [x] 3. Seed
 - **Build:** `supabase/seed.sql` with ~30 realistic Kyiv properties (all 4 types, sale + both rents, UAH/USD/EUR, real Kyiv districts, several without photos, a few very long titles/descriptions, a couple `hidden`), 3 agents, pages `home`/`about`/`contacts`, settings exchange rates. ~10 free-to-use photos (Unsplash licence) downloaded once as WebP into `public/placeholders/`, referenced by `r2_key = placeholders/<file>.webp`.
 - **Files:** `supabase/seed.sql`, `public/placeholders/*`
 - **Agent:** backend (Sonnet — the Ukrainian copy needs quality)
 - **Accept:**
-  - [ ] `supabase db reset` locally gives a browsable dataset; `getPublishedProperties` returns it
-  - [ ] placeholder photos are under ~200 KB each
+  - [x] `supabase db reset` locally gives a browsable dataset; `getPublishedProperties` returns it
+  - [x] placeholder photos are under ~200 KB each
 
 ## External needs
-- The user applies migrations to the client's Supabase project.
+- The user applies migrations `20261028120000_properties.sql` and `20261028130000_leads_pages_settings.sql` to the client's Supabase project (`seed.sql` is local-only demo data, don't run it on production).
 
 ## Open questions
 - **Decided 2026-10-28:** separate `agents` table (FK from properties), reused on the contacts page.
@@ -62,9 +62,13 @@ Small stable value sets are **Postgres enums** (exact unions in the generated ty
 - **Decided 2026-10-28:** leads written only via service role (no anon insert policy); admin read comes in 007. Extra columns `client_request_id`, `page_url`, `utm`.
 - **Decided 2026-10-28:** `pages.body` is Markdown; `settings` single row, server only.
 - **Decided 2026-10-28:** seed city Kyiv; local placeholder photos + `photoUrl()`; seed written by Sonnet.
+- `exchange_rates` default (UAH 41.5, EUR 0.92 per USD) is a guess; the admin sets real rates (008). Until then `price_usd` in admin mode uses these.
+- Agents in the seed have no `photo_url` (no portrait placeholders) — 005 shows the "no photo" avatar state. Placeholder photos are generic (a villa with a pool, glass office towers), not Kyiv-specific; fine for layout work.
+- `createLead` doesn't check that `property_id` exists (an unknown id throws an FK error) — handle in 006.
 
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
 | 2026-10-28 | 1 | done | Migration `20261028120000_properties.sql` (5 enums, `agents`, `properties`, `property_photos`, `set_updated_at()` trigger, catalog indexes, select-only RLS). RLS checked on local with the anon key: only the published property, its photo and the active agent are visible; insert → 42501, update/delete → 0 rows. `status` defaults to `hidden`. Filters take USD-normalized price bounds (caller converts). `src/lib/supabase/public.ts`, `src/lib/db/{properties,property-values,cache-tags}.ts`, `src/lib/photos/photo-url.ts`, `database.types.ts` |
 | 2026-10-28 | 2 | done | Migration `20261028130000_leads_pages_settings.sql` (`lead_kind`, `delivery_status`; `leads` + `settings` RLS on, no policies, revoked from anon/authenticated; `pages` public read; settings row inserted, `id boolean check (id)`). Local checks: anon select/insert leads and select settings → 42501; second settings insert → 23505 / 23514; same `client_request_id` twice → one row, same id. Default rates UAH 41.5 / EUR 0.92 per USD. `src/lib/db/{leads,pages,settings,cache-tags}.ts`, `database.types.ts` |
+| 2026-10-28 | 3 | done | `supabase/seed.sql`: 30 properties (flat 14, house 6, commercial 5, plot 5; sell 21, rent_long 6, rent_day 3; USD 14, UAH 13, EUR 2, 1 without price; 28 published, 2 hidden; 4 `plektan` with `raw`; 6 published without photos; 2 titles > 120 chars, long descriptions), 3 agents (1 inactive), pages `home`/`about`/`contacts`, rates. Plot `area_lot` in sotky. Anon REST with the `getPublishedProperties` shape: 12 items, total 28, no hidden. `public/placeholders/` — 11 Unsplash WebP photos, 80–176 KB, README with sources. Spec done. |
