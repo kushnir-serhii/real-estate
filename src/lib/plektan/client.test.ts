@@ -287,3 +287,46 @@ describe("real mode (mocked fetch)", () => {
     expect(sameRow).toHaveBeenCalledTimes(3);
   });
 });
+
+describe("addAdvert", () => {
+  const params = {
+    client_name: "Іван",
+    phone: "+380501234567",
+    deal: "buy",
+    property: "flat",
+    prop_kind: ["isolated", "studio"],
+    advert_info: "hi",
+  } as const;
+
+  it("sends phones[1] and prop_kind[] once, no retry, and parses ADDED", async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ result: "ADDED", item_id: 42, message: "ok" }));
+    const result = await keyedClient(fetchMock, { retries: 2 }).addAdvert(params);
+    expect(result).toEqual({ itemId: "42" });
+    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe("https://re.plektan.com/uk/API_view/addAdvert");
+    const body = decodeURIComponent(String(init.body));
+    expect(body).toContain("phones[1]=+380501234567");
+    expect(body).toContain("prop_kind[]=isolated&prop_kind[]=studio");
+  });
+
+  it("does not retry a 5xx", async () => {
+    const fetchMock = vi.fn(async () => new Response("", { status: 503 }));
+    await expectPlektanError(keyedClient(fetchMock, { retries: 2 }).addAdvert(params), "http");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("fails on PARSE_ERROR and on other results", async () => {
+    await expectPlektanError(
+      keyedClient(async () => jsonResponse({ result: "PARSE_ERROR", message: "bad" })).addAdvert(params),
+      "api",
+    );
+    await expectPlektanError(keyedClient(async () => jsonResponse({ result: "DUPLICATE" })).addAdvert(params), "api");
+  });
+
+  it("uses the leads fixture and refuses to run without key or fixture", async () => {
+    const ok = createPlektanClient({ leadsFixture: "ok" });
+    expect((await ok.addAdvert(params)).itemId).toMatch(/^\d+$/);
+    await expectPlektanError(createPlektanClient({ leadsFixture: "fail" }).addAdvert(params), "api");
+    await expectPlektanError(createPlektanClient().addAdvert(params), "api");
+  });
+});

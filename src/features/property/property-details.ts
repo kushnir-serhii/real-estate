@@ -137,5 +137,8 @@ export const contactPhone = (p: PublishedProperty): ContactPhone => {
   return phone ? { display: phone, href: `tel:${toTel(phone)}` } : CONTACTS.phone;
 };
 
-/** Anchor of the contact block; the CTA and the mobile bar point here (006 swaps it for the form). */
+/** Anchor of the contact block (agent / agency phones and messengers). */
 export const CONTACT_ANCHOR = "kontakt";
+
+/** Anchor of the request form; the «Залишити заявку» CTA and the mobile bar point here. */
+export const REQUEST_ANCHOR = "zayavka";

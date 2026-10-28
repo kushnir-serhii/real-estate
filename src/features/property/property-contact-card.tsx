@@ -19,7 +19,7 @@ const PHONE_LINK =
 
 /**
  * Who to contact about this property: its agent, else the agency; agency messengers always.
- * Target of the «Залишити заявку» CTA (`#kontakt`). Spec 006 replaces the CTA target with the request form.
+ * Sits under the request form (`#zayavka`), which the «Залишити заявку» CTA points to.
  */
 export const PropertyContactCard = ({ agent, className }: PropertyContactCardProps) => {
   const phones = agent?.phones.length

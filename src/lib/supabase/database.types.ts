@@ -86,13 +86,16 @@ export type Database = {
           page_url: string | null
           payload: Json | null
           phone: string
+          plektan_alerted_at: string | null
           plektan_attempts: number
           plektan_error: string | null
           plektan_item_id: string | null
+          plektan_next_attempt_at: string | null
           plektan_status: Database["public"]["Enums"]["delivery_status"]
           property_id: string | null
           telegram_attempts: number
           telegram_error: string | null
+          telegram_next_attempt_at: string | null
           telegram_status: Database["public"]["Enums"]["delivery_status"]
           updated_at: string
           utm: Json | null
@@ -109,13 +112,16 @@ export type Database = {
           page_url?: string | null
           payload?: Json | null
           phone: string
+          plektan_alerted_at?: string | null
           plektan_attempts?: number
           plektan_error?: string | null
           plektan_item_id?: string | null
+          plektan_next_attempt_at?: string | null
           plektan_status?: Database["public"]["Enums"]["delivery_status"]
           property_id?: string | null
           telegram_attempts?: number
           telegram_error?: string | null
+          telegram_next_attempt_at?: string | null
           telegram_status?: Database["public"]["Enums"]["delivery_status"]
           updated_at?: string
           utm?: Json | null
@@ -132,13 +138,16 @@ export type Database = {
           page_url?: string | null
           payload?: Json | null
           phone?: string
+          plektan_alerted_at?: string | null
           plektan_attempts?: number
           plektan_error?: string | null
           plektan_item_id?: string | null
+          plektan_next_attempt_at?: string | null
           plektan_status?: Database["public"]["Enums"]["delivery_status"]
           property_id?: string | null
           telegram_attempts?: number
           telegram_error?: string | null
+          telegram_next_attempt_at?: string | null
           telegram_status?: Database["public"]["Enums"]["delivery_status"]
           updated_at?: string
           utm?: Json | null

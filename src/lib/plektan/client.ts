@@ -4,12 +4,15 @@ import { z } from "zod";
 
 import { encodeForm, FORM_CONTENT_TYPE } from "./encode-form";
 import { PlektanError } from "./errors";
+import { addAdvertFixtureResponse, parseLeadsFixtureMode, type PlektanLeadsFixtureMode } from "./fixtures/leads";
 import { fixtureResponse, parseFixtureSet } from "./fixtures/transport";
 import {
+  addAdvertResponseSchema,
   contactPersonsResponseSchema,
   districtsResponseSchema,
   searchResponseSchema,
   viewResponseSchema,
+  type PlektanAddAdvertResult,
   type PlektanContactPerson,
   type PlektanDistrict,
   type PlektanListItem,
@@ -56,6 +59,33 @@ export type PlektanDistrictsParams = {
   locality_id?: number | string;
 };
 
+type AddAdvertClient = {
+  client_name: string;
+  /** Sent as `phones[1]`. */
+  phone: string;
+  client_email?: string;
+};
+
+/**
+ * Lead sent to «неперевірені» with the mark «З сайту компанії». Two shapes (told apart by `like_advert`):
+ * - quick request: «Цікавить об'єкт №…» (`like_advert` = the advert id; the API wants an email);
+ * - regular request: a buy / hire wish (`deal`, `property`, all `prop_kind`s, `advert_info`).
+ * `property` / `prop_kind` are «common required» in the docs, so the quick request sends them when known.
+ */
+export type PlektanAddAdvertParams =
+  | (AddAdvertClient & {
+      like_advert: string;
+      client_email: string;
+      property?: PlektanProperty;
+      prop_kind?: readonly string[];
+    })
+  | (AddAdvertClient & {
+      deal: "buy" | "hire_long" | "hire_day";
+      property: PlektanProperty;
+      prop_kind: readonly string[];
+      advert_info?: string;
+    });
+
 export type PlektanSearchPage = { items: PlektanListItem[]; totalRows: number };
 
 export type PlektanClientConfig = {
@@ -64,9 +94,14 @@ export type PlektanClientConfig = {
   lang?: string;
   /** `base` (default) or `next`; only used in fixture mode. */
   fixtureSet?: string;
+  /**
+   * Local transport for `addAdvert` only (`PLEKTAN_LEADS_FIXTURE`). Without it and without a key,
+   * `addAdvert` throws: the caller (`deliverLead`) marks the channel `skipped` before calling.
+   */
+  leadsFixture?: PlektanLeadsFixtureMode | null;
   baseUrl?: string;
   timeoutMs?: number;
-  /** Retries after the first attempt, on network errors and 5xx only. */
+  /** Retries after the first attempt, on network errors and 5xx only. Never applied to `addAdvert`. */
   retries?: number;
   /** First backoff delay; doubles each retry. */
   backoffMs?: number;
@@ -80,6 +115,7 @@ export type PlektanClient = {
   view: (params: PlektanViewParams) => Promise<PlektanViewItem>;
   getContactPersons: () => Promise<PlektanContactPerson[]>;
   getDistricts: (params?: PlektanDistrictsParams) => Promise<PlektanDistrict[]>;
+  addAdvert: (params: PlektanAddAdvertParams) => Promise<PlektanAddAdvertResult>;
 };
 
 const sleep = (ms: number): Promise<void> =>
@@ -167,6 +203,7 @@ export const createPlektanClient = (config: PlektanClientConfig = {}): PlektanCl
     section: string,
     command: string,
     params: Record<string, unknown>,
+    retriesOverride?: number,
   ): Promise<unknown> => {
     if (isFixtureMode) return fixtureResponse(fixtureSet, section, command, params);
 
@@ -176,7 +213,7 @@ export const createPlektanClient = (config: PlektanClientConfig = {}): PlektanCl
       try {
         return await sendOnce(url, body);
       } catch (error) {
-        if (!(error instanceof PlektanError) || !isRetryable(error) || attempt >= retries) {
+        if (!(error instanceof PlektanError) || !isRetryable(error) || attempt >= (retriesOverride ?? retries)) {
           throw error;
         }
         await sleep(backoffMs * 2 ** attempt);
@@ -227,7 +264,25 @@ export const createPlektanClient = (config: PlektanClientConfig = {}): PlektanCl
     return parseResponse(districtsResponseSchema, body, "getDistricts");
   };
 
-  return { isFixtureMode, search, searchAll, view, getContactPersons, getDistricts };
+  const addAdvert = async (params: PlektanAddAdvertParams): Promise<PlektanAddAdvertResult> => {
+    let body: unknown;
+    if (config.leadsFixture) {
+      body = addAdvertFixtureResponse(config.leadsFixture);
+    } else if (isFixtureMode) {
+      throw new PlektanError({ kind: "api", message: "addAdvert needs PLEKTAN_API_KEY" });
+    } else {
+      const { phone, ...rest } = params;
+      // Non-idempotent POST: no automatic retry (a second try could create a duplicate lead).
+      body = await call("API_view", "addAdvert", { ...rest, phones: { 1: phone } }, 0);
+    }
+    const parsed = parseResponse(addAdvertResponseSchema, body, "addAdvert");
+    if (parsed.result.toUpperCase() !== "ADDED") {
+      throw new PlektanError({ kind: "api", message: `addAdvert result ${parsed.result}` });
+    }
+    return { itemId: parsed.item_id };
+  };
+
+  return { isFixtureMode, search, searchAll, view, getContactPersons, getDistricts, addAdvert };
 };
 
 /** Client configured from env; read on every call so tests and scripts can change env. */
@@ -236,6 +291,7 @@ const clientFromEnv = (): PlektanClient =>
     apiKey: process.env.PLEKTAN_API_KEY,
     lang: process.env.PLEKTAN_LANG,
     fixtureSet: process.env.PLEKTAN_FIXTURE_SET,
+    leadsFixture: parseLeadsFixtureMode(process.env.PLEKTAN_LEADS_FIXTURE),
   });
 
 export const search = (params: PlektanSearchParams) => clientFromEnv().search(params);
@@ -244,3 +300,13 @@ export const searchAll = (params: Omit<PlektanSearchParams, "currentPage">) =>
 export const view = (params: PlektanViewParams) => clientFromEnv().view(params);
 export const getContactPersons = () => clientFromEnv().getContactPersons();
 export const getDistricts = (params?: PlektanDistrictsParams) => clientFromEnv().getDistricts(params);
+export const addAdvert = (params: PlektanAddAdvertParams) => clientFromEnv().addAdvert(params);
+
+export type PlektanLeadsMode = "off" | "live" | { fixture: PlektanLeadsFixtureMode };
+
+/** How Plektan leads run now: fixture flag wins, then a key means live, otherwise the channel is off (`skipped`). */
+export const resolvePlektanLeadsMode = (): PlektanLeadsMode => {
+  const fixture = parseLeadsFixtureMode(process.env.PLEKTAN_LEADS_FIXTURE);
+  if (fixture) return { fixture };
+  return (process.env.PLEKTAN_API_KEY ?? "").trim() === "" ? "off" : "live";
+};

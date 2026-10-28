@@ -7,9 +7,10 @@ Everything so far runs locally (local Supabase in Docker, fixture modes). This f
 | Service | Status | Needed from |
 | --- | --- | --- |
 | Supabase | not connected — local only | 002 (now), 007 (auth) |
-| Cloudflare (Workers, R2, Turnstile) | not connected | deploy, 003 (R2), 006 (Turnstile) |
-| Plektan | not connected — fixtures; 003 sync is ready, needs the API key and `PLEKTAN_*_ID` | 003, 006 |
-| Telegram bot | not connected — fixtures | 006 |
+| Cloudflare (Workers, R2) | not connected | deploy, 003 (R2) |
+| Cloudflare Turnstile | not connected — the check passes in fixture mode, no widget | 006 |
+| Plektan | not connected — fixtures; 003 sync is ready, needs the API key and `PLEKTAN_*_ID`; leads are `skipped` until the key exists (local: `PLEKTAN_LEADS_FIXTURE`) | 003, 006 |
+| Telegram bot | not connected — the channel is `skipped` (local: `TELEGRAM_FIXTURE`) | 006 |
 | LLM | not connected — fixtures | 010 |
 
 ## Site URL
@@ -51,6 +52,7 @@ Migrations to apply (in order; add new ones here when a spec adds them):
 | `20261028130000_leads_pages_settings.sql` | 002 | [ ] |
 | `20261028140000_hide_private_property_columns.sql` | 003 | [ ] |
 | `20261028150000_property_hidden_at.sql` | 005 | [ ] |
+| `20261028160000_lead_retry.sql` | 006 | [ ] |
 
 ### 4. Check
 - Dashboard → Advisors → Security: no "RLS disabled" warnings.
@@ -61,9 +63,29 @@ Migrations to apply (in order; add new ones here when a spec adds them):
 - **Auth (007):** site URL and redirect URLs (production domain + `http://localhost:3000`), the admin users' emails, SMTP for magic links.
 - Types: `src/lib/supabase/database.types.ts` is generated from the local DB (`pnpm db:types`); it matches production as long as every migration is applied.
 
+## Leads: Telegram, Turnstile, Plektan (spec 006)
+
+A lead is always saved in Supabase first. Then, after the response, it goes to Plektan (`addAdvert`) and to the managers' Telegram chat. A channel whose keys are empty is marked `skipped` (never a fake `sent`). For local work `PLEKTAN_LEADS_FIXTURE=ok|fail` and `TELEGRAM_FIXTURE=ok|fail` switch on a fake transport per channel; never set them in production.
+
+### Telegram
+1. In Telegram, open @BotFather → `/newbot` → pick a name and a username → copy the **bot token**.
+2. Create a group with the managers and add the bot to it (and give it permission to write).
+3. Get the chat id: send any message in the group, open `https://api.telegram.org/bot<token>/getUpdates` in a browser and read `message.chat.id` (a negative number for groups, for example `-1001234567890`).
+4. Set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_MANAGER_CHAT_ID` as **runtime secrets** in Cloudflare (and in `.dev.vars` / `.env.local` to try it locally). Both must be set, otherwise the channel is `skipped`.
+
+### Turnstile
+1. Cloudflare dashboard → Turnstile → Add site → the production domain (add `localhost` only if you want to test the real widget locally).
+2. `NEXT_PUBLIC_TURNSTILE_SITE_KEY`: Cloudflare **build and runtime** (`NEXT_PUBLIC_*` is inlined at build time). Empty = the forms show no widget.
+3. `TURNSTILE_SECRET_KEY`: Cloudflare **runtime secret**. Empty = the server check always passes (fixture), so never leave it empty in production.
+
+### Plektan leads
+Leads use the same `PLEKTAN_API_KEY` as the sync; set it as a **runtime secret** in Cloudflare too (the sync only has it in GitHub Actions). Before launch, confirm with Plektan that regular buy / rent requests without an email are accepted from the site (the quick request needs an email).
+
 ## Plektan sync (GitHub Actions)
 
 `.github/workflows/sync.yml` runs `pnpm sync` (spec 003): incremental every 30 minutes 07:00-22:00 Kyiv time, a full sync nightly, and on demand. It writes to Supabase directly and then calls `/api/cron/revalidate` on the site to refresh the cache. Without `PLEKTAN_API_KEY` the job exits early with a notice (fixtures are never synced into production).
+
+The same workflow has a separate `leads` job that runs on every schedule: it calls `/api/cron/leads` to retry failed lead deliveries to Plektan and Telegram (up to 5 attempts, after 5 min, 15 min, 1 h, 3 h) and to pick up leads whose first delivery was lost. After the 5th failed Plektan attempt the manager gets one Telegram alert with the name and phone. It needs `CRON_SECRET` and `NEXT_PUBLIC_SITE_URL` (below) and runs even when `PLEKTAN_API_KEY` is empty; without those two it is skipped with a notice.
 
 ### Repo secrets
 GitHub → repo → Settings → Secrets and variables → Actions → New repository secret:
