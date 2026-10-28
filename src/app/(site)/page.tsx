@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import type { Metadata } from "next";
 
+import { HERO } from "@/constants/home";
 import { FeaturedProperties } from "@/features/home/featured-properties";
 import { FeaturedSkeleton } from "@/features/home/featured-skeleton";
 import { Hero } from "@/features/home/hero";
@@ -11,9 +12,6 @@ import { QuickSearch } from "@/features/home/quick-search";
 import { getPageContent } from "@/features/pages/get-page-content";
 
 export const revalidate = 300;
-
-const HERO_LEAD =
-  "Квартири, будинки, комерційні приміщення та ділянки в Києві й області. Допоможемо з вибором і супроводимо угоду.";
 
 export const generateMetadata = async (): Promise<Metadata> => {
   const page = await getPageContent("home");
@@ -29,7 +27,7 @@ const HomePage = async () => {
 
   return (
     <>
-      <Hero title={page.title} lead={HERO_LEAD} />
+      <Hero title={page.title} lead={HERO.lead} />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-4 pb-12 sm:gap-16 sm:pb-16">
         <div className="relative -mt-16">
           <QuickSearch />

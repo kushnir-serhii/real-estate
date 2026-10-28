@@ -2,11 +2,11 @@ import { MessageCircle, Send } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { SITE_CONFIG } from "@/lib/site-config";
+import { CONTACTS } from "@/constants/contacts";
 
 type MessengerLinksProps = { className?: string };
 
-type MessengerKey = keyof typeof SITE_CONFIG.messengers;
+type MessengerKey = keyof typeof CONTACTS.messengers;
 
 const ICONS: Record<MessengerKey, LucideIcon> = {
   telegram: Send,
@@ -15,11 +15,11 @@ const ICONS: Record<MessengerKey, LucideIcon> = {
 };
 
 // as: Object.keys loses the literal key type
-const KEYS = Object.keys(SITE_CONFIG.messengers) as MessengerKey[];
+const KEYS = Object.keys(CONTACTS.messengers) as MessengerKey[];
 
 export const MessengerLinks = ({ className }: MessengerLinksProps) => {
   const items = KEYS.flatMap((key) => {
-    const { label, url, enabled } = SITE_CONFIG.messengers[key];
+    const { label, url, enabled } = CONTACTS.messengers[key];
     return enabled && url !== null ? [{ key, label, url: String(url) }] : [];
   });
 

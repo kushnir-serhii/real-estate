@@ -2,8 +2,8 @@ import "server-only";
 
 import { getPage } from "@/lib/db/pages";
 import { getSupabasePublicEnvOrNull } from "@/lib/supabase/env";
-import { DEFAULT_PAGES } from "./default-pages";
-import type { PageContent, PageSlug } from "./default-pages";
+import { DEFAULT_PAGES } from "@/constants/pages";
+import type { PageContent, PageSlug } from "@/constants/pages";
 
 /** Page content from `pages`, or the built-in default. Never throws. */
 export const getPageContent = async (slug: PageSlug): Promise<PageContent> => {

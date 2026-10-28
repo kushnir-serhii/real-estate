@@ -1,6 +1,5 @@
-export const SITE_CONFIG = {
-  name: "Lyndrik",
-  tagline: "Агентство нерухомості: допомагаємо купити, продати та орендувати житло.",
+// Mock data — replace with the agency's real contacts.
+export const CONTACTS = {
   phone: {
     display: "+380 67 000 00 01",
     href: "tel:+380670000001",

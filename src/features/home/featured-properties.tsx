@@ -6,7 +6,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { PropertyCard } from "@/features/properties/property-card";
 import { getPublishedProperties, propertyFiltersSchema } from "@/lib/db/properties";
 import type { PublishedProperty } from "@/lib/db/properties";
-import { SITE_CONFIG } from "@/lib/site-config";
+import { CONTACTS } from "@/constants/contacts";
 import { getSupabasePublicEnvOrNull } from "@/lib/supabase/env";
 import { FeaturedGrid } from "./featured-grid";
 import { RetryButton } from "./retry-button";
@@ -51,8 +51,8 @@ export const FeaturedProperties = async () => {
             варіанти під ваш запит.
           </p>
           <div className="flex flex-wrap gap-2">
-            <a href={SITE_CONFIG.phone.href} className={buttonVariants()}>
-              {SITE_CONFIG.phone.display}
+            <a href={CONTACTS.phone.href} className={buttonVariants()}>
+              {CONTACTS.phone.display}
             </a>
             <Link href="/contacts" className={buttonVariants({ variant: "outline" })}>
               Контакти

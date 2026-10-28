@@ -4,13 +4,14 @@ import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import { Logo } from "@/components/layout/logo";
 import { MessengerLinks } from "@/components/layout/messenger-links";
 import { PlektanButton } from "@/components/layout/plektan-button";
-import { SITE_CONFIG } from "@/lib/site-config";
+import { BRAND } from "@/constants/brand";
+import { CONTACTS } from "@/constants/contacts";
 
 const LINK_CLASS =
   "inline-flex min-h-11 items-center gap-2 rounded-md text-sm text-foreground outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50";
 
 export const SiteFooter = () => {
-  const socials = Object.values(SITE_CONFIG.socials).filter(
+  const socials = Object.values(CONTACTS.socials).filter(
     (item) => item.url !== "",
   );
 
@@ -20,7 +21,7 @@ export const SiteFooter = () => {
         <div className="flex flex-col items-start gap-2">
           <Logo />
           <p className="max-w-xs text-sm text-muted-foreground">
-            {SITE_CONFIG.tagline}
+            {BRAND.tagline}
           </p>
         </div>
 
@@ -28,24 +29,24 @@ export const SiteFooter = () => {
           <h2 className="mb-2 text-sm font-semibold">Контакти</h2>
           <ul className="flex flex-col">
             <li>
-              <a href={SITE_CONFIG.phone.href} className={LINK_CLASS}>
+              <a href={CONTACTS.phone.href} className={LINK_CLASS}>
                 <Phone className="size-4 shrink-0" aria-hidden="true" />
-                <span className="tabular-nums">{SITE_CONFIG.phone.display}</span>
+                <span className="tabular-nums">{CONTACTS.phone.display}</span>
               </a>
             </li>
             <li>
-              <a href={`mailto:${SITE_CONFIG.email}`} className={LINK_CLASS}>
+              <a href={`mailto:${CONTACTS.email}`} className={LINK_CLASS}>
                 <Mail className="size-4 shrink-0" aria-hidden="true" />
-                <span className="break-all">{SITE_CONFIG.email}</span>
+                <span className="break-all">{CONTACTS.email}</span>
               </a>
             </li>
             <li className="flex min-h-11 items-center gap-2 text-sm">
               <MapPin className="size-4 shrink-0" aria-hidden="true" />
-              {SITE_CONFIG.address}
+              {CONTACTS.address}
             </li>
             <li className="flex min-h-11 items-center gap-2 text-sm">
               <Clock className="size-4 shrink-0" aria-hidden="true" />
-              {SITE_CONFIG.hours}
+              {CONTACTS.hours}
             </li>
           </ul>
         </div>
@@ -75,7 +76,7 @@ export const SiteFooter = () => {
       <div className="border-t">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} {SITE_CONFIG.name}
+            © {new Date().getFullYear()} {BRAND.name}
           </p>
           <Link href="/privacy" className={LINK_CLASS}>
             Політика конфіденційності

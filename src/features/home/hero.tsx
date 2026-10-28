@@ -1,13 +1,15 @@
+import { HERO } from "@/constants/home";
+
 type HeroProps = { title: string; lead: string };
 
 export const Hero = ({ title, lead }: HeroProps) => (
   <section className="relative isolate overflow-hidden bg-muted">
     {/* eslint-disable-next-line @next/next/no-img-element -- static placeholder from public/; Workers has no image optimizer */}
     <img
-      src="/placeholders/flat-living-2.webp"
+      src={HERO.image.src}
       alt=""
-      width={1280}
-      height={853}
+      width={HERO.image.width}
+      height={HERO.image.height}
       fetchPriority="high"
       decoding="async"
       className="absolute inset-0 -z-10 size-full object-cover"

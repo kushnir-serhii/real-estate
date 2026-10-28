@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 
+import { BRAND } from "@/constants/brand";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
@@ -22,9 +23,8 @@ const getMetadataBase = () => {
 
 export const metadata: Metadata = {
   metadataBase: getMetadataBase(),
-  title: { default: "Lyndrik — агентство нерухомості", template: "%s — Lyndrik" },
-  description:
-    "Lyndrik — агентство нерухомості: купівля, продаж та оренда квартир і будинків. Допоможемо знайти житло та оформити угоду.",
+  title: { default: BRAND.siteTitle, template: `%s — ${BRAND.name}` },
+  description: BRAND.siteDescription,
 };
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => (
