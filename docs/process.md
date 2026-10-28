@@ -36,6 +36,7 @@ Every task gets one spec file in [specs/](specs/). Every spec is split into **sl
 - Never run anything against remote Supabase, Cloudflare, Plektan, Telegram or the LLM with real keys; no deploys, no `supabase db push`. Local Supabase and fixture modes only. The user applies migrations and deploys.
 - Never commit `.env*` (except `.env.example`) or `.dev.vars`. A new env var goes into `.env.example` with a comment.
 - Never edit an applied migration; add a new one.
+- A new migration, account or key also goes into [setup.md](setup.md), so the user can connect everything later.
 
 ## The loop (`/run-implement`, `/run-impl`)
 
