@@ -8,6 +8,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 The repo starts empty: spec 001 scaffolds the app. Until it's `done`, the commands below don't exist yet.
 
+## Talking to the user
+
+Talk to the user in Ukrainian: all replies, reports, summaries and questions (in chat and in `AskUserQuestion`: question, options, descriptions). Code, commits and docs stay in English.
+
 ## Commands (after spec 001)
 
 Use pnpm.
