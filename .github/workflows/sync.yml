@@ -1,0 +1,80 @@
+name: Plektan sync
+
+on:
+  schedule:
+    # UTC. Incremental every 30 min; 04:00-20:30 UTC covers 07:00-22:00 Kyiv in both summer (UTC+3) and winter (UTC+2) time.
+    - cron: "*/30 4-20 * * *"
+    # Full sync nightly (03:00 Kyiv in summer, 02:00 in winter).
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+    inputs:
+      full:
+        description: "Full sync (also hides properties missing from Plektan)"
+        type: boolean
+        default: false
+
+# One sync at a time; a running one is never cancelled.
+concurrency:
+  group: plektan-sync
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      PLEKTAN_API_KEY: ${{ secrets.PLEKTAN_API_KEY }}
+      PLEKTAN_COUNTRY_ID: ${{ secrets.PLEKTAN_COUNTRY_ID }}
+      PLEKTAN_REGION_ID: ${{ secrets.PLEKTAN_REGION_ID }}
+      PLEKTAN_LOCALITY_ID: ${{ secrets.PLEKTAN_LOCALITY_ID }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+      # Used by the photo and geocoding steps (specs 003 slices 4-5); harmless before that.
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+      NEXT_PUBLIC_R2_PUBLIC_URL: ${{ secrets.NEXT_PUBLIC_R2_PUBLIC_URL }}
+      GEOCODER_CONTACT_EMAIL: ${{ secrets.GEOCODER_CONTACT_EMAIL }}
+    steps:
+      - name: Skip without a Plektan key
+        id: guard
+        run: |
+          if [ -z "$PLEKTAN_API_KEY" ]; then
+            echo "::notice::PLEKTAN_API_KEY secret is empty: skipping (fixtures must never be synced into production)."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.guard.outputs.run == 'true'
+
+      - uses: pnpm/action-setup@v4
+        if: steps.guard.outputs.run == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.guard.outputs.run == 'true'
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+        if: steps.guard.outputs.run == 'true'
+
+      - name: Sync
+        if: steps.guard.outputs.run == 'true'
+        env:
+          FULL_SYNC: ${{ github.event.schedule == '0 0 * * *' || inputs.full == true }}
+        run: |
+          if [ "$FULL_SYNC" = "true" ]; then
+            pnpm sync --full
+          else
+            pnpm sync
+          fi

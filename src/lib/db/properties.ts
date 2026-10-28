@@ -58,7 +58,7 @@ export type PropertyAgent = Pick<
   Tables["agents"]["Row"],
   "id" | "name" | "phones" | "email" | "photo_url"
 >;
-export type PublishedProperty = Omit<Tables["properties"]["Row"], "raw" | "agent_id"> & {
+export type PublishedProperty = Omit<Tables["properties"]["Row"], "raw" | "house" | "agent_id"> & {
   property_photos: PropertyPhoto[];
   agent: PropertyAgent | null;
 };
@@ -70,11 +70,12 @@ export type PropertyPage = {
   pageCount: number;
 };
 
+/** `raw` and `house` are not granted to the public (migration hide_private_property_columns): never select them here. */
 const PROPERTY_COLUMNS = [
   "id", "source", "external_id", "status", "deal", "property_type", "prop_kind", "price_amount",
   "currency", "price_usd", "price_per_m2", "area_total", "area_life", "area_kitchen", "area_lot",
   "room_count", "storey", "storeys", "repair", "wall_material", "housing_class", "is_newbuilding",
-  "locality", "district", "street", "house", "lat", "lng", "title", "description", "slug",
+  "locality", "district", "street", "lat", "lng", "title", "description", "slug",
   "seo_title", "seo_description", "source_updated_at", "synced_at", "published_at", "created_at",
   "updated_at",
 ].join(",");

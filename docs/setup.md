@@ -8,7 +8,7 @@ Everything so far runs locally (local Supabase in Docker, fixture modes). This f
 | --- | --- | --- |
 | Supabase | not connected — local only | 002 (now), 007 (auth) |
 | Cloudflare (Workers, R2, Turnstile) | not connected | deploy, 003 (R2), 006 (Turnstile) |
-| Plektan | not connected — fixtures | 003, 006 |
+| Plektan | not connected — fixtures; 003 sync is ready, needs the API key and `PLEKTAN_*_ID` | 003, 006 |
 | Telegram bot | not connected — fixtures | 006 |
 | LLM | not connected — fixtures | 010 |
 
@@ -49,6 +49,7 @@ Migrations to apply (in order; add new ones here when a spec adds them):
 | --- | --- | --- |
 | `20261028120000_properties.sql` | 002 | [ ] |
 | `20261028130000_leads_pages_settings.sql` | 002 | [ ] |
+| `20261028140000_hide_private_property_columns.sql` | 003 | [ ] |
 
 ### 4. Check
 - Dashboard → Advisors → Security: no "RLS disabled" warnings.
@@ -58,3 +59,31 @@ Migrations to apply (in order; add new ones here when a spec adds them):
 ### 5. Later
 - **Auth (007):** site URL and redirect URLs (production domain + `http://localhost:3000`), the admin users' emails, SMTP for magic links.
 - Types: `src/lib/supabase/database.types.ts` is generated from the local DB (`pnpm db:types`); it matches production as long as every migration is applied.
+
+## Plektan sync (GitHub Actions)
+
+`.github/workflows/sync.yml` runs `pnpm sync` (spec 003): incremental every 30 minutes 07:00-22:00 Kyiv time, a full sync nightly, and on demand. It writes to Supabase directly and then calls `/api/cron/revalidate` on the site to refresh the cache. Without `PLEKTAN_API_KEY` the job exits early with a notice (fixtures are never synced into production).
+
+### Repo secrets
+GitHub → repo → Settings → Secrets and variables → Actions → New repository secret:
+
+| Secret | Where the value comes from |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Project Settings → API (same values as in Cloudflare) |
+| `PLEKTAN_API_KEY` | from the agency (Plektan account); empty = the job is skipped |
+| `PLEKTAN_COUNTRY_ID`, `PLEKTAN_REGION_ID`, `PLEKTAN_LOCALITY_ID` | Plektan geography ids of the agency's area; `search` needs a geography. Empty ones are left out of the request |
+| `CRON_SECRET` | any long random string (for example `openssl rand -hex 32`); the **same** value must be set as a runtime secret in Cloudflare, where `/api/cron/revalidate` checks it |
+| `NEXT_PUBLIC_SITE_URL` | the production domain, for example `https://lyndrik.example`; the script posts the cache purge to it |
+| `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `NEXT_PUBLIC_R2_PUBLIC_URL` | Cloudflare R2 (used by the photo step, spec 003 slice 4) |
+| `GEOCODER_CONTACT_EMAIL` | an email for Nominatim's User-Agent (geocoding, spec 003 slice 5) |
+
+### Run it by hand
+Actions → "Plektan sync" → Run workflow (tick **full** for a full sync). The same works locally: `pnpm sync`, `pnpm sync --full`, with flags `--no-revalidate` and `--force-hide` (hide vanished properties even when the safety guard refuses: it refuses if the result is empty or fewer than half of the published Plektan properties would remain).
+
+### First real run
+1. Check `PLEKTAN_COUNTRY_ID` / `PLEKTAN_REGION_ID` / `PLEKTAN_LOCALITY_ID` against the Plektan account.
+2. Make sure `settings.properties_source` is `plektan` and the migration above is applied.
+3. Run **full** by hand once and read the summary (`added`, `updated`, `hidden`, `unchanged`, `skipped`, `failed`) before leaving the schedule on.
+
+### Actions minutes
+On a private repo the free plan gives 2000 minutes a month. About 34 incremental runs a day plus a nightly full sync come to roughly 1000 minutes (every run is billed in whole minutes); watch Settings → Billing, and make the interval longer in `sync.yml` if needed.

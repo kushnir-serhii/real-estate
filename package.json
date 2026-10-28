@@ -8,6 +8,8 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "sync": "node --conditions=react-server --env-file-if-exists=.env.local --import tsx scripts/sync.ts",
+    "sync:check": "node --conditions=react-server --env-file-if-exists=.env.local --import tsx scripts/check-sync.ts",
     "ui-check": "playwright test",
     "lint": "eslint .",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",

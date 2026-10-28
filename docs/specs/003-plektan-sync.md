@@ -36,16 +36,16 @@ How it runs:
   - [x] tests cover every price format in the fixtures, plus empty / "договірна" → no price
   - [x] tests cover titles for all 4 types and slug transliteration
 
-### [ ] 3. Sync job
+### [x] 3. Sync job
 - **Build:** `src/lib/sync/run-sync.ts` (`full` | `incremental`): skips (logs, exits 0) unless `settings.properties_source = 'plektan'`; agents from `getContactPersons` (upsert by `external_id`, missing → `is_active = false`); properties upsert by (`source`, `external_id`) only when `date_mod` or mapped values changed; new → `published` + `published_at`; a hidden one that reappears → `published` again, same slug; full sync hides `plektan` properties missing from the result; writes `last_sync_at` and `sync_cursor` (Plektan format `YYYY-MM-DD HH:MM`, Kyiv time, a few minutes of overlap). Returns a summary (added / updated / hidden / unchanged) and the cache tags to revalidate. `scripts/sync.ts` entry + `pnpm sync`. `/api/cron/revalidate` route (zod body `{ tags: string[] }`, `CRON_SECRET` bearer, constant-time compare). `.github/workflows/sync.yml`. Migration: public (`anon`, `authenticated`) can no longer read `properties.raw` or `properties.house` (column privileges); `getPublishedProperties` / `getPropertyBySlug` stop selecting them; types regenerated. `setup.md`: GitHub secrets, env vars, the migration.
 - **Files:** `src/lib/sync/run-sync.ts`, `scripts/sync.ts`, `src/app/api/cron/revalidate/route.ts`, `.github/workflows/sync.yml`, `supabase/migrations/*_hide_private_property_columns.sql`, `src/lib/db/properties.ts`, `src/lib/supabase/database.types.ts`, `.env.example`, `docs/setup.md`
 - **Agent:** backend
 - **Accept:**
-  - [ ] on local Supabase: full sync of `base`, then full sync of `next` → the removed property becomes `hidden`, the changed price is updated, the new one is published
-  - [ ] a second run with no changes writes nothing (summary all unchanged, no `updated_at` changes)
-  - [ ] with `properties_source = 'admin'` the sync writes nothing
-  - [ ] anon key can't read `raw` or `house`; the site's pages still render
-  - [ ] `/api/cron/revalidate` without / with a wrong secret → 401
+  - [x] on local Supabase: full sync of `base`, then full sync of `next` → the removed property becomes `hidden`, the changed price is updated, the new one is published
+  - [x] a second run with no changes writes nothing (summary all unchanged, no `updated_at` changes)
+  - [x] with `properties_source = 'admin'` the sync writes nothing
+  - [x] anon key can't read `raw` or `house`; the site's pages still render
+  - [x] `/api/cron/revalidate` without / with a wrong secret → 401
 
 ### [ ] 4. Photos to R2
 - **Build:** `src/lib/r2/` (`@aws-sdk/client-s3` against R2; fixture mode writes to `public/r2-local/`, git-ignored). In the sync: download each new photo (fixture mode: Plektan fixture URLs resolve to files in `public/placeholders/`), `sharp` → WebP at 480 / 960 / 1600 px wide (never upscaled), keys `properties/<property_id>/<hash>-<w>.webp`; `property_photos` rows ordered as in Plektan, `r2_key` = 960 version, `sizes` = `{ "480": key, "960": key, "1600": key }`, `width`/`height` of the largest, `source_url` = Plektan URL. A photo whose `source_url` is already stored is skipped; photos removed in Plektan are deleted (row + R2 objects). Agent photos (`url_small`) copied once into `agents/<id>.webp`. A failed photo is logged and retried next run; it never fails the sync.
@@ -78,8 +78,12 @@ How it runs:
 - **Decided 2026-10-28:** approximate location — coordinates rounded to ~100 m; `raw` and `house` not readable by the public.
 - **Decided 2026-10-28:** titles generated in Ukrainian; description = `promo_text`; new properties published immediately; `price_usd` from `settings.exchange_rates`; agents from `getContactPersons`; photos WebP 480/960/1600; tests with vitest.
 
+- A change of `settings.exchange_rates` doesn't re-price existing Plektan rows until their `date_mod` changes. Fine while Plektan mode has no rate editing; revisit with 008.
+- In Plektan mode the sync owns properties: a hand-hidden property is re-published on the next sync. 008 should make Plektan properties read-only in the admin (one source of truth).
+
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
 | 2026-10-28 | 1 | done | `src/lib/plektan/` (`client.ts`, `schemas.ts`, `errors.ts`, `encode-form.ts`, `index.ts`, `fixtures/{data,transport}.ts`, `client.test.ts` — 27 tests), `vitest.config.ts`, `tsx` + `vitest` dev deps, `pnpm test`, `.env.example`. Fixtures: `base` 12 properties (adid 1001–1012), `next` drops 1002, changes 1001's price, adds 1013; agents 501–503. Unverified until the key exists: form-encoded body, 1-based `currentPage`, `view`/`getContactPersons`/`getDistricts` envelopes, `price.kind` / `currency_id` codes (mapping relies on the price text). |
 | 2026-10-28 | 2 | done | `src/lib/sync/{map-property,parse-price,property-title,slugify,html-text}.ts` + tests (89 total). `mapProperty(item, view, rates)` → skip (`mls` / `not_actual` / `unsupported`) or row + `agentExternalId`. Per-m² headline price × `area_total` (no area → no price); earliest currency in the text wins; `date_mod` read as Kyiv local time (unverified); unknown Plektan list values → null (original in `raw`). `apartments` titled «N-кімнатна квартира». |
+| 2026-10-28 | 3 | done | `src/lib/sync/{run-sync,sync-cursor}.ts`, `scripts/{sync,check-sync}.ts` (`pnpm sync [--full --no-revalidate --force-hide]`, `pnpm sync:check` — local only, 22 checks, ran 6× green), `src/app/api/cron/revalidate/route.ts` (bearer `CRON_SECRET`, `revalidateTag(tag, { expire: 0 })`), `.github/workflows/sync.yml` (skips without `PLEKTAN_API_KEY`), migration `20261028140000_hide_private_property_columns.sql` (column grants; anon `raw`/`house` → 401), `PROP_KINDS_BY_PROPERTY`, `properties.ts` drops `house`, `setup.md` (secrets, first run). Safety guard: a full sync won't hide when the result is empty or < half of published Plektan rows remain. A failed item → `failed`, exit 1, cursor not advanced. Workflow not run (can't locally). |
