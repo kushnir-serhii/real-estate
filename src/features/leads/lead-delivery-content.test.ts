@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { LeadForDelivery } from "@/lib/db/leads";
 import { PROP_KINDS_BY_PROPERTY } from "@/lib/db/property-values";
-import { buildAdvertInfo, buildPlektanRequest, buildTelegramText, escapeHtml } from "./lead-delivery-content";
+import { buildAdvertInfo, buildPlektanAlertText, buildPlektanRequest, buildTelegramText, escapeHtml } from "./lead-delivery-content";
 
 const SITE = "https://lyndrik.example/";
 
@@ -101,6 +101,11 @@ describe("buildTelegramText", () => {
     expect(text).toContain('<a href="https://lyndrik.example/catalog/kvartira-1">2-кімнатна &lt;Центр&gt;</a> (№ 12345)');
   });
 
+  it("ends with the admin link to the lead", () => {
+    const text = buildTelegramText(lead({ id: "abc-1" }), SITE);
+    expect(text.split("\n").at(-1)).toBe("Відкрити в адмінці: https://lyndrik.example/admin/leads/abc-1");
+  });
+
   it("omits the number for an admin property", () => {
     const text = buildTelegramText(lead({ property: { ...plektanProperty, source: "admin", external_id: null } }), SITE);
     expect(text).not.toContain("№");
@@ -121,6 +126,14 @@ describe("buildTelegramText", () => {
 
   it("labels AI leads", () => {
     expect(buildTelegramText(lead({ kind: "ai", property: null }))).toContain("Заявка від AI-асистента");
+  });
+});
+
+describe("buildPlektanAlertText", () => {
+  it("has name, phone and the admin link", () => {
+    const text = buildPlektanAlertText({ id: "abc-1", name: "Іван", phone: "+380501234567" }, SITE);
+    expect(text).toContain("Заявка не дійшла до Plektan");
+    expect(text.split("\n").at(-1)).toBe("Відкрити в адмінці: https://lyndrik.example/admin/leads/abc-1");
   });
 });
 

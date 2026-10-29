@@ -47,6 +47,11 @@ export const propertyUrl = (slug: string, siteUrl?: string): string => {
   return `${base.replace(/\/+$/, "")}/catalog/${slug}`;
 };
 
+export const adminLeadUrl = (id: string, siteUrl?: string): string => {
+  const base = (siteUrl ?? "").trim() || DEFAULT_SITE_URL;
+  return `${base.replace(/\/+$/, "")}/admin/leads/${id}`;
+};
+
 const link = (url: string, title: string): string =>
   `<a href="${escapeHtml(url)}">${escapeHtml(title)}</a>`;
 
@@ -74,15 +79,17 @@ export const buildTelegramText = (lead: LeadForDelivery, siteUrl?: string): stri
 
   if (lead.message) lines.push(`Повідомлення: ${escapeHtml(truncate(lead.message, TELEGRAM_FIELD_MAX))}`);
   if (lead.page_url) lines.push(`Сторінка: ${escapeHtml(truncate(lead.page_url, 500))}`);
+  lines.push(`Відкрити в адмінці: ${escapeHtml(adminLeadUrl(lead.id, siteUrl))}`);
   return lines.join("\n");
 };
 
 /** Alert after the last failed Plektan attempt (slice 3). Name + phone so the lead is not lost. */
-export const buildPlektanAlertText = (lead: Pick<LeadForDelivery, "name" | "phone">): string =>
+export const buildPlektanAlertText = (lead: Pick<LeadForDelivery, "id" | "name" | "phone">, siteUrl?: string): string =>
   [
     "<b>Заявка не дійшла до Plektan</b>",
     `Ім'я: ${escapeHtml(lead.name)}`,
     `Телефон: ${escapeHtml(lead.phone)}`,
+    `Відкрити в адмінці: ${escapeHtml(adminLeadUrl(lead.id, siteUrl))}`,
   ].join("\n");
 
 /** Plektan `advert_info`: plain text. */

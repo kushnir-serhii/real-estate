@@ -1,16 +1,21 @@
 import Link from "next/link";
 
-import type { AdminLeadListItem } from "@/lib/db/admin-leads";
+import type { AdminLeadFilters, AdminLeadListItem } from "@/lib/db/admin-leads";
 import { cn } from "@/lib/utils";
 import { DeliveryBadge } from "./delivery-badge";
 import { LeadDateTime } from "./lead-date-time";
 import { LEAD_KIND_LABELS } from "./lead-kind-labels";
 import { isLeadFailed, leadHref } from "./leads-params";
 
-type LeadCardsProps = { leads: AdminLeadListItem[]; className?: string };
+type LeadCardsProps = {
+  leads: AdminLeadListItem[];
+  /** Current list filters, kept in the detail link for the way back. */
+  filters?: AdminLeadFilters;
+  className?: string;
+};
 
 /** Phone/tablet list: same data as the table, one stretched link per card. */
-export const LeadCards = ({ leads, className }: LeadCardsProps) => (
+export const LeadCards = ({ leads, filters, className }: LeadCardsProps) => (
   <ul className={cn("grid gap-3 md:grid-cols-2", className)}>
     {leads.map((lead) => (
       <li
@@ -27,7 +32,7 @@ export const LeadCards = ({ leads, className }: LeadCardsProps) => (
 
         <div className="min-w-0">
           <Link
-            href={leadHref(lead.id)}
+            href={leadHref(lead.id, filters)}
             prefetch={false}
             title={lead.name}
             className="block truncate text-base font-medium outline-none after:absolute after:inset-0 after:rounded-xl"

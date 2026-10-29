@@ -63,7 +63,7 @@ export const retryLeadsWith = async (deps: RetryLeadsDeps): Promise<RetryCounts>
     const toAlert = await deps.getToAlert({ maxAttempts: MAX_DELIVERY_ATTEMPTS, limit: RUN_LIMIT });
     for (const lead of toAlert) {
       try {
-        await deps.sendAlert(buildPlektanAlertText(lead));
+        await deps.sendAlert(buildPlektanAlertText(lead, process.env.NEXT_PUBLIC_SITE_URL));
         await deps.markAlerted(lead.id, deps.now());
         counts.alerts += 1;
       } catch {

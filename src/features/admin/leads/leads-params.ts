@@ -10,7 +10,14 @@ export const leadsHref = (filters: AdminLeadFilters, overrides: Partial<AdminLea
   return query ? `${ADMIN_LEADS_PATH}?${query}` : ADMIN_LEADS_PATH;
 };
 
-export const leadHref = (id: string): string => `${ADMIN_LEADS_PATH}/${id}`;
+/**
+ * `/admin/leads/<id>` carrying the list's filters (`?kind=ai&page=2`), so «До списку заявок» returns to
+ * the same view. The detail page re-parses them with the filters schema (never trusts the URL).
+ */
+export const leadHref = (id: string, filters?: AdminLeadFilters): string => {
+  const query = filters ? adminLeadsSearchParams(filters).toString() : "";
+  return query ? `${ADMIN_LEADS_PATH}/${id}?${query}` : `${ADMIN_LEADS_PATH}/${id}`;
+};
 
 export const hasActiveLeadFilters = (f: AdminLeadFilters): boolean =>
   Boolean(f.kind || f.from || f.to || f.q || f.failed);

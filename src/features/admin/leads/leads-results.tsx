@@ -56,8 +56,8 @@ export const LeadsResults = async ({ filters }: LeadsResultsProps) => {
         <div className="flex flex-col gap-4">
           <Summary total={state.page.total} filtered={filtered} />
           <h2 className="sr-only">Список заявок</h2>
-          <LeadsTable leads={state.page.items} className="hidden lg:block" />
-          <LeadCards leads={state.page.items} className="lg:hidden" />
+          <LeadsTable leads={state.page.items} filters={filters} className="hidden lg:block" />
+          <LeadCards leads={state.page.items} filters={filters} className="lg:hidden" />
           <div className="pt-2">
             <LeadsPagination filters={filters} pageCount={state.page.pageCount} />
           </div>

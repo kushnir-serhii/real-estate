@@ -1,4 +1,5 @@
 import "server-only";
+import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
 import {
@@ -68,4 +69,58 @@ export const getAdminLeads = async (filters: AdminLeadFilters): Promise<AdminLea
     page: filters.page,
     pageCount: Math.max(1, Math.ceil(total / ADMIN_LEADS_PAGE_SIZE)),
   };
+};
+
+export type AdminLeadDetail = Pick<
+  LeadRow,
+  | "id"
+  | "kind"
+  | "name"
+  | "phone"
+  | "email"
+  | "message"
+  | "payload"
+  | "utm"
+  | "page_url"
+  | "consent_at"
+  | "created_at"
+  | "property_id"
+  | "plektan_status"
+  | "plektan_error"
+  | "plektan_attempts"
+  | "plektan_next_attempt_at"
+  | "plektan_item_id"
+  | "plektan_alerted_at"
+  | "telegram_status"
+  | "telegram_error"
+  | "telegram_attempts"
+  | "telegram_next_attempt_at"
+> & {
+  property: {
+    slug: string;
+    title: string;
+    external_id: string | null;
+    source: Database["public"]["Enums"]["property_source"];
+    status: Database["public"]["Enums"]["property_status"];
+  } | null;
+};
+
+const DETAIL_SELECT =
+  "id,kind,name,phone,email,message,payload,utm,page_url,consent_at,created_at,property_id,plektan_status,plektan_error,plektan_attempts,plektan_next_attempt_at,plektan_item_id,plektan_alerted_at,telegram_status,telegram_error,telegram_attempts,telegram_next_attempt_at,property:properties(slug,title,external_id,source,status)";
+
+const leadIdSchema = z.uuid();
+
+/** One lead for the admin detail page (user session, RLS guard). Invalid id or no row (or no access) → null. */
+export const getAdminLead = async (id: string): Promise<AdminLeadDetail | null> => {
+  const parsed = leadIdSchema.safeParse(id);
+  if (!parsed.success) return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("leads")
+    .select(DETAIL_SELECT)
+    .eq("id", parsed.data)
+    .maybeSingle()
+    .overrideTypes<AdminLeadDetail, { merge: false }>();
+  if (error) throw new Error(`getAdminLead failed: ${error.message}`);
+  return data;
 };

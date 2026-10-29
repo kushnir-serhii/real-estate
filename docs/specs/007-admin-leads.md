@@ -38,15 +38,15 @@ Andrii and staff sign in to the admin and see every lead with its delivery statu
   - [x] filter by kind and date, «Не доставлено», search by phone/name, pagination; all survive reload (URL)
   - [x] loading, empty (both kinds), error with retry; table at 1280px, cards at 375px without horizontal scroll
 
-### [ ] 3. Lead detail + manual retry
+### [x] 3. Lead detail + manual retry
 - **Build:** `getAdminLead(id)`; `/admin/leads/[id]`: contact (`tel:`, `mailto:`), kind, created, property (link to the site page, Plektan №), message, wishes from `payload` (deal, type, `similar_to`), page URL, UTM, consent date; delivery card per channel: status, attempts (`n з 5`), error in plain Ukrainian, next attempt time, `plektan_item_id`. «Повторити» on a `failed` channel → server action (admin check, zod) → `retryLeadChannel` → result announced (`role="status"`), page revalidated. `retryLeadChannel` with unit tests (works past 5 attempts, one channel only, no schedule beyond 5). Not found → 404 in the admin shell. Telegram text gets the «Відкрити в адмінці» line (test updated).
 - **Files:** `src/lib/db/admin-leads.ts`, `src/lib/db/leads.ts`, `src/features/leads/{deliver-lead,lead-delivery-content}*.ts`, `src/features/admin/leads/*`, `src/app/admin/**/leads/[id]/*`
 - **Agent:** backend (retry, data) → designer (UI)
 - **Accept:**
-  - [ ] a failed delivery shows the error in plain words and a «Повторити» button; with the fixture set to `ok` the retry turns it `sent`, with `fail` it stays `failed` with attempts +1
-  - [ ] non-admins can't call the retry action
-  - [ ] the Telegram message links to the lead in the admin
-  - [ ] detail works at 375px; long values wrap
+  - [x] a failed delivery shows the error in plain words and a «Повторити» button; with the fixture set to `ok` the retry turns it `sent`, with `fail` it stays `failed` with attempts +1
+  - [x] non-admins can't call the retry action
+  - [x] the Telegram message links to the lead in the admin
+  - [x] detail works at 375px; long values wrap
 
 ## External needs
 - Admin users: create them in the Supabase dashboard (Authentication → Users → Add user, with a password) and add each to `admins` (SQL in `docs/setup.md`). Real emails are not needed until production.
@@ -61,6 +61,8 @@ Andrii and staff sign in to the admin and see every lead with its delivery statu
 - On mobile the admin header cuts the email after ~15 characters; fine for now.
 - **Decided 2026-10-29:** the leads table starts at `lg` (1024px); below that cards (two per row from `md`). Badges on 375px cards may share a line or wrap.
 - `error.tsx` of the leads list was not seen failing locally (no easy way to break the query); its retry is reviewed by reading.
+- The lead not-found page renders inside the admin shell but answers HTTP 200 in dev (the segment streams because of `loading.tsx`); accepted, admin is noindex.
+- «Схожий на» links to the public property page; if that property is later hidden it shows the sold page or 404.
 - **Decided 2026-10-28:** 3 slices (auth + shell, list, detail + retry); `admins` table + `is_admin()`, leads read via RLS for admins, writes via service role after the server check.
 
 ## Log
@@ -68,3 +70,4 @@ Andrii and staff sign in to the admin and see every lead with its delivery statu
 | --- | --- | --- | --- |
 | 2026-10-29 | 1 | done | Migration `20261028170000_admins.sql` (`admins` + own-row RLS, `is_admin()` security definer, leads select for admins; no writes). Local checks: anon → 42501, non-admin → 0 leads / `is_admin` false, admin → 30 leads; insert/update → 42501; sign-up → `signup_disabled`. Proxy: anonymous `/admin/*` → sign-in with `next`, `X-Robots-Tag` on every admin response; `getAdminSession()` (cached) in the panel layout: unconfigured / forbidden / admin shell. Sign-in (password, safe `next`), sign-out; seed admin + non-admin + 30 demo leads. Playwright: sign-in errors/pending, 375px no scroll, 44px targets. Files: `supabase/{migrations,seed.sql,config.toml}`, `src/lib/supabase/{proxy,database.types}.ts`, `src/lib/auth/*`, `src/features/admin/*`, `src/app/admin/**`, `docs/setup.md` |
 | 2026-10-29 | 2 | done | `src/lib/db/admin-lead-filters.ts` (URL schema, never throws; Kyiv day bounds incl. DST; phone-digits vs name search; link builder resets page) + tests; `getAdminLeads` with the session client (RLS). Local: 30 total, ai 2, failed 15, page 2 = 10, non-admin 0. UI: GET filter form (kind/«Не доставлено» apply at once), table from `lg`, cards below, delivery badges (icon + word, `--success`/`--warning` tokens), pagination, skeleton, error with retry, three empty states. Playwright 375/1280 light/dark: no horizontal scroll. Files: `src/lib/db/admin-lead*.ts`, `src/lib/format/format-kyiv-date-time.ts`, `src/features/admin/leads/*`, `src/app/admin/(panel)/leads/*`, `src/app/globals.css` |
+| 2026-10-29 | 3 | done | `getAdminLead` (session/RLS); `retryLeadChannel` (shared runners with a `force` flag: one channel, once, also past 5 attempts, no backoff beyond 5) + tests; `retryLeadDelivery` action (`requireAdmin` first, zod); `describeDeliveryError` (plain Ukrainian) + tests; «Відкрити в адмінці» line in the Telegram message and the Plektan alert. UI `/admin/leads/[id]`: contact, request (property, wishes, `similar_to`), source (page, UTM, consent), delivery per channel with «Повторити» (`role=status` result), skeleton, error, not-found; back link keeps list filters. Local fixtures: `ok` → sent, `fail` → failed +1 attempt, also past 5. Files: `src/lib/db/admin-leads.ts`, `src/features/leads/{deliver-lead,lead-delivery-content,retry-leads}*.ts`, `src/features/admin/leads/*`, `src/app/admin/(panel)/leads/[id]/*` |

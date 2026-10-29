@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { LeadDeliveryUpdate, LeadForDelivery } from "@/lib/db/leads";
 import { PlektanError } from "@/lib/plektan";
 import { TelegramError } from "@/lib/telegram";
-import { deliverLeadWith, type DeliverLeadDeps } from "./deliver-lead";
+import { deliverLeadWith, retryLeadChannelWith, type DeliverLeadDeps } from "./deliver-lead";
 
 const baseLead: LeadForDelivery = {
   id: "l1",
@@ -109,5 +109,79 @@ describe("deliverLeadWith", () => {
   it("reports a missing lead", async () => {
     const { deps } = setup({}, null);
     expect(await deliverLeadWith(deps, "nope")).toMatchObject({ found: false });
+  });
+});
+
+describe("retryLeadChannelWith", () => {
+  const failedLead: LeadForDelivery = {
+    ...baseLead,
+    plektan_status: "failed",
+    plektan_attempts: 5,
+    telegram_status: "failed",
+    telegram_attempts: 2,
+  };
+
+  it("retries a failed channel past the attempt limit and clears the error", async () => {
+    const { deps, saved } = setup({}, failedLead);
+    expect(await retryLeadChannelWith(deps, "l1", "plektan")).toEqual({ found: true, outcome: "sent" });
+    expect(saved).toEqual([
+      { channel: "plektan", status: "sent", error: null, attempts: 6, itemId: "777", nextAttemptAt: null },
+    ]);
+  });
+
+  it("runs only the chosen channel", async () => {
+    const { deps, saved } = setup({}, failedLead);
+    await retryLeadChannelWith(deps, "l1", "telegram");
+    expect(deps.sendToPlektan).not.toHaveBeenCalled();
+    expect(deps.sendToTelegram).toHaveBeenCalledTimes(1);
+    expect(saved).toEqual([{ channel: "telegram", status: "sent", error: null, attempts: 3, nextAttemptAt: null }]);
+  });
+
+  it("sets no schedule once attempts reach the limit, with the kind-only error", async () => {
+    const { deps, saved } = setup(
+      {
+        sendToPlektan: async () => {
+          throw new PlektanError({ kind: "http", message: "echoes +380501234567", status: 500 });
+        },
+      },
+      failedLead,
+    );
+    expect(await retryLeadChannelWith(deps, "l1", "plektan")).toEqual({ found: true, outcome: "failed" });
+    expect(saved).toEqual([
+      { channel: "plektan", status: "failed", error: "http 500", attempts: 6, nextAttemptAt: null },
+    ]);
+  });
+
+  it("keeps the usual backoff while attempts remain", async () => {
+    const { deps, saved } = setup(
+      {
+        sendToTelegram: async () => {
+          throw new TelegramError({ kind: "network", message: "x" });
+        },
+      },
+      failedLead,
+    );
+    await retryLeadChannelWith(deps, "l1", "telegram");
+    expect(saved).toEqual([
+      { channel: "telegram", status: "failed", error: "network", attempts: 3, nextAttemptAt: "2026-10-28T13:00:00.000Z" },
+    ]);
+  });
+
+  it("marks a channel without keys skipped", async () => {
+    const { deps } = setup({ plektanMode: () => "off" }, failedLead);
+    expect(await retryLeadChannelWith(deps, "l1", "plektan")).toEqual({ found: true, outcome: "skipped" });
+    expect(deps.sendToPlektan).not.toHaveBeenCalled();
+  });
+
+  it.each(["sent", "pending", "skipped"] as const)("does nothing for a %s channel", async (status) => {
+    const { deps, saved } = setup({}, { ...baseLead, plektan_status: status });
+    expect(await retryLeadChannelWith(deps, "l1", "plektan")).toEqual({ found: true, outcome: "not_due" });
+    expect(deps.sendToPlektan).not.toHaveBeenCalled();
+    expect(saved).toEqual([]);
+  });
+
+  it("reports a missing lead", async () => {
+    const { deps } = setup({}, null);
+    expect(await retryLeadChannelWith(deps, "l1", "plektan")).toEqual({ found: false, outcome: "not_due" });
   });
 });
