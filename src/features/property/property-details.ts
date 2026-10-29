@@ -91,7 +91,7 @@ export const shortFacts = (p: PublishedProperty): string[] => {
   ];
 };
 
-const districtText = (district: string) =>
+export const districtText = (district: string) =>
   /р-н|район/i.test(district) ? district : `${district} р-н`;
 
 /** «Київ, Оболонський р-н, просп. Володимира Івасюка» — never the house number. Null when nothing is known. */
@@ -111,23 +111,6 @@ export const descriptionParagraphs = (text: string | null): string[] =>
     .split(/\n\s*\n/)
     .map((part) => part.trim())
     .filter(Boolean);
-
-const META_DESCRIPTION_LENGTH = 155;
-
-/** Meta description: SEO field, else the start of the text cut on a word, else built from the facts. */
-export const metaDescription = (p: PublishedProperty): string => {
-  if (p.seo_description?.trim()) return p.seo_description.trim();
-  const text = (p.description ?? "").replace(/\s+/g, " ").trim();
-  if (text) {
-    if (text.length <= META_DESCRIPTION_LENGTH) return text;
-    const cut = text.slice(0, META_DESCRIPTION_LENGTH);
-    const lastSpace = cut.lastIndexOf(" ");
-    return `${(lastSpace > 80 ? cut.slice(0, lastSpace) : cut).replace(/[\s,.;:—-]+$/, "")}…`;
-  }
-  return [PROPERTY_TYPE_LABELS[p.property_type], ...shortFacts(p), locationText(p), priceText(p)]
-    .filter(Boolean)
-    .join(", ");
-};
 
 export type ContactPhone = { display: string; href: string };
 

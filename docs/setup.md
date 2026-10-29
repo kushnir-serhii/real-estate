@@ -15,7 +15,7 @@ Everything so far runs locally (local Supabase in Docker, fixture modes). This f
 
 ## Site URL
 
-Set `NEXT_PUBLIC_SITE_URL` to the production domain (for example `https://sofiacity.example`, no trailing path) in Cloudflare, for **build and runtime** (`NEXT_PUBLIC_*` are inlined at build time). It sets `metadataBase` and canonical URLs. Empty means `http://localhost:3000`, fine for local work only.
+Set `NEXT_PUBLIC_SITE_URL` to the production domain (for example `https://sofiacity.example`, no trailing path) in Cloudflare, for **build and runtime** (`NEXT_PUBLIC_*` are inlined at build time). It sets `metadataBase` and canonical URLs. Empty means `http://localhost:3000` in `pnpm dev` only: a production build (`pnpm build`, `pnpm preview`, `pnpm deploy`) fails with a clear error if it is empty or not a valid URL. For a local production build without a domain put `SEO_ALLOW_LOCALHOST=1` in `.env.local` (never in Cloudflare).
 
 ## Supabase
 

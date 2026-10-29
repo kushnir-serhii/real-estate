@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 
-import { BRAND } from "@/constants/brand";
+import { BRAND, OG_DEFAULT_IMAGE } from "@/constants/brand";
+import { getSiteUrl } from "@/lib/site-url";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
@@ -11,20 +12,17 @@ const manrope = Manrope({
   display: "swap",
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-
-const getMetadataBase = () => {
-  try {
-    return new URL(SITE_URL);
-  } catch {
-    return new URL("http://localhost:3000");
-  }
-};
-
 export const metadata: Metadata = {
-  metadataBase: getMetadataBase(),
+  metadataBase: new URL(getSiteUrl()),
   title: { default: BRAND.siteTitle, template: `%s — ${BRAND.name}` },
   description: BRAND.siteDescription,
+  openGraph: {
+    type: "website",
+    locale: "uk_UA",
+    siteName: BRAND.name,
+    images: [OG_DEFAULT_IMAGE],
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => (
