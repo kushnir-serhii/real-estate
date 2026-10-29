@@ -1,6 +1,6 @@
 ---
 name: backend
-description: Backend/integrations builder for the Lyndrik real estate site — Supabase schema, migrations and RLS, data access, Plektan CRM client and sync, R2 photos, Turnstile, Telegram, route handlers and server actions. Use for slices that are mostly data, sync or integrations.
+description: Backend/integrations builder for the Sofiacity real estate site — Supabase schema, migrations and RLS, data access, Plektan CRM client and sync, R2 photos, Turnstile, Telegram, route handlers and server actions. Use for slices that are mostly data, sync or integrations.
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: sonnet
 ---

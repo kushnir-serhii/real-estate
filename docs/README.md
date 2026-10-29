@@ -1,4 +1,4 @@
-# Lyndrik real estate — docs
+# Sofiacity real estate — docs
 
 | Path | What it is |
 | --- | --- |

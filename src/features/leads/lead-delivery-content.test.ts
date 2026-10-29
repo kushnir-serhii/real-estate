@@ -4,7 +4,7 @@ import type { LeadForDelivery } from "@/lib/db/leads";
 import { PROP_KINDS_BY_PROPERTY } from "@/lib/db/property-values";
 import { buildAdvertInfo, buildPlektanAlertText, buildPlektanRequest, buildTelegramText, escapeHtml } from "./lead-delivery-content";
 
-const SITE = "https://lyndrik.example/";
+const SITE = "https://sofiacity.example/";
 
 const plektanProperty = {
   slug: "kvartira-1",
@@ -46,7 +46,7 @@ describe("buildPlektanRequest", () => {
     expect(params).not.toHaveProperty("client_email");
     expect(params).toHaveProperty(
       "advert_info",
-      "Цікавить об'єкт №12345 https://lyndrik.example/catalog/kvartira-1\nПередзвоніть",
+      "Цікавить об'єкт №12345 https://sofiacity.example/catalog/kvartira-1\nПередзвоніть",
     );
   });
 
@@ -98,12 +98,12 @@ describe("buildTelegramText", () => {
     expect(text).toContain("Ім'я: &lt;b&gt;Hack&lt;/b&gt; &amp; co");
     expect(text).toContain("Повідомлення: a &lt; b");
     expect(text).toContain("Сторінка: https://x.ua/?a=1&amp;b=2");
-    expect(text).toContain('<a href="https://lyndrik.example/catalog/kvartira-1">2-кімнатна &lt;Центр&gt;</a> (№ 12345)');
+    expect(text).toContain('<a href="https://sofiacity.example/catalog/kvartira-1">2-кімнатна &lt;Центр&gt;</a> (№ 12345)');
   });
 
   it("ends with the admin link to the lead", () => {
     const text = buildTelegramText(lead({ id: "abc-1" }), SITE);
-    expect(text.split("\n").at(-1)).toBe("Відкрити в адмінці: https://lyndrik.example/admin/leads/abc-1");
+    expect(text.split("\n").at(-1)).toBe("Відкрити в адмінці: https://sofiacity.example/admin/leads/abc-1");
   });
 
   it("omits the number for an admin property", () => {
@@ -133,7 +133,7 @@ describe("buildPlektanAlertText", () => {
   it("has name, phone and the admin link", () => {
     const text = buildPlektanAlertText({ id: "abc-1", name: "Іван", phone: "+380501234567" }, SITE);
     expect(text).toContain("Заявка не дійшла до Plektan");
-    expect(text.split("\n").at(-1)).toBe("Відкрити в адмінці: https://lyndrik.example/admin/leads/abc-1");
+    expect(text.split("\n").at(-1)).toBe("Відкрити в адмінці: https://sofiacity.example/admin/leads/abc-1");
   });
 });
 

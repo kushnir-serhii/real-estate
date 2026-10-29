@@ -95,7 +95,7 @@ export const createGeocoder = (config: GeocoderConfig = {}): Geocoder => {
     let response: Response;
     try {
       response = await (config.fetch ?? fetch)(`${ENDPOINT}?${params.toString()}`, {
-        headers: { "User-Agent": `LyndrikSync/1.0 (${email})`, Accept: "application/json" },
+        headers: { "User-Agent": `SofiacitySync/1.0 (${email})`, Accept: "application/json" },
         signal: AbortSignal.timeout(timeoutMs),
       });
     } catch {

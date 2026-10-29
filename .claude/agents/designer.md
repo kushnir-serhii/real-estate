@@ -1,6 +1,6 @@
 ---
 name: designer
-description: UI/UX designer + frontend builder for the Lyndrik real estate site. Use for designing and building pages, components, layout, design tokens and all UI states (public site and admin). Use proactively for any task that changes how the site looks or feels.
+description: UI/UX designer + frontend builder for the Sofiacity real estate site. Use for designing and building pages, components, layout, design tokens and all UI states (public site and admin). Use proactively for any task that changes how the site looks or feels.
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: opus
 ---

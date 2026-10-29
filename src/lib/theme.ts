@@ -1,4 +1,4 @@
-export const THEME_STORAGE_KEY = "lyndrik-theme";
+export const THEME_STORAGE_KEY = "sofiacity-theme";
 
 export const THEMES = ["light", "dark", "system"] as const;
 export type Theme = (typeof THEMES)[number];

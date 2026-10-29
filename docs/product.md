@@ -1,7 +1,7 @@
 # Product
 
 ## What it is
-The website and admin for **Lyndrik**, a real estate agency in Ukraine. Visitors browse the agency's properties (sale and rent), leave a request or talk to an AI assistant; the manager gets every lead in Telegram and in the admin. Properties come from the agency's CRM (Plektan) or are entered in the admin.
+The website and admin for **Sofiacity**, a real estate agency in Ukraine. Visitors browse the agency's properties (sale and rent), leave a request or talk to an AI assistant; the manager gets every lead in Telegram and in the admin. Properties come from the agency's CRM (Plektan) or are entered in the admin.
 
 **The site is the foundation, the CRM is optional.** The owner (Andrii) may drop Plektan. Properties, photos, leads and clients therefore live in our Supabase + R2; Plektan is an external source and the channel to the portals, not the store. Without Plektan only portal publishing disappears.
 
@@ -49,7 +49,7 @@ Build order and status: [roadmap.md](roadmap.md). Later options (client login vi
 ## Design principles
 **Template, mock data:** for now the site is a template for the real project. All agency data (name, contacts, messengers, texts, coordinates) is mock and lives only as consts in `src/constants/`, so the real agency's data replaces it in one place. Components never hardcode agency data. The seed (`supabase/seed.sql`) is demo data too.
 
-**Design status:** brand, logo and visual design are not defined yet. Build with a neutral placeholder look (shadcn neutral palette, one accent, text wordmark "Lyndrik", placeholder photos). Everything visual goes through tokens in `globals.css` and one `logo.tsx`, so the real design replaces it later without touching pages. Don't ask about branding before it exists.
+**Design status:** brand, logo and visual design are not defined yet. Build with a neutral placeholder look (shadcn neutral palette, one accent, text wordmark "Sofiacity", placeholder photos). Everything visual goes through tokens in `globals.css` and one `logo.tsx`, so the real design replaces it later without touching pages. Don't ask about branding before it exists.
 
 1. Photos first; clean, calm, trustworthy. Neutral palette + one accent.
 2. Mobile-first: catalog, property page and forms must be perfect at 375px.

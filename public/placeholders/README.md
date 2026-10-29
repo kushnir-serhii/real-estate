@@ -1,6 +1,6 @@
 # Placeholder photos
 
-Demo photos for the local seed (`supabase/seed.sql`), referenced as `r2_key = placeholders/<file>.webp` and served from `public/` while `NEXT_PUBLIC_R2_PUBLIC_URL` is empty. Not real Lyndrik listings; replace with real photos in production.
+Demo photos for the local seed (`supabase/seed.sql`), referenced as `r2_key = placeholders/<file>.webp` and served from `public/` while `NEXT_PUBLIC_R2_PUBLIC_URL` is empty. Not real Sofiacity listings; replace with real photos in production.
 
 Licence: [Unsplash License](https://unsplash.com/license) (free to use, no attribution required). Downloaded once as WebP (`fm=webp`), each under 200 KB.
 

@@ -4,12 +4,12 @@ export const CONTACTS = {
     display: "+380 67 000 00 01",
     href: "tel:+380670000001",
   },
-  email: "office@lyndrik.example",
+  email: "office@sofiacity.example",
   address: "м. Київ, вул. Хрещатик, 10",
   hours: "щодня 9:00–19:00",
   coordinates: { lat: 50.4483, lng: 30.5227 },
   messengers: {
-    telegram: { label: "Telegram", url: "https://t.me/lyndrik", enabled: true },
+    telegram: { label: "Telegram", url: "https://t.me/sofiacity", enabled: true },
     viber: {
       label: "Viber",
       url: "viber://chat?number=%2B380670000001",

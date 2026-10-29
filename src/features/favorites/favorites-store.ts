@@ -2,7 +2,7 @@ import { useSyncExternalStore } from "react";
 import { z } from "zod";
 
 /** localStorage key: JSON array of property ids (uuids), newest first. */
-export const FAVORITES_KEY = "lyndrik:favorites";
+export const FAVORITES_KEY = "sofiacity:favorites";
 export const MAX_FAVORITES = 100;
 
 const idSchema = z.string().uuid();
