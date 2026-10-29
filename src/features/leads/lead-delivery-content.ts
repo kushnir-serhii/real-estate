@@ -5,6 +5,7 @@ import type { Database } from "@/lib/supabase/database.types";
 import { PROP_KINDS_BY_PROPERTY, PROPERTY_TYPES } from "@/lib/db/property-values";
 import type { PlektanAddAdvertParams } from "@/lib/plektan";
 import { PROPERTY_TYPE_LABELS } from "@/features/properties/property-labels";
+import { aiWishLines, aiWishesSchema } from "./ai-wishes";
 
 /** Pure builders: what goes to Plektan and to Telegram for a lead. No I/O, no personal data in logs. */
 
@@ -16,7 +17,7 @@ export const DEFAULT_GENERAL_PROPERTY_TYPE = "flat" as const;
 const TELEGRAM_FIELD_MAX = 1500;
 
 const similarToSchema = z.object({ slug: z.string(), title: z.string() });
-const payloadSchema = z.object({
+const payloadSchema = aiWishesSchema.extend({
   deal: z.enum(["buy", "rent"]).optional(),
   property_type: z.enum(PROPERTY_TYPES).optional(),
   similar_to: similarToSchema.optional(),
@@ -73,6 +74,7 @@ export const buildTelegramText = (lead: LeadForDelivery, siteUrl?: string): stri
     payload.property_type ? PROPERTY_TYPE_LABELS[payload.property_type] : null,
   ].filter((part): part is string => part !== null);
   if (wishes.length > 0) lines.push(`Побажання: ${escapeHtml(wishes.join(", "))}`);
+  for (const line of aiWishLines(payload)) lines.push(escapeHtml(truncate(line, TELEGRAM_FIELD_MAX)));
   if (payload.similar_to) {
     lines.push(`Схожий на: ${link(propertyUrl(payload.similar_to.slug, siteUrl), payload.similar_to.title)}`);
   }
@@ -110,6 +112,7 @@ export const buildAdvertInfo = (lead: LeadForDelivery, siteUrl?: string): string
       payload.property_type ? PROPERTY_TYPE_LABELS[payload.property_type] : null,
     ].filter((part): part is string => part !== null);
     if (wishes.length > 0) lines.push(`Побажання: ${wishes.join(", ")}`);
+    lines.push(...aiWishLines(payload));
     if (payload.similar_to) {
       lines.push(`Схожий на: «${payload.similar_to.title}» ${propertyUrl(payload.similar_to.slug, siteUrl)}`);
     }

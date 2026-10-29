@@ -15,13 +15,21 @@ export type FixtureSearchArgs = {
   currency?: Currency;
 };
 
-/**
- * What the scripted assistant does this turn: say something, or call a tool. Slice 3 adds another
- * tool step (`propose_lead`); the text steps stay as they are.
- */
+/** Arguments the scripted assistant passes to `propose_lead` (same names as the real tool). */
+export type FixtureProposeArgs = {
+  summary: string;
+  deal?: "buy" | "rent";
+  property_type?: "flat" | "house";
+  rooms?: string[];
+  budget?: { from?: number; to?: number; currency: Currency };
+  phone?: string;
+};
+
+/** What the scripted assistant does this turn: say something, or call a tool. */
 export type FixtureStep =
   | { kind: "text"; text: string }
-  | { kind: "tool_call"; name: "search_properties"; arguments: FixtureSearchArgs };
+  | { kind: "tool_call"; name: "search_properties"; arguments: FixtureSearchArgs }
+  | { kind: "tool_call"; name: "propose_lead"; arguments: FixtureProposeArgs };
 
 type Wishes = {
   deal: "buy" | "rent" | null;
@@ -139,14 +147,67 @@ const resultsText = (content: string): string => {
   return `Знайшла для вас варіанти, усього ${total}. Для початку: ${first.title}, ${first.price}. Уточнимо район чи бюджет?`;
 };
 
+/** The text after the card is shown (the model must not claim the request is sent). */
+export const CARD_SHOWN_TEXT = "Перевірте дані в картці й натисніть «Надіслати».";
+
+/** A tool result of `propose_lead` carries this status (see the real tool). */
+const isCardResult = (content: string): boolean => content.includes("card_shown");
+
+const PHONE = /\+?\d[\d\s\-()]{8,}\d/;
+const LEAD_WORDS = /заявк|зателефонуйт|передзвон|зв'яжіт|залиш\w* контакт/;
+const YES = /^(так|угу|ага|добре|гаразд|да)(?![\p{L}])/u;
+
+/** The card is offered for a phone number, request words, or a «так» after search results. */
+const wantsCard = (last: string, messages: readonly LlmMessage[]): boolean => {
+  if (PHONE.test(last) || LEAD_WORDS.test(last)) return true;
+  const sawResults = messages.some((m) => m.role === "tool" && !isCardResult(m.content));
+  return sawResults && YES.test(last.trim());
+};
+
+const dealWord = { buy: "купити", rent: "орендувати" } as const;
+
+const proposeArgsOf = (wishes: Wishes, last: string): FixtureProposeArgs => {
+  const type = wishes.propertyType === "house" ? "house" : wishes.propertyType ? "flat" : null;
+  const parts = [
+    wishes.deal ? `Хоче ${dealWord[wishes.deal]}` : "Залишає запит",
+    type === "house" ? "будинок" : type === "flat" ? "квартиру" : null,
+    wishes.rooms !== null ? `${wishes.rooms} кімн.` : null,
+    wishes.budgetTo !== null ? `до ${wishes.budgetTo} ${wishes.currency ?? "USD"}` : null,
+  ].filter((part): part is string => part !== null);
+  const phone = PHONE.exec(last)?.[0];
+  const hasBudget = wishes.budgetFrom !== null || wishes.budgetTo !== null;
+  return {
+    summary: parts.join(", "),
+    ...(wishes.deal ? { deal: wishes.deal } : {}),
+    ...(type ? { property_type: type } : {}),
+    ...(wishes.rooms !== null ? { rooms: [wishes.rooms >= 5 ? "5+" : String(wishes.rooms)] } : {}),
+    ...(hasBudget
+      ? {
+          budget: {
+            ...(wishes.budgetFrom !== null ? { from: wishes.budgetFrom } : {}),
+            ...(wishes.budgetTo !== null ? { to: wishes.budgetTo } : {}),
+            currency: wishes.currency ?? "USD",
+          },
+        }
+      : {}),
+    ...(phone ? { phone: phone.trim() } : {}),
+  };
+};
+
 /** Rule-based reply from the conversation (the fixture never sees the system prompt). */
 export const planFixtureReply = (messages: readonly LlmMessage[]): FixtureStep => {
   const lastMessage = messages.at(-1);
   // The round after a tool call: the tool result is the last message, as it would be for the real model.
-  if (lastMessage?.role === "tool") return { kind: "text", text: resultsText(lastMessage.content) };
+  if (lastMessage?.role === "tool") {
+    return { kind: "text", text: isCardResult(lastMessage.content) ? CARD_SHOWN_TEXT : resultsText(lastMessage.content) };
+  }
 
   const visitorTexts = messages.flatMap((m) => (m.role === "user" ? [m.content] : []));
   const last = (visitorTexts.at(-1) ?? "").toLowerCase();
+
+  if (wantsCard(last, messages)) {
+    return { kind: "tool_call", name: "propose_lead", arguments: proposeArgsOf(readWishes(visitorTexts), last) };
+  }
 
   if (/питання про агенц|про агенц/.test(last)) {
     return {

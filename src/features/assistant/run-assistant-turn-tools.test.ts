@@ -98,11 +98,10 @@ describe("runAssistantTurn tool loop", () => {
       { type: "text", delta: "Є 7 варіантів." },
       { type: "done" },
     ]);
-    expect(db.runAssistantTool).toHaveBeenCalledWith({
-      id: "call_1",
-      name: "search_properties",
-      arguments: '{"deal":"buy"}',
-    });
+    expect(db.runAssistantTool).toHaveBeenCalledWith(
+      { id: "call_1", name: "search_properties", arguments: '{"deal":"buy"}' },
+      { conversationId: NEW_ID },
+    );
     expect(llm.requests[0]?.tools?.map((t) => t.name)).toEqual(["search_properties"]);
 
     const second: LlmMessage[] = llm.requests[1]?.messages ?? [];

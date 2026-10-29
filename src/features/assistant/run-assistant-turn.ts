@@ -133,7 +133,7 @@ export async function* runAssistantTurn(
 
       const results: { call: LlmToolCall; content: string }[] = [];
       for (const call of toolCalls) {
-        const outcome = await runAssistantTool(call);
+        const outcome = await runAssistantTool(call, { conversationId });
         results.push({ call, content: outcome.content });
         if (outcome.event) yield outcome.event;
       }

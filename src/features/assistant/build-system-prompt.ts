@@ -46,6 +46,14 @@ const SEARCH_TOOL_RULES = [
   "Якщо інструмент повернув помилку або district_ignored, не показуй технічних деталей: скажи, що район не знайдено серед наших, і запропонуй схожі з available_districts.",
 ] as const;
 
+/** When and how the model offers the request card. */
+const LEAD_TOOL_RULES = [
+  "Інструмент propose_lead показує відвідувачу картку заявки (ім'я, телефон, згода). Виклич його, коли відвідувач хоче, щоб з ним зв'язалися, залишити заявку чи записатися на перегляд, а також після результатів пошуку, коли він зацікавлений. Передай усе, що вже відомо: угоду, тип, райони, кімнати, бюджет із валютою, оплату (готівка чи іпотека), терміни та короткий опис українською.",
+  "Імені й телефону можна запитати в чаті, але не наполягай: у картці відвідувач введе їх сам.",
+  "propose_lead нічого не надсилає. Не кажи, що заявку надіслано чи передано менеджеру, доки відвідувач не підтвердить картку: після виклику лише попроси перевірити дані в картці й натиснути «Надіслати».",
+  "Не проси згоди на обробку даних у тексті: картка робить це сама.",
+] as const;
+
 /** Builds the system prompt from the assistant constants and the optional current property. */
 export const buildSystemPrompt = (property?: PromptProperty | null): string => {
   const sections = [
@@ -53,6 +61,7 @@ export const buildSystemPrompt = (property?: PromptProperty | null): string => {
     `Контакти агенції: телефон ${CONTACTS.phone.display}, пошта ${CONTACTS.email}, адреса ${CONTACTS.address}, години роботи ${CONTACTS.hours}.`,
     `Правила:\n${ASSISTANT_RULES.map((rule) => `- ${rule}`).join("\n")}`,
     `Пошук об'єктів:\n${SEARCH_TOOL_RULES.map((rule) => `- ${rule}`).join("\n")}`,
+    `Заявка для менеджера:\n${LEAD_TOOL_RULES.map((rule) => `- ${rule}`).join("\n")}`,
     `FAQ агенції (відповідай на питання лише за цим текстом):\n${ASSISTANT_FAQ.map((e) => `Q: ${e.question}\nA: ${e.answer}`).join("\n\n")}`,
     `Початкові кнопки швидкої відповіді в чаті: ${ASSISTANT_QUICK_REPLIES.join(", ")}.`,
     ...(property ? [propertyContext(property)] : []),

@@ -31,7 +31,7 @@ const CATALOG_DEAL = { buy: "sell", rent: "rent_long", rent_daily: "rent_day" } 
 >;
 
 /** The model may send room counts as numbers (`2`) or the catalog's strings (`"2"`, `"5+"`). */
-const roomSchema = z.union([
+export const roomSchema = z.union([
   z.enum(ROOM_OPTIONS),
   z
     .number()
