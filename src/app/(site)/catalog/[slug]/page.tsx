@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { metaDescription } from "@/features/property/property-details";
+import { BRAND, OG_DEFAULT_IMAGE } from "@/constants/brand";
+import { propertySeoDescription, propertySeoTitle } from "@/features/property/property-seo";
 import { PropertyView } from "@/features/property/property-view";
 import { SoldPropertyView } from "@/features/property/sold-property-view";
 import { soldStatusLabel } from "@/features/property/sold-status-label";
@@ -24,7 +25,7 @@ export const generateMetadata = async ({ params }: PropertyPageProps): Promise<M
   const { property } = result;
 
   const canonical = `/catalog/${property.slug}`;
-  const description = metaDescription(property);
+  const description = propertySeoDescription(property);
 
   if (result.kind === "sold") {
     return {
@@ -43,15 +44,24 @@ export const generateMetadata = async ({ params }: PropertyPageProps): Promise<M
           ...(photo.width && photo.height && !photo.sizes ? { width: photo.width, height: photo.height } : {}),
         },
       ]
-    : undefined;
-  // A custom SEO title already carries the brand: don't run it through the title template.
-  const title = property.seo_title?.trim() ? { absolute: property.seo_title.trim() } : property.title;
+    : [OG_DEFAULT_IMAGE];
+  const title = propertySeoTitle(property);
 
   return {
     title,
     description,
     alternates: { canonical },
-    openGraph: { type: "website", url: canonical, title: property.seo_title?.trim() || property.title, description, images },
+    // A page-level openGraph replaces the root one entirely, so locale and site name are repeated here.
+    openGraph: {
+      type: "website",
+      url: canonical,
+      locale: "uk_UA",
+      siteName: BRAND.name,
+      title: typeof title === "string" ? title : title.absolute,
+      description,
+      images,
+    },
+    twitter: { card: "summary_large_image" },
   };
 };
 

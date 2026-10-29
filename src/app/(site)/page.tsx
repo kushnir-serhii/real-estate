@@ -10,15 +10,17 @@ import { HomeAbout } from "@/features/home/home-about";
 import { HomeCta } from "@/features/home/home-cta";
 import { QuickSearch } from "@/features/home/quick-search";
 import { getPageContent } from "@/features/pages/get-page-content";
+import { pageSeoDescription, pageSeoTitle } from "@/features/pages/page-seo";
 
 export const revalidate = 300;
 
 export const generateMetadata = async (): Promise<Metadata> => {
   const page = await getPageContent("home");
   return {
-    title: { absolute: page.seo_title ?? page.title },
-    description: page.seo_description ?? undefined,
+    title: pageSeoTitle(page),
+    description: pageSeoDescription(page),
     alternates: { canonical: "/" },
+    robots: page.noindex ? { index: false, follow: true } : undefined,
   };
 };
 

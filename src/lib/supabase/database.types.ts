@@ -184,6 +184,8 @@ export type Database = {
         Row: {
           body: string
           created_at: string
+          is_draft: boolean
+          noindex: boolean
           seo_description: string | null
           seo_title: string | null
           slug: string
@@ -193,6 +195,8 @@ export type Database = {
         Insert: {
           body?: string
           created_at?: string
+          is_draft?: boolean
+          noindex?: boolean
           seo_description?: string | null
           seo_title?: string | null
           slug: string
@@ -202,6 +206,8 @@ export type Database = {
         Update: {
           body?: string
           created_at?: string
+          is_draft?: boolean
+          noindex?: boolean
           seo_description?: string | null
           seo_title?: string | null
           slug?: string

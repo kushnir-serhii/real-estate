@@ -2,12 +2,15 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
+import { JsonLd } from "@/components/seo/json-ld";
 import { buttonVariants } from "@/components/ui/button";
 import { FavoriteButton } from "@/features/favorites/favorite-button";
 import { PropertyRequestForm } from "@/features/leads/property-request-form";
+import { breadcrumbSchema, CATALOG_CRUMB, HOME_CRUMB, propertySchema } from "@/features/seo/schemas";
+import { getSiteUrl } from "@/lib/site-url";
 import { DEAL_LABELS, PROPERTY_TYPE_LABELS } from "@/features/properties/property-labels";
 import type { PublishedProperty } from "@/lib/db/properties";
-import { photoSrcSet } from "@/lib/photos/photo-src-set";
+import { largestPhotoUrl, photoSrcSet } from "@/lib/photos/photo-src-set";
 import { photoUrl } from "@/lib/photos/photo-url";
 import { cn } from "@/lib/utils";
 import { PropertyContactCard } from "./property-contact-card";
@@ -53,9 +56,23 @@ export const PropertyView = ({ property }: PropertyViewProps) => {
   const perSquareMeter = perSquareMeterText(property);
   const facts = shortFacts(property);
   const location = locationText(property);
+  const siteUrl = getSiteUrl();
+  const listing = propertySchema(
+    siteUrl,
+    property,
+    property.property_photos.map((photo) => largestPhotoUrl(photo)),
+  );
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 pt-2 sm:pt-4 lg:pb-16">
+      <JsonLd
+        data={breadcrumbSchema(siteUrl, [
+          HOME_CRUMB,
+          CATALOG_CRUMB,
+          { name: property.title, path: `/catalog/${property.slug}` },
+        ])}
+      />
+      {listing ? <JsonLd data={listing} /> : null}
       <Link
         href={`/catalog?deal=${property.deal}`}
         className="inline-flex min-h-11 items-center gap-2 rounded-md text-sm font-medium text-muted-foreground outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"

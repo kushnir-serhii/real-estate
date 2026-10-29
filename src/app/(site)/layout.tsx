@@ -1,3 +1,6 @@
+import { JsonLd } from "@/components/seo/json-ld";
+import { organizationSchema } from "@/features/seo/schemas";
+import { getSiteUrl } from "@/lib/site-url";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 
@@ -9,6 +12,7 @@ const SiteLayout = ({ children }: { children: React.ReactNode }) => (
     >
       Перейти до змісту
     </a>
+    <JsonLd data={organizationSchema(getSiteUrl())} />
     <SiteHeader />
     <main id="main" className="flex-1">
       {children}

@@ -8,15 +8,17 @@ import { GeneralRequestForm } from "@/features/leads/general-request-form";
 import { MapEmbed } from "@/features/contacts/map-embed";
 import { Markdown } from "@/features/pages/markdown";
 import { getPageContent } from "@/features/pages/get-page-content";
+import { pageSeoDescription, pageSeoTitle } from "@/features/pages/page-seo";
 
 export const revalidate = 300;
 
 export const generateMetadata = async (): Promise<Metadata> => {
   const page = await getPageContent("contacts");
   return {
-    title: page.seo_title ?? page.title,
-    description: page.seo_description ?? undefined,
+    title: pageSeoTitle(page),
+    description: pageSeoDescription(page),
     alternates: { canonical: "/contacts" },
+    robots: page.noindex ? { index: false, follow: true } : undefined,
   };
 };
 

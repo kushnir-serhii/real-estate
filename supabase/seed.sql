@@ -384,6 +384,9 @@ insert into public.pages (slug, title, body, seo_title, seo_description) values
    'Політика конфіденційності — Sofiacity',
    'Як агентство нерухомості Sofiacity обробляє та захищає персональні дані відвідувачів сайту.');
 
+-- The privacy text is a template until the agency or a lawyer reviews it (spec 009).
+update public.pages set is_draft = true where slug = 'privacy';
+
 -- ===== LOCAL ONLY: demo admin users (spec 007). Never run this against production. ==============
 -- admin@sofiacity.local / admin12345 is an admin; user@sofiacity.local / user12345 is signed up but NOT an admin.
 -- All token columns are '' (not null) or GoTrue fails to sign in.
