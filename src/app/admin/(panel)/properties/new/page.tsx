@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 
 import { buttonVariants } from "@/components/ui/button";
 import { ADMIN_PROPERTIES_PATH } from "@/features/admin/properties/properties-params";
+import { PhotosAfterSaveNote } from "@/features/admin/properties/photos/photos-after-save-note";
 import { PropertyCreateDisabled } from "@/features/admin/properties/property-create-disabled";
 import { PropertyForm } from "@/features/admin/properties/property-form";
 import { EMPTY_PROPERTY_FORM } from "@/features/admin/properties/property-form-values";
@@ -41,15 +42,18 @@ const AdminNewPropertyPage = async () => {
         </div>
       </div>
       {canCreate ? (
-        <PropertyForm
-          propertyId={null}
-          initialValues={EMPTY_PROPERTY_FORM}
-          agents={agents.map((a) => ({ ...a, inactive: false }))}
-          seoOnly={false}
-          slug={null}
-          publishMissing={[]}
-          createdNotice={null}
-        />
+        <>
+          <PropertyForm
+            propertyId={null}
+            initialValues={EMPTY_PROPERTY_FORM}
+            agents={agents.map((a) => ({ ...a, inactive: false }))}
+            seoOnly={false}
+            slug={null}
+            publishMissing={[]}
+            createdNotice={null}
+          />
+          <PhotosAfterSaveNote />
+        </>
       ) : (
         <PropertyCreateDisabled />
       )}

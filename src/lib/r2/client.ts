@@ -2,14 +2,17 @@ import "server-only";
 import { DeleteObjectsCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 /**
- * Cloudflare R2 (S3 API). Used by the sync (Node) and, later, the admin upload.
- * Fixture mode (any `R2_*` value empty): objects are written under `public/r2-local/<key>`,
- * which `photoUrl()` serves locally. The `fs` import lives in the fixture path only.
+ * Cloudflare R2. Three paths, in this order:
+ * 1. the Worker binding `PHOTOS_BUCKET` (admin upload on Cloudflare; see docs/setup.md),
+ * 2. the S3 API when every `R2_*` value is set (the sync in plain Node),
+ * 3. fixture mode: objects are written under `public/r2-local/<key>`, which `photoUrl()` serves locally.
+ * The `fs` import lives in the fixture path only; the binding lookup never throws outside Workers.
  */
 
 const TIMEOUT_MS = 30_000;
 const CACHE_CONTROL = "public, max-age=31536000, immutable";
 const DELETE_BATCH = 1000;
+const BINDING_DELETE_BATCH = 1000;
 export const LOCAL_DIR = "public/r2-local";
 
 type R2Config = { accountId: string; accessKeyId: string; secretAccessKey: string; bucket: string };
@@ -21,6 +24,34 @@ const readConfig = (): R2Config | null => {
   const bucket = process.env.R2_BUCKET?.trim() ?? "";
   if (accountId === "" || accessKeyId === "" || secretAccessKey === "" || bucket === "") return null;
   return { accountId, accessKeyId, secretAccessKey, bucket };
+};
+
+/** The slice of the R2 bucket binding used here (structural, so no generated binding type is needed). */
+type R2BucketBinding = {
+  put: (key: string, value: Uint8Array, options: { httpMetadata: { contentType: string; cacheControl: string } }) => Promise<unknown>;
+  delete: (keys: string | string[]) => Promise<void>;
+};
+
+const isBucketBinding = (value: unknown): value is R2BucketBinding =>
+  typeof value === "object" &&
+  value !== null &&
+  "put" in value &&
+  typeof value.put === "function" &&
+  "delete" in value &&
+  typeof value.delete === "function";
+
+/** The `PHOTOS_BUCKET` binding, or null outside a Workers / OpenNext context or when it isn't configured. */
+const getBinding = async (): Promise<R2BucketBinding | null> => {
+  try {
+    const { getCloudflareContext } = await import("@opennextjs/cloudflare");
+    const { env } = await getCloudflareContext({ async: true });
+    // Not in the generated `CloudflareEnv` until the binding is added to wrangler.jsonc.
+    if (!("PHOTOS_BUCKET" in env)) return null;
+    const bucket: unknown = env.PHOTOS_BUCKET;
+    return isBucketBinding(bucket) ? bucket : null;
+  } catch {
+    return null;
+  }
 };
 
 export const isR2Fixture = (): boolean => readConfig() === null;
@@ -56,6 +87,11 @@ const localPath = async (key: string): Promise<string> => {
 
 export const putObject = async (key: string, body: Uint8Array, contentType: string): Promise<void> => {
   assertSafeKey(key);
+  const binding = await getBinding();
+  if (binding !== null) {
+    await binding.put(key, body, { httpMetadata: { contentType, cacheControl: CACHE_CONTROL } });
+    return;
+  }
   const config = readConfig();
   if (config === null) {
     const fs = await import("node:fs/promises");
@@ -75,6 +111,11 @@ export const deleteObjects = async (keys: readonly string[]): Promise<void> => {
   const unique = [...new Set(keys)];
   unique.forEach(assertSafeKey);
   if (unique.length === 0) return;
+  const binding = await getBinding();
+  if (binding !== null) {
+    for (let i = 0; i < unique.length; i += BINDING_DELETE_BATCH) await binding.delete(unique.slice(i, i + BINDING_DELETE_BATCH));
+    return;
+  }
   const config = readConfig();
   if (config === null) {
     const fs = await import("node:fs/promises");

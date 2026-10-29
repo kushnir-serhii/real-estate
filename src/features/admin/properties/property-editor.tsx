@@ -25,6 +25,8 @@ type PropertyEditorProps = {
   soldPageDays: number;
   /** Just created (from `?geocode=`): the form says so once. */
   createdNotice: { geocodeWarning: string | null } | null;
+  /** The «Фото» section, under the form (saved on its own, not with the form). */
+  photos: React.ReactNode;
 };
 
 /** The edit page body: the form and, from `lg` on the right, the publish card (above the form on phones). */
@@ -41,6 +43,7 @@ export const PropertyEditor = ({
   slug,
   soldPageDays,
   createdNotice,
+  photos,
 }: PropertyEditorProps) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -78,16 +81,19 @@ export const PropertyEditor = ({
           />
         </aside>
       )}
-      <PropertyForm
-        propertyId={propertyId}
-        initialValues={initialValues}
-        agents={agents}
-        seoOnly={seoOnly}
-        slug={slug}
-        publishMissing={missing.items}
-        createdNotice={createdNotice}
-        onDirtyChange={setDirty}
-      />
+      <div className="flex min-w-0 flex-col gap-6">
+        <PropertyForm
+          propertyId={propertyId}
+          initialValues={initialValues}
+          agents={agents}
+          seoOnly={seoOnly}
+          slug={slug}
+          publishMissing={missing.items}
+          createdNotice={createdNotice}
+          onDirtyChange={setDirty}
+        />
+        {photos}
+      </div>
     </div>
   );
 };

@@ -99,6 +99,18 @@ A lead is always saved in Supabase first. Then, after the response, it goes to P
 ### Plektan leads
 Leads use the same `PLEKTAN_API_KEY` as the sync; set it as a **runtime secret** in Cloudflare too (the sync only has it in GitHub Actions). Before launch, confirm with Plektan that regular buy / rent requests without an email are accepted from the site (the quick request needs an email).
 
+## Admin photos: R2 binding (spec 008 slice 4)
+
+The admin uploads photos through `POST /api/admin/photos`, which writes to R2 using a Worker **binding** (no S3 keys needed on Cloudflare). Order in `src/lib/r2`: binding `PHOTOS_BUCKET`, else the S3 API (`R2_*`, used by `pnpm sync`), else local fixture mode (`public/r2-local/`).
+
+1. Create the R2 bucket (the same one the sync writes to) and enable its public access / custom domain.
+2. In `wrangler.jsonc` add (not added yet: deploying with a missing bucket fails):
+   ```jsonc
+   "r2_buckets": [{ "binding": "PHOTOS_BUCKET", "bucket_name": "<bucket>" }]
+   ```
+   then run `pnpm cf-typegen` to refresh `cloudflare-env.d.ts`.
+3. Set `NEXT_PUBLIC_R2_PUBLIC_URL` (the bucket's public base URL) in Cloudflare as a **build** variable too, since it is inlined into the client bundle; without it the site links photos to `/r2-local/...`.
+
 ## Plektan sync (GitHub Actions)
 
 `.github/workflows/sync.yml` runs `pnpm sync` (spec 003): incremental every 30 minutes 07:00-22:00 Kyiv time, a full sync nightly, and on demand. It writes to Supabase directly and then calls `/api/cron/revalidate` on the site to refresh the cache. Without `PLEKTAN_API_KEY` the job exits early with a notice (fixtures are never synced into production).

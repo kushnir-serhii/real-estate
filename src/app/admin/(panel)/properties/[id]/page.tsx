@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
+import { PropertyPhotos } from "@/features/admin/properties/photos/property-photos";
+import { PropertyPhotosReadOnly } from "@/features/admin/properties/photos/property-photos-read-only";
 import { PropertyEditHeader } from "@/features/admin/properties/property-edit-header";
 import { PropertyEditor } from "@/features/admin/properties/property-editor";
 import { geocodeWarning } from "@/features/admin/properties/property-form-state";
@@ -91,6 +93,13 @@ const AdminPropertyPage = async ({ params, searchParams }: AdminPropertyPageProp
         slug={{ value: property.slug, frozen: property.published_at !== null }}
         soldPageDays={SOLD_PAGE_DAYS}
         createdNotice={geocode ? { geocodeWarning: geocodeWarning(geocode) } : null}
+        photos={
+          permissions.photos ? (
+            <PropertyPhotos propertyId={property.id} photos={property.photos} />
+          ) : (
+            <PropertyPhotosReadOnly photos={property.photos} />
+          )
+        }
       />
     </div>
   );
