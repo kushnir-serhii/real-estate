@@ -74,7 +74,7 @@ export const SiteFooter = () => {
       </div>
 
       <div className="border-t">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 pt-4 pb-chat-launcher sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} {BRAND.name}
           </p>

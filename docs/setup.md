@@ -11,7 +11,7 @@ Everything so far runs locally (local Supabase in Docker, fixture modes). This f
 | Cloudflare Turnstile | not connected — the check passes in fixture mode, no widget | 006 |
 | Plektan | not connected — fixtures; 003 sync is ready, needs the API key and `PLEKTAN_*_ID`; leads are `skipped` until the key exists (local: `PLEKTAN_LEADS_FIXTURE`) | 003, 006 |
 | Telegram bot | not connected — the channel is `skipped` (local: `TELEGRAM_FIXTURE`) | 006 |
-| LLM | not connected — fixtures | 010 |
+| LLM | not connected — fixture assistant (scripted, answers without a key); set `LLM_API_KEY` (+ optional `LLM_MODEL`, default `gpt-4o-mini`) | 010 |
 
 ## Site URL
 
@@ -57,6 +57,7 @@ Migrations to apply (in order; add new ones here when a spec adds them):
 | `20261029120000_admin_properties.sql` | 008 | [ ] |
 | `20261029130000_pages_noindex.sql` | 009 | [ ] |
 | `20261029140000_pages_is_draft.sql` | 009 | [ ] |
+| `20261029150000_ai_assistant.sql` | 010 | [ ] |
 
 ### 4. Check
 - Dashboard → Advisors → Security: no "RLS disabled" warnings.

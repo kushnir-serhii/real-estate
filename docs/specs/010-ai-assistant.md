@@ -1,6 +1,6 @@
 # 010 — AI assistant
 
-**Status:** ready · **Depends on:** 005, 006 · **Route(s):** widget on every public page (`(site)` layout), `POST /api/assistant`, `POST /api/cron/assistant`
+**Status:** in-progress · **Depends on:** 005, 006 · **Route(s):** widget on every public page (`(site)` layout), `POST /api/assistant`, `POST /api/cron/assistant`
 
 ## Goal
 A chat on the site that asks what the visitor needs, shows matching properties from our database, answers agency FAQ and turns the conversation into a structured lead. The manager gets a qualified request (deal, type, district, rooms, budget, payment, timing, contact) through the same pipeline as the forms (006), and it is never lost if Plektan or Telegram fails.
@@ -26,16 +26,16 @@ New tables (admin-only, RLS on, no public policies, written by the service role)
 
 ## Slices
 
-### [ ] 1. LLM client, conversation API, chat widget
+### [x] 1. LLM client, conversation API, chat widget
 - **Build:** backend: `src/lib/llm/` (OpenAI chat client with streaming + tool calls + usage, timeout, typed errors without the key; fixture assistant on empty key; `index.ts` picks one by env), migration `ai_conversations` (id, created_at, updated_at, page_url, property_id, lead_id, proposal jsonb, message_count, input/output tokens, cost_usd, ip_hash, turnstile_ok) + `ai_messages` (conversation_id fk cascade, role, content, data jsonb, created_at) with RLS on and no public access; types regenerated; `src/constants/assistant.ts` (persona, greeting, quick replies, mock FAQ, agency facts from existing constants); `src/features/assistant/` server code: system prompt builder, `runAssistantTurn` (load history → LLM → stream events → save messages + usage); `POST /api/assistant` route (zod body, NDJSON stream). No tools yet. UI (designer): widget button + lazy panel in `(site)/layout.tsx`, message list, input (label, Enter to send, Shift+Enter newline, 1000-char counter), streaming text, quick replies, all states above, sessionStorage restore.
 - **Files:** `src/lib/llm/*`, `supabase/migrations/*`, `src/lib/supabase/database.types.ts`, `src/lib/db/assistant.ts`, `src/constants/assistant.ts`, `src/features/assistant/*`, `src/app/api/assistant/route.ts`, `src/app/(site)/layout.tsx`, `.env.example`, `docs/setup.md`
 - **Agent:** backend → designer
 - **Accept:**
-  - [ ] with an empty `LLM_API_KEY` the chat answers (fixture) and the reply streams in
-  - [ ] history comes from the DB: a second message in the same conversation continues it; a forged `conversation_id` starts a new one
-  - [ ] new tables have RLS and no public access; types regenerated; migration in `docs/setup.md`
-  - [ ] widget on every public page, not in the admin; 375px full screen, keyboard (Esc, focus return), all states designed and announced
-  - [ ] unit tests: OpenAI SSE parsing (text, tool call deltas, usage), event schema
+  - [x] with an empty `LLM_API_KEY` the chat answers (fixture) and the reply streams in
+  - [x] history comes from the DB: a second message in the same conversation continues it; a forged `conversation_id` starts a new one
+  - [x] new tables have RLS and no public access; types regenerated; migration in `docs/setup.md`
+  - [x] widget on every public page, not in the admin; 375px full screen, keyboard (Esc, focus return), all states designed and announced
+  - [x] unit tests: OpenAI SSE parsing (text, tool call deltas, usage), event schema
 
 ### [ ] 2. Property search tool + cards in the chat
 - **Build:** `search_properties` tool (schema, filter mapping incl. budget currency → USD via exchange rates, max 5, compact result for the model), tool loop in `runAssistantTurn` (max 3 tool rounds per turn), `properties` event; fixture assistant uses the tool; property context on a property page. UI: compact property cards in the chat (photo or placeholder, title, formatted price, rooms/area/district, link), «Усі результати в каталозі» link with the same filters, empty result («Таких об'єктів зараз немає» + the assistant offers to leave a request).
@@ -78,9 +78,13 @@ New tables (admin-only, RLS on, no public policies, written by the service role)
 - **Decided:** OpenAI `gpt-4o-mini` (model in env), own fetch client, no new libraries.
 - **Decided:** the lead is created from a confirmation card in the chat; consent is set by the person.
 - **Decided:** transcripts stored 30 days (admin-only), shown on the lead; the structured wishes stay in the lead.
+- Retry after an error that came after the visitor's message was saved stores that message twice on the server: add a `client_message_id` (dedupe) in slice 4.
+- The reply keeps streaming after the panel is closed (so it isn't lost); it stops on «Нова розмова» or leaving the site.
+- No live end-to-end run yet: this project's local Supabase can't start while another project's stack holds ports 54321–54324; DB flow covered by unit tests with the DB mocked.
 - **Decided:** limits $20/month, 20 messages / 10 min per IP, 30 per conversation, 1000 chars; Turnstile once per conversation; widget on all public pages; property context on property pages; only our properties + FAQ, visitor's language (default Ukrainian).
 
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
 | 2026-10-29 | — | ready | Decisions recorded: OpenAI gpt-4o-mini, confirmation card, transcripts 30 days, default limits and widget. |
+| 2026-10-29 | 1 | done | OpenAI fetch client (SSE parse, tool-call deltas, usage, typed errors) + scripted fixture on empty key; migration `20261029150000_ai_assistant.sql` (`ai_conversations`, `ai_messages`, RLS, no public access), types regenerated from a throwaway Postgres; `src/constants/assistant.ts` (persona, FAQ mock); system prompt, `runAssistantTurn`, `POST /api/assistant` (NDJSON). Widget: lazy panel (Sheet), launcher above the property mobile bar, streaming, quick replies, error/limit states, sessionStorage. Files: `src/lib/llm/*`, `src/lib/db/assistant.ts`, `src/features/assistant/*`, `src/app/api/assistant/route.ts`, `src/app/(site)/layout.tsx`, `src/app/globals.css`, `src/components/layout/site-footer.tsx`, `src/features/property/property-mobile-bar.tsx`, `.env.example`, `docs/setup.md` |

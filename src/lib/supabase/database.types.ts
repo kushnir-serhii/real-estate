@@ -91,6 +91,104 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_conversations: {
+        Row: {
+          cost_usd: number
+          created_at: string
+          id: string
+          input_tokens: number
+          ip_hash: string | null
+          lead_id: string | null
+          message_count: number
+          output_tokens: number
+          page_url: string | null
+          property_id: string | null
+          proposal: Json | null
+          turnstile_ok: boolean
+          updated_at: string
+        }
+        Insert: {
+          cost_usd?: number
+          created_at?: string
+          id?: string
+          input_tokens?: number
+          ip_hash?: string | null
+          lead_id?: string | null
+          message_count?: number
+          output_tokens?: number
+          page_url?: string | null
+          property_id?: string | null
+          proposal?: Json | null
+          turnstile_ok?: boolean
+          updated_at?: string
+        }
+        Update: {
+          cost_usd?: number
+          created_at?: string
+          id?: string
+          input_tokens?: number
+          ip_hash?: string | null
+          lead_id?: string | null
+          message_count?: number
+          output_tokens?: number
+          page_url?: string | null
+          property_id?: string | null
+          proposal?: Json | null
+          turnstile_ok?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_conversations_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_conversations_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          data: Json | null
+          id: string
+          role: string
+        }
+        Insert: {
+          content?: string
+          conversation_id: string
+          created_at?: string
+          data?: Json | null
+          id?: string
+          role: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          data?: Json | null
+          id?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           client_request_id: string

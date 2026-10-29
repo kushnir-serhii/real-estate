@@ -2,6 +2,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { organizationSchema } from "@/features/seo/schemas";
 import { getSiteUrl } from "@/lib/site-url";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { AssistantLauncher } from "@/features/assistant/assistant-launcher";
 import { SiteHeader } from "@/components/layout/site-header";
 
 const SiteLayout = ({ children }: { children: React.ReactNode }) => (
@@ -18,6 +19,7 @@ const SiteLayout = ({ children }: { children: React.ReactNode }) => (
       {children}
     </main>
     <SiteFooter />
+    <AssistantLauncher />
   </div>
 );
 

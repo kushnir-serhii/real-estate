@@ -41,6 +41,27 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* AI assistant launcher (round floating button) → size-chat-button */
+  --spacing-chat-button: 3.5rem;
+  /* height of the property page's mobile bar (button + padding + border), without the safe area */
+  --spacing-property-bar: 4.625rem;
+  /* chat panel width from the sm breakpoint → sm:max-w-(--container-chat-panel) */
+  --container-chat-panel: 25rem;
+
+  --animate-typing-dot: typing-dot 1.2s ease-in-out infinite;
+  @keyframes typing-dot {
+    0%,
+    60%,
+    100% {
+      opacity: 0.35;
+      transform: translateY(0);
+    }
+    30% {
+      opacity: 1;
+      transform: translateY(-25%);
+    }
+  }
 }
 
 :root {
@@ -109,6 +130,26 @@
   scrollbar-width: none;
   &::-webkit-scrollbar {
     display: none;
+  }
+}
+
+/* AI assistant launcher: bottom-right, clear of the iPhone home bar, and above the property
+   page's call / request bar while that bar is shown (below lg) */
+@utility chat-launcher-bottom {
+  bottom: calc(--spacing(4) + env(safe-area-inset-bottom));
+  body:has([data-property-mobile-bar]) & {
+    @variant max-lg {
+      bottom: calc(var(--spacing-property-bar) + --spacing(3) + env(safe-area-inset-bottom));
+    }
+  }
+}
+/* room under the last footer row so the floating launcher never hides it */
+@utility pb-chat-launcher {
+  padding-bottom: calc(var(--spacing-chat-button) + --spacing(8));
+  body:has([data-property-mobile-bar]) & {
+    @variant max-lg {
+      padding-bottom: calc(var(--spacing-property-bar) + var(--spacing-chat-button) + --spacing(8));
+    }
   }
 }
 
