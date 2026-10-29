@@ -4,14 +4,15 @@ import type { Metadata } from "next";
 import { buttonVariants } from "@/components/ui/button";
 import { Markdown } from "@/features/pages/markdown";
 import { getPageContent } from "@/features/pages/get-page-content";
+import { pageSeoDescription, pageSeoTitle } from "@/features/pages/page-seo";
 
 export const revalidate = 300;
 
 export const generateMetadata = async (): Promise<Metadata> => {
   const page = await getPageContent("about");
   return {
-    title: page.seo_title ?? page.title,
-    description: page.seo_description ?? undefined,
+    title: pageSeoTitle(page),
+    description: pageSeoDescription(page),
     alternates: { canonical: "/about" },
     robots: page.noindex ? { index: false, follow: true } : undefined,
   };

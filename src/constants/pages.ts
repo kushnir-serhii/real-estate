@@ -2,13 +2,16 @@ import { BRAND } from "@/constants/brand";
 import { CONTACTS } from "@/constants/contacts";
 import type { Page } from "@/lib/db/pages";
 
-export type PageContent = Pick<Page, "title" | "body" | "seo_title" | "seo_description" | "noindex">;
+export type PageContent = Pick<Page, "title" | "body" | "seo_title" | "seo_description" | "noindex" | "is_draft">;
 
 export const PAGE_SLUGS = ["home", "about", "contacts", "privacy"] as const;
 export type PageSlug = (typeof PAGE_SLUGS)[number];
 
-/** Flip to false once the agency or a lawyer has reviewed the policy text. */
-export const PRIVACY_IS_DRAFT = true;
+/**
+ * «Чернетка» notice of the built-in privacy text (used only while the `pages` row is missing).
+ * Once the page is saved in /admin/pages, `pages.is_draft` decides.
+ */
+export const DEFAULT_PRIVACY_IS_DRAFT = true;
 
 /** Built-in content, shown when the `pages` row is missing or Supabase is unavailable. Mock — replace for the real agency. */
 export const DEFAULT_PAGES: Record<PageSlug, PageContent> = {
@@ -18,6 +21,7 @@ export const DEFAULT_PAGES: Record<PageSlug, PageContent> = {
     seo_title: `${BRAND.name} — нерухомість у Києві: купівля, продаж, оренда`,
     seo_description: `Агентство нерухомості ${BRAND.name}: квартири, будинки, комерційні приміщення та ділянки в Києві та області. Підбір, перегляди й супровід угоди.`,
     noindex: false,
+    is_draft: false,
   },
   about: {
     title: "Про агентство",
@@ -25,6 +29,7 @@ export const DEFAULT_PAGES: Record<PageSlug, PageContent> = {
     seo_title: `Про агентство ${BRAND.name}`,
     seo_description: `Команда ріелторів ${BRAND.name} працює з нерухомістю в Києві та області. Як ми працюємо і чому нам довіряють клієнти.`,
     noindex: false,
+    is_draft: false,
   },
   contacts: {
     title: "Контакти",
@@ -32,6 +37,7 @@ export const DEFAULT_PAGES: Record<PageSlug, PageContent> = {
     seo_title: `Контакти ${BRAND.name}`,
     seo_description: `Телефон, email і адреса офісу агентства нерухомості ${BRAND.name} у Києві. Графік роботи, месенджери та контакти ріелторів.`,
     noindex: false,
+    is_draft: false,
   },
   privacy: {
     title: "Політика конфіденційності",
@@ -39,5 +45,6 @@ export const DEFAULT_PAGES: Record<PageSlug, PageContent> = {
     seo_title: `Політика конфіденційності — ${BRAND.name}`,
     seo_description: `Як агентство нерухомості ${BRAND.name} обробляє та захищає персональні дані відвідувачів сайту.`,
     noindex: false,
+    is_draft: DEFAULT_PRIVACY_IS_DRAFT,
   },
 };
