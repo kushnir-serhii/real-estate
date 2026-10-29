@@ -1,3 +1,4 @@
+import { formatPhoneInput } from "@/features/leads/phone";
 import Link from "next/link";
 
 import type { AdminLeadFilters, AdminLeadListItem } from "@/lib/db/admin-leads";
@@ -39,7 +40,7 @@ export const LeadCards = ({ leads, filters, className }: LeadCardsProps) => (
           >
             {lead.name}
           </Link>
-          <span className="block truncate text-sm text-muted-foreground tabular-nums">{lead.phone}</span>
+          <span className="block truncate text-sm text-muted-foreground tabular-nums">{formatPhoneInput(lead.phone)}</span>
         </div>
 
         {lead.property && (
