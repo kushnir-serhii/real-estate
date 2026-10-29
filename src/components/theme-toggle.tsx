@@ -12,7 +12,7 @@ import {
   type Theme,
 } from "@/lib/theme";
 
-const THEME_EVENT = "lyndrik-theme-change";
+const THEME_EVENT = "sofiacity-theme-change";
 
 const OPTIONS: { value: Theme; label: string; Icon: LucideIcon }[] = [
   { value: "light", label: "Світла", Icon: Sun },

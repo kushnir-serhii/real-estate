@@ -1,2 +1,6 @@
-/** Admin sections in the header. 008 adds «Об'єкти». */
-export const ADMIN_NAV = [{ href: "/admin/leads", label: "Заявки" }] as const;
+/** Admin sections in the header. */
+export const ADMIN_NAV = [
+  { href: "/admin/properties", label: "Об'єкти" },
+  { href: "/admin/leads", label: "Заявки" },
+  { href: "/admin/settings", label: "Налаштування" },
+] as const;

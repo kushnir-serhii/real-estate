@@ -12,6 +12,7 @@ export const PROPERTY_TYPES = [
   "plot",
 ] as const satisfies readonly Enums["property_type"][];
 export const CURRENCIES = ["UAH", "USD", "EUR"] as const satisfies readonly Enums["currency"][];
+export type Currency = (typeof CURRENCIES)[number];
 
 // Plektan value lists (docs/reference/plektan-api.md). Stored as text, so a new value needs no migration.
 export const FLAT_PROP_KINDS = [

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-`real-estate` is the website + admin for the real estate agency **Lyndrik** (Ukraine). One Next.js app at the repo root (no monorepo), deployed to Cloudflare. Product and architecture: `docs/product.md`. Original working notes (Ukrainian): `docs/reference/stack.md`, Plektan CRM API: `docs/reference/plektan-api.md`.
+`real-estate` is the website + admin for the real estate agency **Sofiacity** (Ukraine). One Next.js app at the repo root (no monorepo), deployed to Cloudflare. Product and architecture: `docs/product.md`. Original working notes (Ukrainian): `docs/reference/stack.md`, Plektan CRM API: `docs/reference/plektan-api.md`.
 
 The repo starts empty: spec 001 scaffolds the app. Until it's `done`, the commands below don't exist yet.
 
