@@ -1,10 +1,22 @@
 import { describe, expect, it } from "vitest";
 
 import { ASSISTANT_ERROR_MESSAGE } from "@/constants/assistant";
-import { activeReply, chatReducer, INITIAL_CHAT_STATE } from "./chat-reducer";
+import type { AssistantPropertyCard } from "./assistant-events";
+import { activeReply, chatReducer, INITIAL_CHAT_STATE, replyText } from "./chat-reducer";
 import type { AssistantReply, ChatAction, ChatState } from "./chat-reducer";
 
 const CONVERSATION = "7d6a1f0e-3c1b-4a53-9d2f-0a1b2c3d4e5f";
+
+const CARD: AssistantPropertyCard = {
+  slug: "kvartyra-1",
+  title: "2-кімнатна квартира",
+  price: "85 000 $",
+  rooms: 2,
+  area_total: 54,
+  district: "Центр",
+  photo_url: null,
+  url: "/catalog/kvartyra-1",
+};
 
 const run = (actions: ChatAction[], from: ChatState = INITIAL_CHAT_STATE) => actions.reduce(chatReducer, from);
 
@@ -20,7 +32,7 @@ describe("chatReducer", () => {
   it("adds the visitor message and a waiting reply", () => {
     expect(sent.messages).toEqual([
       { id: "u1", role: "user", text: "Купити" },
-      { id: "r1", role: "assistant", text: "", prompt: "Купити", state: { status: "waiting" } },
+      { id: "r1", role: "assistant", parts: [], prompt: "Купити", state: { status: "waiting" } },
     ]);
     expect(activeReply(sent)?.id).toBe("r1");
   });
@@ -40,7 +52,10 @@ describe("chatReducer", () => {
       sent,
     );
     expect(state.conversationId).toBe(CONVERSATION);
-    expect(reply(state, "r1")).toMatchObject({ text: "Добре, який район?", state: { status: "done" } });
+    expect(reply(state, "r1")).toMatchObject({
+      parts: [{ kind: "text", text: "Добре, який район?" }],
+      state: { status: "done" },
+    });
     expect(activeReply(state)).toBeNull();
   });
 
@@ -92,7 +107,7 @@ describe("chatReducer", () => {
     expect(reply(retried, "r2")).toEqual({
       id: "r2",
       role: "assistant",
-      text: "",
+      parts: [],
       prompt: "Купити",
       state: { status: "waiting" },
     });
@@ -112,11 +127,74 @@ describe("chatReducer", () => {
     expect(chatReducer(reset, { type: "event", replyId: "r1", event: { type: "text", delta: "x" } })).toBe(reset);
   });
 
-  it("leaves the state alone for property cards and the lead card (later slices)", () => {
+  it("keeps property results and text in the order they came", () => {
+    const state = run(
+      [
+        { type: "event", replyId: "r1", event: { type: "properties", items: [CARD], total: 12, catalog_url: "/catalog?deal=sell" } },
+        { type: "event", replyId: "r1", event: { type: "text", delta: "Ось " } },
+        { type: "event", replyId: "r1", event: { type: "text", delta: "варіанти." } },
+        { type: "event", replyId: "r1", event: { type: "properties", items: [], total: 0, catalog_url: "/catalog" } },
+        { type: "event", replyId: "r1", event: { type: "text", delta: "Залишите заявку?" } },
+        { type: "event", replyId: "r1", event: { type: "done" } },
+      ],
+      sent,
+    );
+    expect(reply(state, "r1")).toMatchObject({
+      parts: [
+        { kind: "properties", items: [CARD], total: 12, catalogUrl: "/catalog?deal=sell" },
+        { kind: "text", text: "Ось варіанти." },
+        { kind: "properties", items: [], total: 0, catalogUrl: "/catalog" },
+        { kind: "text", text: "Залишите заявку?" },
+      ],
+      state: { status: "done" },
+    });
+    expect(replyText(reply(state, "r1"))).toBe("Ось варіанти.\n\nЗалишите заявку?");
+  });
+
+  it("shows results as soon as they come and finishes a reply that only has results", () => {
+    const shown = chatReducer(sent, {
+      type: "event",
+      replyId: "r1",
+      event: { type: "properties", items: [CARD], total: 1, catalog_url: "/catalog" },
+    });
+    expect(reply(shown, "r1").state).toEqual({ status: "streaming" });
+    const done = chatReducer(shown, { type: "event", replyId: "r1", event: { type: "done" } });
+    expect(reply(done, "r1").state).toEqual({ status: "done" });
+  });
+
+  it("starts a retried reply without the failed one's results", () => {
+    const failed = run(
+      [
+        { type: "event", replyId: "r1", event: { type: "properties", items: [CARD], total: 1, catalog_url: "/catalog" } },
+        { type: "fail", replyId: "r1" },
+      ],
+      sent,
+    );
+    expect(reply(chatReducer(failed, { type: "retry", failedId: "r1", replyId: "r2" }), "r2").parts).toEqual([]);
+  });
+
+  it("drops results that come after the reply finished", () => {
+    const done = run(
+      [
+        { type: "event", replyId: "r1", event: { type: "text", delta: "Так" } },
+        { type: "event", replyId: "r1", event: { type: "done" } },
+      ],
+      sent,
+    );
+    expect(
+      chatReducer(done, {
+        type: "event",
+        replyId: "r1",
+        event: { type: "properties", items: [CARD], total: 1, catalog_url: "/catalog" },
+      }),
+    ).toBe(done);
+  });
+
+  it("leaves the state alone for the lead card (slice 3)", () => {
     const state = chatReducer(sent, {
       type: "event",
       replyId: "r1",
-      event: { type: "properties", items: [], total: 0, catalog_url: "/catalog" },
+      event: { type: "lead_card", proposal_id: "p1", prefill: {}, summary: "Квартира" },
     });
     expect(state).toBe(sent);
   });

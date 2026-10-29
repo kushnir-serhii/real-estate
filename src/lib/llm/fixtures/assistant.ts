@@ -30,8 +30,16 @@ async function* run(request: LlmRequest, delayMs: number): AsyncGenerator<LlmEve
       yield { type: "finish", reason: "stop" };
       yield { type: "usage", usage: { inputTokens: 0, outputTokens: 0 } };
       return;
+    case "tool_call": {
+      // Deterministic id from how many tool results are already in the conversation.
+      const id = `fixture-call-${request.messages.filter((m) => m.role === "tool").length + 1}`;
+      yield { type: "tool_call", call: { id, name: step.name, arguments: JSON.stringify(step.arguments) } };
+      yield { type: "finish", reason: "tool_calls" };
+      yield { type: "usage", usage: { inputTokens: 0, outputTokens: 0 } };
+      return;
+    }
     default: {
-      const unreachable: never = step.kind;
+      const unreachable: never = step;
       return unreachable;
     }
   }

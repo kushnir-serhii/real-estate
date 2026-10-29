@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-import { ASSISTANT_LIMIT_REASONS } from "./assistant-events";
+import { ASSISTANT_LIMIT_REASONS, assistantPropertyCardSchema } from "./assistant-events";
 import { INITIAL_CHAT_STATE, INTERRUPTED_MESSAGE } from "./chat-reducer";
-import type { ChatMessage, ChatState } from "./chat-reducer";
+import type { AssistantReply, ChatMessage, ChatState } from "./chat-reducer";
 
 /** sessionStorage key: the display copy of the chat, so a reload keeps it. Closing the tab forgets it. */
 export const CHAT_STORAGE_KEY = "sofiacity:assistant-chat";
@@ -18,15 +18,34 @@ const replyStateSchema = z.discriminatedUnion("status", [
   z.object({ status: z.literal("limit"), reason: z.enum(ASSISTANT_LIMIT_REASONS) }),
 ]);
 
-const messageSchema = z.discriminatedUnion("role", [
-  z.object({ id: z.string().min(1), role: z.literal("user"), text: z.string() }),
+const replyPartSchema = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("text"), text: z.string() }),
   z.object({
-    id: z.string().min(1),
-    role: z.literal("assistant"),
-    text: z.string(),
-    prompt: z.string(),
-    state: replyStateSchema,
+    kind: z.literal("properties"),
+    items: z.array(assistantPropertyCardSchema),
+    total: z.number().int().nonnegative(),
+    catalogUrl: z.string(),
   }),
+]);
+
+const replyBase = {
+  id: z.string().min(1),
+  role: z.literal("assistant"),
+  prompt: z.string(),
+  state: replyStateSchema,
+};
+
+/** A reply stored before replies had parts (one plain `text`): kept as a single text part. */
+const legacyReplySchema = z
+  .object({ ...replyBase, text: z.string() })
+  .transform(
+    ({ text, ...reply }): AssistantReply => ({ ...reply, parts: text === "" ? [] : [{ kind: "text", text }] }),
+  );
+
+const messageSchema = z.union([
+  z.object({ id: z.string().min(1), role: z.literal("user"), text: z.string() }),
+  z.object({ ...replyBase, parts: z.array(replyPartSchema) }),
+  legacyReplySchema,
 ]);
 
 const storedChatSchema = z.object({

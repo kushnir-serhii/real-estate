@@ -13,10 +13,65 @@ describe("parseStoredChat", () => {
       conversationId: CONVERSATION,
       messages: [
         { id: "u1", role: "user", text: "Купити" },
-        { id: "r1", role: "assistant", text: "Який район?", prompt: "Купити", state: { status: "done" } },
+        {
+          id: "r1",
+          role: "assistant",
+          parts: [
+            {
+              kind: "properties",
+              items: [
+                {
+                  slug: "kvartyra-1",
+                  title: "Квартира",
+                  price: "85 000 $",
+                  rooms: 2,
+                  area_total: 54,
+                  district: null,
+                  photo_url: null,
+                  url: "/catalog/kvartyra-1",
+                },
+              ],
+              total: 7,
+              catalogUrl: "/catalog?deal=sell",
+            },
+            { kind: "text", text: "Який район?" },
+          ],
+          prompt: "Купити",
+          state: { status: "done" },
+        },
       ],
     };
     expect(parseStoredChat(JSON.stringify(stored))).toEqual(stored);
+  });
+
+  it("loads a reply stored before replies had parts as one text part", () => {
+    const legacy = {
+      conversationId: null,
+      messages: [
+        { id: "r1", role: "assistant", text: "Який район?", prompt: "Купити", state: { status: "done" } },
+        { id: "r2", role: "assistant", text: "", prompt: "Ще", state: { status: "error", message: "Збій" } },
+      ],
+    };
+    expect(parseStoredChat(JSON.stringify(legacy)).messages).toEqual([
+      { id: "r1", role: "assistant", parts: [{ kind: "text", text: "Який район?" }], prompt: "Купити", state: { status: "done" } },
+      { id: "r2", role: "assistant", parts: [], prompt: "Ще", state: { status: "error", message: "Збій" } },
+    ]);
+  });
+
+  it("drops a chat with a malformed property card", () => {
+    const stored = {
+      conversationId: null,
+      messages: [
+        {
+          id: "r1",
+          role: "assistant",
+          parts: [{ kind: "properties", items: [{ slug: "x" }], total: 1, catalogUrl: "/catalog" }],
+          prompt: "Купити",
+          state: { status: "done" },
+        },
+      ],
+    };
+    expect(parseStoredChat(JSON.stringify(stored))).toBe(INITIAL_CHAT_STATE);
   });
 
   it("drops missing, malformed and foreign data", () => {
@@ -31,7 +86,9 @@ describe("parseStoredChat", () => {
   it("turns a reply cut off by a reload into a retryable error", () => {
     const stored = {
       conversationId: null,
-      messages: [{ id: "r1", role: "assistant", text: "Част", prompt: "Купити", state: { status: "streaming" } }],
+      messages: [
+        { id: "r1", role: "assistant", parts: [{ kind: "text", text: "Част" }], prompt: "Купити", state: { status: "streaming" } },
+      ],
     };
     expect(parseStoredChat(JSON.stringify(stored)).messages[0]).toMatchObject({
       state: { status: "error", message: INTERRUPTED_MESSAGE },

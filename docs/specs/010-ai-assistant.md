@@ -37,15 +37,15 @@ New tables (admin-only, RLS on, no public policies, written by the service role)
   - [x] widget on every public page, not in the admin; 375px full screen, keyboard (Esc, focus return), all states designed and announced
   - [x] unit tests: OpenAI SSE parsing (text, tool call deltas, usage), event schema
 
-### [ ] 2. Property search tool + cards in the chat
+### [x] 2. Property search tool + cards in the chat
 - **Build:** `search_properties` tool (schema, filter mapping incl. budget currency → USD via exchange rates, max 5, compact result for the model), tool loop in `runAssistantTurn` (max 3 tool rounds per turn), `properties` event; fixture assistant uses the tool; property context on a property page. UI: compact property cards in the chat (photo or placeholder, title, formatted price, rooms/area/district, link), «Усі результати в каталозі» link with the same filters, empty result («Таких об'єктів зараз немає» + the assistant offers to leave a request).
 - **Files:** `src/features/assistant/*`, `src/lib/llm/fixtures/*`, `src/features/catalog/catalog-params.ts` (only if a shared URL builder is needed)
 - **Agent:** backend → designer
 - **Accept:**
-  - [ ] only published properties are returned; nothing the tool didn't return is shown as a card
-  - [ ] budget in UAH/EUR/USD filters like the catalog; the catalog link reproduces the same filters
-  - [ ] on a property page the assistant knows the property (prompt context from the server, published only)
-  - [ ] unit tests for the filter mapping; cards work at 375px with a missing photo
+  - [x] only published properties are returned; nothing the tool didn't return is shown as a card
+  - [x] budget in UAH/EUR/USD filters like the catalog; the catalog link reproduces the same filters
+  - [x] on a property page the assistant knows the property (prompt context from the server, published only)
+  - [x] unit tests for the filter mapping; cards work at 375px with a missing photo
 
 ### [ ] 3. FAQ + lead card → pipeline + transcript in the admin
 - **Build:** FAQ in the prompt from `src/constants/assistant.ts`; `propose_lead` tool (zod wishes, stored on the conversation, `lead_card` event); fixture offers the card; lead card UI (name, phone mask, email, summary, consent + `/privacy`, pending/success/error, announced); server action `submitAssistantLead` (zod, conversation must exist and have a proposal, honeypot, `createLead` kind `ai`, `lead_id` on the conversation, `after(deliverLead)`); `lead-delivery-content.ts` and `read-lead-wishes.ts` learn the AI fields (districts, rooms, budget, payment, timing, summary); admin lead detail shows the wishes and the transcript (or «переписку видалено»).
@@ -81,6 +81,9 @@ New tables (admin-only, RLS on, no public policies, written by the service role)
 - Retry after an error that came after the visitor's message was saved stores that message twice on the server: add a `client_message_id` (dedupe) in slice 4.
 - The reply keeps streaming after the panel is closed (so it isn't lost); it stops on «Нова розмова» or leaving the site.
 - No live end-to-end run yet: this project's local Supabase can't start while another project's stack holds ports 54321–54324; DB flow covered by unit tests with the DB mocked.
+- The search tool and the turn loop are tested separately (tool with injected data, loop with a mocked tool); no live run against a DB yet.
+- Chat cards use one `photo_url` (smallest R2 size) without `srcset`: may look soft on retina if that size is under ~192px.
+- On desktop the chat panel is modal (page dimmed behind it); make it non-modal if the client wants to browse beside the chat.
 - **Decided:** limits $20/month, 20 messages / 10 min per IP, 30 per conversation, 1000 chars; Turnstile once per conversation; widget on all public pages; property context on property pages; only our properties + FAQ, visitor's language (default Ukrainian).
 
 ## Log
@@ -88,3 +91,4 @@ New tables (admin-only, RLS on, no public policies, written by the service role)
 | --- | --- | --- | --- |
 | 2026-10-29 | — | ready | Decisions recorded: OpenAI gpt-4o-mini, confirmation card, transcripts 30 days, default limits and widget. |
 | 2026-10-29 | 1 | done | OpenAI fetch client (SSE parse, tool-call deltas, usage, typed errors) + scripted fixture on empty key; migration `20261029150000_ai_assistant.sql` (`ai_conversations`, `ai_messages`, RLS, no public access), types regenerated from a throwaway Postgres; `src/constants/assistant.ts` (persona, FAQ mock); system prompt, `runAssistantTurn`, `POST /api/assistant` (NDJSON). Widget: lazy panel (Sheet), launcher above the property mobile bar, streaming, quick replies, error/limit states, sessionStorage. Files: `src/lib/llm/*`, `src/lib/db/assistant.ts`, `src/features/assistant/*`, `src/app/api/assistant/route.ts`, `src/app/(site)/layout.tsx`, `src/app/globals.css`, `src/components/layout/site-footer.tsx`, `src/features/property/property-mobile-bar.tsx`, `.env.example`, `docs/setup.md` |
+| 2026-10-29 | 2 | done | `search_properties` tool (zod args from the model, reuses `parseCatalogState` / `toPropertyFilters` / `catalogHref`, budget → USD, district match, max 5), tool loop (≤3 rounds, tool calls + results stored, history trimmed without orphans), fixture calls the tool; chat cards (parts-based reducer, storage migration, placeholder, catalog link, empty note, announced). `countObjects` moved to `src/lib/format/`. Files: `src/features/assistant/*`, `src/lib/llm/fixtures/*`, `src/lib/format/count-objects.ts`, `src/features/admin/{pages,settings}/*` (imports) |

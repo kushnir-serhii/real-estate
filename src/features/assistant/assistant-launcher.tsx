@@ -15,6 +15,9 @@ const AssistantPanel = dynamic(() => loadPanel().then((module) => module.Assista
   loading: () => <AssistantPanelSkeleton />,
 });
 
+/** From this width the chat is a side panel beside the page (Tailwind `sm`, as in the sheet's classes below). */
+const SIDE_PANEL_QUERY = "(min-width: 40rem)";
+
 /** Starts fetching the chat code when the visitor is about to open it (hover, focus). */
 const preloadPanel = () => {
   void loadPanel();
@@ -27,6 +30,12 @@ const preloadPanel = () => {
 export const AssistantLauncher = () => {
   const [open, setOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
+
+  // A property link from the chat: on phones the panel covers the page, so it closes to show it; on wider
+  // screens it stays open beside the page. The chat lives in a module store, so nothing is lost either way.
+  const handleNavigate = () => {
+    if (!window.matchMedia(SIDE_PANEL_QUERY).matches) setOpen(false);
+  };
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -53,7 +62,7 @@ export const AssistantLauncher = () => {
         }}
         className="gap-0 pt-[env(safe-area-inset-top)] data-[side=right]:h-dvh data-[side=right]:w-full data-[side=right]:sm:max-w-(--container-chat-panel)"
       >
-        <AssistantPanel />
+        <AssistantPanel onNavigate={handleNavigate} />
       </SheetContent>
     </Sheet>
   );

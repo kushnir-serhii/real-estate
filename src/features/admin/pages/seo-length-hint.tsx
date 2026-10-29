@@ -1,4 +1,4 @@
-import { pluralUk } from "@/features/admin/settings/count-objects";
+import { pluralUk } from "@/lib/format/count-objects";
 import { seoLengthStatus } from "@/features/pages/page-seo";
 
 type SeoLengthHintProps = {

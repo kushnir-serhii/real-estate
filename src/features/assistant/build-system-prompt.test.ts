@@ -25,6 +25,13 @@ describe("buildSystemPrompt", () => {
     expect(prompt).not.toContain("цей об'єкт нашого каталогу");
   });
 
+  it("tells the model to search before naming properties and to use only the results", () => {
+    const prompt = buildSystemPrompt();
+    expect(prompt).toContain("search_properties");
+    expect(prompt).toContain("Не називай жодного об'єкта");
+    expect(prompt).toContain("total = 0");
+  });
+
   it("adds the current property with price, deal, type, rooms, district and url", () => {
     const prompt = buildSystemPrompt(property);
     expect(prompt).toContain(property.title);
@@ -34,5 +41,6 @@ describe("buildSystemPrompt", () => {
     expect(prompt).toContain("Печерський");
     expect(prompt).toContain("/catalog/kvartyra-pechersk");
     expect(prompt).toMatch(/85\s000/);
+    expect(prompt).toContain("схожі");
   });
 });

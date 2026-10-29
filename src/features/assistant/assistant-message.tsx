@@ -6,12 +6,15 @@ import { SheetClose } from "@/components/ui/sheet";
 import { ASSISTANT_PERSONA } from "@/constants/assistant";
 import { CONTACTS } from "@/constants/contacts";
 import { AssistantBubble } from "./assistant-bubble";
+import { AssistantPropertyResults } from "./assistant-property-results";
 import { AssistantTypingIndicator } from "./assistant-typing-indicator";
-import type { AssistantReply, ChatMessage } from "./chat-reducer";
+import type { AssistantReply, ChatMessage, ReplyPart } from "./chat-reducer";
 
 type AssistantMessageProps = {
   message: ChatMessage;
   onRetry: (replyId: string) => void;
+  /** The visitor follows a property link from the chat. */
+  onNavigate?: () => void;
 };
 
 const LimitNotice = () => (
@@ -33,28 +36,59 @@ const LimitNotice = () => (
   </div>
 );
 
-const ReplyBody = ({ reply, onRetry }: { reply: AssistantReply; onRetry: (replyId: string) => void }) => {
-  const text = reply.text !== "" && (
-    <AssistantBubble from="assistant">
-      <span className="sr-only">{ASSISTANT_PERSONA.name}: </span>
-      {reply.text}
-    </AssistantBubble>
-  );
+const TypingBubble = () => (
+  <AssistantBubble from="assistant">
+    <AssistantTypingIndicator />
+  </AssistantBubble>
+);
+
+const renderPart = (part: ReplyPart, index: number, onNavigate?: () => void) => {
+  switch (part.kind) {
+    case "text":
+      return (
+        part.text !== "" && (
+          <AssistantBubble key={index} from="assistant">
+            <span className="sr-only">{ASSISTANT_PERSONA.name}: </span>
+            {part.text}
+          </AssistantBubble>
+        )
+      );
+    case "properties":
+      return <AssistantPropertyResults key={index} part={part} onNavigate={onNavigate} />;
+    default: {
+      const unreachable: never = part;
+      return unreachable;
+    }
+  }
+};
+
+type ReplyBodyProps = {
+  reply: AssistantReply;
+  onRetry: (replyId: string) => void;
+  onNavigate?: () => void;
+};
+
+/** The reply's parts in arrival order (results, then the text about them), then its state. */
+const ReplyBody = ({ reply, onRetry, onNavigate }: ReplyBodyProps) => {
+  const parts = reply.parts.map((part, index) => renderPart(part, index, onNavigate));
 
   switch (reply.state.status) {
     case "waiting":
-      return (
-        <AssistantBubble from="assistant">
-          <AssistantTypingIndicator />
-        </AssistantBubble>
-      );
+      return <TypingBubble />;
     case "streaming":
+      return (
+        <>
+          {parts}
+          {/* Results are in, the words about them are not yet. */}
+          {reply.parts.at(-1)?.kind !== "text" && <TypingBubble />}
+        </>
+      );
     case "done":
-      return text;
+      return parts;
     case "error":
       return (
         <>
-          {text}
+          {parts}
           <div className="flex max-w-[85%] flex-col items-start gap-2 self-start">
             <p role="alert" className="rounded-lg bg-destructive/10 px-4 py-3 text-sm font-medium break-words text-destructive">
               {reply.state.message}
@@ -69,7 +103,7 @@ const ReplyBody = ({ reply, onRetry }: { reply: AssistantReply; onRetry: (replyI
     case "limit":
       return (
         <>
-          {text}
+          {parts}
           <LimitNotice />
         </>
       );
@@ -80,7 +114,7 @@ const ReplyBody = ({ reply, onRetry }: { reply: AssistantReply; onRetry: (replyI
   }
 };
 
-export const AssistantMessage = ({ message, onRetry }: AssistantMessageProps) => (
+export const AssistantMessage = ({ message, onRetry, onNavigate }: AssistantMessageProps) => (
   <li className="flex flex-col gap-2">
     {message.role === "user" ? (
       <AssistantBubble from="user">
@@ -88,7 +122,7 @@ export const AssistantMessage = ({ message, onRetry }: AssistantMessageProps) =>
         {message.text}
       </AssistantBubble>
     ) : (
-      <ReplyBody reply={message} onRetry={onRetry} />
+      <ReplyBody reply={message} onRetry={onRetry} onNavigate={onNavigate} />
     )}
   </li>
 );

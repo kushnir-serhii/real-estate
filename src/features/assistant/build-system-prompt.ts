@@ -32,8 +32,19 @@ const propertyContext = (property: PromptProperty): string => {
   return [
     "Відвідувач зараз дивиться цей об'єкт нашого каталогу. Питання «цей об'єкт», «тут», «ця квартира» стосуються саме його. Використовуй лише ці дані; чого тут немає, того не знаєш.",
     ...lines.map((line) => `- ${line}`),
+    "Якщо відвідувач хоче схожі або інші варіанти, виклич search_properties із відповідними умовами (угода, тип, кімнати, бюджет, район).",
   ].join("\n");
 };
+
+/** How and when the model uses the search tool. */
+const SEARCH_TOOL_RULES = [
+  "Інструмент search_properties шукає серед опублікованих об'єктів нашої агенції. Виклич його, щойно знаєш угоду (купівля чи оренда) або тип; решту умов додавай, коли відвідувач їх назве.",
+  "Не називай жодного об'єкта, ціни чи посилання, поки не отримав їх від search_properties. Згадуй лише ті об'єкти, які він повернув; не вигадуй і не доповнюй дані.",
+  "Картки знайдених об'єктів і посилання на каталог відвідувач бачить у чаті сам: не вставляй у відповідь URL, яких не повертав інструмент, і не переписуй усі характеристики. Коротко прокоментуй результат і запропонуй уточнити умови.",
+  "Бюджет передавай у тій валюті, яку назвав відвідувач (UAH, USD або EUR); без валюти питай або використовуй USD.",
+  "Якщо інструмент не знайшов нічого (total = 0), чесно скажи, що таких об'єктів зараз немає, і запропонуй змінити умови або залишити запит для менеджера.",
+  "Якщо інструмент повернув помилку або district_ignored, не показуй технічних деталей: скажи, що район не знайдено серед наших, і запропонуй схожі з available_districts.",
+] as const;
 
 /** Builds the system prompt from the assistant constants and the optional current property. */
 export const buildSystemPrompt = (property?: PromptProperty | null): string => {
@@ -41,6 +52,7 @@ export const buildSystemPrompt = (property?: PromptProperty | null): string => {
     `Ти ${ASSISTANT_PERSONA.name}, ${ASSISTANT_PERSONA.role}. Агенція: ${BRAND.name}. ${BRAND.tagline}`,
     `Контакти агенції: телефон ${CONTACTS.phone.display}, пошта ${CONTACTS.email}, адреса ${CONTACTS.address}, години роботи ${CONTACTS.hours}.`,
     `Правила:\n${ASSISTANT_RULES.map((rule) => `- ${rule}`).join("\n")}`,
+    `Пошук об'єктів:\n${SEARCH_TOOL_RULES.map((rule) => `- ${rule}`).join("\n")}`,
     `FAQ агенції (відповідай на питання лише за цим текстом):\n${ASSISTANT_FAQ.map((e) => `Q: ${e.question}\nA: ${e.answer}`).join("\n\n")}`,
     `Початкові кнопки швидкої відповіді в чаті: ${ASSISTANT_QUICK_REPLIES.join(", ")}.`,
     ...(property ? [propertyContext(property)] : []),

@@ -10,8 +10,13 @@ import { AssistantMessageList } from "./assistant-message-list";
 import { AssistantPanelHeader } from "./assistant-panel-header";
 import { activeReply } from "./chat-reducer";
 
+type AssistantPanelProps = {
+  /** The visitor follows a property link from the chat (the launcher closes the full-screen panel on phones). */
+  onNavigate?: () => void;
+};
+
 /** Chat body inside the launcher's sheet. Loaded on first open (`next/dynamic`), so pages don't ship it. */
-export const AssistantPanel = () => {
+export const AssistantPanel = ({ onNavigate }: AssistantPanelProps) => {
   const chat = useAssistantChat();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const busy = activeReply(chat) !== null;
@@ -39,7 +44,12 @@ export const AssistantPanel = () => {
           )
         }
       />
-      <AssistantMessageList messages={chat.messages} onSend={sendChatMessage} onRetry={retryChatReply} />
+      <AssistantMessageList
+        messages={chat.messages}
+        onSend={sendChatMessage}
+        onRetry={retryChatReply}
+        onNavigate={onNavigate}
+      />
       <AssistantComposer busy={busy} onSend={sendChatMessage} textareaRef={textareaRef} />
     </>
   );

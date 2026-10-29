@@ -1,5 +1,5 @@
 import { ASSISTANT_ERROR_MESSAGE } from "@/constants/assistant";
-import type { AssistantEvent, AssistantLimitReason } from "./assistant-events";
+import type { AssistantEvent, AssistantLimitReason, AssistantPropertyCard } from "./assistant-events";
 
 /** Display copy of the chat on the client. The server keeps the real history (spec 010). */
 
@@ -14,10 +14,15 @@ export type ReplyStatus = ReplyState["status"];
 
 export type UserMessage = { id: string; role: "user"; text: string };
 
+/** One piece of a reply, in the order it arrived: property results come before the text about them. */
+export type TextPart = { kind: "text"; text: string };
+export type PropertiesPart = { kind: "properties"; items: AssistantPropertyCard[]; total: number; catalogUrl: string };
+export type ReplyPart = TextPart | PropertiesPart;
+
 export type AssistantReply = {
   id: string;
   role: "assistant";
-  text: string;
+  parts: ReplyPart[];
   /** The visitor's message this reply answers: «Спробувати ще раз» sends it again. */
   prompt: string;
   state: ReplyState;
@@ -42,6 +47,23 @@ export type ChatAction =
 export const INITIAL_CHAT_STATE: ChatState = { conversationId: null, messages: [] };
 
 export const INTERRUPTED_MESSAGE = "Відповідь перервалася. Спробуйте ще раз.";
+
+/** The reply's text parts joined (what the screen reader hears once the reply is complete). */
+export const replyText = (reply: AssistantReply): string =>
+  reply.parts
+    .flatMap((part) => (part.kind === "text" ? [part.text] : []))
+    .join("\n\n");
+
+/** A delta extends the last text part, or starts a new one after property results. */
+const appendText = (parts: ReplyPart[], delta: string): ReplyPart[] => {
+  const last = parts.at(-1);
+  return last?.kind === "text"
+    ? [...parts.slice(0, -1), { kind: "text", text: last.text + delta }]
+    : [...parts, { kind: "text", text: delta }];
+};
+
+const hasContent = (reply: AssistantReply): boolean =>
+  reply.parts.some((part) => part.kind === "properties" || part.text.trim() !== "");
 
 const isOpen = (state: ReplyState) => state.status === "waiting" || state.status === "streaming";
 
@@ -81,7 +103,7 @@ const applyEvent = (state: ChatState, replyId: string, event: AssistantEvent): C
       if (event.delta === "") return state;
       return updateOpenReply(state, replyId, (reply) => ({
         ...reply,
-        text: reply.text + event.delta,
+        parts: appendText(reply.parts, event.delta),
         state: { status: "streaming" },
       }));
     case "error":
@@ -97,12 +119,20 @@ const applyEvent = (state: ChatState, replyId: string, event: AssistantEvent): C
     case "done":
       return updateOpenReply(state, replyId, (reply) => ({
         ...reply,
-        // Nothing said at all is a failed turn, not an empty bubble.
-        state: reply.text.trim() === "" ? { status: "error", message: ASSISTANT_ERROR_MESSAGE } : { status: "done" },
+        // Nothing said or shown at all is a failed turn, not an empty bubble.
+        state: hasContent(reply) ? { status: "done" } : { status: "error", message: ASSISTANT_ERROR_MESSAGE },
       }));
     case "properties":
+      return updateOpenReply(state, replyId, (reply) => ({
+        ...reply,
+        parts: [
+          ...reply.parts,
+          { kind: "properties", items: event.items, total: event.total, catalogUrl: event.catalog_url },
+        ],
+        state: { status: "streaming" },
+      }));
     case "lead_card":
-      // Property cards (slice 2) and the lead card (slice 3) are added to the reply here.
+      // The lead card (slice 3) is added to the reply here.
       return state;
     default: {
       const unreachable: never = event;
@@ -120,7 +150,7 @@ export const chatReducer = (state: ChatState, action: ChatAction): ChatState => 
         messages: [
           ...state.messages,
           { id: action.userId, role: "user", text: action.text },
-          { id: action.replyId, role: "assistant", text: "", prompt: action.text, state: { status: "waiting" } },
+          { id: action.replyId, role: "assistant", parts: [], prompt: action.text, state: { status: "waiting" } },
         ],
       };
     }
@@ -128,7 +158,7 @@ export const chatReducer = (state: ChatState, action: ChatAction): ChatState => 
       if (activeReply(state)) return state;
       return updateReply(state, action.failedId, (reply) =>
         reply.state.status === "error"
-          ? { ...reply, id: action.replyId, text: "", state: { status: "waiting" } }
+          ? { ...reply, id: action.replyId, parts: [], state: { status: "waiting" } }
           : reply,
       );
     }

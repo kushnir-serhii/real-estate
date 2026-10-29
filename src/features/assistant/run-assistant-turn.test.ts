@@ -12,6 +12,7 @@ const db = vi.hoisted(() => ({
   appendMessages: vi.fn(),
   addConversationUsage: vi.fn(),
   getPropertyBySlug: vi.fn(),
+  runAssistantTool: vi.fn(),
 }));
 
 vi.mock("@/lib/db/assistant", () => ({
@@ -22,6 +23,10 @@ vi.mock("@/lib/db/assistant", () => ({
   addConversationUsage: db.addConversationUsage,
 }));
 vi.mock("@/lib/db/properties", () => ({ getPropertyBySlug: db.getPropertyBySlug }));
+vi.mock("./assistant-tools", () => ({
+  ASSISTANT_TOOLS: [{ name: "search_properties", description: "d", parameters: {} }],
+  runAssistantTool: db.runAssistantTool,
+}));
 
 import { runAssistantTurn } from "./run-assistant-turn";
 
@@ -56,6 +61,7 @@ beforeEach(() => {
   db.appendMessages.mockResolvedValue(undefined);
   db.addConversationUsage.mockResolvedValue(undefined);
   db.getPropertyBySlug.mockResolvedValue(null);
+  db.runAssistantTool.mockResolvedValue({ content: '{"total":0,"shown":0,"items":[]}' });
   vi.spyOn(console, "error").mockImplementation(() => undefined);
 });
 

@@ -1,6 +1,6 @@
 import type { SourceSwitchSummary } from "@/lib/db/admin-properties";
 import type { PropertiesMode } from "@/lib/db/property-permissions";
-import { countObjects, pluralUk } from "./count-objects";
+import { countObjects, pluralUk } from "@/lib/format/count-objects";
 
 const NUMBER = new Intl.NumberFormat("uk-UA");
 

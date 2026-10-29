@@ -6,12 +6,15 @@ import { ASSISTANT_GREETING, ASSISTANT_PERSONA } from "@/constants/assistant";
 import { AssistantBubble } from "./assistant-bubble";
 import { AssistantEmptyState } from "./assistant-empty-state";
 import { AssistantMessage } from "./assistant-message";
-import type { ChatMessage } from "./chat-reducer";
+import { resultsAnnouncement } from "./assistant-property-results";
+import { replyText } from "./chat-reducer";
+import type { ChatMessage, PropertiesPart } from "./chat-reducer";
 
 type AssistantMessageListProps = {
   messages: ChatMessage[];
   onSend: (text: string) => void;
   onRetry: (replyId: string) => void;
+  onNavigate?: () => void;
 };
 
 /** Within this distance from the bottom the list keeps following new text. */
@@ -26,18 +29,36 @@ const lastUserId = (messages: ChatMessage[]): string | null =>
   messages.findLast((message) => message.role === "user")?.id ?? null;
 
 /**
- * What the polite live region says: «typing» while waiting, then the whole reply once it is complete
- * (not every delta). Errors and limits announce themselves (`role="alert"` / `role="status"`).
+ * What the polite live region says: «typing» while waiting, the count as soon as property results arrive,
+ * then the reply's text once it is complete (not every delta). Errors and limits announce themselves
+ * (`role="alert"` / `role="status"`).
  */
 const announcement = (messages: ChatMessage[], skipId: string | null): string => {
   const last = messages.at(-1);
   if (last?.role !== "assistant") return "";
-  if (last.state.status === "waiting") return `${ASSISTANT_PERSONA.name} пише відповідь…`;
-  if (last.state.status === "done" && last.id !== skipId) return `${ASSISTANT_PERSONA.name}: ${last.text}`;
-  return "";
+  const results = last.parts.findLast((part): part is PropertiesPart => part.kind === "properties");
+  switch (last.state.status) {
+    case "waiting":
+      return `${ASSISTANT_PERSONA.name} пише відповідь…`;
+    case "streaming":
+      return results ? resultsAnnouncement(results) : "";
+    case "done": {
+      if (last.id === skipId) return "";
+      const text = replyText(last).trim();
+      if (text !== "") return `${ASSISTANT_PERSONA.name}: ${text}`;
+      return results ? resultsAnnouncement(results) : "";
+    }
+    case "error":
+    case "limit":
+      return "";
+    default: {
+      const unreachable: never = last.state;
+      return unreachable;
+    }
+  }
 };
 
-export const AssistantMessageList = ({ messages, onSend, onRetry }: AssistantMessageListProps) => {
+export const AssistantMessageList = ({ messages, onSend, onRetry, onNavigate }: AssistantMessageListProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const stickRef = useRef(true);
   const seenUserIdRef = useRef<string | null>(null);
@@ -71,7 +92,7 @@ export const AssistantMessageList = ({ messages, onSend, onRetry }: AssistantMes
         ) : (
           <ol aria-label="Розмова" className="flex flex-col gap-3">
             {messages.map((message) => (
-              <AssistantMessage key={message.id} message={message} onRetry={onRetry} />
+              <AssistantMessage key={message.id} message={message} onRetry={onRetry} onNavigate={onNavigate} />
             ))}
           </ol>
         )}
