@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test'
 
 // Usage (from the repo root): SPEC=001 ROUTES=root,design pnpm ui-check
 // Routes go without the leading slash (Git Bash rewrites "/x" into a Windows path); "root" is "/".
+// Admin routes: also set UI_CHECK_EMAIL / UI_CHECK_PASSWORD (local seed admin) to sign in first.
 // Without ROUTES the default list below is checked. Screenshots: e2e/screenshots/<SPEC>/<route>-<viewport>-<theme>.png
 
 const DEFAULT_ROUTES = ['/', '/design']
@@ -46,6 +47,17 @@ for (const route of ROUTES) {
             // storage blocked: the page falls back to the system theme
           }
         }, theme)
+
+        // admin routes: sign in first when credentials are given (local seed admin)
+        const email = process.env.UI_CHECK_EMAIL
+        const password = process.env.UI_CHECK_PASSWORD
+        if (route.startsWith('/admin') && route !== '/admin/sign-in' && email && password) {
+          await page.goto('/admin/sign-in')
+          await page.getByLabel('Email').fill(email)
+          await page.getByLabel('Пароль').fill(password)
+          await page.getByRole('button', { name: 'Увійти' }).click()
+          await page.waitForURL((url) => !url.pathname.startsWith('/admin/sign-in'))
+        }
 
         await page.goto(route)
         await page.waitForLoadState('networkidle')

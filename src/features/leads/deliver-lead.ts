@@ -64,8 +64,15 @@ type ChannelRun = {
   update: LeadDeliveryUpdate | null;
 };
 
-const runPlektan = async (lead: LeadForDelivery, deps: DeliverLeadDeps): Promise<ChannelRun> => {
-  if (!isDue(lead.plektan_status, lead.plektan_attempts)) return { outcome: "not_due", update: null };
+/**
+ * `force` (manual retry): runs when the channel is `failed`, however many attempts it used; any
+ * other status is left alone. Without it only the cron/first-delivery rule (`isDue`) applies.
+ */
+const shouldRun = (status: LeadForDelivery["plektan_status"], attempts: number, force: boolean): boolean =>
+  force ? status === "failed" : isDue(status, attempts);
+
+const runPlektan = async (lead: LeadForDelivery, deps: DeliverLeadDeps, force = false): Promise<ChannelRun> => {
+  if (!shouldRun(lead.plektan_status, lead.plektan_attempts, force)) return { outcome: "not_due", update: null };
   if (deps.plektanMode() === "off") {
     return {
       outcome: "skipped",
@@ -84,8 +91,8 @@ const runPlektan = async (lead: LeadForDelivery, deps: DeliverLeadDeps): Promise
   }
 };
 
-const runTelegram = async (lead: LeadForDelivery, deps: DeliverLeadDeps): Promise<ChannelRun> => {
-  if (!isDue(lead.telegram_status, lead.telegram_attempts)) return { outcome: "not_due", update: null };
+const runTelegram = async (lead: LeadForDelivery, deps: DeliverLeadDeps, force = false): Promise<ChannelRun> => {
+  if (!shouldRun(lead.telegram_status, lead.telegram_attempts, force)) return { outcome: "not_due", update: null };
   if (deps.telegramMode() === "off") {
     return {
       outcome: "skipped",
@@ -113,12 +120,33 @@ export const deliverLeadWith = async (deps: DeliverLeadDeps, id: string): Promis
   if (!lead) return { found: false, plektan: "not_due", telegram: "not_due" };
 
   const [plektan, telegram] = await Promise.all([runPlektan(lead, deps), runTelegram(lead, deps)]);
+  await saveRuns(deps, id, [plektan, telegram]);
+  return { found: true, plektan: plektan.outcome, telegram: telegram.outcome };
+};
+
+const saveRuns = async (deps: DeliverLeadDeps, id: string, runs: ChannelRun[]): Promise<void> => {
   const saves = await Promise.allSettled(
-    [plektan, telegram].flatMap((run) => (run.update ? [deps.saveDelivery(id, run.update)] : [])),
+    runs.flatMap((run) => (run.update ? [deps.saveDelivery(id, run.update)] : [])),
   );
   const failedSave = saves.find((save) => save.status === "rejected");
   if (failedSave) throw failedSave.reason;
-  return { found: true, plektan: plektan.outcome, telegram: telegram.outcome };
+};
+
+/**
+ * Manual retry from the admin: ONE attempt of ONE channel, now, only when that channel is `failed`
+ * (also past `MAX_DELIVERY_ATTEMPTS`). On failure the backoff is set only while attempts remain,
+ * so it never extends the cron schedule. Throws only if the database itself fails.
+ */
+export const retryLeadChannelWith = async (
+  deps: DeliverLeadDeps,
+  id: string,
+  channel: "plektan" | "telegram",
+): Promise<{ found: boolean; outcome: ChannelOutcome }> => {
+  const lead = await deps.loadLead(id);
+  if (!lead) return { found: false, outcome: "not_due" };
+  const run = channel === "plektan" ? await runPlektan(lead, deps, true) : await runTelegram(lead, deps, true);
+  await saveRuns(deps, id, [run]);
+  return { found: true, outcome: run.outcome };
 };
 
 /**
@@ -128,3 +156,6 @@ export const deliverLeadWith = async (deps: DeliverLeadDeps, id: string): Promis
  * fixture flag (`PLEKTAN_LEADS_FIXTURE`, `TELEGRAM_FIXTURE`) is set.
  */
 export const deliverLead = (id: string): Promise<DeliveryResult> => deliverLeadWith(defaultDeps, id);
+
+export const retryLeadChannel = (id: string, channel: "plektan" | "telegram") =>
+  retryLeadChannelWith(defaultDeps, id, channel);
