@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { ExchangeRates } from "@/lib/db/settings";
 import { saveExchangeRatesAction } from "./actions";
-import { countObjects } from "./count-objects";
+import { countObjects } from "@/lib/format/count-objects";
 import { INITIAL_SAVE_RATES_STATE } from "./settings-state";
 import type { RatesFieldErrors } from "./settings-state";
 

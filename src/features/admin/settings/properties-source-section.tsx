@@ -3,7 +3,7 @@ import { Cloud, LayoutDashboard } from "lucide-react";
 import type { SourceSwitchSummary } from "@/lib/db/admin-properties";
 import type { PropertiesMode } from "@/lib/db/property-permissions";
 import { formatKyivDateTime } from "@/lib/format/format-kyiv-date-time";
-import { countObjects } from "./count-objects";
+import { countObjects } from "@/lib/format/count-objects";
 import { SettingsSection } from "./settings-section";
 import { SourceSwitch } from "./source-switch";
 import { sourceSwitchConsequences } from "./source-switch-consequences";

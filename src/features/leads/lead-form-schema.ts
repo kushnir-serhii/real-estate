@@ -39,7 +39,7 @@ const required = (message: string) => z.string({ error: message }).trim().min(1,
 const optional = <T extends z.ZodType>(schema: T) =>
   z.preprocess((v) => (typeof v === "string" && v.trim() === "" ? undefined : v), schema.optional());
 
-const common = {
+export const leadCommonFields = {
   client_request_id: z.uuid({ error: LEAD_MESSAGES.generic }),
   name: required(LEAD_MESSAGES.name).max(LEAD_LIMITS.name, { error: LEAD_MESSAGES.nameTooLong }),
   phone: required(LEAD_MESSAGES.phone)
@@ -56,13 +56,13 @@ const common = {
 
 export const propertyRequestSchema = z.object({
   kind: z.literal("property_request"),
-  ...common,
+  ...leadCommonFields,
   property_id: z.uuid({ error: LEAD_MESSAGES.property }),
 });
 
 export const generalRequestSchema = z.object({
   kind: z.literal("general"),
-  ...common,
+  ...leadCommonFields,
   deal: z.enum(LEAD_DEALS, { error: LEAD_MESSAGES.deal }),
   property_type: optional(z.enum(PROPERTY_TYPES, { error: LEAD_MESSAGES.propertyType })),
   /** Id of the sold/hidden property the visitor looked at; the server resolves slug and title. */
