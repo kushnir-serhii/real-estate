@@ -21,3 +21,9 @@ export const largestPhotoUrl = (photo: { r2_key: string; sizes: unknown }): stri
   const widest = entries.at(-1);
   return photoUrl(widest ? widest[1] : photo.r2_key);
 };
+
+/** URL of the narrowest stored size (thumbnails), falling back to the original key. */
+export const smallestPhotoUrl = (photo: { r2_key: string; sizes: unknown }): string => {
+  const narrowest = sizeEntries(photo.sizes)[0];
+  return photoUrl(narrowest ? narrowest[1] : photo.r2_key);
+};

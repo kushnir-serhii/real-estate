@@ -284,7 +284,16 @@ insert into public.properties (
   'Вишневе', null, 'вул. Садова', '17', null, null,
   'Дачна ділянка 6 соток у Вишневому',
   'Дачна ділянка 6 соток з невеликим садовим будиночком. Є світло, колодязь, фруктові дерева. Тихий дачний кооператив, до траси 5 хвилин.',
-  'dachna-dilianka-6-sotok-vyshneve-a97e24', '00000000-0000-4000-8000-0000000000a3', null, now() - interval '30 days');
+  'dachna-dilianka-6-sotok-vyshneve-a97e24', '00000000-0000-4000-8000-0000000000a3', null, now() - interval '30 days'),
+
+-- Draft (spec 008): hidden and never published, so it is visible only in the admin.
+('admin', null, 'hidden', 'sell', 'flat', 'isolated',
+  null, null, 48, null, null, null,
+  2, null, null, null, null, null, false,
+  'Київ', null, null, null, null, null,
+  '2-кімнатна квартира, Київ',
+  null,
+  '2-kimnatna-kvartyra-kyiv-d7a001', null, null, null);
 
 -- Derived prices: USD-normalized amount (rates from settings) and price per m2 in the listing currency.
 update public.properties p
