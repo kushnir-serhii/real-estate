@@ -374,3 +374,59 @@ insert into public.pages (slug, title, body, seo_title, seo_description) values
    E'## 1. Хто обробляє ваші дані\n\nВолоділець персональних даних — агентство нерухомості Lyndrik (далі — «Агентство»).\n\n- Телефон: +380 67 000 00 01\n- Email: office@lyndrik.example\n- Адреса: м. Київ, вул. Хрещатик, 10\n\n## 2. Які дані ми збираємо\n\n- ім''я;\n- номер телефону;\n- адреса електронної пошти;\n- текст вашого повідомлення чи запиту;\n- сторінка сайту, з якої ви надіслали запит, та UTM-мітки рекламних переходів;\n- технічні дані, потрібні для роботи сайту: тип пристрою й браузера, IP-адреса, файли cookie (наприклад, вибір світлої чи темної теми).\n\n## 3. Навіщо ми обробляємо дані\n\n- щоб відповісти на ваш запит і зв''язатися з вами;\n- щоб підібрати нерухомість під ваші потреби;\n- щоб передати запит у CRM-систему Агентства та відповідальному менеджеру;\n- щоб забезпечувати стабільну роботу й безпеку сайту.\n\n## 4. Правова підстава\n\nМи обробляємо персональні дані на підставі вашої згоди, яку ви надаєте, надсилаючи форму на сайті, відповідно до Закону України «Про захист персональних даних». Технічні дані, потрібні для роботи сайту, обробляються на підставі нашого законного інтересу забезпечувати його працездатність.\n\n## 5. Скільки ми зберігаємо дані\n\nДані із заявок зберігаються доти, доки це потрібно для досягнення мети обробки, але не довше трьох років після останнього контакту з вами, якщо інший строк не вимагає закон. Після цього дані видаляються або знеособлюються.\n\n## 6. Кому ми передаємо дані\n\nМи не продаємо персональні дані. Дані можуть опрацьовувати лише ті сторонні сервіси, які потрібні для роботи сайту й Агентства, і тільки в необхідному обсязі:\n\n- хостинг і база даних, у яких працює сайт;\n- CRM-система Агентства, куди потрапляють заявки;\n- сервіси сповіщень, через які менеджер отримує повідомлення про заявку.\n\nТакож ми можемо передати дані, якщо цього вимагає закон.\n\n## 7. Ваші права\n\nВи маєте право:\n\n- дізнатися, які ваші дані ми обробляємо, і отримати доступ до них;\n- вимагати виправити неточні дані;\n- вимагати видалити ваші дані;\n- відкликати згоду на обробку;\n- звернутися зі скаргою до Уповноваженого Верховної Ради України з прав людини.\n\n## 8. Як скористатися правами\n\nНапишіть нам на office@lyndrik.example із темою «Персональні дані» та вкажіть ім''я й телефон, які ви залишали на сайті. Ми відповімо протягом 30 днів.\n\n## 9. Зміни до політики\n\nМи можемо оновлювати цю політику. Актуальна версія завжди доступна на цій сторінці. Продовжуючи користуватися сайтом після змін, ви погоджуєтеся з оновленою версією.',
    'Політика конфіденційності — Lyndrik',
    'Як агентство нерухомості Lyndrik обробляє та захищає персональні дані відвідувачів сайту.');
+
+-- ===== LOCAL ONLY: demo admin users (spec 007). Never run this against production. ==============
+-- admin@lyndrik.local / admin12345 is an admin; user@lyndrik.local / user12345 is signed up but NOT an admin.
+-- All token columns are '' (not null) or GoTrue fails to sign in.
+insert into auth.users (
+  instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+  raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
+  confirmation_token, recovery_token, email_change_token_new, email_change, email_change_token_current,
+  phone_change, phone_change_token, reauthentication_token
+) values
+  ('00000000-0000-0000-0000-000000000000', '00000000-0000-4000-8000-0000000000b1', 'authenticated', 'authenticated',
+    'admin@lyndrik.local', crypt('admin12345', gen_salt('bf')), now(),
+    '{"provider":"email","providers":["email"]}', '{}', now(), now(), '', '', '', '', '', '', '', ''),
+  ('00000000-0000-0000-0000-000000000000', '00000000-0000-4000-8000-0000000000b2', 'authenticated', 'authenticated',
+    'user@lyndrik.local', crypt('user12345', gen_salt('bf')), now(),
+    '{"provider":"email","providers":["email"]}', '{}', now(), now(), '', '', '', '', '', '', '', '');
+
+insert into auth.identities (provider_id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at) values
+  ('00000000-0000-4000-8000-0000000000b1', '00000000-0000-4000-8000-0000000000b1',
+    '{"sub":"00000000-0000-4000-8000-0000000000b1","email":"admin@lyndrik.local","email_verified":true}', 'email', now(), now(), now()),
+  ('00000000-0000-4000-8000-0000000000b2', '00000000-0000-4000-8000-0000000000b2',
+    '{"sub":"00000000-0000-4000-8000-0000000000b2","email":"user@lyndrik.local","email_verified":true}', 'email', now(), now(), now());
+
+insert into public.admins (user_id, email) values
+  ('00000000-0000-4000-8000-0000000000b1', 'admin@lyndrik.local');
+
+-- ===== LOCAL ONLY: demo leads (30, ~40 days, mixed kinds and delivery statuses) ================
+-- Fictional people; phones are +380 67 000 00 xx style fakes. Row 0 has a very long name and message.
+insert into public.leads (
+  kind, property_id, name, phone, email, message, consent_at, client_request_id, page_url,
+  plektan_status, plektan_error, plektan_attempts, telegram_status, telegram_error, telegram_attempts, created_at
+)
+select
+  case when i % 3 = 0 then 'general' when i % 7 = 6 then 'ai' else 'property_request' end::public.lead_kind,
+  case when i % 3 = 0 or i % 7 = 6 then null
+       else (select id from public.properties order by slug limit 1 offset (i % 5)) end,
+  case when i = 0 then 'Олександр-Михайло Святославович Верховинський-Підгірянський з родиною та представниками компанії'
+       else (array['Олена Шевченко','Андрій Бондаренко','Марія Ткаченко','Іван Коваль','Наталія Лисенко',
+                   'Петро Мороз','Юлія Кравченко','Дмитро Поліщук','Ірина Гриценко','Сергій Олійник'])[i % 10 + 1] end,
+  '+38067000' || lpad((10 + i)::text, 4, '0'),
+  case when i % 2 = 0 then 'client' || i || '@example.com' else null end,
+  case when i = 0 then repeat('Шукаємо просторий будинок поблизу Києва з ділянкою, гаражем і можливістю оформити іпотеку. ', 12)
+       when i % 4 = 0 then null
+       else (array['Доброго дня! Хочу оглянути цей об''єкт цього тижня.','Підкажіть, чи можливий торг?',
+                   'Цікавить ця квартира, зателефонуйте після 18:00.','Потрібна консультація щодо покупки.'])[i % 4 + 1] end,
+  now() - (i * interval '32 hours') - interval '5 minutes',
+  gen_random_uuid(),
+  '/catalog',
+  (array['sent','failed','skipped','pending','failed','sent'])[i % 6 + 1]::public.delivery_status,
+  (array[null,'timeout',null,null,'http 500',null])[i % 6 + 1],
+  (array[1,5,0,0,3,1])[i % 6 + 1],
+  (array['sent','sent','skipped','pending','failed','failed'])[i % 6 + 1]::public.delivery_status,
+  (array[null,null,null,null,'http 502','timeout'])[i % 6 + 1],
+  (array[1,1,0,0,2,4])[i % 6 + 1],
+  now() - (i * interval '32 hours')
+from generate_series(0, 29) as i;

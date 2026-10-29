@@ -1,6 +1,6 @@
 # 007 — Admin: sign-in + leads
 
-**Status:** ready · **Depends on:** 002, 006 · **Route(s):** `/admin`, `/admin/sign-in`, `/admin/leads`, `/admin/leads/[id]`
+**Status:** in-progress · **Depends on:** 002, 006 · **Route(s):** `/admin`, `/admin/sign-in`, `/admin/leads`, `/admin/leads/[id]`
 
 ## Goal
 Andrii and staff sign in to the admin and see every lead with its delivery status, even when the CRM is gone, and resend a delivery that failed. The admin shell (sign-in, guard, layout) is reused by 008 and 009.
@@ -20,15 +20,15 @@ Andrii and staff sign in to the admin and see every lead with its delivery statu
 
 ## Slices
 
-### [ ] 1. Auth, roles, admin shell
+### [x] 1. Auth, roles, admin shell
 - **Build:** migration (`admins`, `is_admin()`, leads select policy + grant) and types regenerated; `enable_signup = false` in `config.toml`; seed admin. `src/lib/auth/` (or `src/lib/db/admins.ts`): `getAdminSession()` → `{ state: 'unconfigured' } | { state: 'anonymous' } | { state: 'forbidden', email } | { state: 'admin', email }`. Proxy redirect for anonymous on `/admin/*` (except `/admin/sign-in`) + `X-Robots-Tag`. `/admin/sign-in`: email + password form (labels, inline errors, pending, wrong credentials message announced with `role="alert"`), server action `signIn` (zod) → redirect to `next` (only same-origin `/admin` paths); `signOut` action. Admin layout (`src/app/admin/(panel)/layout.tsx` or similar): header «Lyndrik · адмінка», nav «Заявки», user email, «Вийти»; mobile layout at 375px; `robots: noindex`. `/admin` → redirect to `/admin/leads`; `/admin/leads` a placeholder page for now. Forbidden and unconfigured states. `docs/setup.md`: migration row, auth settings (sign-ups off, site/redirect URLs), how to add an admin.
 - **Files:** `supabase/migrations/*_admins.sql`, `supabase/config.toml`, `supabase/seed.sql`, `src/lib/supabase/database.types.ts`, `src/lib/supabase/proxy.ts`, `src/proxy.ts`, `src/lib/auth/*`, `src/features/admin/*`, `src/app/admin/**`, `docs/setup.md`
 - **Agent:** backend (migration, session, proxy, actions) → designer (sign-in page, layout, states)
 - **Accept:**
-  - [ ] anonymous users are redirected from every `/admin` route to sign-in; a signed-in non-admin sees «Немає доступу» and can't read leads (checked with the anon key + a non-admin session against local Supabase)
-  - [ ] an admin signs in, lands on `/admin/leads` (or `next`), signs out
-  - [ ] admin pages are `noindex` (meta + header)
-  - [ ] sign-in page: labels, errors announced, pending state, 375px without horizontal scroll
+  - [x] anonymous users are redirected from every `/admin` route to sign-in; a signed-in non-admin sees «Немає доступу» and can't read leads (checked with the anon key + a non-admin session against local Supabase)
+  - [x] an admin signs in, lands on `/admin/leads` (or `next`), signs out
+  - [x] admin pages are `noindex` (meta + header)
+  - [x] sign-in page: labels, errors announced, pending state, 375px without horizontal scroll
 
 ### [ ] 2. Leads list
 - **Build:** `getAdminLeads` + filters schema; `/admin/leads` with filters (kind, from/to dates, «Не доставлено» toggle), search by name/phone, pagination — all in the URL. Each lead: date/time (`uk-UA`, Kyiv), kind, name, phone, property title (truncated), delivery badges for Plektan and Telegram (sent / pending / failed / skipped, not by color only). Table on desktop, cards at 375px; the whole row links to the detail. `loading.tsx` skeleton, `error.tsx` with retry, empty state (no leads yet vs nothing matches the filters + «Скинути фільтри»), long names/titles truncated with `title`.
@@ -57,8 +57,11 @@ Andrii and staff sign in to the admin and see every lead with its delivery statu
 - **Decided 2026-10-28:** email + password (no SMTP needed); magic link and in-app password reset later if wanted.
 - **Decided 2026-10-28:** manual retry = one immediate attempt of one channel, also past 5 attempts; doesn't reset the counter or extend the cron schedule.
 - **Decided 2026-10-28:** extras in scope: «Не доставлено» filter, link to the admin lead in Telegram, admin usable at 375px.
+- Local `config.toml` keeps `[auth.email] enable_signup = true`: there it switches the whole email provider; sign-ups are off via `[auth] enable_signup = false`.
+- On mobile the admin header cuts the email after ~15 characters; fine for now.
 - **Decided 2026-10-28:** 3 slices (auth + shell, list, detail + retry); `admins` table + `is_admin()`, leads read via RLS for admins, writes via service role after the server check.
 
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
+| 2026-10-29 | 1 | done | Migration `20261028170000_admins.sql` (`admins` + own-row RLS, `is_admin()` security definer, leads select for admins; no writes). Local checks: anon → 42501, non-admin → 0 leads / `is_admin` false, admin → 30 leads; insert/update → 42501; sign-up → `signup_disabled`. Proxy: anonymous `/admin/*` → sign-in with `next`, `X-Robots-Tag` on every admin response; `getAdminSession()` (cached) in the panel layout: unconfigured / forbidden / admin shell. Sign-in (password, safe `next`), sign-out; seed admin + non-admin + 30 demo leads. Playwright: sign-in errors/pending, 375px no scroll, 44px targets. Files: `supabase/{migrations,seed.sql,config.toml}`, `src/lib/supabase/{proxy,database.types}.ts`, `src/lib/auth/*`, `src/features/admin/*`, `src/app/admin/**`, `docs/setup.md` |

@@ -6,7 +6,7 @@ Everything so far runs locally (local Supabase in Docker, fixture modes). This f
 
 | Service | Status | Needed from |
 | --- | --- | --- |
-| Supabase | not connected — local only | 002 (now), 007 (auth) |
+| Supabase | not connected — local only; 007 adds admin auth (email + password, sign-ups off, `admins` table) | 002 (now), 007 (auth) |
 | Cloudflare (Workers, R2) | not connected | deploy, 003 (R2) |
 | Cloudflare Turnstile | not connected — the check passes in fixture mode, no widget | 006 |
 | Plektan | not connected — fixtures; 003 sync is ready, needs the API key and `PLEKTAN_*_ID`; leads are `skipped` until the key exists (local: `PLEKTAN_LEADS_FIXTURE`) | 003, 006 |
@@ -53,6 +53,7 @@ Migrations to apply (in order; add new ones here when a spec adds them):
 | `20261028140000_hide_private_property_columns.sql` | 003 | [ ] |
 | `20261028150000_property_hidden_at.sql` | 005 | [ ] |
 | `20261028160000_lead_retry.sql` | 006 | [ ] |
+| `20261028170000_admins.sql` | 007 | [ ] |
 
 ### 4. Check
 - Dashboard → Advisors → Security: no "RLS disabled" warnings.
@@ -60,8 +61,24 @@ Migrations to apply (in order; add new ones here when a spec adds them):
 - Set real exchange rates in `settings.exchange_rates` (UAH and EUR per 1 USD) until the admin can edit them (008).
 
 ### 5. Later
-- **Auth (007):** site URL and redirect URLs (production domain + `http://localhost:3000`), the admin users' emails, SMTP for magic links.
 - Types: `src/lib/supabase/database.types.ts` is generated from the local DB (`pnpm db:types`); it matches production as long as every migration is applied.
+
+## Admin (spec 007)
+
+Email + password sign-in; no SMTP needed. The local demo admin (`admin@lyndrik.local` / `admin12345`, plus a non-admin `user@lyndrik.local`) exists only in `supabase/seed.sql`; never seeded in production.
+
+### Auth settings (Supabase dashboard)
+- Authentication → Sign In / Providers → turn **off** "Allow new users to sign up". Keep the **Email** provider on with password sign-in.
+- Authentication → URL Configuration: Site URL = the production domain; Redirect URLs = the production domain and `http://localhost:3000`.
+
+### Add an admin
+1. Authentication → Users → Add user → Create new user: email + password, tick "Auto Confirm User".
+2. SQL editor:
+   ```sql
+   insert into public.admins (user_id, email)
+   select id, email from auth.users where email = 'person@example.com';
+   ```
+To remove access: `delete from public.admins where email = '...';`. Password reset: Authentication → Users → the user → Send password recovery, or set a new password there.
 
 ## Leads: Telegram, Turnstile, Plektan (spec 006)
 
