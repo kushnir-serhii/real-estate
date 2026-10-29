@@ -55,6 +55,7 @@ Migrations to apply (in order; add new ones here when a spec adds them):
 | `20261028160000_lead_retry.sql` | 006 | [ ] |
 | `20261028170000_admins.sql` | 007 | [ ] |
 | `20261029120000_admin_properties.sql` | 008 | [ ] |
+| `20261029130000_pages_noindex.sql` | 009 | [ ] |
 
 ### 4. Check
 - Dashboard → Advisors → Security: no "RLS disabled" warnings.

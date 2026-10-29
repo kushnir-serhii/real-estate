@@ -13,6 +13,7 @@ export const generateMetadata = async (): Promise<Metadata> => {
     title: page.seo_title ?? page.title,
     description: page.seo_description ?? undefined,
     alternates: { canonical: "/privacy" },
+    robots: page.noindex ? { index: false, follow: true } : undefined,
   };
 };
 

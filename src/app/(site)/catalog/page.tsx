@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
+import { JsonLd } from "@/components/seo/json-ld";
 import { CatalogFiltersForm } from "@/features/catalog/catalog-filters-form";
 import {
   canonicalPath,
@@ -19,7 +20,9 @@ import { CatalogSkeleton } from "@/features/catalog/catalog-skeleton";
 import { CatalogSort } from "@/features/catalog/catalog-sort";
 import { FiltersSheet } from "@/features/catalog/filters-sheet";
 import { loadDistrictOptions } from "@/features/catalog/load-district-options";
+import { breadcrumbSchema, HOME_CRUMB } from "@/features/seo/schemas";
 import { getExchangeRates } from "@/lib/db/settings";
+import { getSiteUrl } from "@/lib/site-url";
 
 type CatalogPageProps = { searchParams: Promise<SearchParams> };
 
@@ -51,6 +54,9 @@ const CatalogPage = async ({ searchParams }: CatalogPageProps) => {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:py-10">
+      <JsonLd
+        data={breadcrumbSchema(getSiteUrl(), [HOME_CRUMB, { name: "Каталог", path: canonicalPath(state) }])}
+      />
       <h1 className="text-2xl font-bold text-balance sm:text-3xl">{catalogTitle(state)}</h1>
 
       <div className="mt-6 lg:grid lg:grid-cols-[17rem_minmax(0,1fr)] lg:items-start lg:gap-8">

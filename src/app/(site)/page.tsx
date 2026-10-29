@@ -19,6 +19,7 @@ export const generateMetadata = async (): Promise<Metadata> => {
     title: { absolute: page.seo_title ?? page.title },
     description: page.seo_description ?? undefined,
     alternates: { canonical: "/" },
+    robots: page.noindex ? { index: false, follow: true } : undefined,
   };
 };
 

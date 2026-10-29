@@ -286,3 +286,33 @@ const fetchPublishedDistricts = async (): Promise<string[]> => {
 export const getPublishedDistricts = unstable_cache(fetchPublishedDistricts, ["published-districts"], {
   tags: [CACHE_TAGS.properties],
 });
+
+export type SitemapProperty = Pick<PublishedProperty, "slug" | "updated_at">;
+
+/** PostgREST returns at most 1000 rows per request (Supabase default): read in pages of that size. */
+const SITEMAP_BATCH = 1000;
+/** A sitemap file holds at most 50 000 URLs; beyond that it would need a sitemap index (not needed for one agency). */
+export const SITEMAP_MAX_PROPERTIES = 45_000;
+
+const fetchSitemapProperties = async (): Promise<SitemapProperty[]> => {
+  const supabase = createPublicClient();
+  const result: SitemapProperty[] = [];
+  for (let from = 0; result.length < SITEMAP_MAX_PROPERTIES; from += SITEMAP_BATCH) {
+    const { data, error } = await supabase
+      .from("properties")
+      .select("slug,updated_at")
+      .eq("status", "published")
+      .order("updated_at", { ascending: false })
+      .order("id")
+      .range(from, from + SITEMAP_BATCH - 1);
+    if (error) throw new Error(`getSitemapProperties failed: ${error.message}`);
+    result.push(...data);
+    if (data.length < SITEMAP_BATCH) break;
+  }
+  return result;
+};
+
+/** Slug + `updated_at` of every published property, for the sitemap. Cached under the `properties` tag. */
+export const getSitemapProperties = unstable_cache(fetchSitemapProperties, ["sitemap-properties"], {
+  tags: [CACHE_TAGS.properties],
+});
