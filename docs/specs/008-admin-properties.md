@@ -1,6 +1,6 @@
 # 008 — Admin: properties + photos
 
-**Status:** ready · **Depends on:** 003, 007 · **Route(s):** `/admin/settings`, `/admin/properties`, `/admin/properties/new`, `/admin/properties/[id]`
+**Status:** in-progress · **Depends on:** 003, 007 · **Route(s):** `/admin/settings`, `/admin/properties`, `/admin/properties/new`, `/admin/properties/[id]`
 
 ## Goal
 The agency can run the catalog without the CRM: create, edit, publish and hide properties with photos stored in R2. Switching Plektan off never freezes the catalog. The longest part of the admin.
@@ -27,15 +27,15 @@ The agency can run the catalog without the CRM: create, edit, publish and hide p
 
 ## Slices
 
-### [ ] 1. Settings: source switch + exchange rates
+### [x] 1. Settings: source switch + exchange rates
 - **Build:** migration (admin select policies) + types. `ADMIN_NAV` gets «Налаштування». `/admin/settings`: current mode with a plain explanation, last sync time, a switch with a confirm dialog listing the consequences and counts (to `admin`: «N об'єктів з Plektan стануть редагованими, синхронізація зупиниться»; to `plektan`: «зміни в об'єктах з Plektan перезапишуться при наступній синхронізації, ваші фото до них видаляться; N ваших об'єктів лишаться, їх можна лише сховати чи опублікувати»). Rates form (UAH, EUR per USD, positive numbers) → save recomputes `price_usd` and revalidates. Server actions with `requireAdmin()` + zod; results announced. `src/lib/auth` or `src/lib/db`: a helper `canEditProperty(mode, source)` / `canCreateProperty(mode)` used by later slices. Loading, error states.
 - **Files:** `supabase/migrations/*_admin_properties.sql`, `src/lib/supabase/database.types.ts`, `src/lib/db/settings.ts`, `src/lib/db/admin-properties.ts`, `src/features/admin/settings/*`, `src/features/admin/admin-nav.ts`, `src/app/admin/(panel)/settings/*`, `docs/setup.md`
 - **Agent:** backend → designer
 - **Accept:**
-  - [ ] the sync doesn't run in `admin` mode (`pnpm sync` logs skipped); admin create is disabled in `plektan` mode (helper + tests)
-  - [ ] switching asks for confirmation with the consequences; non-admins can't call the actions
-  - [ ] saving rates recomputes `price_usd` of every priced property; invalid rates are rejected with a message
-  - [ ] an admin session reads hidden properties and their photos; anon still can't
+  - [x] the sync doesn't run in `admin` mode (`pnpm sync` logs skipped); admin create is disabled in `plektan` mode (helper + tests)
+  - [x] switching asks for confirmation with the consequences; non-admins can't call the actions
+  - [x] saving rates recomputes `price_usd` of every priced property; invalid rates are rejected with a message
+  - [x] an admin session reads hidden properties and their photos; anon still can't
 
 ### [ ] 2. Properties list
 - **Build:** `ADMIN_NAV` gets «Об'єкти» (first). `/admin/properties`: filters (status incl. «Чернетка», source, deal, type) and search, pagination, all in the URL; each row: cover thumbnail (placeholder when none), title (truncated with `title`), price via `formatPrice` (or «Ціна договірна»), status badge (icon + word), source, updated date (`uk-UA`, Kyiv). Table from `lg`, cards below. «Додати об'єкт» button (disabled with an explanation in `plektan` mode). Skeleton, error with retry, empty states (no properties yet vs nothing matches + «Скинути фільтри»).
@@ -80,7 +80,10 @@ The agency can run the catalog without the CRM: create, edit, publish and hide p
 - **Decided 2026-10-29:** 4 slices (settings, list, form, photos).
 - Old WordPress site: migrate properties? Who? Out of 008 (stack.md → Відкриті питання).
 - Agents can't be added or edited in the admin; matters if Plektan is dropped.
+- **Fixed in slice 1:** a new draft got `hidden_at` on insert, so the public 7-day sold window would expose it via REST. `set_property_hidden_at()` now sets `hidden_at` only for rows that were published once (`published_at` set).
+- `shadcn add alert-dialog` wanted to overwrite our `button.tsx` and pull an npm package `cn`; the primitive was written from `shadcn view` instead (tokens only).
 
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
+| 2026-10-29 | 1 | done | Migration `20261029120000_admin_properties.sql`: admin select policies on `properties` / `property_photos` (all statuses), drafts never public (`hidden_at` only after a publish), `save_exchange_rates(uah, eur)` (settings + `price_usd` recompute in one transaction, service role only). Local: admin sees 2 hidden + their photos, anon / non-admin don't; draft insert invisible to anon; `pnpm sync` in admin mode → skipped. `property-permissions.ts` (`canCreateProperty`, `canEditProperty`) + tests; actions `switchPropertiesSource` (`confirm=yes`), `saveExchangeRatesAction`. UI `/admin/settings`: mode, last sync, counts, confirm dialog with consequences, rates form with inline errors; skeleton, error; 375/1280 checked. Files: `supabase/migrations/*`, `src/lib/db/{admin-properties,property-permissions}*.ts`, `src/features/admin/settings/*`, `src/app/admin/(panel)/settings/*`, `src/components/ui/alert-dialog.tsx`, `docs/setup.md` |

@@ -427,6 +427,10 @@ export type Database = {
     }
     Functions: {
       is_admin: { Args: never; Returns: boolean }
+      save_exchange_rates: {
+        Args: { p_eur: number; p_uah: number }
+        Returns: number
+      }
     }
     Enums: {
       currency: "UAH" | "USD" | "EUR"
