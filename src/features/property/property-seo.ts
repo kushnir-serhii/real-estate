@@ -23,7 +23,7 @@ export type PropertySeoInput = Pick<
 /** Shape accepted by Next `metadata.title`: plain (the root template adds the brand) or `absolute` (no brand added). */
 export type SeoTitle = string | { absolute: string };
 
-/** Longest title that still gets « — Sofiacity» appended by the root template. */
+/** Longest title that still gets « — 7 SKY» appended by the root template. */
 const TITLE_WITH_BRAND_MAX = 60;
 const BRAND_SUFFIX = ` — ${BRAND.name}`;
 const DESCRIPTION_MAX = 155;

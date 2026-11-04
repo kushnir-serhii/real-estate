@@ -1,8 +1,12 @@
 import { useSyncExternalStore } from "react";
 import { z } from "zod";
 
+import { LEGACY_STORAGE_PREFIX } from "@/lib/legacy-storage";
+
 /** localStorage key: JSON array of property ids (uuids), newest first. */
-export const FAVORITES_KEY = "sofiacity:favorites";
+export const FAVORITES_KEY = "7sky:favorites";
+/** Key used before the rebrand; read once and moved to FAVORITES_KEY. */
+const LEGACY_FAVORITES_KEY = `${LEGACY_STORAGE_PREFIX}:favorites`;
 export const MAX_FAVORITES = 100;
 
 const idSchema = z.string().uuid();
@@ -26,12 +30,27 @@ export const sanitizeIds = (value: unknown): string[] => {
   return [...seen];
 };
 
+/** Moves the pre-rebrand list to the new key once; unreadable data is dropped. Throws only when storage is blocked. */
+const migrateLegacy = (): string[] => {
+  const legacy = window.localStorage.getItem(LEGACY_FAVORITES_KEY);
+  if (legacy === null) return [];
+  let ids: string[] = [];
+  try {
+    ids = sanitizeIds(JSON.parse(legacy));
+  } catch {
+    // Garbage: start empty.
+  }
+  window.localStorage.removeItem(LEGACY_FAVORITES_KEY);
+  if (ids.length > 0) window.localStorage.setItem(FAVORITES_KEY, JSON.stringify(ids));
+  return ids;
+};
+
 /** `null` when storage can't be read at all. */
 const readStorage = (): string[] | null => {
   try {
     const raw = window.localStorage.getItem(FAVORITES_KEY);
-    if (raw === null) return [];
-    return sanitizeIds(JSON.parse(raw));
+    if (raw !== null) return sanitizeIds(JSON.parse(raw));
+    return migrateLegacy();
   } catch {
     return null;
   }

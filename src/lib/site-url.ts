@@ -22,8 +22,8 @@ export const getSiteUrl = (env: Record<string, string | undefined> = process.env
   if (isProductionBuild && env.SEO_ALLOW_LOCALHOST !== "1") {
     throw new Error(
       configured
-        ? `NEXT_PUBLIC_SITE_URL is not a valid URL ("${configured}"). Set it to the production domain, e.g. https://sofiacity.example (or SEO_ALLOW_LOCALHOST=1 for a local build).`
-        : "NEXT_PUBLIC_SITE_URL is empty. Set it to the production domain, e.g. https://sofiacity.example, before building (or SEO_ALLOW_LOCALHOST=1 for a local build).",
+        ? `NEXT_PUBLIC_SITE_URL is not a valid URL ("${configured}"). Set it to the production domain, e.g. https://7sky.example (or SEO_ALLOW_LOCALHOST=1 for a local build).`
+        : "NEXT_PUBLIC_SITE_URL is empty. Set it to the production domain, e.g. https://7sky.example, before building (or SEO_ALLOW_LOCALHOST=1 for a local build).",
     );
   }
   return LOCAL_SITE_URL;

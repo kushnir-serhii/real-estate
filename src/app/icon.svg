@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 7 SKY favicon: the brand mark in public/brand/7sky-mark.svg, heavier stroke and without the thin inner lines so it reads at 16px. Fill = primary token (light) in src/app/globals.css. -->
+  <rect width="64" height="64" rx="12" fill="#0068ad"/>
+  <g transform="translate(32 33) scale(0.52) translate(-60 -39)" fill="none" stroke="#ffffff" stroke-width="8.5" stroke-linejoin="miter" stroke-linecap="butt">
+    <path d="M40 68H24A15.5 15.5 0 0 1 26 38A30 30 0 0 1 84 30A20.5 20.5 0 0 1 96 68H76"/>
+    <path d="M40 70V54L48 50"/>
+    <path d="M48 70V30L66 20V44"/>
+    <path d="M58 70V40L76 49V70"/>
+  </g>
+</svg>

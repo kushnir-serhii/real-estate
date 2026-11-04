@@ -29,7 +29,7 @@ const form = (overrides: Record<string, unknown> = {}) => ({
   kind: "general",
   client_request_id: crypto.randomUUID(),
   name: "Тест Тестович",
-  phone: "+380 67 000 00 09",
+  phone: "+380 00 000 00 09",
   consent: "on",
   deal: "buy",
   ...overrides,
@@ -179,7 +179,7 @@ describe("assistant on the demo driver", () => {
       proposal_id: card.proposal_id,
       client_request_id: crypto.randomUUID(),
       name: "Тест Тестович",
-      phone: "+380 67 000 00 09",
+      phone: "+380 00 000 00 09",
       consent: true,
       honeypot: "",
     };

@@ -49,7 +49,7 @@ for (const route of ROUTES) {
         await page.emulateMedia({ colorScheme: theme })
         await page.addInitScript((value) => {
           try {
-            localStorage.setItem('sofiacity-theme', value)
+            localStorage.setItem('7sky-theme', value)
           } catch {
             // storage blocked: the page falls back to the system theme
           }

@@ -20,7 +20,7 @@ export const SiteFooter = () => {
     <footer className="border-t bg-muted">
       <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-10 md:grid-cols-2 lg:grid-cols-3">
         <div className="flex flex-col items-start gap-2">
-          <Logo />
+          <Logo alwaysShowName />
           <p className="max-w-xs text-sm text-muted-foreground">
             {BRAND.tagline}
           </p>

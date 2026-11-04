@@ -4,7 +4,7 @@ import { getSiteUrl } from "./site-url";
 
 describe("getSiteUrl", () => {
   it("returns the configured origin without a path", () => {
-    expect(getSiteUrl({ NEXT_PUBLIC_SITE_URL: "https://sofiacity.example/" })).toBe("https://sofiacity.example");
+    expect(getSiteUrl({ NEXT_PUBLIC_SITE_URL: "https://7sky.example/" })).toBe("https://7sky.example");
   });
 
   it("falls back to localhost outside a production build", () => {
