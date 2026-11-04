@@ -111,6 +111,12 @@ The project is a pet project / template right now: no Supabase, Cloudflare, Plek
 - **Decided:** Cloudflare isn't connected; the demo data is hardcoded mock data in the repo (`src/lib/demo/seed/`), held in memory at runtime. Per-isolate behaviour on Workers is accepted as is (the banner says edits reset); no extra work for it.
 - **Decided:** mock data, no Supabase / Cloudflare connected now · public demo with an open admin (one-click demo sign-in) · maps fully offline (static SVG map, Leaflet removed) · neutral demo brand, Plektan badge local and shown only with the integration on · in-memory demo store (no persistence).
 
+- **Decided (2026-11-04):** no Docker / local Supabase in this run, and none when the template is published: it's a portfolio piece on mock data. The `supabase` driver keeps today's code behind the interface and is checked by review, typecheck and the (skipped) Supabase contract run; the live criteria «`DATA_DRIVER=supabase` gives the same pages» (slice 1) and «`supabase db reset` loads the seed» (slice 7) are marked «not verified live» in the log.
+- **Decided (2026-11-04):** the run doesn't stop at slice 5: it's committed, the header screenshots (375 / 1280, light / dark) go into the final report, review fixes come as a `fix:` commit.
+- **Decided (2026-11-04):** 7 SKY gets a new «sky» accent: only the accent tokens in `globals.css` change (AA contrast in both themes), the rest of the palette stays.
+- **Decided (2026-11-04):** on the `demo` driver a production build without `NEXT_PUBLIC_SITE_URL` uses `http://localhost:3000` and logs a warning; on the `supabase` driver it still fails with a clear message.
+- **Decided (2026-11-04):** driver layout: `src/lib/db/<domain>.ts` stays the facade callers import; implementations live in `src/lib/db/supabase/<domain>.ts` and `src/lib/demo/db/<domain>.ts` (written into `docs/conventions.md` in slice 1).
+
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
