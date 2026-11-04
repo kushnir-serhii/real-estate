@@ -61,6 +61,8 @@ Next.js (App Router) · React · TypeScript (strict) · Tailwind 4 · shadcn/ui 
 - The facade owns caching (`unstable_cache`, tags) and puts the driver into the cache key, so both drivers cache the same way. The facade loads a driver with a dynamic `import()`, so the other one never enters the request.
 - A demo driver must behave like SQL + RLS: public reads see only published, non-hidden properties (plus the 7-day sold window on detail) and active agents; return copies, never store rows; private columns (`raw`, `house`, `agent_id`) stay out of public results.
 - Env is read lazily (inside functions), never at import time. Nothing on the demo path may call a Supabase client.
+- `supabase/seed.sql` is generated output: change `src/lib/demo/seed/`, run `pnpm seed:sql` and commit both (a test fails on drift). The generator (`src/lib/demo/seed/sql.ts`) writes dates relative to `now()` and inserts in foreign-key order; a new table with seed rows is added there.
+- Production-build guard (`src/lib/build-guard.ts`, run from `next.config.ts`): `DATA_DRIVER=supabase` without the public Supabase env fails the build; the `demo` driver builds with nothing and logs «demo mode». `getSiteUrl()` without `NEXT_PUBLIC_SITE_URL` falls back to localhost with a warning on `demo`, and fails the build on `supabase`.
 - A new data function adds: its type in `driver-types.ts`, both implementations, and a case in `src/lib/db/driver-contract.test.ts` (runs on the demo driver always, on Supabase when a local DB is reachable).
 
 ## Integrations

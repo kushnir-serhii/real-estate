@@ -1,4 +1,8 @@
+import { isDemoMode } from "@/lib/data-driver";
 import { runSync } from "@/lib/sync/run-sync";
+
+const DEMO_NOTICE =
+  "demo mode (DATA_DRIVER=demo): nothing to sync. The demo already contains its listings in memory; set DATA_DRIVER=supabase and the Supabase keys (docs/setup.md) to sync from Plektan.";
 
 const args = new Set(process.argv.slice(2));
 const known = new Set(["--full", "--no-revalidate", "--force-hide"]);
@@ -35,6 +39,10 @@ const revalidate = async (tags: string[]): Promise<boolean> => {
 };
 
 const main = async (): Promise<number> => {
+  if (isDemoMode()) {
+    console.log(DEMO_NOTICE);
+    return 0;
+  }
   const result = await runSync({ mode: args.has("--full") ? "full" : "incremental", forceHide: args.has("--force-hide") });
   if (result.status === "skipped") return 0;
 

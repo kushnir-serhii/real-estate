@@ -51,4 +51,4 @@ In this order (details and steps: `docs/setup.md`):
 5. **Plektan** (listing sync and lead channel), only if the agency uses it. The site works without it.
 6. **LLM key** (real assistant instead of the scripted fixture).
 
-Before going live, replace `supabase/seed.sql` and the demo texts with real ones, and read the checklist in `docs/setup.md`.
+Before going live, replace the demo seed (`src/lib/demo/seed/`; `supabase/seed.sql` is generated from it with `pnpm seed:sql`, run it after editing the seed) and the demo texts with real ones, and read the checklist in `docs/setup.md`.

@@ -16,6 +16,8 @@ const eslintConfig = defineConfig([
     ".wrangler/**",
     "cloudflare-env.d.ts",
     "src/lib/supabase/database.types.ts",
+    // agent worktrees: separate checkouts with their own build output
+    ".claude/worktrees/**",
   ]),
 ]);
 

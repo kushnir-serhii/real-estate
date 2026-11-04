@@ -4,32 +4,34 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-`real-estate` is the website + admin for the real estate agency **Sofiacity** (Ukraine). One Next.js app at the repo root (no monorepo), deployed to Cloudflare. Product and architecture: `docs/product.md`. Original working notes (Ukrainian): `docs/reference/stack.md`, Plektan CRM API: `docs/reference/plektan-api.md`.
-
-The repo starts empty: spec 001 scaffolds the app. Until it's `done`, the commands below don't exist yet.
+`real-estate` is the website + admin for the real estate agency **7 SKY** (a fictional demo agency in Ukraine; the repo doubles as a template for a real project). One Next.js app at the repo root (no monorepo), deployed to Cloudflare. Product and architecture: `docs/product.md`. Original working notes (Ukrainian): `docs/reference/stack.md`, Plektan CRM API: `docs/reference/plektan-api.md`.
 
 ## Talking to the user
 
 Talk to the user in Ukrainian: all replies, reports, summaries and questions (in chat and in `AskUserQuestion`: question, options, descriptions). Code, commits and docs stay in English.
 
-## Commands (after spec 001)
+## Commands
 
-Use pnpm.
+Use pnpm. **Docker isn't needed:** a fresh clone runs on the demo driver (mock data in memory) with no `.env.local`, no keys and no network. A local Supabase (Docker) is only for testing the `supabase` driver.
 
 ```sh
 pnpm install
 pnpm dev          # next dev
 pnpm typecheck    # tsc --noEmit
 pnpm lint         # eslint
-pnpm build        # next build
+pnpm build        # next build (the demo build needs no env)
+pnpm test         # vitest: unit + driver contract tests (the Supabase run is skipped when no local DB)
+pnpm perf         # speed baseline on a local production build (LCP, CLS, JS), see docs/conventions.md
+pnpm seed:sql     # regenerate supabase/seed.sql from src/lib/demo/seed (a test fails on drift)
 pnpm preview      # build for Cloudflare (OpenNext) and run in workerd locally
 pnpm ui-check     # Playwright UI check, see docs/process.md → step 8
 ```
 
-Database: Supabase migrations live in `supabase/migrations/`. Agents write migrations and regenerate types; they never run anything against the remote (production) Supabase, Cloudflare or Plektan accounts — applying migrations and deploying is the user's job.
+Database (only for the `supabase` driver): Supabase migrations live in `supabase/migrations/`. Agents write migrations and regenerate types; they never run anything against the remote (production) Supabase, Cloudflare or Plektan accounts — applying migrations and deploying is the user's job.
 
 ## Architecture notes
 
+- **Two data drivers** (`DATA_DRIVER=demo|supabase`; empty = `supabase` if its env is set, else `demo`): `supabase` is Postgres + RLS + R2; `demo` is typed mock data in memory (`src/lib/demo/`, seed in `src/lib/demo/seed/`) with a one-click demo admin sign-in and in-memory photo uploads. Callers import the facades in `src/lib/db/` and never branch on the driver. `supabase/seed.sql` is generated from the demo seed. Leaving demo mode: `docs/setup.md`.
 - **The site is the foundation, the CRM is optional.** Properties, photos, leads and clients live in Supabase + R2. Plektan is an external source and a channel to portals, never the store. Everything must keep working if Plektan is switched off.
 - **One source of truth for properties at a time:** Plektan sync *or* the admin. Never both (duplicates).
 - Flows: Plektan → cron sync (`after_date`) → Supabase + photos to R2 → site. Leads: form / AI → Supabase **first** → Plektan `addAdvert` → Telegram to the manager. A failed Plektan or Telegram call never loses a lead.

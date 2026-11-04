@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { getSiteUrl } from "./site-url";
 
+const PROD_SUPABASE = { NODE_ENV: "production", NEXT_PHASE: "phase-production-build", DATA_DRIVER: "supabase" };
+
 describe("getSiteUrl", () => {
   it("returns the configured origin without a path", () => {
     expect(getSiteUrl({ NEXT_PUBLIC_SITE_URL: "https://7sky.example/" })).toBe("https://7sky.example");
@@ -12,21 +14,28 @@ describe("getSiteUrl", () => {
     expect(getSiteUrl({ NODE_ENV: "production" })).toBe("http://localhost:3000");
   });
 
-  it("throws with a clear message in a production build without the variable", () => {
-    expect(() => getSiteUrl({ NODE_ENV: "production", NEXT_PHASE: "phase-production-build" })).toThrow(
+  it("demo driver: a production build without the variable falls back to localhost", () => {
+    expect(getSiteUrl({ NODE_ENV: "production", NEXT_PHASE: "phase-production-build" })).toBe("http://localhost:3000");
+    expect(getSiteUrl({ NODE_ENV: "production", NEXT_PHASE: "phase-production-build", DATA_DRIVER: "demo" })).toBe(
+      "http://localhost:3000",
+    );
+  });
+
+  it("supabase driver: throws with a clear message in a production build without the variable", () => {
+    expect(() => getSiteUrl({ ...PROD_SUPABASE })).toThrow(
       /NEXT_PUBLIC_SITE_URL is empty/,
     );
   });
 
   it("throws on an invalid value in a production build", () => {
     expect(() =>
-      getSiteUrl({ NODE_ENV: "production", NEXT_PHASE: "phase-production-build", NEXT_PUBLIC_SITE_URL: "nope" }),
+      getSiteUrl({ ...PROD_SUPABASE, NEXT_PUBLIC_SITE_URL: "nope" }),
     ).toThrow(/not a valid URL/);
   });
 
   it("can be opted out for local builds", () => {
     expect(
-      getSiteUrl({ NODE_ENV: "production", NEXT_PHASE: "phase-production-build", SEO_ALLOW_LOCALHOST: "1" }),
+      getSiteUrl({ ...PROD_SUPABASE, SEO_ALLOW_LOCALHOST: "1" }),
     ).toBe("http://localhost:3000");
   });
 });

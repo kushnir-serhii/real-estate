@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { getSupabasePublicEnvOrNull } from "@/lib/supabase/env";
+// Relative import: next.config.ts (build guard) loads this file without the "@/" alias.
+import { getSupabasePublicEnvOrNull, hasSupabasePublicEnv } from "./supabase/env";
 
 /**
  * Where the data comes from: `supabase` (Postgres + RLS) or `demo` (typed mock data in memory, no accounts, no Docker).
@@ -10,18 +11,26 @@ export type DataDriver = (typeof DATA_DRIVERS)[number];
 
 const dataDriverSchema = z.enum(DATA_DRIVERS);
 
-/** Read lazily (never at import time). An invalid value fails loudly instead of silently picking a driver. */
-export const getDataDriver = (): DataDriver => {
-  const raw = process.env.DATA_DRIVER?.trim();
-  if (raw) {
-    const parsed = dataDriverSchema.safeParse(raw);
+/** Pure resolution: an invalid value fails loudly instead of silently picking a driver. */
+export const resolveDataDriver = (raw: string | undefined, supabaseConfigured: boolean): DataDriver => {
+  const value = raw?.trim();
+  if (value) {
+    const parsed = dataDriverSchema.safeParse(value);
     if (!parsed.success) {
-      throw new Error(`Invalid DATA_DRIVER "${raw}": use "demo" or "supabase", or leave it empty for auto.`);
+      throw new Error(`Invalid DATA_DRIVER "${value}": use "demo" or "supabase", or leave it empty for auto.`);
     }
     return parsed.data;
   }
-  return getSupabasePublicEnvOrNull() === null ? "demo" : "supabase";
+  return supabaseConfigured ? "supabase" : "demo";
 };
+
+/** Same on an explicit env object (site URL, build guard). */
+export const resolveDataDriverFromEnv = (env: Record<string, string | undefined>): DataDriver =>
+  resolveDataDriver(env.DATA_DRIVER, hasSupabasePublicEnv(env));
+
+/** Read lazily (never at import time). */
+export const getDataDriver = (): DataDriver =>
+  resolveDataDriver(process.env.DATA_DRIVER, getSupabasePublicEnvOrNull() !== null);
 
 export const isDemoMode = (): boolean => getDataDriver() === "demo";
 

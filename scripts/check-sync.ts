@@ -7,10 +7,16 @@ import { rename, rm } from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
 import { createClient } from "@supabase/supabase-js";
+import { isDemoMode } from "@/lib/data-driver";
 import { FIXTURE_DEFS, FIXTURE_USERS } from "@/lib/plektan/fixtures/data";
 import { runSync, type SyncResult, type SyncSummary } from "@/lib/sync/run-sync";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Database } from "@/lib/supabase/database.types";
+
+if (isDemoMode()) {
+  console.log("demo mode (DATA_DRIVER=demo): sync:check needs a local Supabase (DATA_DRIVER=supabase); nothing to check.");
+  process.exit(0);
+}
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const host = (() => {
