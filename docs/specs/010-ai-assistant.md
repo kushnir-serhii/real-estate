@@ -1,6 +1,6 @@
 # 010 — AI assistant
 
-**Status:** in-progress · **Depends on:** 005, 006 · **Route(s):** widget on every public page (`(site)` layout), `POST /api/assistant`, `POST /api/cron/assistant`
+**Status:** done · **Depends on:** 005, 006 · **Route(s):** widget on every public page (`(site)` layout), `POST /api/assistant`, `POST /api/cron/assistant`
 
 ## Goal
 A chat on the site that asks what the visitor needs, shows matching properties from our database, answers agency FAQ and turns the conversation into a structured lead. The manager gets a qualified request (deal, type, district, rooms, budget, payment, timing, contact) through the same pipeline as the forms (006), and it is never lost if Plektan or Telegram fails.
@@ -80,14 +80,11 @@ New tables (admin-only, RLS on, no public policies, written by the service role)
 - **Decided:** transcripts stored 30 days (admin-only), shown on the lead; the structured wishes stay in the lead.
 - **Decided (slice 4):** a retried message carries the same `client_message_id` and is stored once.
 - The reply keeps streaming after the panel is closed (so it isn't lost); it stops on «Нова розмова» or leaving the site.
-- No live end-to-end run yet: this project's local Supabase can't start while another project's stack holds ports 54321–54324; DB flow covered by unit tests with the DB mocked.
-- The search tool and the turn loop are tested separately (tool with injected data, loop with a mocked tool); no live run against a DB yet.
 - Chat cards use one `photo_url` (smallest R2 size) without `srcset`: may look soft on retina if that size is under ~192px.
 - On desktop the chat panel is modal (page dimmed behind it); make it non-modal if the client wants to browse beside the chat.
 - The same card submitted again with a new `client_request_id` (e.g. after a reload without the stored id) would make a second lead; mark the proposal as used if that matters.
-- The admin transcript (up to ~500 messages) has no pagination or collapsing; not seen visually yet (needs the local DB).
+- The admin transcript (up to ~500 messages) has no pagination or collapsing;.
 - `conversation_limit` locks the composer like `budget` (the server would refuse every next message); «Нова розмова» stays.
-- The IP rate query (PostgREST inner join) and the whole flow have only run with the DB mocked: check once on a local stack.
 - **Decided:** limits $20/month, 20 messages / 10 min per IP, 30 per conversation, 1000 chars; Turnstile once per conversation; widget on all public pages; property context on property pages; only our properties + FAQ, visitor's language (default Ukrainian).
 
 ## Log
@@ -98,3 +95,4 @@ New tables (admin-only, RLS on, no public policies, written by the service role)
 | 2026-10-29 | 2 | done | `search_properties` tool (zod args from the model, reuses `parseCatalogState` / `toPropertyFilters` / `catalogHref`, budget → USD, district match, max 5), tool loop (≤3 rounds, tool calls + results stored, history trimmed without orphans), fixture calls the tool; chat cards (parts-based reducer, storage migration, placeholder, catalog link, empty note, announced). `countObjects` moved to `src/lib/format/`. Files: `src/features/assistant/*`, `src/lib/llm/fixtures/*`, `src/lib/format/count-objects.ts`, `src/features/admin/{pages,settings}/*` (imports) |
 | 2026-11-04 | 3 | done | `propose_lead` tool (zod wishes, proposal stored on the conversation, `lead_card` event), prompt rules, fixture offers the card; `submitAssistantLead` (006 field rules, proposal must match, payload only from the server copy, `kind = ai`, `lead_id` on the conversation, `after(deliverLead)`); AI wishes in Telegram / `advert_info` / admin (`ai-wishes.ts`); `getLeadTranscript`. Chat card (reuses the 006 fields, pending/invalid/error/ok, stale older card, stored), admin: AI wish facts + «Переписка з асистентом» (deleted / error with retry). Honeypot id via `useId`. Backend code committed by the user as `ec6dfb9`. Files: `src/features/assistant/*`, `src/features/leads/*`, `src/features/admin/leads/*`, `src/app/admin/(panel)/leads/[id]/page.tsx`, `src/lib/db/assistant.ts`, `src/lib/llm/fixtures/*` |
 | 2026-11-04 | 4 | done | Migration `20261104120000_ai_limits.sql` (`ai_usage` + `add_ai_usage` for service_role only, `ai_messages.client_message_id` unique per conversation, IP index), types regenerated; limits before the LLM (length, IP rate on a salted SHA-256 hash, conversation cap, monthly budget, Turnstile once per conversation) as `limit` events; dedupe; usage to `ai_usage`; lead action needs `turnstile_ok`; `POST /api/cron/assistant` deletes conversations > 30 days (nightly job in `sync.yml`). Client: Turnstile in the panel (single-use token, «Перевіряємо…»), `client_message_id` kept across retries, limit notices with the 006 form + contacts. Files: `supabase/migrations/*`, `src/lib/supabase/database.types.ts`, `src/features/assistant/*`, `src/features/leads/turnstile-*`, `src/app/api/{assistant,cron/assistant}/*`, `src/lib/db/assistant.ts`, `.github/workflows/sync.yml`, `.env.example`, `docs/setup.md` |
+| 2026-11-04 | UI check | passed | Live run on the local stack (fixture LLM): chat on a property page → search cards → lead card → `ai` lead saved with the server-side payload, conversation linked, transcript on the admin lead page. `SPEC=010 ROUTES=root,catalog,catalog/<live>,contacts,admin/leads/<ai lead>`: 20/20 at 375 and 1280, light and dark; screenshots reviewed. A first run failed on a 404 photo from a stale `.next` data cache after the DB was recreated (not 010); passed after clearing `.next`. |
