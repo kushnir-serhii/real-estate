@@ -12,6 +12,7 @@ export const CHAT_STORAGE_KEY = "sofiacity:assistant-chat";
 export const MAX_STORED_MESSAGES = 100;
 
 const replyStateSchema = z.discriminatedUnion("status", [
+  z.object({ status: z.literal("verifying") }),
   z.object({ status: z.literal("waiting") }),
   z.object({ status: z.literal("streaming") }),
   z.object({ status: z.literal("done") }),
@@ -53,6 +54,8 @@ const replyBase = {
   id: z.string().min(1),
   role: z.literal("assistant"),
   prompt: z.string(),
+  // Missing (stored before slice 4) or unreadable: the next retry makes a new one.
+  clientMessageId: z.uuid().optional().catch(undefined),
   state: replyStateSchema,
 };
 
@@ -85,7 +88,9 @@ const settlePart = (part: ReplyPart): ReplyPart =>
 const settle = (message: ChatMessage): ChatMessage => {
   if (message.role !== "assistant") return message;
   const settled = { ...message, parts: message.parts.map(settlePart) };
-  return settled.state.status === "waiting" || settled.state.status === "streaming"
+  return settled.state.status === "verifying" ||
+    settled.state.status === "waiting" ||
+    settled.state.status === "streaming"
     ? { ...settled, state: { status: "error", message: INTERRUPTED_MESSAGE } }
     : settled;
 };

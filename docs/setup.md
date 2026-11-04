@@ -58,6 +58,7 @@ Migrations to apply (in order; add new ones here when a spec adds them):
 | `20261029130000_pages_noindex.sql` | 009 | [ ] |
 | `20261029140000_pages_is_draft.sql` | 009 | [ ] |
 | `20261029150000_ai_assistant.sql` | 010 | [ ] |
+| `20261104120000_ai_limits.sql` | 010 | [ ] |
 
 ### 4. Check
 - Dashboard → Advisors → Security: no "RLS disabled" warnings.
@@ -98,6 +99,14 @@ A lead is always saved in Supabase first. Then, after the response, it goes to P
 1. Cloudflare dashboard → Turnstile → Add site → the production domain (add `localhost` only if you want to test the real widget locally).
 2. `NEXT_PUBLIC_TURNSTILE_SITE_KEY`: Cloudflare **build and runtime** (`NEXT_PUBLIC_*` is inlined at build time). Empty = the forms show no widget.
 3. `TURNSTILE_SECRET_KEY`: Cloudflare **runtime secret**. Empty = the server check always passes (fixture), so never leave it empty in production.
+
+### AI assistant limits (spec 010 slice 4)
+1. Apply `20261104120000_ai_limits.sql` (the monthly spend counter `ai_usage`, message dedupe, IP index).
+2. `ASSISTANT_IP_SALT`: Cloudflare **runtime secret**, a long random value (for example `openssl rand -hex 32`). Visitor IPs are stored only as a salted hash; empty = a fixed dev salt, so never leave it empty in production. Changing it resets everyone's rate-limit history.
+3. Budget and limits (optional, runtime variables): `LLM_MONTHLY_BUDGET_USD` (20), `ASSISTANT_RATE_LIMIT` (20) per `ASSISTANT_RATE_WINDOW_MIN` (10), `ASSISTANT_CONVERSATION_LIMIT` (30). Prices live in `src/lib/llm/pricing.ts`; update them if OpenAI changes prices or you switch `LLM_MODEL`.
+4. Also set a hard monthly limit in the OpenAI dashboard (Settings → Limits): the in-app cap is an estimate from token usage.
+5. Turnstile (above) protects the first message of each chat; with an empty `TURNSTILE_SECRET_KEY` the check passes.
+6. Cleanup: the `assistant-cleanup` job in `.github/workflows/sync.yml` calls `/api/cron/assistant` nightly (and on manual run) and deletes chats older than 30 days; leads are kept. Needs `CRON_SECRET` and `NEXT_PUBLIC_SITE_URL` like the `leads` job.
 
 ### Plektan leads
 Leads use the same `PLEKTAN_API_KEY` as the sync; set it as a **runtime secret** in Cloudflare too (the sync only has it in GitHub Actions). Before launch, confirm with Plektan that regular buy / rent requests without an email are accepted from the site (the quick request needs an email).

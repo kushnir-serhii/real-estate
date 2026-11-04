@@ -44,6 +44,8 @@ const announcement = (messages: ChatMessage[], skipId: string | null): string =>
   if (last?.role !== "assistant") return "";
   const results = last.parts.findLast((part): part is PropertiesPart => part.kind === "properties");
   switch (last.state.status) {
+    case "verifying":
+      return "Перевіряємо, що ви не робот…";
     case "waiting":
       return `${ASSISTANT_PERSONA.name} пише відповідь…`;
     case "streaming":
@@ -101,13 +103,14 @@ export const AssistantMessageList = ({ messages, onSend, onRetry, onNavigate }: 
           <AssistantEmptyState onPick={onSend} />
         ) : (
           <ol aria-label="Розмова" className="flex flex-col gap-3">
-            {messages.map((message) => (
+            {messages.map((message, index) => (
               <AssistantMessage
                 key={message.id}
                 message={message}
                 onRetry={onRetry}
                 onNavigate={onNavigate}
                 latestCardId={latestCardId}
+                latest={index === messages.length - 1}
               />
             ))}
           </ol>

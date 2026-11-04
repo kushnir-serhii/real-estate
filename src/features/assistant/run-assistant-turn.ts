@@ -4,15 +4,20 @@ import { ASSISTANT_ERROR_MESSAGE } from "@/constants/assistant";
 import {
   addConversationUsage,
   appendMessages,
+  addMonthlyUsage,
   createConversation,
+  findUserMessageByClientId,
   getConversation,
   getConversationMessages,
+  markConversationTurnstileOk,
 } from "@/lib/db/assistant";
 import type { NewAiMessage } from "@/lib/db/assistant";
 import { getPropertyBySlug } from "@/lib/db/properties";
 import { costUsd, getLlm, isLlmError } from "@/lib/llm";
 import type { Llm, LlmMessage, LlmToolCall, LlmUsage } from "@/lib/llm";
+import { verifyTurnstile } from "@/lib/turnstile";
 
+import { checkLimits, hashIp, usageMonth } from "./assistant-limits";
 import { assistantToolCallsData, toLlmHistory, toolResultData } from "./assistant-history";
 import type { AssistantEvent } from "./assistant-events";
 import { ASSISTANT_TOOLS, runAssistantTool } from "./assistant-tools";
@@ -32,6 +37,12 @@ export type AssistantTurnInput = {
   message: string;
   pageUrl?: string;
   propertySlug?: string;
+  /** Turnstile token; required with the first message of a conversation when a secret is configured. */
+  turnstileToken?: string;
+  /** Same id on a retry: the visitor message is stored once. */
+  clientMessageId?: string;
+  /** Raw visitor IP: only hashed for the rate limit and passed to Turnstile, never stored or logged. */
+  clientIp?: string;
   signal?: AbortSignal;
 };
 
@@ -64,14 +75,55 @@ export async function* runAssistantTurn(
   let history: LlmMessage[];
   let property: (PromptProperty & { id: string }) | null;
   try {
+    const ipHash = await hashIp(input.clientIp);
     property = await resolveProperty(input.propertySlug);
     const existing = input.conversationId ? await getConversation(input.conversationId) : null;
-    const conversation =
-      existing ?? (await createConversation({ pageUrl: input.pageUrl ?? null, propertyId: property?.id ?? null }));
+    const duplicate =
+      existing && input.clientMessageId ? await findUserMessageByClientId(existing.id, input.clientMessageId) : null;
+
+    // Every check runs before the model is called and before anything is stored.
+    const reason = await checkLimits({
+      message: input.message,
+      ipHash,
+      conversationId: existing?.id,
+      isRetry: duplicate !== null,
+    });
+    if (reason) {
+      yield { type: "limit", reason };
+      yield { type: "done" };
+      return;
+    }
+    // Turnstile last, so a refused message doesn't burn the single-use token.
+    const needsTurnstile = !existing || !existing.turnstile_ok;
+    if (needsTurnstile && !(await verifyTurnstile(input.turnstileToken ?? "", input.clientIp))) {
+      yield { type: "limit", reason: "turnstile" };
+      yield { type: "done" };
+      return;
+    }
+
+    let conversation = existing;
+    if (!conversation) {
+      conversation = await createConversation({
+        pageUrl: input.pageUrl ?? null,
+        propertyId: property?.id ?? null,
+        ipHash,
+        turnstileOk: true,
+      });
+    } else if (needsTurnstile) {
+      await markConversationTurnstileOk(conversation.id, ipHash);
+    }
     conversationId = conversation.id;
-    history = toLlmHistory(await getConversationMessages(conversationId, HISTORY_LIMIT));
-    // The visitor's message is stored before the model is called, so it survives a model failure.
-    await appendMessages(conversationId, [{ role: "user", content: input.message }]);
+
+    const stored = await getConversationMessages(conversationId, HISTORY_LIMIT);
+    // A retry continues from what came before the stored message, which is not stored again.
+    const before = duplicate ? stored.filter((row) => row.created_at < duplicate.created_at) : stored;
+    history = toLlmHistory(before);
+    if (!duplicate) {
+      // The visitor's message is stored before the model is called, so it survives a model failure.
+      await appendMessages(conversationId, [
+        { role: "user", content: input.message, ...(input.clientMessageId ? { client_message_id: input.clientMessageId } : {}) },
+      ]);
+    }
   } catch {
     console.error("[assistant] could not load the conversation");
     yield { type: "error", message: ASSISTANT_ERROR_MESSAGE };
@@ -153,12 +205,22 @@ export async function* runAssistantTurn(
     try {
       if (roundText !== "") toStore.push({ role: "assistant", content: roundText });
       if (toStore.length > 0) await appendMessages(conversationId, toStore);
-      if (sawUsage) {
-        const usage: LlmUsage = { inputTokens, outputTokens };
-        await addConversationUsage(conversationId, { ...usage, costUsd: costUsd(llm.model, usage) });
-      }
     } catch {
       console.error("[assistant] could not save the reply");
+    }
+    if (sawUsage) {
+      const usage: LlmUsage = { inputTokens, outputTokens };
+      const delta = { ...usage, costUsd: costUsd(llm.model, usage) };
+      try {
+        await addConversationUsage(conversationId, delta);
+      } catch {
+        console.error("[assistant] could not save the conversation usage");
+      }
+      try {
+        await addMonthlyUsage(usageMonth(new Date()), delta);
+      } catch {
+        console.error("[assistant] could not save the monthly usage");
+      }
     }
   }
 

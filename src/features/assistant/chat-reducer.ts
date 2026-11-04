@@ -5,6 +5,8 @@ import type { AssistantLeadField, AssistantLeadState } from "./assistant-lead-st
 /** Display copy of the chat on the client. The server keeps the real history (spec 010). */
 
 export type ReplyState =
+  /** Waiting for the Turnstile token before the message goes out (first message of a conversation). */
+  | { status: "verifying" }
   | { status: "waiting" }
   | { status: "streaming" }
   | { status: "done" }
@@ -45,6 +47,11 @@ export type AssistantReply = {
   parts: ReplyPart[];
   /** The visitor's message this reply answers: «Спробувати ще раз» sends it again. */
   prompt: string;
+  /**
+   * Sent as `client_message_id`; the same id goes with every retry, so the server stores the message once.
+   * Missing on chats stored before slice 4: the first retry gives it one.
+   */
+  clientMessageId?: string;
   state: ReplyState;
 };
 
@@ -56,8 +63,12 @@ export type ChatState = {
 };
 
 export type ChatAction =
-  | { type: "send"; userId: string; replyId: string; text: string }
-  | { type: "retry"; failedId: string; replyId: string }
+  /** `verify`: the message waits for a Turnstile token first. */
+  | { type: "send"; userId: string; replyId: string; text: string; clientMessageId: string; verify: boolean }
+  /** `clientMessageId` is used only when the reply has none yet (chats stored before slice 4). */
+  | { type: "retry"; failedId: string; replyId: string; clientMessageId: string; verify: boolean }
+  /** The Turnstile token is in: the message goes out. */
+  | { type: "verified"; replyId: string }
   | { type: "event"; replyId: string; event: AssistantEvent }
   /** Network failure, non-OK response, or the stream ended without `done`. */
   | { type: "fail"; replyId: string; message?: string }
@@ -137,7 +148,43 @@ const toSubmit = (result: AssistantLeadState): LeadCardSubmit => {
   }
 };
 
-const isOpen = (state: ReplyState) => state.status === "waiting" || state.status === "streaming";
+const isOpen = (state: ReplyState) =>
+  state.status === "verifying" || state.status === "waiting" || state.status === "streaming";
+
+/** Limits that refuse every next message too: the composer gives way to a note and «Нова розмова». */
+export const COMPOSER_LOCK_REASONS = ["budget", "conversation_limit"] as const;
+export type ComposerLock = (typeof COMPOSER_LOCK_REASONS)[number];
+
+const isComposerLock = (reason: AssistantLimitReason): reason is ComposerLock =>
+  COMPOSER_LOCK_REASONS.some((lock) => lock === reason);
+
+const lastReply = (state: ChatState): AssistantReply | null => {
+  const last = state.messages.at(-1);
+  return last?.role === "assistant" ? last : null;
+};
+
+/** The newest reply ended with this limit (its notice, fallback and actions belong to it). */
+export const lastLimit = (state: ChatState): { replyId: string; reason: AssistantLimitReason } | null => {
+  const reply = lastReply(state);
+  return reply?.state.status === "limit" ? { replyId: reply.id, reason: reply.state.reason } : null;
+};
+
+/** The composer is closed until «Нова розмова»: the server would refuse any next message the same way. */
+export const composerLock = (state: ChatState): ComposerLock | null => {
+  const reason = lastLimit(state)?.reason;
+  return reason !== undefined && isComposerLock(reason) ? reason : null;
+};
+
+/**
+ * The next message needs a Turnstile token: a new conversation (the server checks its first message),
+ * or the last check failed. Tokens are single-use, so every such attempt gets a fresh one.
+ */
+export const needsTurnstile = (state: ChatState): boolean =>
+  state.conversationId === null || lastLimit(state)?.reason === "turnstile";
+
+/** «Спробувати ще раз» resends the same message: after an error, or after a failed Turnstile check. */
+export const canRetry = (reply: AssistantReply): boolean =>
+  reply.state.status === "error" || (reply.state.status === "limit" && reply.state.reason === "turnstile");
 
 /** The reply being received right now, if any. */
 export const activeReply = (state: ChatState): AssistantReply | null => {
@@ -237,18 +284,35 @@ export const chatReducer = (state: ChatState, action: ChatAction): ChatState => 
         messages: [
           ...state.messages,
           { id: action.userId, role: "user", text: action.text },
-          { id: action.replyId, role: "assistant", parts: [], prompt: action.text, state: { status: "waiting" } },
+          {
+            id: action.replyId,
+            role: "assistant",
+            parts: [],
+            prompt: action.text,
+            clientMessageId: action.clientMessageId,
+            state: action.verify ? { status: "verifying" } : { status: "waiting" },
+          },
         ],
       };
     }
     case "retry": {
       if (activeReply(state)) return state;
       return updateReply(state, action.failedId, (reply) =>
-        reply.state.status === "error"
-          ? { ...reply, id: action.replyId, parts: [], state: { status: "waiting" } }
+        canRetry(reply)
+          ? {
+              ...reply,
+              id: action.replyId,
+              parts: [],
+              clientMessageId: reply.clientMessageId ?? action.clientMessageId,
+              state: action.verify ? { status: "verifying" } : { status: "waiting" },
+            }
           : reply,
       );
     }
+    case "verified":
+      return updateReply(state, action.replyId, (reply) =>
+        reply.state.status === "verifying" ? { ...reply, state: { status: "waiting" } } : reply,
+      );
     case "event":
       return applyEvent(state, action.replyId, action.event);
     case "fail":

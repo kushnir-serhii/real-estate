@@ -37,6 +37,27 @@ jobs:
           fi
           curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" "$NEXT_PUBLIC_SITE_URL/api/cron/leads"
 
+  # Deletes AI assistant transcripts older than 30 days (spec 010). Leads are kept.
+  assistant-cleanup:
+    # Nightly (the full-sync schedule) or by hand; not every 30 minutes.
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 0 * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    concurrency:
+      group: assistant-cleanup
+      cancel-in-progress: false
+    env:
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+    steps:
+      - name: Delete old assistant conversations
+        run: |
+          if [ -z "$CRON_SECRET" ] || [ -z "$NEXT_PUBLIC_SITE_URL" ]; then
+            echo "::notice::CRON_SECRET or NEXT_PUBLIC_SITE_URL is empty: skipping the assistant cleanup."
+            exit 0
+          fi
+          curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" "$NEXT_PUBLIC_SITE_URL/api/cron/assistant"
+
   sync:
     runs-on: ubuntu-latest
     # One sync at a time; a running one is never cancelled.

@@ -4,10 +4,17 @@ import { z } from "zod";
 
 export const ASSISTANT_MESSAGE_MAX_LENGTH = 1000;
 
+/** Hard cap the request schema still rejects with 400; over ASSISTANT_MESSAGE_MAX_LENGTH is a `limit` event instead. */
+export const ASSISTANT_REQUEST_MAX_LENGTH = 10_000;
+
 /** `POST /api/assistant` body. The history is never sent: the server loads it by `conversation_id`. */
 export const assistantRequestSchema = z.object({
   conversation_id: z.uuid().optional(),
-  message: z.string().trim().min(1).max(ASSISTANT_MESSAGE_MAX_LENGTH),
+  message: z.string().trim().min(1).max(ASSISTANT_REQUEST_MAX_LENGTH),
+  /** Turnstile token: send it with the first message of a conversation (when a site key is set). */
+  turnstile_token: z.string().max(4096).optional(),
+  /** Unique per visitor message; resend the same id when retrying so the message is stored once. */
+  client_message_id: z.uuid().optional(),
   page_url: z.string().trim().max(2048).optional(),
   property_slug: z.string().trim().min(1).max(200).optional(),
 });

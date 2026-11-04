@@ -4,12 +4,20 @@ import Script from "next/script";
 import { useCallback, useEffect, useRef } from "react";
 
 import { cn } from "@/lib/utils";
+import { TURNSTILE_SITE_KEY } from "./turnstile-site-key";
+
+type TurnstileAppearance = "always" | "interaction-only";
 
 type TurnstileRenderOptions = {
   sitekey: string;
   language?: string;
   theme?: "auto" | "light" | "dark";
   size?: "normal" | "flexible" | "compact";
+  appearance?: TurnstileAppearance;
+  "response-field"?: boolean;
+  callback?: (token: string) => void;
+  "expired-callback"?: () => void;
+  "error-callback"?: () => void;
 };
 
 type TurnstileApi = {
@@ -25,29 +33,54 @@ declare global {
 }
 
 const SCRIPT_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
 
 type TurnstileWidgetProps = {
   /** Any value that changes after each submit result: the widget resets to issue a fresh token. */
   resetSignal: unknown;
+  /** Gets every fresh token, and `null` when it expires or the check fails (for code that sends it itself). */
+  onToken?: (token: string | null) => void;
+  /** `interaction-only`: invisible unless Cloudflare needs the visitor to click (the chat). */
+  appearance?: TurnstileAppearance;
+  /** `false`: no hidden `cf-turnstile-response` input (the token is read through `onToken`). */
+  responseField?: boolean;
   className?: string;
 };
 
 /**
- * Cloudflare Turnstile, rendered explicitly into a div inside the form; the widget adds the
- * `cf-turnstile-response` input itself. Renders nothing when the site key is empty (local work).
+ * Cloudflare Turnstile, rendered explicitly into a div; by default the widget adds the
+ * `cf-turnstile-response` input to the form around it. Renders nothing when the site key is empty (local work).
  */
-export const TurnstileWidget = ({ resetSignal, className }: TurnstileWidgetProps) => {
+export const TurnstileWidget = ({
+  resetSignal,
+  onToken,
+  appearance = "always",
+  responseField = true,
+  className,
+}: TurnstileWidgetProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
+  // The widget is rendered once; the latest callback is read through the ref.
+  const onTokenRef = useRef(onToken);
+  useEffect(() => {
+    onTokenRef.current = onToken;
+  }, [onToken]);
 
   const renderWidget = useCallback(() => {
     const container = containerRef.current;
-    if (!SITE_KEY || !container || !window.turnstile || widgetIdRef.current !== null) return;
+    if (!TURNSTILE_SITE_KEY || !container || !window.turnstile || widgetIdRef.current !== null) return;
     widgetIdRef.current =
-      window.turnstile.render(container, { sitekey: SITE_KEY, language: "uk", theme: "auto", size: "flexible" }) ??
-      null;
-  }, []);
+      window.turnstile.render(container, {
+        sitekey: TURNSTILE_SITE_KEY,
+        language: "uk",
+        theme: "auto",
+        size: "flexible",
+        appearance,
+        "response-field": responseField,
+        callback: (token) => onTokenRef.current?.(token),
+        "expired-callback": () => onTokenRef.current?.(null),
+        "error-callback": () => onTokenRef.current?.(null),
+      }) ?? null;
+  }, [appearance, responseField]);
 
   useEffect(() => {
     // The script may already be loaded by an earlier mount (client navigation, «Надіслати ще одну»).
@@ -62,7 +95,7 @@ export const TurnstileWidget = ({ resetSignal, className }: TurnstileWidgetProps
     if (widgetIdRef.current !== null) window.turnstile?.reset(widgetIdRef.current);
   }, [resetSignal]);
 
-  if (!SITE_KEY) return null;
+  if (!TURNSTILE_SITE_KEY) return null;
 
   return (
     <>

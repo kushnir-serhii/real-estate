@@ -38,6 +38,7 @@ const conversation = (over: Record<string, unknown> = {}) => ({
   page_url: "/catalog/x",
   property_id: null,
   proposal,
+  turnstile_ok: true,
   ...over,
 });
 
@@ -120,11 +121,13 @@ describe("processAssistantLead", () => {
     expect(mocks.createLead).not.toHaveBeenCalled();
   });
 
-  it("refuses a stale card: unknown conversation, no proposal, or another proposal id", async () => {
+  it("refuses a stale card: unknown conversation, no Turnstile check, no proposal, or another proposal id", async () => {
     const message = "Картка застаріла, попросіть асистента ще раз";
     mocks.getConversation.mockResolvedValue(null);
     expect(await processAssistantLead(input())).toEqual({ status: "error", message });
     mocks.getConversation.mockResolvedValue(conversation({ proposal: null }));
+    expect(await processAssistantLead(input())).toEqual({ status: "error", message });
+    mocks.getConversation.mockResolvedValue(conversation({ turnstile_ok: false }));
     expect(await processAssistantLead(input())).toEqual({ status: "error", message });
     mocks.getConversation.mockResolvedValue(conversation());
     expect(await processAssistantLead(input({ proposal_id: "11111111-1111-4111-8111-111111111111" }))).toEqual({

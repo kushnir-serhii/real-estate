@@ -57,15 +57,15 @@ New tables (admin-only, RLS on, no public policies, written by the service role)
   - [x] Plektan request and Telegram text carry the AI wishes; unit tests
   - [x] the admin lead page shows the wishes and the transcript; 375px
 
-### [ ] 4. Limits, Turnstile, spend cap, cleanup
+### [x] 4. Limits, Turnstile, spend cap, cleanup
 - **Build:** migration `ai_usage` (month pk, input/output tokens, cost_usd) + an atomic increment function (service role only); Turnstile token with the first message (widget in the panel, invisible/managed; empty site key = no widget); IP rate limit (salted hash, `ASSISTANT_IP_SALT`), per-conversation and per-message caps, monthly budget check before calling the LLM; `limit` event → fallback UI (general request form + contacts); `POST /api/cron/assistant` (`CRON_SECRET`) deletes conversations older than 30 days; step in `.github/workflows/sync.yml`. Env vars in `.env.example` and `docs/setup.md`.
 - **Files:** `supabase/migrations/*`, `src/lib/supabase/database.types.ts`, `src/lib/llm/pricing.ts`, `src/features/assistant/*`, `src/lib/db/assistant.ts`, `src/app/api/assistant/route.ts`, `src/app/api/cron/assistant/route.ts`, `.github/workflows/sync.yml`, `.env.example`, `docs/setup.md`
 - **Agent:** backend → designer
 - **Accept:**
-  - [ ] the 21st message in 10 min from one IP, the 31st in a conversation and a 1001-char message are refused with the right `limit` reason, without calling the LLM
-  - [ ] when the month's cost reaches the cap the chat shows the fallback; usage is counted from token usage × pricing
-  - [ ] a failed Turnstile check refuses the first message; empty secret passes
-  - [ ] the cleanup cron deletes conversations (and messages) older than 30 days and keeps leads; unit tests for the limits and cost math
+  - [x] the 21st message in 10 min from one IP, the 31st in a conversation and a 1001-char message are refused with the right `limit` reason, without calling the LLM
+  - [x] when the month's cost reaches the cap the chat shows the fallback; usage is counted from token usage × pricing
+  - [x] a failed Turnstile check refuses the first message; empty secret passes
+  - [x] the cleanup cron deletes conversations (and messages) older than 30 days and keeps leads; unit tests for the limits and cost math
 
 ## External needs
 - OpenAI API key (`LLM_API_KEY`) with a hard monthly limit set in the OpenAI dashboard too (belt and braces with `LLM_MONTHLY_BUDGET_USD`).
@@ -78,7 +78,7 @@ New tables (admin-only, RLS on, no public policies, written by the service role)
 - **Decided:** OpenAI `gpt-4o-mini` (model in env), own fetch client, no new libraries.
 - **Decided:** the lead is created from a confirmation card in the chat; consent is set by the person.
 - **Decided:** transcripts stored 30 days (admin-only), shown on the lead; the structured wishes stay in the lead.
-- Retry after an error that came after the visitor's message was saved stores that message twice on the server: add a `client_message_id` (dedupe) in slice 4.
+- **Decided (slice 4):** a retried message carries the same `client_message_id` and is stored once.
 - The reply keeps streaming after the panel is closed (so it isn't lost); it stops on «Нова розмова» or leaving the site.
 - No live end-to-end run yet: this project's local Supabase can't start while another project's stack holds ports 54321–54324; DB flow covered by unit tests with the DB mocked.
 - The search tool and the turn loop are tested separately (tool with injected data, loop with a mocked tool); no live run against a DB yet.
@@ -86,6 +86,8 @@ New tables (admin-only, RLS on, no public policies, written by the service role)
 - On desktop the chat panel is modal (page dimmed behind it); make it non-modal if the client wants to browse beside the chat.
 - The same card submitted again with a new `client_request_id` (e.g. after a reload without the stored id) would make a second lead; mark the proposal as used if that matters.
 - The admin transcript (up to ~500 messages) has no pagination or collapsing; not seen visually yet (needs the local DB).
+- `conversation_limit` locks the composer like `budget` (the server would refuse every next message); «Нова розмова» stays.
+- The IP rate query (PostgREST inner join) and the whole flow have only run with the DB mocked: check once on a local stack.
 - **Decided:** limits $20/month, 20 messages / 10 min per IP, 30 per conversation, 1000 chars; Turnstile once per conversation; widget on all public pages; property context on property pages; only our properties + FAQ, visitor's language (default Ukrainian).
 
 ## Log
@@ -95,3 +97,4 @@ New tables (admin-only, RLS on, no public policies, written by the service role)
 | 2026-10-29 | 1 | done | OpenAI fetch client (SSE parse, tool-call deltas, usage, typed errors) + scripted fixture on empty key; migration `20261029150000_ai_assistant.sql` (`ai_conversations`, `ai_messages`, RLS, no public access), types regenerated from a throwaway Postgres; `src/constants/assistant.ts` (persona, FAQ mock); system prompt, `runAssistantTurn`, `POST /api/assistant` (NDJSON). Widget: lazy panel (Sheet), launcher above the property mobile bar, streaming, quick replies, error/limit states, sessionStorage. Files: `src/lib/llm/*`, `src/lib/db/assistant.ts`, `src/features/assistant/*`, `src/app/api/assistant/route.ts`, `src/app/(site)/layout.tsx`, `src/app/globals.css`, `src/components/layout/site-footer.tsx`, `src/features/property/property-mobile-bar.tsx`, `.env.example`, `docs/setup.md` |
 | 2026-10-29 | 2 | done | `search_properties` tool (zod args from the model, reuses `parseCatalogState` / `toPropertyFilters` / `catalogHref`, budget → USD, district match, max 5), tool loop (≤3 rounds, tool calls + results stored, history trimmed without orphans), fixture calls the tool; chat cards (parts-based reducer, storage migration, placeholder, catalog link, empty note, announced). `countObjects` moved to `src/lib/format/`. Files: `src/features/assistant/*`, `src/lib/llm/fixtures/*`, `src/lib/format/count-objects.ts`, `src/features/admin/{pages,settings}/*` (imports) |
 | 2026-11-04 | 3 | done | `propose_lead` tool (zod wishes, proposal stored on the conversation, `lead_card` event), prompt rules, fixture offers the card; `submitAssistantLead` (006 field rules, proposal must match, payload only from the server copy, `kind = ai`, `lead_id` on the conversation, `after(deliverLead)`); AI wishes in Telegram / `advert_info` / admin (`ai-wishes.ts`); `getLeadTranscript`. Chat card (reuses the 006 fields, pending/invalid/error/ok, stale older card, stored), admin: AI wish facts + «Переписка з асистентом» (deleted / error with retry). Honeypot id via `useId`. Backend code committed by the user as `ec6dfb9`. Files: `src/features/assistant/*`, `src/features/leads/*`, `src/features/admin/leads/*`, `src/app/admin/(panel)/leads/[id]/page.tsx`, `src/lib/db/assistant.ts`, `src/lib/llm/fixtures/*` |
+| 2026-11-04 | 4 | done | Migration `20261104120000_ai_limits.sql` (`ai_usage` + `add_ai_usage` for service_role only, `ai_messages.client_message_id` unique per conversation, IP index), types regenerated; limits before the LLM (length, IP rate on a salted SHA-256 hash, conversation cap, monthly budget, Turnstile once per conversation) as `limit` events; dedupe; usage to `ai_usage`; lead action needs `turnstile_ok`; `POST /api/cron/assistant` deletes conversations > 30 days (nightly job in `sync.yml`). Client: Turnstile in the panel (single-use token, «Перевіряємо…»), `client_message_id` kept across retries, limit notices with the 006 form + contacts. Files: `supabase/migrations/*`, `src/lib/supabase/database.types.ts`, `src/features/assistant/*`, `src/features/leads/turnstile-*`, `src/app/api/{assistant,cron/assistant}/*`, `src/lib/db/assistant.ts`, `.github/workflows/sync.yml`, `.env.example`, `docs/setup.md` |

@@ -54,7 +54,7 @@ const stale: AssistantLeadState = { status: "error", message: ASSISTANT_LEAD_MES
 /**
  * The confirmed lead card, on plain data. Order: honeypot (silent ok) → validation → the conversation
  * and its stored proposal → save → `lead_id` on the conversation → delivery after the response.
- * No Turnstile here: the conversation was Turnstile-checked when it started (spec 010, slice 4).
+ * No Turnstile token here: the conversation must have passed the check when it started (`turnstile_ok`).
  * Never logs personal data.
  */
 export const processAssistantLead = async (raw: unknown): Promise<AssistantLeadState> => {
@@ -75,7 +75,7 @@ export const processAssistantLead = async (raw: unknown): Promise<AssistantLeadS
 
   try {
     const conversation = await getConversation(data.conversation_id);
-    if (!conversation) return stale;
+    if (!conversation || !conversation.turnstile_ok) return stale;
     const proposal = storedProposalSchema.safeParse(conversation.proposal);
     if (!proposal.success || proposal.data.proposal_id !== data.proposal_id) return stale;
 

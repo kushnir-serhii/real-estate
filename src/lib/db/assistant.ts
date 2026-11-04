@@ -14,8 +14,14 @@ export type AiMessageRole = AiMessage["role"];
 /** Roles allowed by the table's check constraint. */
 export const AI_MESSAGE_ROLES = ["user", "assistant", "tool"] as const satisfies readonly AiMessageRole[];
 
-export type NewAiMessage = Pick<Tables["ai_messages"]["Insert"], "role" | "content" | "data">;
-export type NewAiConversation = { pageUrl?: string | null; propertyId?: string | null };
+export type NewAiMessage = Pick<Tables["ai_messages"]["Insert"], "role" | "content" | "data" | "client_message_id">;
+export type NewAiConversation = {
+  pageUrl?: string | null;
+  propertyId?: string | null;
+  /** Salted hash, never the raw address. */
+  ipHash?: string | null;
+  turnstileOk?: boolean;
+};
 export type AiUsageDelta = { inputTokens: number; outputTokens: number; costUsd: number };
 
 /** Prompt history only needs these columns. */
@@ -26,7 +32,12 @@ const HISTORY_COLUMNS = "id,role,content,data,created_at";
 export const createConversation = async (input: NewAiConversation): Promise<AiConversation> => {
   const { data, error } = await createAdminClient()
     .from("ai_conversations")
-    .insert({ page_url: input.pageUrl ?? null, property_id: input.propertyId ?? null })
+    .insert({
+      page_url: input.pageUrl ?? null,
+      property_id: input.propertyId ?? null,
+      ip_hash: input.ipHash ?? null,
+      turnstile_ok: input.turnstileOk ?? false,
+    })
     .select("*")
     .single();
   if (error) throw new Error(`createConversation failed: ${error.message}`);
@@ -38,6 +49,92 @@ export const getConversation = async (id: string): Promise<AiConversation | null
   const { data, error } = await createAdminClient().from("ai_conversations").select("*").eq("id", id).maybeSingle();
   if (error) throw new Error(`getConversation failed: ${error.message}`);
   return data;
+};
+
+/** Marks an existing conversation as Turnstile-checked and stores the visitor's salted IP hash. */
+export const markConversationTurnstileOk = async (id: string, ipHash: string): Promise<void> => {
+  const { error } = await createAdminClient()
+    .from("ai_conversations")
+    .update({ turnstile_ok: true, ip_hash: ipHash })
+    .eq("id", id);
+  if (error) throw new Error(`markConversationTurnstileOk failed: ${error.message}`);
+};
+
+/** The stored visitor message with this client id (a retry), or null. */
+export const findUserMessageByClientId = async (
+  conversationId: string,
+  clientMessageId: string,
+): Promise<Pick<AiMessage, "id" | "created_at"> | null> => {
+  const { data, error } = await createAdminClient()
+    .from("ai_messages")
+    .select("id,created_at")
+    .eq("conversation_id", conversationId)
+    .eq("client_message_id", clientMessageId)
+    .eq("role", "user")
+    .maybeSingle();
+  if (error) throw new Error(`findUserMessageByClientId failed: ${error.message}`);
+  return data;
+};
+
+/** Visitor messages stored in one conversation. */
+export const countUserMessages = async (conversationId: string): Promise<number> => {
+  const { count, error } = await createAdminClient()
+    .from("ai_messages")
+    .select("id", { count: "exact", head: true })
+    .eq("conversation_id", conversationId)
+    .eq("role", "user");
+  if (error) throw new Error(`countUserMessages failed: ${error.message}`);
+  return count ?? 0;
+};
+
+/** Visitor messages since `sinceIso` in conversations of this hashed IP. */
+export const countUserMessagesByIp = async (ipHash: string, sinceIso: string): Promise<number> => {
+  const { count, error } = await createAdminClient()
+    .from("ai_messages")
+    .select("id,ai_conversations!inner(ip_hash)", { count: "exact", head: true })
+    .eq("role", "user")
+    .gte("created_at", sinceIso)
+    .eq("ai_conversations.ip_hash", ipHash);
+  if (error) throw new Error(`countUserMessagesByIp failed: ${error.message}`);
+  return count ?? 0;
+};
+
+/** Spend of a month (`month` = first day, `YYYY-MM-01`); 0 when nothing is recorded. */
+export const getMonthCostUsd = async (month: string): Promise<number> => {
+  const { data, error } = await createAdminClient().from("ai_usage").select("cost_usd").eq("month", month).maybeSingle();
+  if (error) throw new Error(`getMonthCostUsd failed: ${error.message}`);
+  return data?.cost_usd ?? 0;
+};
+
+/** Atomic add to the month's counter (SQL function, service role only). */
+export const addMonthlyUsage = async (month: string, usage: AiUsageDelta): Promise<void> => {
+  const { error } = await createAdminClient().rpc("add_ai_usage", {
+    p_month: month,
+    p_input: usage.inputTokens,
+    p_output: usage.outputTokens,
+    p_cost: usage.costUsd,
+  });
+  if (error) throw new Error(`addMonthlyUsage failed: ${error.message}`);
+};
+
+/** Deletes conversations created before `cutoffIso` (messages cascade; leads are untouched). Returns the count. */
+export const deleteConversationsBefore = async (cutoffIso: string): Promise<number> => {
+  const { count, error } = await createAdminClient()
+    .from("ai_conversations")
+    .delete({ count: "exact" })
+    .lt("created_at", cutoffIso);
+  if (error) throw new Error(`deleteConversationsBefore failed: ${error.message}`);
+  return count ?? 0;
+};
+
+/** Deletes monthly usage rows older than `cutoffMonth` (`YYYY-MM-01`). */
+export const deleteUsageBefore = async (cutoffMonth: string): Promise<number> => {
+  const { count, error } = await createAdminClient()
+    .from("ai_usage")
+    .delete({ count: "exact" })
+    .lt("month", cutoffMonth);
+  if (error) throw new Error(`deleteUsageBefore failed: ${error.message}`);
+  return count ?? 0;
 };
 
 /** The last `limit` messages of a conversation, oldest first. */

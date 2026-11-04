@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { assistantRequestSchema, encodeAssistantEvent } from "@/features/assistant/assistant-events";
+import { getClientIp } from "@/features/assistant/assistant-limits";
 import { runAssistantTurn } from "@/features/assistant/run-assistant-turn";
 
 export const dynamic = "force-dynamic";
@@ -21,6 +22,9 @@ export const POST = async (request: Request) => {
     message: parsed.data.message,
     pageUrl: parsed.data.page_url,
     propertySlug: parsed.data.property_slug,
+    turnstileToken: parsed.data.turnstile_token,
+    clientMessageId: parsed.data.client_message_id,
+    clientIp: getClientIp(request.headers),
     signal: request.signal,
   });
 

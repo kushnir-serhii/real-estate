@@ -156,6 +156,7 @@ export type Database = {
       }
       ai_messages: {
         Row: {
+          client_message_id: string | null
           content: string
           conversation_id: string
           created_at: string
@@ -164,6 +165,7 @@ export type Database = {
           role: string
         }
         Insert: {
+          client_message_id?: string | null
           content?: string
           conversation_id: string
           created_at?: string
@@ -172,6 +174,7 @@ export type Database = {
           role: string
         }
         Update: {
+          client_message_id?: string | null
           content?: string
           conversation_id?: string
           created_at?: string
@@ -188,6 +191,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ai_usage: {
+        Row: {
+          cost_usd: number
+          input_tokens: number
+          month: string
+          output_tokens: number
+          updated_at: string
+        }
+        Insert: {
+          cost_usd?: number
+          input_tokens?: number
+          month: string
+          output_tokens?: number
+          updated_at?: string
+        }
+        Update: {
+          cost_usd?: number
+          input_tokens?: number
+          month?: string
+          output_tokens?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       leads: {
         Row: {
@@ -530,6 +557,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_ai_usage: {
+        Args: {
+          p_cost: number
+          p_input: number
+          p_month: string
+          p_output: number
+        }
+        Returns: undefined
+      }
       is_admin: { Args: never; Returns: boolean }
       save_exchange_rates: {
         Args: { p_eur: number; p_uah: number }
