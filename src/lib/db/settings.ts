@@ -1,7 +1,7 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
 import { z } from "zod";
-import { getDataDriver, isDemoMode } from "@/lib/data-driver";
+import { getCacheScope, isDemoMode } from "@/lib/data-driver";
 import type { Database } from "@/lib/supabase/database.types";
 import { CACHE_TAGS } from "./cache-tags";
 import type { SettingsDriver } from "./driver-types";
@@ -30,7 +30,7 @@ export const getSettings = async (): Promise<Settings> => (await loadDriver()).f
 const getCachedExchangeRates = (): Promise<ExchangeRates> =>
   unstable_cache(
     async () => (await loadDriver()).fetchExchangeRates(),
-    ["exchange-rates", getDataDriver()],
+    ["exchange-rates", getCacheScope()],
     { tags: [CACHE_TAGS.settings] },
   )();
 

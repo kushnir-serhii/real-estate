@@ -1,6 +1,6 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
-import { getDataDriver, isDemoMode } from "@/lib/data-driver";
+import { getCacheScope, isDemoMode } from "@/lib/data-driver";
 import type { Database } from "@/lib/supabase/database.types";
 import { CACHE_TAGS, pageTag } from "./cache-tags";
 import type { PagesDriver } from "./driver-types";
@@ -16,6 +16,6 @@ const loadDriver = async (): Promise<PagesDriver> =>
 export const getPage = (slug: string): Promise<Page | null> =>
   unstable_cache(
     async (s: string) => (await loadDriver()).fetchPage(s),
-    ["page-by-slug", getDataDriver(), slug],
+    ["page-by-slug", getCacheScope(), slug],
     { tags: [CACHE_TAGS.pages, pageTag(slug)] },
   )(slug);

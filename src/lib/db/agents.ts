@@ -1,6 +1,6 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
-import { getDataDriver, isDemoMode } from "@/lib/data-driver";
+import { getCacheScope, isDemoMode } from "@/lib/data-driver";
 import type { Database } from "@/lib/supabase/database.types";
 import { CACHE_TAGS } from "./cache-tags";
 import type { AgentsDriver } from "./driver-types";
@@ -19,6 +19,6 @@ const loadDriver = async (): Promise<AgentsDriver> =>
 export const getActiveAgents = (): Promise<Agent[]> =>
   unstable_cache(
     async () => (await loadDriver()).fetchActiveAgents(),
-    ["active-agents", getDataDriver()],
+    ["active-agents", getCacheScope()],
     { tags: [CACHE_TAGS.agents] },
   )();

@@ -1,6 +1,6 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
-import { getDataDriver, isDemoMode } from "@/lib/data-driver";
+import { getCacheScope, isDemoMode } from "@/lib/data-driver";
 import { CACHE_TAGS, propertyTag } from "./cache-tags";
 import type { PropertiesDriver } from "./driver-types";
 import type {
@@ -22,13 +22,13 @@ const loadDriver = async (): Promise<PropertiesDriver> =>
     ? (await import("@/lib/demo/db/properties")).demoPropertiesDriver
     : (await import("@/lib/db/supabase/properties")).supabasePropertiesDriver;
 
-// The driver is part of every cache key: a cache written by one driver is never read by the other.
+// The cache scope (driver, plus a per-process epoch on demo) is part of every cache key: a cache written by one driver, or by an earlier demo process, is never read.
 
 /** Published properties, filtered, sorted and paginated. Cached under the `properties` tag. */
 export const getPublishedProperties = (filters: PropertyFilters): Promise<PropertyPage> =>
   unstable_cache(
     async (f: PropertyFilters) => (await loadDriver()).fetchPublishedProperties(f),
-    ["published-properties", getDataDriver(), JSON.stringify(filters)],
+    ["published-properties", getCacheScope(), JSON.stringify(filters)],
     { tags: [CACHE_TAGS.properties] },
   )(filters);
 
@@ -39,7 +39,7 @@ export const getPublishedProperties = (filters: PropertyFilters): Promise<Proper
 export const getPropertyBySlug = (slug: string): Promise<PropertyBySlug | null> =>
   unstable_cache(
     async (s: string) => (await loadDriver()).fetchPropertyBySlug(s),
-    ["property-by-slug", getDataDriver(), slug],
+    ["property-by-slug", getCacheScope(), slug],
     { tags: [CACHE_TAGS.properties, propertyTag(slug)], revalidate: 3600 },
   )(slug);
 
@@ -63,7 +63,7 @@ export const getSimilarProperties = (property: SimilarTo): Promise<PublishedProp
   };
   return unstable_cache(
     async (t: SimilarTo) => (await loadDriver()).fetchSimilarProperties(t),
-    ["similar-properties", getDataDriver(), JSON.stringify(target)],
+    ["similar-properties", getCacheScope(), JSON.stringify(target)],
     { tags: [CACHE_TAGS.properties] },
   )(target);
 };
@@ -72,7 +72,7 @@ export const getSimilarProperties = (property: SimilarTo): Promise<PublishedProp
 export const getPublishedDistricts = (): Promise<string[]> =>
   unstable_cache(
     async () => (await loadDriver()).fetchPublishedDistricts(),
-    ["published-districts", getDataDriver()],
+    ["published-districts", getCacheScope()],
     { tags: [CACHE_TAGS.properties] },
   )();
 
@@ -80,6 +80,6 @@ export const getPublishedDistricts = (): Promise<string[]> =>
 export const getSitemapProperties = (): Promise<SitemapProperty[]> =>
   unstable_cache(
     async () => (await loadDriver()).fetchSitemapProperties(),
-    ["sitemap-properties", getDataDriver()],
+    ["sitemap-properties", getCacheScope()],
     { tags: [CACHE_TAGS.properties] },
   )();

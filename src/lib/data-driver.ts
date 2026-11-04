@@ -39,3 +39,20 @@ export const isDemoMode = (): boolean => getDataDriver() === "demo";
  * (otherwise pages render their empty states instead of failing).
  */
 export const hasPublicData = (): boolean => isDemoMode() || getSupabasePublicEnvOrNull() !== null;
+
+const CACHE_EPOCH_KEY = "__demoCacheEpoch";
+type CacheEpochGlobal = typeof globalThis & { [CACHE_EPOCH_KEY]?: string };
+
+/**
+ * The data-cache scope for cached reads (`unstable_cache` keys). `supabase` is shared by every process.
+ * The demo store lives in memory per process, while the data cache in `.next/cache` outlives restarts and
+ * rebuilds: without a per-process epoch a restart would serve the previous process's edits (or an old seed).
+ * Kept on `globalThis`, so HMR keeps it like it keeps the store.
+ */
+export const getCacheScope = (): string => {
+  const driver = getDataDriver();
+  if (driver !== "demo") return driver;
+  const holder: CacheEpochGlobal = globalThis;
+  holder[CACHE_EPOCH_KEY] ??= crypto.randomUUID();
+  return `demo:${holder[CACHE_EPOCH_KEY]}`;
+};
