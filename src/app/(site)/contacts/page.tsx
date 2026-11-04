@@ -4,8 +4,9 @@ import type { Metadata } from "next";
 import { AgentsSection } from "@/features/contacts/agents-section";
 import { AgentsSkeleton } from "@/features/contacts/agents-skeleton";
 import { ContactBlock } from "@/features/contacts/contact-block";
+import { CONTACTS } from "@/constants/contacts";
+import { StaticMap } from "@/features/map/static-map";
 import { GeneralRequestForm } from "@/features/leads/general-request-form";
-import { MapEmbed } from "@/features/contacts/map-embed";
 import { Markdown } from "@/features/pages/markdown";
 import { getPageContent } from "@/features/pages/get-page-content";
 import { pageSeoDescription, pageSeoTitle } from "@/features/pages/page-seo";
@@ -46,7 +47,12 @@ const ContactsPage = async () => {
       <Suspense fallback={<AgentsSkeleton />}>
         <AgentsSection />
       </Suspense>
-      <MapEmbed />
+      <section aria-labelledby="map-title" className="flex flex-col gap-4">
+        <h2 id="map-title" className="text-2xl font-bold">
+          Як нас знайти
+        </h2>
+        <StaticMap lat={CONTACTS.coordinates.lat} lng={CONTACTS.coordinates.lng} address={CONTACTS.address} />
+      </section>
     </div>
   );
 };

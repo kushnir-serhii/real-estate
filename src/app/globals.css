@@ -6,7 +6,7 @@
 
 /* Tokens. Swap the look here only: colors, radius, fonts. */
 @theme inline {
-  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-manrope-cyrillic), var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-sans);
 
   --color-background: var(--background);
