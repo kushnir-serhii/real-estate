@@ -1,11 +1,10 @@
-import { Phone, RotateCcw } from "lucide-react";
-import Link from "next/link";
+import { RotateCcw, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { SheetClose } from "@/components/ui/sheet";
 import { ASSISTANT_PERSONA } from "@/constants/assistant";
-import { CONTACTS } from "@/constants/contacts";
 import { AssistantBubble } from "./assistant-bubble";
+import { AssistantLeadCard } from "./assistant-lead-card";
+import { AssistantLimitNotice } from "./assistant-limit-notice";
 import { AssistantPropertyResults } from "./assistant-property-results";
 import { AssistantTypingIndicator } from "./assistant-typing-indicator";
 import type { AssistantReply, ChatMessage, ReplyPart } from "./chat-reducer";
@@ -15,25 +14,17 @@ type AssistantMessageProps = {
   onRetry: (replyId: string) => void;
   /** The visitor follows a property link from the chat. */
   onNavigate?: () => void;
+  /** The newest lead card in the chat; older unsent ones are stale. */
+  latestCardId?: string | null;
+  /** The last message in the chat: only its limit notice offers the form, contacts and retry. */
+  latest?: boolean;
 };
 
-const LimitNotice = () => (
-  <div role="status" className="flex max-w-[85%] flex-col gap-3 self-start rounded-2xl bg-secondary p-4 text-secondary-foreground">
-    <p className="text-base/relaxed">Зараз асистент недоступний. Залиште заявку або зателефонуйте нам.</p>
-    <div className="flex flex-wrap gap-2">
-      <SheetClose asChild>
-        <Button asChild>
-          <Link href="/contacts">Залишити заявку</Link>
-        </Button>
-      </SheetClose>
-      <Button asChild variant="outline">
-        <a href={CONTACTS.phone.href}>
-          <Phone aria-hidden="true" />
-          <span className="tabular-nums">{CONTACTS.phone.display}</span>
-        </a>
-      </Button>
-    </div>
-  </div>
+const VerifyingBubble = () => (
+  <AssistantBubble from="assistant" className="flex items-center gap-2 text-muted-foreground">
+    <ShieldCheck className="size-4 shrink-0 motion-safe:animate-pulse" aria-hidden="true" />
+    Перевіряємо, що ви не робот…
+  </AssistantBubble>
 );
 
 const TypingBubble = () => (
@@ -42,7 +33,7 @@ const TypingBubble = () => (
   </AssistantBubble>
 );
 
-const renderPart = (part: ReplyPart, index: number, onNavigate?: () => void) => {
+const renderPart = (part: ReplyPart, index: number, latestCardId: string | null, onNavigate?: () => void) => {
   switch (part.kind) {
     case "text":
       return (
@@ -55,6 +46,10 @@ const renderPart = (part: ReplyPart, index: number, onNavigate?: () => void) => 
       );
     case "properties":
       return <AssistantPropertyResults key={index} part={part} onNavigate={onNavigate} />;
+    case "lead_card":
+      return (
+        <AssistantLeadCard key={part.proposalId} card={part} superseded={part.proposalId !== latestCardId} />
+      );
     default: {
       const unreachable: never = part;
       return unreachable;
@@ -66,13 +61,17 @@ type ReplyBodyProps = {
   reply: AssistantReply;
   onRetry: (replyId: string) => void;
   onNavigate?: () => void;
+  latestCardId: string | null;
+  latest: boolean;
 };
 
 /** The reply's parts in arrival order (results, then the text about them), then its state. */
-const ReplyBody = ({ reply, onRetry, onNavigate }: ReplyBodyProps) => {
-  const parts = reply.parts.map((part, index) => renderPart(part, index, onNavigate));
+const ReplyBody = ({ reply, onRetry, onNavigate, latestCardId, latest }: ReplyBodyProps) => {
+  const parts = reply.parts.map((part, index) => renderPart(part, index, latestCardId, onNavigate));
 
   switch (reply.state.status) {
+    case "verifying":
+      return <VerifyingBubble />;
     case "waiting":
       return <TypingBubble />;
     case "streaming":
@@ -104,7 +103,7 @@ const ReplyBody = ({ reply, onRetry, onNavigate }: ReplyBodyProps) => {
       return (
         <>
           {parts}
-          <LimitNotice />
+          <AssistantLimitNotice reason={reply.state.reason} latest={latest} onRetry={() => onRetry(reply.id)} />
         </>
       );
     default: {
@@ -114,7 +113,13 @@ const ReplyBody = ({ reply, onRetry, onNavigate }: ReplyBodyProps) => {
   }
 };
 
-export const AssistantMessage = ({ message, onRetry, onNavigate }: AssistantMessageProps) => (
+export const AssistantMessage = ({
+  message,
+  onRetry,
+  onNavigate,
+  latestCardId = null,
+  latest = false,
+}: AssistantMessageProps) => (
   <li className="flex flex-col gap-2">
     {message.role === "user" ? (
       <AssistantBubble from="user">
@@ -122,7 +127,13 @@ export const AssistantMessage = ({ message, onRetry, onNavigate }: AssistantMess
         {message.text}
       </AssistantBubble>
     ) : (
-      <ReplyBody reply={message} onRetry={onRetry} onNavigate={onNavigate} />
+      <ReplyBody
+        reply={message}
+        onRetry={onRetry}
+        onNavigate={onNavigate}
+        latestCardId={latestCardId}
+        latest={latest}
+      />
     )}
   </li>
 );

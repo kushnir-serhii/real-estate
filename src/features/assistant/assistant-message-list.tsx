@@ -5,10 +5,11 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { ASSISTANT_GREETING, ASSISTANT_PERSONA } from "@/constants/assistant";
 import { AssistantBubble } from "./assistant-bubble";
 import { AssistantEmptyState } from "./assistant-empty-state";
+import { LEAD_CARD_ANNOUNCEMENT } from "./assistant-lead-card";
 import { AssistantMessage } from "./assistant-message";
 import { resultsAnnouncement } from "./assistant-property-results";
-import { replyText } from "./chat-reducer";
-import type { ChatMessage, PropertiesPart } from "./chat-reducer";
+import { latestLeadCardId, replyText } from "./chat-reducer";
+import type { AssistantReply, ChatMessage, PropertiesPart } from "./chat-reducer";
 
 type AssistantMessageListProps = {
   messages: ChatMessage[];
@@ -28,9 +29,14 @@ const lastAssistantDoneId = (messages: ChatMessage[]): string | null => {
 const lastUserId = (messages: ChatMessage[]): string | null =>
   messages.findLast((message) => message.role === "user")?.id ?? null;
 
+/** A card waiting for the visitor in this reply: they hear «Перевірте дані заявки» (focus stays where it is). */
+const hasOpenCard = (reply: AssistantReply): boolean =>
+  reply.parts.some((part) => part.kind === "lead_card" && part.submit.status === "idle");
+
 /**
  * What the polite live region says: «typing» while waiting, the count as soon as property results arrive,
- * then the reply's text once it is complete (not every delta). Errors and limits announce themselves
+ * then the reply's text once it is complete (not every delta), and «Перевірте дані заявки» when a lead card
+ * arrives. Errors and limits announce themselves
  * (`role="alert"` / `role="status"`).
  */
 const announcement = (messages: ChatMessage[], skipId: string | null): string => {
@@ -38,14 +44,19 @@ const announcement = (messages: ChatMessage[], skipId: string | null): string =>
   if (last?.role !== "assistant") return "";
   const results = last.parts.findLast((part): part is PropertiesPart => part.kind === "properties");
   switch (last.state.status) {
+    case "verifying":
+      return "Перевіряємо, що ви не робот…";
     case "waiting":
       return `${ASSISTANT_PERSONA.name} пише відповідь…`;
     case "streaming":
+      if (hasOpenCard(last)) return LEAD_CARD_ANNOUNCEMENT;
       return results ? resultsAnnouncement(results) : "";
     case "done": {
       if (last.id === skipId) return "";
       const text = replyText(last).trim();
-      if (text !== "") return `${ASSISTANT_PERSONA.name}: ${text}`;
+      const card = hasOpenCard(last) ? ` ${LEAD_CARD_ANNOUNCEMENT}.` : "";
+      if (text !== "") return `${ASSISTANT_PERSONA.name}: ${text}${card}`;
+      if (card !== "") return LEAD_CARD_ANNOUNCEMENT;
       return results ? resultsAnnouncement(results) : "";
     }
     case "error":
@@ -64,6 +75,7 @@ export const AssistantMessageList = ({ messages, onSend, onRetry, onNavigate }: 
   const seenUserIdRef = useRef<string | null>(null);
   // A reply that was already complete when the panel opened isn't read out again.
   const [restoredId] = useState(() => lastAssistantDoneId(messages));
+  const latestCardId = latestLeadCardId(messages);
 
   const handleScroll = () => {
     const element = scrollRef.current;
@@ -91,8 +103,15 @@ export const AssistantMessageList = ({ messages, onSend, onRetry, onNavigate }: 
           <AssistantEmptyState onPick={onSend} />
         ) : (
           <ol aria-label="Розмова" className="flex flex-col gap-3">
-            {messages.map((message) => (
-              <AssistantMessage key={message.id} message={message} onRetry={onRetry} onNavigate={onNavigate} />
+            {messages.map((message, index) => (
+              <AssistantMessage
+                key={message.id}
+                message={message}
+                onRetry={onRetry}
+                onNavigate={onNavigate}
+                latestCardId={latestCardId}
+                latest={index === messages.length - 1}
+              />
             ))}
           </ol>
         )}

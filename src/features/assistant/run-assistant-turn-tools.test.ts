@@ -14,7 +14,14 @@ const db = vi.hoisted(() => ({
   runAssistantTool: vi.fn(),
 }));
 
+vi.mock("@/lib/turnstile", () => ({ verifyTurnstile: async () => true }));
 vi.mock("@/lib/db/assistant", () => ({
+  markConversationTurnstileOk: async () => undefined,
+  findUserMessageByClientId: async () => null,
+  countUserMessages: async () => 0,
+  countUserMessagesByIp: async () => 0,
+  getMonthCostUsd: async () => 0,
+  addMonthlyUsage: async () => undefined,
   getConversation: db.getConversation,
   createConversation: db.createConversation,
   getConversationMessages: db.getConversationMessages,

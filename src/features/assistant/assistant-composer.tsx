@@ -16,6 +16,11 @@ type AssistantComposerProps = {
   busy: boolean;
   onSend: (text: string) => void;
   textareaRef?: Ref<HTMLTextAreaElement>;
+  /**
+   * A message the server refused as too long goes back into the input (once per `key`, only into an
+   * empty input, so nothing typed since is lost).
+   */
+  restore?: { key: string; text: string } | null;
 };
 
 /** The counter appears this close to the limit. */
@@ -23,8 +28,13 @@ const COUNTER_FROM = ASSISTANT_MESSAGE_MAX_LENGTH - 200;
 
 const formatCount = new Intl.NumberFormat("uk-UA").format;
 
-export const AssistantComposer = ({ busy, onSend, textareaRef }: AssistantComposerProps) => {
+export const AssistantComposer = ({ busy, onSend, textareaRef, restore = null }: AssistantComposerProps) => {
   const [value, setValue] = useState("");
+  const [restoredKey, setRestoredKey] = useState<string | null>(null);
+  if (restore !== null && restore.key !== restoredKey) {
+    setRestoredKey(restore.key);
+    if (value === "") setValue(restore.text);
+  }
   const id = useId();
   const inputId = `${id}-input`;
   const counterId = `${id}-counter`;

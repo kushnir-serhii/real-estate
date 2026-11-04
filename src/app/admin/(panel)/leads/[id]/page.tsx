@@ -7,10 +7,13 @@ import { LeadDeliveryCard } from "@/features/admin/leads/lead-delivery-card";
 import { LeadDetailHeader } from "@/features/admin/leads/lead-detail-header";
 import { LeadRequestCard } from "@/features/admin/leads/lead-request-card";
 import { LeadSourceCard } from "@/features/admin/leads/lead-source-card";
+import { LeadTranscriptSection } from "@/features/admin/leads/lead-transcript-section";
+import type { LeadTranscriptLoad } from "@/features/admin/leads/lead-transcript-section";
 import { leadsHref } from "@/features/admin/leads/leads-params";
 import { parseAdminLeadFilters } from "@/lib/db/admin-lead-filters";
 import type { AdminLeadSearchParams } from "@/lib/db/admin-lead-filters";
 import { getAdminLead } from "@/lib/db/admin-leads";
+import { getLeadTranscript } from "@/lib/db/assistant";
 
 type AdminLeadPageProps = {
   params: Promise<{ id: string }>;
@@ -20,6 +23,16 @@ type AdminLeadPageProps = {
 
 /** One query per request for the metadata and the page. */
 const loadLead = cache(getAdminLead);
+
+/** Only after the admin-checked lead load. A failure shows in the section; the lead stays on screen. */
+const loadTranscript = async (leadId: string): Promise<LeadTranscriptLoad> => {
+  try {
+    return await getLeadTranscript(leadId);
+  } catch {
+    console.error("AdminLeadPage: loading the transcript failed");
+    return { status: "error" };
+  }
+};
 
 const TITLE_NAME_MAX = 40;
 
@@ -36,6 +49,7 @@ const AdminLeadPage = async ({ params, searchParams }: AdminLeadPageProps) => {
   const [{ id }, query] = await Promise.all([params, searchParams]);
   const lead = await loadLead(id);
   if (!lead) notFound();
+  const transcript = lead.kind === "ai" ? await loadTranscript(lead.id) : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -45,6 +59,7 @@ const AdminLeadPage = async ({ params, searchParams }: AdminLeadPageProps) => {
           <LeadContactCard lead={lead} />
           <LeadRequestCard lead={lead} />
           <LeadSourceCard lead={lead} />
+          {transcript && <LeadTranscriptSection transcript={transcript} />}
         </div>
         <LeadDeliveryCard lead={lead} />
       </div>

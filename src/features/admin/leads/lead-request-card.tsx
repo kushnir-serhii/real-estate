@@ -2,6 +2,8 @@ import { EyeOff } from "lucide-react";
 
 import { PROPERTY_TYPE_LABELS } from "@/features/properties/property-labels";
 import type { AdminLeadDetail } from "@/lib/db/admin-leads";
+import { cn } from "@/lib/utils";
+import { aiWishFacts } from "./ai-wish-facts";
 import { ExternalLink } from "./external-link";
 import { LeadFacts } from "./lead-facts";
 import type { LeadFact } from "./lead-facts";
@@ -33,7 +35,7 @@ const PropertyValue = ({ property }: { property: NonNullable<AdminLeadDetail["pr
   </div>
 );
 
-/** What the client asked about: the property, their wishes (general / AI leads) and the message. */
+/** What the client asked about: the property, their wishes (general / AI leads: summary, districts, budget…) and the message. */
 export const LeadRequestCard = ({ lead }: LeadRequestCardProps) => {
   const wishes = readLeadWishes(lead.payload);
   const facts: LeadFact[] = [];
@@ -51,6 +53,14 @@ export const LeadRequestCard = ({ lead }: LeadRequestCardProps) => {
       value: <ExternalLink href={catalogHref(wishes.similarTo.slug)}>{wishes.similarTo.title}</ExternalLink>,
     });
   }
+  for (const fact of aiWishFacts(wishes)) {
+    facts.push({
+      label: fact.label,
+      value: (
+        <span className={cn("whitespace-pre-line", fact.numeric && "tabular-nums")}>{fact.text}</span>
+      ),
+    });
+  }
 
   const isEmpty = facts.length === 0 && !lead.message;
 
@@ -65,7 +75,9 @@ export const LeadRequestCard = ({ lead }: LeadRequestCardProps) => {
           </p>
         </div>
       ) : (
-        !isEmpty && <p className="text-sm text-muted-foreground">Повідомлення клієнт не залишив.</p>
+        // The assistant's leads carry wishes, not a free-form message.
+        !isEmpty &&
+        lead.kind !== "ai" && <p className="text-sm text-muted-foreground">Повідомлення клієнт не залишив.</p>
       )}
       {isEmpty && (
         <p className="text-sm text-muted-foreground">

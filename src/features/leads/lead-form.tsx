@@ -13,6 +13,7 @@ import { LeadFormFields } from "./lead-form-fields";
 import { initialLeadFormState } from "./lead-state";
 import type { LeadField, LeadFormState } from "./lead-state";
 import { LeadSuccess } from "./lead-success";
+import { newRequestId } from "./new-request-id";
 import { TurnstileWidget } from "./turnstile-widget";
 
 type LeadErrors = Partial<Record<LeadField, string>>;
@@ -31,16 +32,6 @@ type LeadFormProps = {
 
 /** Fields the visitor can't fix by hand: their errors go to the message above the button. */
 const HIDDEN_FIELDS: readonly LeadField[] = ["kind", "client_request_id", "property_id", "similar_to"];
-
-const UUID_TEMPLATE = "10000000-1000-4000-8000-100000000000";
-
-/** `crypto.randomUUID` exists only in secure contexts (not on a phone opening the dev server over http). */
-const newRequestId = (): string => {
-  if (typeof crypto.randomUUID === "function") return crypto.randomUUID();
-  return UUID_TEMPLATE.replace(/[018]/g, (c) =>
-    (Number(c) ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (Number(c) / 4)))).toString(16),
-  );
-};
 
 const utmFromLocation = (): string => {
   const utm: Record<string, string> = {};

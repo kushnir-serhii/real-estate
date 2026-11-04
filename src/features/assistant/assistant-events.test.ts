@@ -74,11 +74,18 @@ describe("assistantRequestSchema", () => {
     expect(assistantRequestSchema.parse(body)).toEqual(body);
   });
 
+  it("takes the optional turnstile token and client message id", () => {
+    const body = { message: "Hi", turnstile_token: "tok", client_message_id: ID };
+    expect(assistantRequestSchema.parse(body)).toEqual(body);
+    expect(assistantRequestSchema.safeParse({ message: "Hi", client_message_id: "nope" }).success).toBe(false);
+  });
+
   it("rejects empty, whitespace-only and too long messages and a non-uuid conversation id", () => {
     expect(assistantRequestSchema.safeParse({ message: "" }).success).toBe(false);
     expect(assistantRequestSchema.safeParse({ message: "   " }).success).toBe(false);
-    expect(assistantRequestSchema.safeParse({ message: "a".repeat(1001) }).success).toBe(false);
-    expect(assistantRequestSchema.safeParse({ message: "a".repeat(1000) }).success).toBe(true);
+    // 1001 chars passes the schema: the turn answers it with a `message_too_long` limit event.
+    expect(assistantRequestSchema.safeParse({ message: "a".repeat(1001) }).success).toBe(true);
+    expect(assistantRequestSchema.safeParse({ message: "a".repeat(10_001) }).success).toBe(false);
     expect(assistantRequestSchema.safeParse({ message: "Hi", conversation_id: "nope" }).success).toBe(false);
     expect(assistantRequestSchema.safeParse({}).success).toBe(false);
   });
