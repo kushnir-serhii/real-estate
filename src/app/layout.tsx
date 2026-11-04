@@ -23,6 +23,9 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => (
   <html lang="uk" className={`${manropeLatin.variable} ${manropeCyrillic.variable}`} suppressHydrationWarning>
     <head>
       <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      <noscript>
+        <style>{".nojs-only{display:block!important}"}</style>
+      </noscript>
     </head>
     <body>{children}</body>
   </html>

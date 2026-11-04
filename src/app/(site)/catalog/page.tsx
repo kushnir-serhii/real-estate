@@ -76,12 +76,13 @@ const CatalogPage = async ({ searchParams }: CatalogPageProps) => {
             </div>
           </div>
 
-          {/* Phones without JS can't open the sheet: show the form inline instead. */}
-          <noscript>
+          {/* Phones without JS can't open the sheet: the root layout's <noscript> style reveals this form.
+              Not a <noscript> itself: streamed React content inside it has no placeholders in the DOM, so `$RS` throws. */}
+          <div className="nojs-only hidden">
             <div className="rounded-xl bg-card p-4 ring-1 ring-foreground/10 lg:hidden">
               <CatalogFiltersForm state={state} districts={districts} idPrefix="filters-nojs" />
             </div>
-          </noscript>
+          </div>
 
           <Suspense key={query} fallback={<CatalogSkeleton />}>
             <CatalogResults state={state} filters={filters} />
