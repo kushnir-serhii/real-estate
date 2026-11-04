@@ -174,3 +174,25 @@
     cursor: pointer;
   }
 }
+
+/* Unlayered so it beats px-* utilities. Native selects: one chevron in both themes with room to breathe, instead of the
+   browser arrow pressed against the edge */
+select:not([multiple]):not([size]) {
+  appearance: none;
+  padding-right: 2.25rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23737373' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+}
+.dark select:not([multiple]):not([size]) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23b5b5b5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+/* Chrome paints the open list with the select's own colors; a see-through select
+   background (dark:bg-input/30) turns into a white list with light text. Give options
+   solid theme colors. */
+option,
+optgroup {
+  background-color: var(--popover);
+  color: var(--popover-foreground);
+}
