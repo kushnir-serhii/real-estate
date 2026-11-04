@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { ASSISTANT_ERROR_MESSAGE } from "@/constants/assistant";
 import type { AssistantPropertyCard } from "./assistant-events";
-import { activeReply, chatReducer, INITIAL_CHAT_STATE, replyText } from "./chat-reducer";
+import { activeReply, chatReducer, findLeadCard, INITIAL_CHAT_STATE, latestLeadCardId, replyText } from "./chat-reducer";
 import type { AssistantReply, ChatAction, ChatState } from "./chat-reducer";
 
 const CONVERSATION = "7d6a1f0e-3c1b-4a53-9d2f-0a1b2c3d4e5f";
@@ -190,12 +190,124 @@ describe("chatReducer", () => {
     ).toBe(done);
   });
 
-  it("leaves the state alone for the lead card (slice 3)", () => {
-    const state = chatReducer(sent, {
-      type: "event",
-      replyId: "r1",
-      event: { type: "lead_card", proposal_id: "p1", prefill: {}, summary: "Квартира" },
+  it("ignores a lead card for a finished reply", () => {
+    const done = run([{ type: "event", replyId: "r1", event: { type: "done" } }], sent);
+    expect(chatReducer(done, { type: "event", replyId: "r1", event: LEAD_EVENT })).toBe(done);
+  });
+});
+
+const LEAD_EVENT = {
+  type: "lead_card",
+  proposal_id: "p1",
+  prefill: { name: "Олена", phone: "+380671234567" },
+  summary: "2-кімнатна на Оболоні до 80 000 $",
+} as const;
+
+const withCard = run(
+  [
+    { type: "event", replyId: "r1", event: { type: "text", delta: "Ось заявка:" } },
+    { type: "event", replyId: "r1", event: LEAD_EVENT },
+    { type: "event", replyId: "r1", event: { type: "done" } },
+  ],
+  sent,
+);
+
+const cardOf = (state: ChatState, proposalId = "p1") => {
+  const card = findLeadCard(state, proposalId);
+  if (!card) throw new Error(`no card ${proposalId}`);
+  return card;
+};
+
+describe("chatReducer: lead card", () => {
+  it("adds the card to the reply after its text, idle and without a request id yet", () => {
+    expect(reply(withCard, "r1").parts).toEqual([
+      { kind: "text", text: "Ось заявка:" },
+      {
+        kind: "lead_card",
+        proposalId: "p1",
+        prefill: { name: "Олена", phone: "+380671234567" },
+        summary: "2-кімнатна на Оболоні до 80 000 $",
+        clientRequestId: null,
+        submit: { status: "idle" },
+      },
+    ]);
+    expect(reply(withCard, "r1").state).toEqual({ status: "done" });
+  });
+
+  it("counts a reply with only a card as content, not as a failed turn", () => {
+    const state = run(
+      [
+        { type: "event", replyId: "r1", event: LEAD_EVENT },
+        { type: "event", replyId: "r1", event: { type: "done" } },
+      ],
+      sent,
+    );
+    expect(reply(state, "r1").state).toEqual({ status: "done" });
+  });
+
+  it("ignores a repeated card event for the same proposal", () => {
+    const once = chatReducer(sent, { type: "event", replyId: "r1", event: LEAD_EVENT });
+    expect(chatReducer(once, { type: "event", replyId: "r1", event: LEAD_EVENT })).toBe(once);
+  });
+
+  it("goes pending on submit and keeps the first request id across retries", () => {
+    const pending = chatReducer(withCard, { type: "lead_submit", proposalId: "p1", clientRequestId: "req-1" });
+    expect(cardOf(pending)).toMatchObject({ clientRequestId: "req-1", submit: { status: "pending" } });
+    // A double tap while pending changes nothing.
+    expect(chatReducer(pending, { type: "lead_submit", proposalId: "p1", clientRequestId: "req-2" })).toBe(pending);
+
+    const failed = chatReducer(pending, {
+      type: "lead_result",
+      proposalId: "p1",
+      result: { status: "error", message: "Не вдалося" },
     });
-    expect(state).toBe(sent);
+    expect(cardOf(failed).submit).toEqual({ status: "error", message: "Не вдалося" });
+
+    const retried = chatReducer(failed, { type: "lead_submit", proposalId: "p1", clientRequestId: "req-3" });
+    expect(cardOf(retried)).toMatchObject({ clientRequestId: "req-1", submit: { status: "pending" } });
+  });
+
+  it("maps invalid and ok results", () => {
+    const pending = chatReducer(withCard, { type: "lead_submit", proposalId: "p1", clientRequestId: "req-1" });
+    const invalid = chatReducer(pending, {
+      type: "lead_result",
+      proposalId: "p1",
+      result: { status: "invalid", fieldErrors: { phone: "Перевірте номер", consent: "Потрібна згода" } },
+    });
+    expect(cardOf(invalid).submit).toEqual({
+      status: "invalid",
+      fieldErrors: { phone: "Перевірте номер", consent: "Потрібна згода" },
+    });
+
+    const sentOk = run(
+      [
+        { type: "lead_submit", proposalId: "p1", clientRequestId: "req-1" },
+        { type: "lead_result", proposalId: "p1", result: { status: "ok" } },
+      ],
+      invalid,
+    );
+    expect(cardOf(sentOk).submit).toEqual({ status: "ok" });
+    // A sent card can't be sent again.
+    expect(chatReducer(sentOk, { type: "lead_submit", proposalId: "p1", clientRequestId: "x" })).toBe(sentOk);
+  });
+
+  it("drops a result for a card that isn't pending or no longer exists", () => {
+    const result = { type: "lead_result", proposalId: "p1", result: { status: "ok" } } as const;
+    expect(chatReducer(withCard, result)).toBe(withCard);
+    expect(chatReducer(INITIAL_CHAT_STATE, result)).toBe(INITIAL_CHAT_STATE);
+  });
+
+  it("knows the newest card in the chat", () => {
+    expect(latestLeadCardId(sent.messages)).toBeNull();
+    const second = run(
+      [
+        { type: "send", userId: "u2", replyId: "r2", text: "Ще варіант" },
+        { type: "event", replyId: "r2", event: { ...LEAD_EVENT, proposal_id: "p2" } },
+        { type: "event", replyId: "r2", event: { type: "done" } },
+      ],
+      withCard,
+    );
+    expect(latestLeadCardId(withCard.messages)).toBe("p1");
+    expect(latestLeadCardId(second.messages)).toBe("p2");
   });
 });

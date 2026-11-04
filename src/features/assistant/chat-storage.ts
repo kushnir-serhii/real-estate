@@ -1,8 +1,9 @@
 import { z } from "zod";
 
 import { ASSISTANT_LIMIT_REASONS, assistantPropertyCardSchema } from "./assistant-events";
+import { ASSISTANT_LEAD_FIELDS } from "./assistant-lead-state";
 import { INITIAL_CHAT_STATE, INTERRUPTED_MESSAGE } from "./chat-reducer";
-import type { AssistantReply, ChatMessage, ChatState } from "./chat-reducer";
+import type { AssistantReply, ChatMessage, ChatState, ReplyPart } from "./chat-reducer";
 
 /** sessionStorage key: the display copy of the chat, so a reload keeps it. Closing the tab forgets it. */
 export const CHAT_STORAGE_KEY = "sofiacity:assistant-chat";
@@ -25,6 +26,26 @@ const replyPartSchema = z.discriminatedUnion("kind", [
     items: z.array(assistantPropertyCardSchema),
     total: z.number().int().nonnegative(),
     catalogUrl: z.string(),
+  }),
+  z.object({
+    kind: z.literal("lead_card"),
+    proposalId: z.string().min(1),
+    prefill: z.object({ name: z.string().optional(), phone: z.string().optional() }),
+    summary: z.string(),
+    clientRequestId: z.string().min(1).nullable(),
+    submit: z
+      .discriminatedUnion("status", [
+        z.object({ status: z.literal("idle") }),
+        z.object({ status: z.literal("pending") }),
+        z.object({ status: z.literal("ok") }),
+        z.object({
+          status: z.literal("invalid"),
+          fieldErrors: z.partialRecord(z.enum(ASSISTANT_LEAD_FIELDS), z.string()),
+        }),
+        z.object({ status: z.literal("error"), message: z.string() }),
+      ])
+      // An unreadable state only loses the card's last result, not the chat.
+      .catch({ status: "idle" }),
   }),
 ]);
 
@@ -53,11 +74,21 @@ const storedChatSchema = z.object({
   messages: z.array(messageSchema),
 });
 
+/**
+ * A card that was sending when the page reloaded gets its button back. Sending again is safe: the
+ * same `clientRequestId` goes with it, so the server never saves a second lead.
+ */
+const settlePart = (part: ReplyPart): ReplyPart =>
+  part.kind === "lead_card" && part.submit.status === "pending" ? { ...part, submit: { status: "idle" } } : part;
+
 /** A reply the page was receiving when it reloaded can't continue: it becomes a retryable error. */
-const settle = (message: ChatMessage): ChatMessage =>
-  message.role === "assistant" && (message.state.status === "waiting" || message.state.status === "streaming")
-    ? { ...message, state: { status: "error", message: INTERRUPTED_MESSAGE } }
-    : message;
+const settle = (message: ChatMessage): ChatMessage => {
+  if (message.role !== "assistant") return message;
+  const settled = { ...message, parts: message.parts.map(settlePart) };
+  return settled.state.status === "waiting" || settled.state.status === "streaming"
+    ? { ...settled, state: { status: "error", message: INTERRUPTED_MESSAGE } }
+    : settled;
+};
 
 /** Stored JSON to chat state; anything malformed or foreign gives an empty chat. */
 export const parseStoredChat = (raw: string | null): ChatState => {

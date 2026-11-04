@@ -84,4 +84,47 @@ describe("fixture assistant", () => {
     expect(empty.text).toContain("немає");
     expect(empty.text).toContain("запит");
   });
+
+  describe("lead card", () => {
+    it("offers the card for a phone number and passes what it knows", async () => {
+      const { call, args, text } = await reply("Хочу купити 2-кімнатну квартиру до 80 000 $", "Мій номер 050 123 45 67");
+      expect(text).toBe("");
+      expect(call?.name).toBe("propose_lead");
+      expect(args).toMatchObject({
+        deal: "buy",
+        property_type: "flat",
+        rooms: ["2"],
+        budget: { to: 80000, currency: "USD" },
+        phone: "050 123 45 67",
+      });
+      expect((args as { summary: string }).summary).toContain("купити");
+    });
+
+    it("offers the card for request words", async () => {
+      expect((await reply("Залиште мою заявку")).call?.name).toBe("propose_lead");
+      expect((await reply("Передзвоніть мені")).call?.name).toBe("propose_lead");
+      expect((await reply("Зателефонуйте завтра")).call?.name).toBe("propose_lead");
+    });
+
+    it("offers the card for «так» only after search results", async () => {
+      expect((await reply("Так")).call).toBeUndefined();
+      const found = JSON.stringify({ total: 1, shown: 1, items: [{ title: "Квартира", price: "1 $" }] });
+      const afterResults = await run([
+        { role: "user", content: "Хочу купити квартиру" },
+        { role: "tool", toolCallId: "x", content: found },
+        { role: "assistant", content: "Є варіанти." },
+        { role: "user", content: "Так" },
+      ]);
+      expect(afterResults.call?.name).toBe("propose_lead");
+    });
+
+    it("says to check the card, not that the request is sent", async () => {
+      const done = await run([
+        { role: "user", content: "Залиште заявку" },
+        { role: "tool", toolCallId: "x", content: JSON.stringify({ status: "card_shown" }) },
+      ]);
+      expect(done.call).toBeUndefined();
+      expect(done.text).toBe("Перевірте дані в картці й натисніть «Надіслати».");
+    });
+  });
 });

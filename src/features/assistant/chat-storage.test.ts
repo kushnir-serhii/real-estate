@@ -117,6 +117,59 @@ describe("propertySlugFromPath", () => {
   });
 });
 
+const storedCard = (submit: unknown) =>
+  JSON.stringify({
+    conversationId: CONVERSATION,
+    messages: [
+      {
+        id: "r1",
+        role: "assistant",
+        parts: [
+          {
+            kind: "lead_card",
+            proposalId: "p1",
+            prefill: { phone: "+380671234567" },
+            summary: "Квартира",
+            clientRequestId: "req-1",
+            submit,
+          },
+        ],
+        prompt: "Так",
+        state: { status: "done" },
+      },
+    ],
+  });
+
+const restoredCard = (raw: string) => {
+  const message = parseStoredChat(raw).messages[0];
+  if (message?.role !== "assistant") throw new Error("no reply");
+  return message.parts[0];
+};
+
+describe("parseStoredChat: lead card", () => {
+  it("restores a card with its request id and result", () => {
+    expect(restoredCard(storedCard({ status: "invalid", fieldErrors: { phone: "Перевірте номер" } }))).toEqual({
+      kind: "lead_card",
+      proposalId: "p1",
+      prefill: { phone: "+380671234567" },
+      summary: "Квартира",
+      clientRequestId: "req-1",
+      submit: { status: "invalid", fieldErrors: { phone: "Перевірте номер" } },
+    });
+  });
+
+  it("gives a card that was sending its button back (the same request id makes a resend safe)", () => {
+    expect(restoredCard(storedCard({ status: "pending" }))).toMatchObject({
+      clientRequestId: "req-1",
+      submit: { status: "idle" },
+    });
+  });
+
+  it("keeps the chat when a card's result is unreadable", () => {
+    expect(restoredCard(storedCard({ status: "weird" }))).toMatchObject({ submit: { status: "idle" } });
+  });
+});
+
 describe("buildAssistantRequest", () => {
   it("sends the conversation id, page and property slug, never the history", () => {
     const request = buildAssistantRequest(

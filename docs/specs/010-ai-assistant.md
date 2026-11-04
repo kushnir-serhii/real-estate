@@ -47,15 +47,15 @@ New tables (admin-only, RLS on, no public policies, written by the service role)
   - [x] on a property page the assistant knows the property (prompt context from the server, published only)
   - [x] unit tests for the filter mapping; cards work at 375px with a missing photo
 
-### [ ] 3. FAQ + lead card → pipeline + transcript in the admin
+### [x] 3. FAQ + lead card → pipeline + transcript in the admin
 - **Build:** FAQ in the prompt from `src/constants/assistant.ts`; `propose_lead` tool (zod wishes, stored on the conversation, `lead_card` event); fixture offers the card; lead card UI (name, phone mask, email, summary, consent + `/privacy`, pending/success/error, announced); server action `submitAssistantLead` (zod, conversation must exist and have a proposal, honeypot, `createLead` kind `ai`, `lead_id` on the conversation, `after(deliverLead)`); `lead-delivery-content.ts` and `read-lead-wishes.ts` learn the AI fields (districts, rooms, budget, payment, timing, summary); admin lead detail shows the wishes and the transcript (or «переписку видалено»).
 - **Files:** `src/features/assistant/*`, `src/lib/llm/fixtures/*`, `src/features/leads/{lead-delivery-content,lead-delivery-content.test}.ts`, `src/features/admin/leads/*`, `src/app/admin/(panel)/leads/[id]/page.tsx`, `src/lib/db/assistant.ts`, `src/lib/db/admin-leads.ts`
 - **Agent:** backend → designer
 - **Accept:**
-  - [ ] a confirmed card creates one `ai` lead (double submit → one lead) with the structured payload from the server, not from the client
-  - [ ] no consent → nothing saved; the model can't create a lead without the card
-  - [ ] Plektan request and Telegram text carry the AI wishes; unit tests
-  - [ ] the admin lead page shows the wishes and the transcript; 375px
+  - [x] a confirmed card creates one `ai` lead (double submit → one lead) with the structured payload from the server, not from the client
+  - [x] no consent → nothing saved; the model can't create a lead without the card
+  - [x] Plektan request and Telegram text carry the AI wishes; unit tests
+  - [x] the admin lead page shows the wishes and the transcript; 375px
 
 ### [ ] 4. Limits, Turnstile, spend cap, cleanup
 - **Build:** migration `ai_usage` (month pk, input/output tokens, cost_usd) + an atomic increment function (service role only); Turnstile token with the first message (widget in the panel, invisible/managed; empty site key = no widget); IP rate limit (salted hash, `ASSISTANT_IP_SALT`), per-conversation and per-message caps, monthly budget check before calling the LLM; `limit` event → fallback UI (general request form + contacts); `POST /api/cron/assistant` (`CRON_SECRET`) deletes conversations older than 30 days; step in `.github/workflows/sync.yml`. Env vars in `.env.example` and `docs/setup.md`.
@@ -84,6 +84,8 @@ New tables (admin-only, RLS on, no public policies, written by the service role)
 - The search tool and the turn loop are tested separately (tool with injected data, loop with a mocked tool); no live run against a DB yet.
 - Chat cards use one `photo_url` (smallest R2 size) without `srcset`: may look soft on retina if that size is under ~192px.
 - On desktop the chat panel is modal (page dimmed behind it); make it non-modal if the client wants to browse beside the chat.
+- The same card submitted again with a new `client_request_id` (e.g. after a reload without the stored id) would make a second lead; mark the proposal as used if that matters.
+- The admin transcript (up to ~500 messages) has no pagination or collapsing; not seen visually yet (needs the local DB).
 - **Decided:** limits $20/month, 20 messages / 10 min per IP, 30 per conversation, 1000 chars; Turnstile once per conversation; widget on all public pages; property context on property pages; only our properties + FAQ, visitor's language (default Ukrainian).
 
 ## Log
@@ -92,3 +94,4 @@ New tables (admin-only, RLS on, no public policies, written by the service role)
 | 2026-10-29 | — | ready | Decisions recorded: OpenAI gpt-4o-mini, confirmation card, transcripts 30 days, default limits and widget. |
 | 2026-10-29 | 1 | done | OpenAI fetch client (SSE parse, tool-call deltas, usage, typed errors) + scripted fixture on empty key; migration `20261029150000_ai_assistant.sql` (`ai_conversations`, `ai_messages`, RLS, no public access), types regenerated from a throwaway Postgres; `src/constants/assistant.ts` (persona, FAQ mock); system prompt, `runAssistantTurn`, `POST /api/assistant` (NDJSON). Widget: lazy panel (Sheet), launcher above the property mobile bar, streaming, quick replies, error/limit states, sessionStorage. Files: `src/lib/llm/*`, `src/lib/db/assistant.ts`, `src/features/assistant/*`, `src/app/api/assistant/route.ts`, `src/app/(site)/layout.tsx`, `src/app/globals.css`, `src/components/layout/site-footer.tsx`, `src/features/property/property-mobile-bar.tsx`, `.env.example`, `docs/setup.md` |
 | 2026-10-29 | 2 | done | `search_properties` tool (zod args from the model, reuses `parseCatalogState` / `toPropertyFilters` / `catalogHref`, budget → USD, district match, max 5), tool loop (≤3 rounds, tool calls + results stored, history trimmed without orphans), fixture calls the tool; chat cards (parts-based reducer, storage migration, placeholder, catalog link, empty note, announced). `countObjects` moved to `src/lib/format/`. Files: `src/features/assistant/*`, `src/lib/llm/fixtures/*`, `src/lib/format/count-objects.ts`, `src/features/admin/{pages,settings}/*` (imports) |
+| 2026-11-04 | 3 | done | `propose_lead` tool (zod wishes, proposal stored on the conversation, `lead_card` event), prompt rules, fixture offers the card; `submitAssistantLead` (006 field rules, proposal must match, payload only from the server copy, `kind = ai`, `lead_id` on the conversation, `after(deliverLead)`); AI wishes in Telegram / `advert_info` / admin (`ai-wishes.ts`); `getLeadTranscript`. Chat card (reuses the 006 fields, pending/invalid/error/ok, stale older card, stored), admin: AI wish facts + «Переписка з асистентом» (deleted / error with retry). Honeypot id via `useId`. Backend code committed by the user as `ec6dfb9`. Files: `src/features/assistant/*`, `src/features/leads/*`, `src/features/admin/leads/*`, `src/app/admin/(panel)/leads/[id]/page.tsx`, `src/lib/db/assistant.ts`, `src/lib/llm/fixtures/*` |

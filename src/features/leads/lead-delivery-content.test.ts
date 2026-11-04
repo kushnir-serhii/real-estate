@@ -33,6 +33,56 @@ const lead = (over: Partial<LeadForDelivery> = {}): LeadForDelivery => ({
   ...over,
 });
 
+describe("AI lead wishes", () => {
+  const aiLead = lead({
+    kind: "ai",
+    property: null,
+    payload: {
+      deal: "buy",
+      property_type: "flat",
+      districts: ["Печерський", "Оболонь"],
+      rooms: ["2", "3"],
+      budget: { from: 50000, to: 80000, currency: "USD" },
+      payment: "mortgage",
+      timing: "за місяць",
+      summary: "Хоче <2к> біля метро",
+    },
+  });
+
+  it("adds districts, rooms, budget, payment, timing and the summary to the Telegram text (escaped)", () => {
+    const text = buildTelegramText(aiLead, SITE);
+    expect(text).toContain("Побажання: Купити, Квартира");
+    expect(text).toContain("Райони: Печерський, Оболонь");
+    expect(text).toContain("Кімнат: 2, 3");
+    expect(text).toContain("Бюджет: від 50 000 до 80 000 $");
+    expect(text).toContain("Оплата: Іпотека");
+    expect(text).toContain("Терміни: за місяць");
+    expect(text).toContain("Суть запиту: Хоче &lt;2к&gt; біля метро");
+  });
+
+  it("adds them to the Plektan advert_info and keeps the deal / type mapping", () => {
+    const params = buildPlektanRequest(aiLead, SITE);
+    expect(params).toMatchObject({ deal: "buy", property: "flat", prop_kind: PROP_KINDS_BY_PROPERTY.flat });
+    const info = buildAdvertInfo(aiLead, SITE);
+    expect(info).toContain("Райони: Печерський, Оболонь");
+    expect(info).toContain("Бюджет: від 50 000 до 80 000 $");
+    expect(info).toContain("Оплата: Іпотека");
+    expect(buildAdvertInfo(lead({ kind: "ai", property: null, payload: { payment: "cash", budget: { to: 3000000, currency: "UAH" } } }), SITE)).toBe(
+      "Бюджет: до 3 000 000 грн\nОплата: Готівка",
+    );
+  });
+
+  it("drops only the malformed wish", () => {
+    const info = buildAdvertInfo(
+      lead({ kind: "ai", property: null, payload: { deal: "rent", payment: "crypto", districts: ["Центр"], budget: "много" } }),
+      SITE,
+    );
+    expect(info).toContain("Райони: Центр");
+    expect(info).not.toContain("Оплата");
+    expect(info).not.toContain("Бюджет");
+  });
+});
+
 describe("buildPlektanRequest", () => {
   it("sends a quick request for a Plektan property with an email", () => {
     const params = buildPlektanRequest(lead({ email: "a@b.ua" }), SITE);

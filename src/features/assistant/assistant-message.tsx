@@ -6,6 +6,7 @@ import { SheetClose } from "@/components/ui/sheet";
 import { ASSISTANT_PERSONA } from "@/constants/assistant";
 import { CONTACTS } from "@/constants/contacts";
 import { AssistantBubble } from "./assistant-bubble";
+import { AssistantLeadCard } from "./assistant-lead-card";
 import { AssistantPropertyResults } from "./assistant-property-results";
 import { AssistantTypingIndicator } from "./assistant-typing-indicator";
 import type { AssistantReply, ChatMessage, ReplyPart } from "./chat-reducer";
@@ -15,6 +16,8 @@ type AssistantMessageProps = {
   onRetry: (replyId: string) => void;
   /** The visitor follows a property link from the chat. */
   onNavigate?: () => void;
+  /** The newest lead card in the chat; older unsent ones are stale. */
+  latestCardId?: string | null;
 };
 
 const LimitNotice = () => (
@@ -42,7 +45,7 @@ const TypingBubble = () => (
   </AssistantBubble>
 );
 
-const renderPart = (part: ReplyPart, index: number, onNavigate?: () => void) => {
+const renderPart = (part: ReplyPart, index: number, latestCardId: string | null, onNavigate?: () => void) => {
   switch (part.kind) {
     case "text":
       return (
@@ -55,6 +58,10 @@ const renderPart = (part: ReplyPart, index: number, onNavigate?: () => void) => 
       );
     case "properties":
       return <AssistantPropertyResults key={index} part={part} onNavigate={onNavigate} />;
+    case "lead_card":
+      return (
+        <AssistantLeadCard key={part.proposalId} card={part} superseded={part.proposalId !== latestCardId} />
+      );
     default: {
       const unreachable: never = part;
       return unreachable;
@@ -66,11 +73,12 @@ type ReplyBodyProps = {
   reply: AssistantReply;
   onRetry: (replyId: string) => void;
   onNavigate?: () => void;
+  latestCardId: string | null;
 };
 
 /** The reply's parts in arrival order (results, then the text about them), then its state. */
-const ReplyBody = ({ reply, onRetry, onNavigate }: ReplyBodyProps) => {
-  const parts = reply.parts.map((part, index) => renderPart(part, index, onNavigate));
+const ReplyBody = ({ reply, onRetry, onNavigate, latestCardId }: ReplyBodyProps) => {
+  const parts = reply.parts.map((part, index) => renderPart(part, index, latestCardId, onNavigate));
 
   switch (reply.state.status) {
     case "waiting":
@@ -114,7 +122,7 @@ const ReplyBody = ({ reply, onRetry, onNavigate }: ReplyBodyProps) => {
   }
 };
 
-export const AssistantMessage = ({ message, onRetry, onNavigate }: AssistantMessageProps) => (
+export const AssistantMessage = ({ message, onRetry, onNavigate, latestCardId = null }: AssistantMessageProps) => (
   <li className="flex flex-col gap-2">
     {message.role === "user" ? (
       <AssistantBubble from="user">
@@ -122,7 +130,7 @@ export const AssistantMessage = ({ message, onRetry, onNavigate }: AssistantMess
         {message.text}
       </AssistantBubble>
     ) : (
-      <ReplyBody reply={message} onRetry={onRetry} onNavigate={onNavigate} />
+      <ReplyBody reply={message} onRetry={onRetry} onNavigate={onNavigate} latestCardId={latestCardId} />
     )}
   </li>
 );

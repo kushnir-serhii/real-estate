@@ -12,15 +12,18 @@ import { formatPhoneInput } from "./phone";
 
 type LeadFormFieldsProps = {
   errors: Partial<Record<LeadField, string>>;
-  messagePlaceholder: string;
+  /** Shows the optional message field with this hint; without it there is no message field (the chat's lead card). */
+  messagePlaceholder?: string;
+  /** Starting values the visitor can change (the chat's lead card fills in what they told the assistant). */
+  defaultValues?: { name?: string; phone?: string };
 };
 
 const OPTIONAL = <span className="font-normal text-muted-foreground">(необов&apos;язково)</span>;
 
 /** Name, phone (masked), optional email and message. Uncontrolled except the phone mask; never reset by the form. */
-export const LeadFormFields = ({ errors, messagePlaceholder }: LeadFormFieldsProps) => {
+export const LeadFormFields = ({ errors, messagePlaceholder, defaultValues }: LeadFormFieldsProps) => {
   const id = useId();
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState(() => formatPhoneInput(defaultValues?.phone ?? ""));
   const ids = {
     name: `${id}-name`,
     phone: `${id}-phone`,
@@ -42,6 +45,7 @@ export const LeadFormFields = ({ errors, messagePlaceholder }: LeadFormFieldsPro
             name="name"
             autoComplete="name"
             maxLength={LEAD_LIMITS.name}
+            defaultValue={defaultValues?.name}
             {...errorProps("name")}
           />
           <FieldError id={`${ids.name}-error`} message={errors.name} />
@@ -76,19 +80,21 @@ export const LeadFormFields = ({ errors, messagePlaceholder }: LeadFormFieldsPro
         />
         <FieldError id={`${ids.email}-error`} message={errors.email} />
       </div>
-      <div className="flex min-w-0 flex-col gap-2">
-        <Label htmlFor={ids.message}>Повідомлення {OPTIONAL}</Label>
-        <Textarea
-          id={ids.message}
-          name="message"
-          rows={3}
-          maxLength={LEAD_LIMITS.message}
-          placeholder={messagePlaceholder}
-          className="min-h-24"
-          {...errorProps("message")}
-        />
-        <FieldError id={`${ids.message}-error`} message={errors.message} />
-      </div>
+      {messagePlaceholder !== undefined && (
+        <div className="flex min-w-0 flex-col gap-2">
+          <Label htmlFor={ids.message}>Повідомлення {OPTIONAL}</Label>
+          <Textarea
+            id={ids.message}
+            name="message"
+            rows={3}
+            maxLength={LEAD_LIMITS.message}
+            placeholder={messagePlaceholder}
+            className="min-h-24"
+            {...errorProps("message")}
+          />
+          <FieldError id={`${ids.message}-error`} message={errors.message} />
+        </div>
+      )}
     </>
   );
 };

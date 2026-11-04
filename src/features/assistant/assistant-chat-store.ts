@@ -1,8 +1,12 @@
 import { useSyncExternalStore } from "react";
 
+import { newRequestId } from "@/features/leads/new-request-id";
+import { submitAssistantLead } from "./actions";
 import { ASSISTANT_MESSAGE_MAX_LENGTH } from "./assistant-events";
 import type { AssistantRequestInput } from "./assistant-events";
-import { activeReply, chatReducer, INITIAL_CHAT_STATE } from "./chat-reducer";
+import { ASSISTANT_LEAD_MESSAGES } from "./assistant-lead-state";
+import type { AssistantLeadState } from "./assistant-lead-state";
+import { activeReply, chatReducer, findLeadCard, INITIAL_CHAT_STATE } from "./chat-reducer";
 import type { ChatAction, ChatState } from "./chat-reducer";
 import { readStoredChat, writeStoredChat } from "./chat-storage";
 import { propertySlugFromPath } from "./property-path";
@@ -96,6 +100,46 @@ export const retryChatReply = (failedId: string) => {
   const replyId = newId();
   dispatch({ type: "retry", failedId, replyId });
   void runTurn(replyId, failed.prompt);
+};
+
+/** What the visitor typed into a lead card. The wishes are not sent: the server has its own copy. */
+export type LeadCardFields = { name: string; phone: string; email: string; consent: boolean; honeypot: string };
+
+const LEAD_NETWORK_ERROR = "Не вдалося надіслати заявку. Перевірте інтернет і спробуйте ще раз.";
+
+/**
+ * Sends one lead card through the server action. The card's request id is made once and reused on
+ * every retry, so a double tap or a retry after a lost answer still gives one lead.
+ */
+export const submitLeadCard = async (proposalId: string, fields: LeadCardFields): Promise<void> => {
+  ensureLoaded();
+  const card = findLeadCard(state, proposalId);
+  if (!card || card.submit.status === "pending" || card.submit.status === "ok") return;
+  const clientRequestId = card.clientRequestId ?? newRequestId();
+  const conversationId = state.conversationId;
+  dispatch({ type: "lead_submit", proposalId, clientRequestId });
+
+  let result: AssistantLeadState;
+  if (conversationId === null) {
+    result = { status: "error", message: ASSISTANT_LEAD_MESSAGES.stale };
+  } else {
+    try {
+      result = await submitAssistantLead({
+        conversation_id: conversationId,
+        proposal_id: proposalId,
+        client_request_id: clientRequestId,
+        name: fields.name,
+        phone: fields.phone,
+        email: fields.email.trim() === "" ? undefined : fields.email,
+        consent: fields.consent,
+        honeypot: fields.honeypot,
+      });
+    } catch {
+      // A dropped connection rejects the action: shown as a retryable error, the input stays.
+      result = { status: "error", message: LEAD_NETWORK_ERROR };
+    }
+  }
+  dispatch({ type: "lead_result", proposalId, result });
 };
 
 /** «Нова розмова»: stops the reply in progress and forgets the conversation id and the messages. */

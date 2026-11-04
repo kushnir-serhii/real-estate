@@ -16,6 +16,35 @@ describe("readLeadWishes", () => {
     });
   });
 
+  it("reads the AI wishes", () => {
+    expect(
+      readLeadWishes({
+        deal: "buy",
+        districts: ["Печерський"],
+        rooms: ["2"],
+        budget: { to: 80000, currency: "EUR" },
+        payment: "cash",
+        timing: "за місяць",
+        summary: "Хоче квартиру",
+        conversation_id: "x",
+      }),
+    ).toEqual({
+      deal: "buy",
+      districts: ["Печерський"],
+      rooms: ["2"],
+      budget: { to: 80000, currency: "EUR" },
+      payment: "cash",
+      timing: "за місяць",
+      summary: "Хоче квартиру",
+    });
+  });
+
+  it("is lenient per AI field", () => {
+    expect(
+      readLeadWishes({ districts: "Центр", rooms: ["2"], budget: { currency: "USD" }, payment: "unknown", timing: 5 }),
+    ).toEqual({ rooms: ["2"] });
+  });
+
   it("treats null and non-objects as no wishes", () => {
     expect(readLeadWishes(null)).toEqual({});
     expect(readLeadWishes([1, 2])).toEqual({});

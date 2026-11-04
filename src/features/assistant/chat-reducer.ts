@@ -1,5 +1,6 @@
 import { ASSISTANT_ERROR_MESSAGE } from "@/constants/assistant";
 import type { AssistantEvent, AssistantLimitReason, AssistantPropertyCard } from "./assistant-events";
+import type { AssistantLeadField, AssistantLeadState } from "./assistant-lead-state";
 
 /** Display copy of the chat on the client. The server keeps the real history (spec 010). */
 
@@ -17,7 +18,26 @@ export type UserMessage = { id: string; role: "user"; text: string };
 /** One piece of a reply, in the order it arrived: property results come before the text about them. */
 export type TextPart = { kind: "text"; text: string };
 export type PropertiesPart = { kind: "properties"; items: AssistantPropertyCard[]; total: number; catalogUrl: string };
-export type ReplyPart = TextPart | PropertiesPart;
+
+/** Where the visitor is with one lead card. `invalid` / `error` keep the card open for a fix or a retry. */
+export type LeadCardSubmit =
+  | { status: "idle" }
+  | { status: "pending" }
+  | { status: "ok" }
+  | { status: "invalid"; fieldErrors: Partial<Record<AssistantLeadField, string>> }
+  | { status: "error"; message: string };
+
+export type LeadCardPart = {
+  kind: "lead_card";
+  proposalId: string;
+  prefill: { name?: string; phone?: string };
+  summary: string;
+  /** Made on the first submit and reused for every retry of this card: the server saves one lead. */
+  clientRequestId: string | null;
+  submit: LeadCardSubmit;
+};
+
+export type ReplyPart = TextPart | PropertiesPart | LeadCardPart;
 
 export type AssistantReply = {
   id: string;
@@ -42,7 +62,11 @@ export type ChatAction =
   /** Network failure, non-OK response, or the stream ended without `done`. */
   | { type: "fail"; replyId: string; message?: string }
   | { type: "reset" }
-  | { type: "restore"; state: ChatState };
+  | { type: "restore"; state: ChatState }
+  /** The visitor sends a lead card (first try or a retry). Ignored while it is pending or already sent. */
+  | { type: "lead_submit"; proposalId: string; clientRequestId: string }
+  /** The server action's answer for that card. */
+  | { type: "lead_result"; proposalId: string; result: AssistantLeadState };
 
 export const INITIAL_CHAT_STATE: ChatState = { conversationId: null, messages: [] };
 
@@ -63,7 +87,55 @@ const appendText = (parts: ReplyPart[], delta: string): ReplyPart[] => {
 };
 
 const hasContent = (reply: AssistantReply): boolean =>
-  reply.parts.some((part) => part.kind === "properties" || part.text.trim() !== "");
+  reply.parts.some((part) => part.kind !== "text" || part.text.trim() !== "");
+
+/** Every lead card in the chat, oldest first. */
+const leadCards = (messages: readonly ChatMessage[]): LeadCardPart[] =>
+  messages.flatMap((message) =>
+    message.role === "assistant" ? message.parts.filter((part): part is LeadCardPart => part.kind === "lead_card") : [],
+  );
+
+export const findLeadCard = (state: ChatState, proposalId: string): LeadCardPart | null =>
+  leadCards(state.messages).find((card) => card.proposalId === proposalId) ?? null;
+
+/** The newest card: older cards that weren't sent are stale (the server keeps only the newest proposal). */
+export const latestLeadCardId = (messages: readonly ChatMessage[]): string | null =>
+  leadCards(messages).at(-1)?.proposalId ?? null;
+
+/** Updates one card wherever it is; finished replies included (the card is filled in after the turn ends). */
+const updateLeadCard = (
+  state: ChatState,
+  proposalId: string,
+  update: (card: LeadCardPart) => LeadCardPart,
+): ChatState => {
+  let changed = false;
+  const messages = state.messages.map((message) => {
+    if (message.role !== "assistant") return message;
+    const parts = message.parts.map((part) => {
+      if (part.kind !== "lead_card" || part.proposalId !== proposalId) return part;
+      const next = update(part);
+      if (next !== part) changed = true;
+      return next;
+    });
+    return parts.some((part, index) => part !== message.parts[index]) ? { ...message, parts } : message;
+  });
+  return changed ? { ...state, messages } : state;
+};
+
+const toSubmit = (result: AssistantLeadState): LeadCardSubmit => {
+  switch (result.status) {
+    case "ok":
+      return { status: "ok" };
+    case "invalid":
+      return { status: "invalid", fieldErrors: result.fieldErrors };
+    case "error":
+      return { status: "error", message: result.message };
+    default: {
+      const unreachable: never = result;
+      return unreachable;
+    }
+  }
+};
 
 const isOpen = (state: ReplyState) => state.status === "waiting" || state.status === "streaming";
 
@@ -132,8 +204,23 @@ const applyEvent = (state: ChatState, replyId: string, event: AssistantEvent): C
         state: { status: "streaming" },
       }));
     case "lead_card":
-      // The lead card (slice 3) is added to the reply here.
-      return state;
+      // A repeated event for the same proposal doesn't add a second card.
+      if (findLeadCard(state, event.proposal_id)) return state;
+      return updateOpenReply(state, replyId, (reply) => ({
+        ...reply,
+        parts: [
+          ...reply.parts,
+          {
+            kind: "lead_card",
+            proposalId: event.proposal_id,
+            prefill: event.prefill,
+            summary: event.summary,
+            clientRequestId: null,
+            submit: { status: "idle" },
+          },
+        ],
+        state: { status: "streaming" },
+      }));
     default: {
       const unreachable: never = event;
       return unreachable;
@@ -173,6 +260,16 @@ export const chatReducer = (state: ChatState, action: ChatAction): ChatState => 
       return INITIAL_CHAT_STATE;
     case "restore":
       return action.state;
+    case "lead_submit":
+      return updateLeadCard(state, action.proposalId, (card) =>
+        card.submit.status === "pending" || card.submit.status === "ok"
+          ? card
+          : { ...card, clientRequestId: card.clientRequestId ?? action.clientRequestId, submit: { status: "pending" } },
+      );
+    case "lead_result":
+      return updateLeadCard(state, action.proposalId, (card) =>
+        card.submit.status === "pending" ? { ...card, submit: toSubmit(action.result) } : card,
+      );
     default: {
       const unreachable: never = action;
       return unreachable;
