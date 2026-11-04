@@ -72,13 +72,14 @@ The project is a pet project / template right now: no Supabase, Cloudflare, Plek
   - [ ] `leaflet` is gone from `package.json` and the bundle; the property page JS gets smaller (number in the log)
 
 ### [ ] 5. Neutral demo brand + template guide
-- **Build:** the fictional agency **7 SKY** in `src/constants/{brand,contacts,home,pages,assistant}.ts` (name, tagline, phones `+380 00 000 00 0X`, emails `@example.com`, address, socials as `#` or example handles), new logo mark, favicon, `public/og-default.png` (1200×630, generated locally, no external images) and listing / agent texts in `src/lib/demo/seed/`; replace «Sofiacity» everywhere in UI copy, fixtures, tests, `site-url.ts` examples and `localStorage` / `sessionStorage` key prefixes (a stored key rename must not crash older stored values). `docs/template.md`: start a new project in steps (brand constants, colours / tokens, mock data, which services to connect and in what order, links to `docs/setup.md`).
-- **Files:** `src/constants/*`, `src/app/{favicon.ico,layout.tsx,admin/layout.tsx}`, `public/og-default.png`, `src/lib/demo/seed/*`, `src/lib/plektan/fixtures/data.ts`, `src/lib/theme.ts`, `src/features/{favorites,assistant}/*storage*.ts`, tests that assert the brand, `docs/template.md`
+- **Build:** the fictional agency **7 SKY** in `src/constants/{brand,contacts,home,pages,assistant}.ts` (name, tagline, phones `+380 00 000 00 0X`, emails `@example.com`, address, socials as `#` or example handles); the logo from the given mark `public/brand/7sky-mark.svg` (cloud outline with buildings, stroke-only, `currentColor`): `Logo` renders it inline (so it follows the theme colour) next to the «7 SKY» wordmark in the header and footer, the mark alone below ~360px if the header gets tight; the mark's geometry may be tuned (stroke weight, spacing) but not redrawn; favicon (`icon.svg` + `favicon.ico` from the mark, readable at 16px), `public/og-default.png` (1200×630, generated locally, no external images) and listing / agent texts in `src/lib/demo/seed/`; replace «Sofiacity» everywhere in UI copy, fixtures, tests, `site-url.ts` examples and `localStorage` / `sessionStorage` key prefixes (a stored key rename must not crash older stored values). `docs/template.md`: start a new project in steps (brand constants, colours / tokens, mock data, which services to connect and in what order, links to `docs/setup.md`).
+- **Files:** `src/constants/*`, `public/brand/7sky-mark.svg`, `src/components/layout/logo.tsx`, `src/app/{favicon.ico,icon.svg,layout.tsx,admin/layout.tsx}`, `public/og-default.png`, `src/lib/demo/seed/*`, `src/lib/plektan/fixtures/data.ts`, `src/lib/theme.ts`, `src/features/{favorites,assistant}/*storage*.ts`, tests that assert the brand, `docs/template.md`
 - **Agent:** designer · **Model:** sonnet (text replacement in tests and fixtures: haiku)
 - **Accept:**
   - [ ] the site, admin, SEO metadata and the assistant persona say «7 SKY»
   - [ ] `grep -ri sofiacity src public` finds nothing (docs keep the history)
-  - [ ] logo, favicon and OG image fit the existing design tokens in both themes
+  - [ ] the header, footer and admin show the 7 SKY mark + wordmark; logo, favicon and OG image fit the existing design tokens in both themes; the link keeps its `aria-label`, 44px target and focus ring
+  - [ ] the user reviews the logo in the header (375px, 1280px, light and dark) before the slice is committed
   - [ ] a new person can follow `docs/template.md` to rename the brand without searching the code
 
 ### [ ] 6. Speed baseline
@@ -106,7 +107,7 @@ The project is a pet project / template right now: no Supabase, Cloudflare, Plek
 - Later, the real launch: `docs/setup.md` → «Leaving demo mode».
 
 ## Open questions
-- **Decided:** the demo brand is **7 SKY** (name in `BRAND`; colours and logo mark proposed by the designer in slice 5 on the existing tokens).
+- **Decided:** the demo brand is **7 SKY** (name in `BRAND`; logo mark given by the user: `public/brand/7sky-mark.svg`; colours proposed by the designer in slice 5 on the existing tokens).
 - **Decided:** Cloudflare isn't connected; the demo data is hardcoded mock data in the repo (`src/lib/demo/seed/`), held in memory at runtime. Per-isolate behaviour on Workers is accepted as is (the banner says edits reset); no extra work for it.
 - **Decided:** mock data, no Supabase / Cloudflare connected now · public demo with an open admin (one-click demo sign-in) · maps fully offline (static SVG map, Leaflet removed) · neutral demo brand, Plektan badge local and shown only with the integration on · in-memory demo store (no persistence).
 
