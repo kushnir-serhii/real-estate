@@ -1,7 +1,8 @@
 import "server-only";
 import { DEFAULT_PAGES, PAGE_SLUGS } from "@/constants/pages";
 import type { PageContent, PageSlug } from "@/constants/pages";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { isDemoMode } from "@/lib/data-driver";
+import type { AdminPagesDriver } from "./driver-types";
 import type { Page } from "./pages";
 
 /**
@@ -30,13 +31,14 @@ const toContent = (row: Page): PageContent => ({
   is_draft: row.is_draft,
 });
 
+const loadDriver = async (): Promise<AdminPagesDriver> =>
+  isDemoMode()
+    ? (await import("@/lib/demo/db/admin-pages")).demoAdminPagesDriver
+    : (await import("@/lib/db/supabase/admin-pages")).supabaseAdminPagesDriver;
+
 /** The four pages in the fixed order, each from its row or the default. */
 export const listAdminPages = async (): Promise<AdminPageListItem[]> => {
-  const { data, error } = await createAdminClient()
-    .from("pages")
-    .select("slug, title, noindex, is_draft, updated_at")
-    .in("slug", [...PAGE_SLUGS]);
-  if (error) throw new Error(`listAdminPages failed: ${error.message}`);
+  const data = await (await loadDriver()).fetchPageRows(PAGE_SLUGS);
 
   return PAGE_SLUGS.map((slug): AdminPageListItem => {
     const row = data.find((r) => r.slug === slug);
@@ -51,22 +53,14 @@ export const listAdminPages = async (): Promise<AdminPageListItem[]> => {
 
 /** One page: the saved row or the default. */
 export const getAdminPage = async (slug: PageSlug): Promise<AdminPage> => {
-  const { data, error } = await createAdminClient().from("pages").select("*").eq("slug", slug).maybeSingle();
-  if (error) throw new Error(`getAdminPage failed: ${error.message}`);
+  const data = await (await loadDriver()).fetchPageRow(slug);
   if (!data) return { slug, content: DEFAULT_PAGES[slug], state: "default", updated_at: null };
   return { slug, content: toContent(data), state: "custom", updated_at: data.updated_at };
 };
 
 /** Creates the row on the first save, updates it afterwards (`updated_at` comes from the trigger on update). */
-export const saveAdminPage = async (slug: PageSlug, content: PageContent): Promise<void> => {
-  const { error } = await createAdminClient()
-    .from("pages")
-    .upsert({ slug, ...content }, { onConflict: "slug" });
-  if (error) throw new Error(`saveAdminPage failed: ${error.message}`);
-};
+export const saveAdminPage = async (slug: PageSlug, content: PageContent): Promise<void> =>
+  (await loadDriver()).upsertPage(slug, content);
 
 /** Back to the built-in text: deletes the row. */
-export const resetAdminPage = async (slug: PageSlug): Promise<void> => {
-  const { error } = await createAdminClient().from("pages").delete().eq("slug", slug);
-  if (error) throw new Error(`resetAdminPage failed: ${error.message}`);
-};
+export const resetAdminPage = async (slug: PageSlug): Promise<void> => (await loadDriver()).deletePage(slug);

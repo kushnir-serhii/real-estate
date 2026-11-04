@@ -1,3 +1,18 @@
+import type { PageContent } from "@/constants/pages";
+import type { PropertySeoValues } from "@/features/admin/properties/property-form-schema";
+import type { AdminLeadFilters } from "./admin-lead-filters";
+import type { AdminLeadDetail, AdminLeadPage } from "./admin-leads";
+import type {
+  AdminProperty,
+  AdminPropertyPage,
+  PropertySlugResult,
+  PropertyWriteColumns,
+  DeleteAdminDraftResult,
+  SourceSwitchCounts,
+} from "./admin-properties";
+import type { AdminPropertyFilters } from "./admin-property-filters";
+import type { NewPhotoRow, PhotoWriteResult, StoredPhotoRow } from "./admin-property-photos";
+import type { PropertiesMode } from "./property-permissions";
 import type { Agent } from "./agents";
 import type {
   AiConversation,
@@ -93,4 +108,63 @@ export type AssistantDriver = {
   setConversationLead: (conversationId: string, leadId: string) => Promise<void>;
   /** The newest conversation linked to the lead, or null (cleaned up). */
   findLeadConversationId: (leadId: string) => Promise<string | null>;
+};
+
+/** Admin reads of leads (spec 007). Service-role / admin-session access only; the caller ran `requireAdmin()`. */
+export type AdminLeadsDriver = {
+  fetchAdminLeads: (filters: AdminLeadFilters) => Promise<AdminLeadPage>;
+  /** `id` is a valid uuid. */
+  fetchAdminLead: (id: string) => Promise<AdminLeadDetail | null>;
+};
+
+/** Static pages for the admin (spec 009): raw rows; the facade adds the built-in defaults. */
+export type AdminPagesDriver = {
+  fetchPageRows: (slugs: readonly string[]) => Promise<Page[]>;
+  fetchPageRow: (slug: string) => Promise<Page | null>;
+  upsertPage: (slug: string, content: PageContent) => Promise<void>;
+  deletePage: (slug: string) => Promise<void>;
+};
+
+/** Photo rows of the admin (spec 008). Positions are 0..n-1, the cover is 0. */
+export type AdminPropertyPhotosDriver = {
+  countPhotos: (propertyId: string) => Promise<number>;
+  appendPhoto: (propertyId: string, photo: NewPhotoRow) => Promise<StoredPhotoRow>;
+  reorderPropertyPhotos: (propertyId: string, orderedIds: readonly string[]) => Promise<PhotoWriteResult>;
+  deletePropertyPhoto: (propertyId: string, photoId: string) => Promise<PhotoWriteResult>;
+};
+
+/** Admin properties (spec 008): storage only. Geocoding, price derivation and the slug rule live in the facade. */
+export type AdminPropertiesDriver = {
+  fetchAdminProperties: (filters: AdminPropertyFilters) => Promise<AdminPropertyPage>;
+  fetchSourceSwitchCounts: () => Promise<SourceSwitchCounts>;
+  setPropertiesSource: (mode: PropertiesMode) => Promise<void>;
+  saveExchangeRates: (rates: ExchangeRates) => Promise<{ recomputed: number }>;
+  /** `id` is a valid uuid. */
+  fetchAdminProperty: (id: string) => Promise<AdminProperty | null>;
+  fetchActiveAgentOptions: () => Promise<{ id: string; name: string }[]>;
+  agentExists: (agentId: string) => Promise<boolean>;
+  /** New row: `source = 'admin'`, `status = 'hidden'` (a draft). */
+  insertProperty: (
+    columns: PropertyWriteColumns,
+    slug: string,
+  ) => Promise<{ ok: true; id: string; slug: string } | { ok: false; reason: "slug_taken" }>;
+  updateProperty: (
+    id: string,
+    columns: PropertyWriteColumns,
+    slug: string,
+  ) => Promise<{ ok: true; slug: string } | { ok: false; reason: "slug_taken" | "not_found" }>;
+  updatePropertySeo: (id: string, seo: PropertySeoValues) => Promise<PropertySlugResult>;
+  fetchPublishFields: (id: string) => Promise<PublishFields | null>;
+  setPublished: (id: string, publishedAt: string) => Promise<void>;
+  hideProperty: (id: string) => Promise<PropertySlugResult>;
+  deleteDraft: (id: string) => Promise<DeleteAdminDraftResult>;
+};
+
+export type PublishFields = {
+  slug: string;
+  title: string;
+  deal: AdminProperty["deal"];
+  property_type: AdminProperty["property_type"];
+  locality: string | null;
+  published_at: string | null;
 };

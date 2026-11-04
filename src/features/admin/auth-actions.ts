@@ -1,8 +1,10 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { getSupabasePublicEnvOrNull } from "@/lib/supabase/env";
+import { hasPublicData, isDemoMode } from "@/lib/data-driver";
+import { DEMO_COOKIE_NAME, DEMO_SESSION_MAX_AGE_S, signDemoSession } from "@/lib/demo/session";
 import { createClient } from "@/lib/supabase/server";
 import type { SignInState } from "./sign-in-state";
 
@@ -25,7 +27,10 @@ export const signIn = async (_prev: SignInState, formData: FormData): Promise<Si
   const rawEmail = formData.get("email");
   const email = typeof rawEmail === "string" ? rawEmail.trim().slice(0, 320) : "";
 
-  if (!getSupabasePublicEnvOrNull()) {
+  if (isDemoMode()) {
+    return { status: "error", email, message: "У демо-режимі пароль не потрібен: натисніть «Увійти як демо-адміністратор»." };
+  }
+  if (!hasPublicData()) {
     return { status: "error", email, message: "Вхід зараз недоступний: адмінку ще не підключено до бази даних." };
   }
 
@@ -50,8 +55,23 @@ export const signIn = async (_prev: SignInState, formData: FormData): Promise<Si
   redirect(safeNext(formData.get("next")));
 };
 
+/** One click, no password: sets the signed demo cookie. Only on the demo driver; elsewhere it goes back to sign-in. */
+export const signInDemo = async (formData: FormData): Promise<void> => {
+  if (!isDemoMode()) redirect("/admin/sign-in");
+  (await cookies()).set(DEMO_COOKIE_NAME, await signDemoSession(), {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: DEMO_SESSION_MAX_AGE_S,
+  });
+  redirect(safeNext(formData.get("next")));
+};
+
 export const signOut = async (): Promise<void> => {
-  if (getSupabasePublicEnvOrNull()) {
+  if (isDemoMode()) {
+    (await cookies()).delete(DEMO_COOKIE_NAME);
+  } else if (hasPublicData()) {
     const supabase = await createClient();
     await supabase.auth.signOut();
   }

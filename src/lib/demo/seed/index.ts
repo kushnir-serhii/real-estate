@@ -1,4 +1,5 @@
 import type { Database } from "@/lib/supabase/database.types";
+import { DEMO_ADMIN } from "../session";
 import type { DemoData } from "../store";
 import { SEED_AGENT_KEYS, SEED_AGENTS } from "./agents";
 import { buildSeedLeads } from "./leads";
@@ -89,7 +90,7 @@ export const buildDemoSeed = (now: number): DemoData => {
     ai_messages: sampleLeads.ai_messages,
     ai_usage: [],
     admins: [
-      { user_id: "00000000-0000-4000-8000-0000000000b1", email: "admin@sofiacity.local", created_at: nowIso },
+      { user_id: DEMO_ADMIN.userId, email: DEMO_ADMIN.email, created_at: nowIso },
     ],
   };
 };

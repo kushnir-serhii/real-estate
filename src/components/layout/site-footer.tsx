@@ -6,6 +6,7 @@ import { MessengerLinks } from "@/components/layout/messenger-links";
 import { PlektanButton } from "@/components/layout/plektan-button";
 import { BRAND } from "@/constants/brand";
 import { CONTACTS } from "@/constants/contacts";
+import { isDemoMode } from "@/lib/data-driver";
 
 const LINK_CLASS =
   "inline-flex min-h-11 items-center gap-2 rounded-md text-sm text-foreground outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50";
@@ -78,6 +79,9 @@ export const SiteFooter = () => {
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} {BRAND.name}
           </p>
+          {isDemoMode() ? (
+            <p className="text-xs text-muted-foreground">Демо-режим: дані тестові, зміни скидаються</p>
+          ) : null}
           <Link href="/privacy" className={LINK_CLASS}>
             Політика конфіденційності
           </Link>
