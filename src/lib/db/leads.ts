@@ -1,10 +1,10 @@
 import "server-only";
 import { z } from "zod";
-import { createAdminClient } from "@/lib/supabase/admin";
+import type { LeadsDriver } from "./driver-types";
+import { isDemoMode } from "@/lib/data-driver";
 import type { Database } from "@/lib/supabase/database.types";
 
 type Enums = Database["public"]["Enums"];
-type LeadInsert = Database["public"]["Tables"]["leads"]["Insert"];
 
 export const LEAD_KINDS = ["property_request", "general", "ai"] as const satisfies readonly Enums["lead_kind"][];
 export const DELIVERY_STATUSES = [
@@ -36,39 +36,21 @@ export const createLeadSchema = z.object({
 });
 
 export type CreateLeadInput = z.input<typeof createLeadSchema>;
+export type ParsedLead = z.output<typeof createLeadSchema>;
 export type CreateLeadResult = { id: string; created: boolean };
+
+/** The driver is picked per call (env is read lazily) and loaded on demand, so the other one never enters the request. */
+const loadDriver = async (): Promise<LeadsDriver> =>
+  isDemoMode()
+    ? (await import("@/lib/demo/db/leads")).demoLeadsDriver
+    : (await import("@/lib/db/supabase/leads")).supabaseLeadsDriver;
 
 /**
  * Saves a lead (service role). Idempotent on `client_request_id`: a repeat call returns the
  * existing lead with `created: false`. Never logs personal data.
  */
-export const createLead = async (input: CreateLeadInput): Promise<CreateLeadResult> => {
-  const lead = createLeadSchema.parse(input);
-  const supabase = createAdminClient();
-  const row: LeadInsert = {
-    ...lead,
-    // zod's `Record<string, unknown>` is JSON-serializable here but not assignable to the generated `Json` type.
-    payload: lead.payload as LeadInsert["payload"],
-    utm: lead.utm as LeadInsert["utm"],
-  };
-
-  const { data: inserted, error } = await supabase
-    .from("leads")
-    .upsert(row, { onConflict: "client_request_id", ignoreDuplicates: true })
-    .select("id")
-    .maybeSingle();
-  if (error) throw new Error(`createLead failed: ${error.message}`);
-  if (inserted) return { id: inserted.id, created: true };
-
-  // Duplicate request: ignoreDuplicates returns no row, so read the existing one.
-  const { data: existing, error: readError } = await supabase
-    .from("leads")
-    .select("id")
-    .eq("client_request_id", lead.client_request_id)
-    .single();
-  if (readError) throw new Error(`createLead failed: ${readError.message}`);
-  return { id: existing.id, created: false };
-};
+export const createLead = async (input: CreateLeadInput): Promise<CreateLeadResult> =>
+  (await loadDriver()).insertLead(createLeadSchema.parse(input));
 
 type DeliveryStatus = Enums["delivery_status"];
 
@@ -98,18 +80,8 @@ export type LeadForDelivery = {
 };
 
 /** Service role. Returns null when the lead doesn't exist. */
-export const getLeadForDelivery = async (id: string): Promise<LeadForDelivery | null> => {
-  const { data, error } = await createAdminClient()
-    .from("leads")
-    .select(
-      `id,kind,name,phone,email,message,payload,page_url,plektan_status,plektan_attempts,telegram_status,telegram_attempts,
-      property:properties(slug,title,source,external_id,deal,property_type,prop_kind)`,
-    )
-    .eq("id", id)
-    .maybeSingle();
-  if (error) throw new Error(`getLeadForDelivery failed: ${error.message}`);
-  return data;
-};
+export const getLeadForDelivery = async (id: string): Promise<LeadForDelivery | null> =>
+  (await loadDriver()).fetchLeadForDelivery(id);
 
 export type LeadDeliveryUpdate =
   | {
@@ -131,25 +103,8 @@ export type LeadDeliveryUpdate =
     };
 
 /** Writes one channel's result. `error` must hold no personal data. */
-export const updateLeadDelivery = async (id: string, update: LeadDeliveryUpdate): Promise<void> => {
-  const patch: Database["public"]["Tables"]["leads"]["Update"] =
-    update.channel === "plektan"
-      ? {
-          plektan_status: update.status,
-          plektan_error: update.error,
-          plektan_attempts: update.attempts,
-          plektan_next_attempt_at: update.nextAttemptAt,
-          ...(update.itemId === undefined ? {} : { plektan_item_id: update.itemId }),
-        }
-      : {
-          telegram_status: update.status,
-          telegram_error: update.error,
-          telegram_attempts: update.attempts,
-          telegram_next_attempt_at: update.nextAttemptAt,
-        };
-  const { error } = await createAdminClient().from("leads").update(patch).eq("id", id);
-  if (error) throw new Error(`updateLeadDelivery failed: ${error.message}`);
-};
+export const updateLeadDelivery = async (id: string, update: LeadDeliveryUpdate): Promise<void> =>
+  (await loadDriver()).updateLeadDelivery(id, update);
 
 /**
  * Leads that cron should deliver now (oldest first): a channel `failed` with attempts left and its
@@ -161,47 +116,23 @@ export const getDueLeadIds = async (params: {
   staleBefore: Date;
   maxAttempts: number;
   limit: number;
-}): Promise<string[]> => {
-  const now = params.now.toISOString();
-  const stale = params.staleBefore.toISOString();
-  const max = params.maxAttempts;
-  const { data, error } = await createAdminClient()
-    .from("leads")
-    .select("id")
-    .or(
-      [
-        `and(plektan_status.eq.failed,plektan_attempts.lt.${max},plektan_next_attempt_at.lte.${now})`,
-        `and(telegram_status.eq.failed,telegram_attempts.lt.${max},telegram_next_attempt_at.lte.${now})`,
-        `and(plektan_status.eq.pending,created_at.lt.${stale})`,
-        `and(telegram_status.eq.pending,created_at.lt.${stale})`,
-      ].join(","),
-    )
-    .order("created_at", { ascending: true })
-    .limit(params.limit);
-  if (error) throw new Error(`getDueLeadIds failed: ${error.message}`);
-  return data.map((row) => row.id);
-};
+}): Promise<string[]> => (await loadDriver()).fetchDueLeadIds(params);
 
 /** A lead whose Plektan delivery ran out of attempts and hasn't been reported to the manager yet. */
 export type LeadToAlert = Pick<LeadForDelivery, "id" | "name" | "phone">;
 
-export const getLeadsToAlert = async (params: { maxAttempts: number; limit: number }): Promise<LeadToAlert[]> => {
-  const { data, error } = await createAdminClient()
-    .from("leads")
-    .select("id,name,phone")
-    .eq("plektan_status", "failed")
-    .gte("plektan_attempts", params.maxAttempts)
-    .is("plektan_alerted_at", null)
-    .order("created_at", { ascending: true })
-    .limit(params.limit);
-  if (error) throw new Error(`getLeadsToAlert failed: ${error.message}`);
-  return data;
-};
+export const getLeadsToAlert = async (params: { maxAttempts: number; limit: number }): Promise<LeadToAlert[]> =>
+  (await loadDriver()).fetchLeadsToAlert(params);
 
-export const markPlektanAlerted = async (id: string, at: Date): Promise<void> => {
-  const { error } = await createAdminClient()
-    .from("leads")
-    .update({ plektan_alerted_at: at.toISOString() })
-    .eq("id", id);
-  if (error) throw new Error(`markPlektanAlerted failed: ${error.message}`);
-};
+export const markPlektanAlerted = async (id: string, at: Date): Promise<void> =>
+  (await loadDriver()).markPlektanAlerted(id, at);
+
+/** True only for a published property: a lead's `property_id` from the client is never taken on trust. */
+export const isPropertyPublished = async (id: string): Promise<boolean> =>
+  (await loadDriver()).isPropertyPublished(id);
+
+/** Any property (sold / hidden too) the visitor asked to find something similar to. */
+export type PropertyBrief = { id: string; slug: string; title: string };
+
+export const getPropertyBrief = async (id: string): Promise<PropertyBrief | null> =>
+  (await loadDriver()).fetchPropertyBrief(id);

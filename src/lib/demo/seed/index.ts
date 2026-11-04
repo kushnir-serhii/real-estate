@@ -1,6 +1,7 @@
 import type { Database } from "@/lib/supabase/database.types";
 import type { DemoData } from "../store";
 import { SEED_AGENT_KEYS, SEED_AGENTS } from "./agents";
+import { buildSeedLeads } from "./leads";
 import { SEED_PAGES } from "./pages";
 import { SEED_PHOTO_FILES, SEED_PHOTO_SETS } from "./photos";
 import { SEED_PROPERTIES } from "./properties";
@@ -66,6 +67,8 @@ export const buildDemoSeed = (now: number): DemoData => {
     }));
   });
 
+  const sampleLeads = buildSeedLeads(now, idBySlug);
+
   const pages = SEED_PAGES.map((page) => ({ ...page, created_at: nowIso, updated_at: nowIso }));
 
   return {
@@ -81,10 +84,9 @@ export const buildDemoSeed = (now: number): DemoData => {
       sync_cursor: null,
       updated_at: nowIso,
     },
-    // Samples for the admin (leads, an AI conversation) come with the demo writes and the demo admin.
-    leads: [],
-    ai_conversations: [],
-    ai_messages: [],
+    leads: sampleLeads.leads,
+    ai_conversations: sampleLeads.ai_conversations,
+    ai_messages: sampleLeads.ai_messages,
     ai_usage: [],
     admins: [
       { user_id: "00000000-0000-4000-8000-0000000000b1", email: "admin@sofiacity.local", created_at: nowIso },

@@ -2,8 +2,7 @@ import "server-only";
 
 import { after } from "next/server";
 
-import { createLead, type CreateLeadInput } from "@/lib/db/leads";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createLead, getPropertyBrief, isPropertyPublished, type CreateLeadInput } from "@/lib/db/leads";
 import { verifyTurnstile } from "@/lib/turnstile";
 import {
   HONEYPOT_FIELD,
@@ -22,29 +21,6 @@ const isLeadField = (value: unknown): value is LeadField =>
   typeof value === "string" && (LEAD_FIELDS as readonly string[]).includes(value);
 
 const stringOf = (value: unknown): string => (typeof value === "string" ? value : "");
-
-/** Reads published property ids only: the client's `property_id` is never trusted. */
-const isPublishedProperty = async (id: string): Promise<boolean> => {
-  const { data, error } = await createAdminClient()
-    .from("properties")
-    .select("id")
-    .eq("id", id)
-    .eq("status", "published")
-    .maybeSingle();
-  if (error) throw new Error(`lead property check failed: ${error.message}`);
-  return data !== null;
-};
-
-/** Sold/hidden (or any) property the visitor asked to find something similar to. Unknown id → null. */
-const findSimilarTo = async (id: string): Promise<{ id: string; slug: string; title: string } | null> => {
-  const { data, error } = await createAdminClient()
-    .from("properties")
-    .select("id,slug,title")
-    .eq("id", id)
-    .maybeSingle();
-  if (error) throw new Error(`lead similar_to lookup failed: ${error.message}`);
-  return data ? { id: data.id, slug: data.slug, title: data.title } : null;
-};
 
 /** Never throws out of `after()`; the error text may carry personal data, so only a fixed line is logged. */
 const deliverInBackground = async (id: string): Promise<void> => {
@@ -85,11 +61,11 @@ export const processLeadSubmission = async (
   try {
     let payload: Record<string, unknown> | undefined;
     if (data.kind === "property_request") {
-      if (!(await isPublishedProperty(data.property_id))) {
+      if (!(await isPropertyPublished(data.property_id))) {
         return { status: "error", message: LEAD_ERROR_MESSAGES.property };
       }
     } else {
-      const similarTo = data.similar_to ? await findSimilarTo(data.similar_to) : null;
+      const similarTo = data.similar_to ? await getPropertyBrief(data.similar_to) : null;
       payload = {
         deal: data.deal,
         ...(data.property_type ? { property_type: data.property_type } : {}),

@@ -41,15 +41,15 @@ The project is a pet project / template right now: no Supabase, Cloudflare, Plek
   - [x] contract tests (vitest) run the same cases against the demo driver: published-only, filters, sort, pagination, budget currency; the Supabase run is skipped when no local DB is reachable
   - [x] the demo rows are typed from `database.types.ts`; an invalid `DATA_DRIVER` fails with a clear message
 
-### [ ] 2. Demo writes: leads, assistant, cron
+### [x] 2. Demo writes: leads, assistant, cron
 - **Build:** demo driver for `leads.ts` (`createLead` with `client_request_id` dedupe, delivery status, retry fields), `assistant.ts` (conversations, messages, proposal, usage, rate limits, spend counter, 30-day cleanup), the `/api/cron/*` handlers. The 006 pipeline and the 010 assistant run unchanged on top of it, with the Plektan / Telegram / LLM / Turnstile fixture modes they already have.
 - **Files:** `src/lib/db/{leads,assistant}.ts` (+ driver files), `src/features/leads/submit-lead.ts`, `src/features/assistant/assistant-limits.ts`, `src/lib/cron/*`
 - **Agent:** backend · **Model:** sonnet
 - **Accept:**
-  - [ ] every site form creates a lead in demo mode; a double submit makes one lead; delivery statuses follow the fixture env (`skipped` / `sent` / `failed`) exactly as on Supabase
-  - [ ] the AI chat works end to end in demo mode: answers, property cards, lead card → an `ai` lead with the server-side payload; limits and the spend cap still apply
-  - [ ] `/api/cron/leads` and `/api/cron/assistant` work on the demo store
-  - [ ] contract tests for lead dedupe, retry selection and conversation cleanup run against the demo driver
+  - [x] every site form creates a lead in demo mode; a double submit makes one lead; delivery statuses follow the fixture env (`skipped` / `sent` / `failed`) exactly as on Supabase
+  - [x] the AI chat works end to end in demo mode: answers, property cards, lead card → an `ai` lead with the server-side payload; limits and the spend cap still apply
+  - [x] `/api/cron/leads` and `/api/cron/assistant` work on the demo store
+  - [x] contract tests for lead dedupe, retry selection and conversation cleanup run against the demo driver
 
 ### [ ] 3. Demo admin: sign-in, CRUD, photos, reset
 - **Build:** `src/lib/demo/session.ts` (sign / verify the cookie, `DEMO_SESSION_SECRET`); `getAdminSession` / `requireAdmin` / `proxy.ts` use it in demo mode; the sign-in page shows «Увійти як демо-адміністратор» in demo mode and the email + password form otherwise; sign-out clears the cookie. Demo driver for `admin-leads`, `admin-properties`, `admin-property-photos`, `admin-pages`, `property-permissions`. Photo upload in demo mode: validated as today (type, size, image decode), stored in memory with `DEMO_UPLOAD_MAX_MB` caps, served by `GET /api/demo/photos/[...key]` (long cache, correct content type), `photoUrl()` points there for demo-uploaded keys. «Скинути демо-дані» in the admin (`POST /api/demo/reset`, admin only, revalidates the cache). The demo banner on the admin layout and a short note in the site footer.
@@ -121,3 +121,4 @@ The project is a pet project / template right now: no Supabase, Cloudflare, Plek
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
 | 2026-11-04 | 1 | done: facades in `src/lib/db/*` + `supabase/` and `demo/db/` drivers, `data-driver.ts`, demo store on `globalThis`, typed seed (28 public listings, sold + long-hidden + draft states), contract tests (demo run green, Supabase run skipped). `DATA_DRIVER=supabase` not verified live (no Docker, decided). Plektan API fixtures not ported: the seed already has its 4 `plektan` listings. Baseline before the spec (commit 8a75114): 1 402 586 B of client chunks, leaflet chunk 149 078 B | `src/lib/data-driver.ts`, `src/lib/demo/*`, `src/lib/db/{properties,pages,agents,settings,property-query,driver-types,driver-contract.test}.ts`, `src/lib/db/supabase/*`, 7 callers gated by `hasPublicData()`, `src/lib/supabase/{env,proxy}.ts`, `.env.example`, `docs/conventions.md` |
+| 2026-11-04 | 2 | done: `leads` / `assistant` facades + `supabase/` and `demo/db/` drivers (dedupe, FK checks, defaults, `updated_at`, message role check and dedupe, `add_ai_usage` upsert, cascade, retry «due» filter mirrored), `submit-lead.ts` property lookups through the facade, seed: 5 leads (form / property / ai; sent / failed / skipped) + an AI conversation with a proposal; write contract tests (demo green, Supabase skipped) and a demo pipeline test; crons checked on a demo server (with `CRON_SECRET`; empty secret = 401 as before). Supabase driver not verified live (decided) | `src/lib/db/{leads,assistant,driver-types,write-driver-contract.test}.ts`, `src/lib/db/supabase/{leads,assistant}.ts`, `src/lib/demo/db/{leads,assistant,json}.ts`, `src/lib/demo/seed/{leads,index}.ts`, `src/features/leads/{submit-lead,submit-lead-demo.test}.ts` |
