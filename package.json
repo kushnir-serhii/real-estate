@@ -11,6 +11,7 @@
     "sync": "node --conditions=react-server --env-file-if-exists=.env.local --import tsx scripts/sync.ts",
     "sync:check": "node --conditions=react-server --env-file-if-exists=.env.local --import tsx scripts/check-sync.ts",
     "ui-check": "playwright test",
+    "perf": "tsx scripts/perf.ts",
     "lint": "eslint .",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",

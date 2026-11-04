@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { PROPERTY_TYPE_LABELS } from "@/features/properties/property-labels";
 import { cn } from "@/lib/utils";
 import { FieldError } from "./field-error";
-import { LEAD_PROPERTY_TYPES } from "./lead-form-schema";
+import { LEAD_PROPERTY_TYPES } from "./lead-form-values";
 
 const SELECT_CLASS =
   "h-11 w-full min-w-0 rounded-lg border border-control bg-background px-3 text-base text-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30";

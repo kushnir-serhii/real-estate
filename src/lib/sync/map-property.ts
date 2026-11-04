@@ -1,12 +1,6 @@
 import type { ZodType } from "zod";
-import {
-  DEALS,
-  housingClassSchema,
-  PROPERTY_TYPES,
-  propKindSchema,
-  repairSchema,
-  wallMaterialSchema,
-} from "@/lib/db/property-values";
+import { DEALS, PROPERTY_TYPES } from "@/lib/db/property-values";
+import { housingClassSchema, propKindSchema, repairSchema, wallMaterialSchema } from "@/lib/db/property-schemas";
 import type { ExchangeRates } from "@/lib/db/settings";
 import type { PlektanListItem, PlektanViewItem } from "@/lib/plektan";
 import type { Json, TablesInsert } from "@/lib/supabase/database.types";

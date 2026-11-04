@@ -84,5 +84,12 @@ Next.js (App Router) · React · TypeScript (strict) · Tailwind 4 · shadcn/ui 
 - Touch targets ≥ 44px; icon-only buttons have `aria-label`; gallery works with keyboard and swipe.
 - Form results and errors are announced (`role="status"` / `role="alert"`).
 
+## Performance budget
+Checked with `pnpm perf` (needs `pnpm build`; mobile 375px, 4x CPU throttle, fast 4G; median of 3 warm runs; fails on a non-localhost request). Routes: `/`, `/catalog`, a property page.
+- LCP < 2.5 s, CLS < 0.1.
+- First-load JS (script tags in the HTML, gzip) does not grow: now ~220 KB gz on `/`, ~216 KB on `/catalog`, ~226 KB on a property page. A change that adds more than ~5 KB gz to a route needs a reason in the spec.
+- Client components import only light modules: no `zod`, no server-side data modules. Put constants / enums that forms and stores need in a `*-values.ts` file and keep the zod schemas in a separate file.
+- The first-screen photo has `fetchPriority="high"` and the right `sizes`; photos below the fold are lazy; the assistant panel is loaded on demand; loading skeletons are at least one viewport tall so the footer does not jump.
+
 ## States (every screen)
 Loading (skeleton) · empty (explanation + next action) · error (message + retry) · long values (truncate with title or wrap) · many items (pagination) · missing photo (placeholder).

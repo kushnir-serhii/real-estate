@@ -1,4 +1,3 @@
-import { z } from "zod";
 import type { Database } from "@/lib/supabase/database.types";
 
 type Enums = Database["public"]["Enums"];
@@ -58,12 +57,7 @@ export const WALL_MATERIALS = [
 ] as const;
 export const HOUSING_CLASSES = ["econom", "business", "elit"] as const;
 
-export const propKindSchema = z.enum(PROP_KINDS);
-export const repairSchema = z.enum(REPAIRS);
-export const wallMaterialSchema = z.enum(WALL_MATERIALS);
-export const housingClassSchema = z.enum(HOUSING_CLASSES);
-
-export type PropKind = z.infer<typeof propKindSchema>;
-export type Repair = z.infer<typeof repairSchema>;
-export type WallMaterial = z.infer<typeof wallMaterialSchema>;
-export type HousingClass = z.infer<typeof housingClassSchema>;
+export type PropKind = (typeof PROP_KINDS)[number];
+export type Repair = (typeof REPAIRS)[number];
+export type WallMaterial = (typeof WALL_MATERIALS)[number];
+export type HousingClass = (typeof HOUSING_CLASSES)[number];

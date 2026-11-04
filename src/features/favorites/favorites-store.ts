@@ -1,5 +1,4 @@
 import { useSyncExternalStore } from "react";
-import { z } from "zod";
 
 import { LEGACY_STORAGE_PREFIX } from "@/lib/legacy-storage";
 
@@ -9,7 +8,8 @@ export const FAVORITES_KEY = "7sky:favorites";
 const LEGACY_FAVORITES_KEY = `${LEGACY_STORAGE_PREFIX}:favorites`;
 export const MAX_FAVORITES = 100;
 
-const idSchema = z.string().uuid();
+// A plain regex instead of zod: this store ships in the header of every page, and zod would add ~100 KB of JS there.
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const EMPTY: readonly string[] = [];
 
@@ -23,8 +23,7 @@ export const sanitizeIds = (value: unknown): string[] => {
   if (!Array.isArray(value)) return [];
   const seen = new Set<string>();
   for (const item of value) {
-    const parsed = idSchema.safeParse(item);
-    if (parsed.success) seen.add(parsed.data);
+    if (typeof item === "string" && UUID_PATTERN.test(item)) seen.add(item);
     if (seen.size >= MAX_FAVORITES) break;
   }
   return [...seen];

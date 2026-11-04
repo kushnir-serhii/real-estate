@@ -2,7 +2,7 @@
 
 import { DealField } from "./deal-field";
 import { LeadForm } from "./lead-form";
-import type { LeadDeal } from "./lead-form-schema";
+import type { LeadDeal } from "./lead-form-values";
 import { PropertyTypeField } from "./property-type-field";
 
 type GeneralRequestFormProps = {

@@ -4,7 +4,7 @@ import { MessengerLinks } from "@/components/layout/messenger-links";
 import { buttonVariants } from "@/components/ui/button";
 import { CONTACTS } from "@/constants/contacts";
 import { GeneralRequestForm } from "@/features/leads/general-request-form";
-import type { LeadDeal } from "@/features/leads/lead-form-schema";
+import type { LeadDeal } from "@/features/leads/lead-form-values";
 import type { PublishedProperty } from "@/lib/db/properties";
 import { cn } from "@/lib/utils";
 import { CONTACT_ANCHOR } from "./property-details";
