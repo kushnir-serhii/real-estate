@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isDemoMode } from "@/lib/data-driver";
 import type { Database } from "./database.types";
 import { getSupabasePublicEnvOrNull } from "./env";
 
@@ -21,8 +22,9 @@ export const updateSession = async (request: NextRequest) => {
   };
 
   const env = getSupabasePublicEnvOrNull();
-  // Not configured (local without keys, CI): pass through without calling Supabase.
-  if (!env) return finish(NextResponse.next({ request }));
+  // Demo driver (the demo admin session comes in spec 011 slice 3) or not configured (CI): pass through
+  // without calling Supabase, even when its env happens to be set.
+  if (isDemoMode() || !env) return finish(NextResponse.next({ request }));
 
   let response = NextResponse.next({ request });
   let refreshedCookies: CookieToSet[] = [];

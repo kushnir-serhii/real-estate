@@ -1,6 +1,6 @@
 # 011 — Demo mode: a local-first template
 
-**Status:** ready · **Depends on:** 010 · **Route(s):** every route (site, admin, API); new `GET /api/demo/photos/[...key]`, `POST /api/demo/reset`
+**Status:** in-progress · **Depends on:** 010 · **Route(s):** every route (site, admin, API); new `GET /api/demo/photos/[...key]`, `POST /api/demo/reset`
 
 ## Goal
 The project is a pet project / template right now: no Supabase, Cloudflare, Plektan, Telegram or LLM accounts will be connected. Anyone can clone the repo, run `pnpm install && pnpm dev` **without Docker, keys or network access to third-party services**, and see the whole product working on mock data: the design, the speed and every feature (catalog, property page, forms and lead pipeline, AI assistant, the admin with sign-in, leads, properties and photos, pages, SEO). The same build can be deployed as a public demo with an open admin. Every seam that prepares the real connection stays in place, so switching to the real services later is a config change (`DATA_DRIVER=supabase` + keys), not a rewrite. The site becomes a neutral starting point for a new agency project.
@@ -31,15 +31,15 @@ The project is a pet project / template right now: no Supabase, Cloudflare, Plek
 
 ## Slices
 
-### [ ] 1. Data driver seam + demo store for public reads
+### [x] 1. Data driver seam + demo store for public reads
 - **Build:** `src/lib/data-driver.ts`; the driver interface for the public reads (properties list / detail / featured, district options, agents, pages, settings, sitemap); the `supabase` driver keeps today's queries unchanged; the `demo` driver filters, sorts and paginates the in-memory rows exactly like the SQL + RLS (published only, `hidden_at` null, catalog filters, price in USD via the exchange rates, the same `PropertyFilters`). Port `supabase/seed.sql` + the Plektan fixture listings to `src/lib/demo/seed/`. Caching (`unstable_cache` / tags) works the same in both drivers. `proxy.ts` and `src/lib/supabase/env.ts` no longer throw when Supabase isn't configured in demo mode.
 - **Files:** `src/lib/data-driver.ts`, `src/lib/demo/*`, `src/lib/db/{properties,pages,agents,settings,property-values}.ts` (+ driver files), `src/features/catalog/load-district-options.ts`, `src/app/sitemap.ts`, `src/proxy.ts`, `src/lib/supabase/env.ts`, `.env.example`
 - **Agent:** backend · **Model:** sonnet
 - **Accept:**
-  - [ ] with an empty `.env.local` and Docker stopped, `pnpm dev` serves `/`, `/catalog` (every filter, sort, pagination), a property page, a sold / hidden property (the 005 states), `/contacts`, static pages, `sitemap.xml` without errors
-  - [ ] `DATA_DRIVER=supabase` with the local Supabase gives the same pages as before this spec (no change in behaviour)
-  - [ ] contract tests (vitest) run the same cases against the demo driver: published-only, filters, sort, pagination, budget currency; the Supabase run is skipped when no local DB is reachable
-  - [ ] the demo rows are typed from `database.types.ts`; an invalid `DATA_DRIVER` fails with a clear message
+  - [x] with an empty `.env.local` and Docker stopped, `pnpm dev` serves `/`, `/catalog` (every filter, sort, pagination), a property page, a sold / hidden property (the 005 states), `/contacts`, static pages, `sitemap.xml` without errors
+  - [x] `DATA_DRIVER=supabase` with the local Supabase gives the same pages as before this spec (no change in behaviour)
+  - [x] contract tests (vitest) run the same cases against the demo driver: published-only, filters, sort, pagination, budget currency; the Supabase run is skipped when no local DB is reachable
+  - [x] the demo rows are typed from `database.types.ts`; an invalid `DATA_DRIVER` fails with a clear message
 
 ### [ ] 2. Demo writes: leads, assistant, cron
 - **Build:** demo driver for `leads.ts` (`createLead` with `client_request_id` dedupe, delivery status, retry fields), `assistant.ts` (conversations, messages, proposal, usage, rate limits, spend counter, 30-day cleanup), the `/api/cron/*` handlers. The 006 pipeline and the 010 assistant run unchanged on top of it, with the Plektan / Telegram / LLM / Turnstile fixture modes they already have.
@@ -120,3 +120,4 @@ The project is a pet project / template right now: no Supabase, Cloudflare, Plek
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
+| 2026-11-04 | 1 | done: facades in `src/lib/db/*` + `supabase/` and `demo/db/` drivers, `data-driver.ts`, demo store on `globalThis`, typed seed (28 public listings, sold + long-hidden + draft states), contract tests (demo run green, Supabase run skipped). `DATA_DRIVER=supabase` not verified live (no Docker, decided). Plektan API fixtures not ported: the seed already has its 4 `plektan` listings. Baseline before the spec (commit 8a75114): 1 402 586 B of client chunks, leaflet chunk 149 078 B | `src/lib/data-driver.ts`, `src/lib/demo/*`, `src/lib/db/{properties,pages,agents,settings,property-query,driver-types,driver-contract.test}.ts`, `src/lib/db/supabase/*`, 7 callers gated by `hasPublicData()`, `src/lib/supabase/{env,proxy}.ts`, `.env.example`, `docs/conventions.md` |

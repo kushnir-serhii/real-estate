@@ -24,7 +24,8 @@ export const getSupabasePublicEnv = (): SupabasePublicEnv => {
   const env = getSupabasePublicEnvOrNull();
   if (!env) {
     throw new Error(
-      "Supabase is not configured: set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.",
+      "Supabase is not configured: set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY " +
+        "(or use DATA_DRIVER=demo, which never calls Supabase).",
     );
   }
   return env;

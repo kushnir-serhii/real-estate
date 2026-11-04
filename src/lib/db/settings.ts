@@ -1,9 +1,10 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
 import { z } from "zod";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { getDataDriver, isDemoMode } from "@/lib/data-driver";
 import type { Database } from "@/lib/supabase/database.types";
 import { CACHE_TAGS } from "./cache-tags";
+import type { SettingsDriver } from "./driver-types";
 
 /** Units of each currency per 1 USD. */
 export const exchangeRatesSchema = z.object({
@@ -15,31 +16,23 @@ export type ExchangeRates = z.infer<typeof exchangeRatesSchema>;
 type SettingsRow = Database["public"]["Tables"]["settings"]["Row"];
 export type Settings = Omit<SettingsRow, "exchange_rates" | "id"> & { exchange_rates: ExchangeRates };
 
-/** The single settings row (service role, not cached: sync and admin read it fresh). */
-export const getSettings = async (): Promise<Settings> => {
-  const { data, error } = await createAdminClient().from("settings").select("*").single();
-  if (error) throw new Error(`getSettings failed: ${error.message}`);
-  return {
-    properties_source: data.properties_source,
-    last_sync_at: data.last_sync_at,
-    sync_cursor: data.sync_cursor,
-    updated_at: data.updated_at,
-    exchange_rates: exchangeRatesSchema.parse(data.exchange_rates),
-  };
-};
-
-/** Rates used when Supabase can't be read, so public pages still render (matches the DB default). */
+/** Rates used when the data can't be read, so public pages still render (matches the DB default). */
 export const DEFAULT_EXCHANGE_RATES: ExchangeRates = { UAH: 41.5, EUR: 0.92 };
 
-const fetchExchangeRates = async (): Promise<ExchangeRates> => {
-  const { data, error } = await createAdminClient().from("settings").select("exchange_rates").single();
-  if (error) throw new Error(`getExchangeRates failed: ${error.message}`);
-  return exchangeRatesSchema.parse(data.exchange_rates);
-};
+const loadDriver = async (): Promise<SettingsDriver> =>
+  isDemoMode()
+    ? (await import("@/lib/demo/db/settings")).demoSettingsDriver
+    : (await import("@/lib/db/supabase/settings")).supabaseSettingsDriver;
 
-const getCachedExchangeRates = unstable_cache(fetchExchangeRates, ["exchange-rates"], {
-  tags: [CACHE_TAGS.settings],
-});
+/** The single settings row (service role on Supabase; not cached: sync and admin read it fresh). */
+export const getSettings = async (): Promise<Settings> => (await loadDriver()).fetchSettings();
+
+const getCachedExchangeRates = (): Promise<ExchangeRates> =>
+  unstable_cache(
+    async () => (await loadDriver()).fetchExchangeRates(),
+    ["exchange-rates", getDataDriver()],
+    { tags: [CACHE_TAGS.settings] },
+  )();
 
 /**
  * Exchange rates for public pages (catalog price filter). Service role on the server because

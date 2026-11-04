@@ -1,11 +1,11 @@
 import "server-only";
 
 import { getPublishedDistricts } from "@/lib/db/properties";
-import { getSupabasePublicEnvOrNull } from "@/lib/supabase/env";
+import { hasPublicData } from "@/lib/data-driver";
 
 /** District options for the filter form; the form still works (without the field) if they fail. */
 export const loadDistrictOptions = async (): Promise<string[]> => {
-  if (getSupabasePublicEnvOrNull() === null) return [];
+  if (!hasPublicData()) return [];
   try {
     return await getPublishedDistricts();
   } catch (error) {

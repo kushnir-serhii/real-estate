@@ -4,7 +4,7 @@ import { PropertyCard } from "@/features/properties/property-card";
 import { RetryButton } from "@/features/home/retry-button";
 import { getPublishedProperties } from "@/lib/db/properties";
 import type { PropertyFilters, PropertyPage } from "@/lib/db/properties";
-import { getSupabasePublicEnvOrNull } from "@/lib/supabase/env";
+import { hasPublicData } from "@/lib/data-driver";
 import { CatalogEmpty } from "./catalog-empty";
 import { CatalogGrid } from "./catalog-grid";
 import { CatalogPagination } from "./catalog-pagination";
@@ -23,7 +23,7 @@ type ResultsState =
 const CARD_SIZES = "(min-width: 1280px) 22rem, (min-width: 640px) 50vw, 100vw";
 
 const load = async (filters: PropertyFilters): Promise<ResultsState> => {
-  if (getSupabasePublicEnvOrNull() === null) return { kind: "empty" };
+  if (!hasPublicData()) return { kind: "empty" };
   try {
     const page = await getPublishedProperties(filters);
     if (page.items.length > 0) return { kind: "ready", page };

@@ -7,7 +7,7 @@ import { PropertyCard } from "@/features/properties/property-card";
 import { getPublishedProperties, propertyFiltersSchema } from "@/lib/db/properties";
 import type { PublishedProperty } from "@/lib/db/properties";
 import { CONTACTS } from "@/constants/contacts";
-import { getSupabasePublicEnvOrNull } from "@/lib/supabase/env";
+import { hasPublicData } from "@/lib/data-driver";
 import { FeaturedGrid } from "./featured-grid";
 import { RetryButton } from "./retry-button";
 
@@ -19,7 +19,7 @@ type FeaturedState =
   | { kind: "error" };
 
 const loadFeatured = async (): Promise<FeaturedState> => {
-  if (getSupabasePublicEnvOrNull() === null) return { kind: "empty" };
+  if (!hasPublicData()) return { kind: "empty" };
   try {
     const page = await getPublishedProperties(propertyFiltersSchema.parse({ sort: "newest" }));
     const items = page.items.slice(0, FEATURED_COUNT);

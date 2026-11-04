@@ -9,13 +9,13 @@ import { FeaturedGrid } from "@/features/home/featured-grid";
 import { FeaturedSkeleton } from "@/features/home/featured-skeleton";
 import { PropertyCard } from "@/features/properties/property-card";
 import { getPublishedProperties, propertyFiltersSchema } from "@/lib/db/properties";
-import { getSupabasePublicEnvOrNull } from "@/lib/supabase/env";
+import { hasPublicData } from "@/lib/data-driver";
 
 const NEWEST_COUNT = 3;
 
 /** Newest published properties; non-essential, so no data or a failed query hides the block. */
 const NewestProperties = async () => {
-  if (getSupabasePublicEnvOrNull() === null) return null;
+  if (!hasPublicData()) return null;
   const items = await getPublishedProperties(propertyFiltersSchema.parse({ sort: "newest" }))
     .then((page) => page.items.slice(0, NEWEST_COUNT))
     .catch((error: unknown) => {

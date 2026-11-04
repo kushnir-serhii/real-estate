@@ -3,13 +3,13 @@ import "server-only";
 import { RetryButton } from "@/features/home/retry-button";
 import { getActiveAgents } from "@/lib/db/agents";
 import type { Agent } from "@/lib/db/agents";
-import { getSupabasePublicEnvOrNull } from "@/lib/supabase/env";
+import { hasPublicData } from "@/lib/data-driver";
 import { AgentCard } from "./agent-card";
 
 type AgentsState = { kind: "ready"; items: Agent[] } | { kind: "hidden" } | { kind: "error" };
 
 const loadAgents = async (): Promise<AgentsState> => {
-  if (getSupabasePublicEnvOrNull() === null) return { kind: "hidden" };
+  if (!hasPublicData()) return { kind: "hidden" };
   try {
     const items = await getActiveAgents();
     return items.length > 0 ? { kind: "ready", items } : { kind: "hidden" };

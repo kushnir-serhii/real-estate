@@ -18,7 +18,9 @@ Next.js (App Router) · React · TypeScript (strict) · Tailwind 4 · shadcn/ui 
 | Shared UI | `src/components/layout/`, `src/components/` | |
 | shadcn primitive | `src/components/ui/button.tsx` | as the CLI generated it |
 | Agency-specific data | `src/constants/<topic>.ts` (`contacts`, `brand`, `home`, `pages`, …) | `UPPER_SNAKE_CASE` consts `as const`; mock values until the real agency's data arrives |
-| Data access | `src/lib/db/<domain>.ts` | `getPublishedProperties(…)` |
+| Data access (facade) | `src/lib/db/<domain>.ts` | `getPublishedProperties(…)`: the only thing `src/features/**` and `src/app/**` import; adds caching, picks the driver |
+| Data drivers | `src/lib/db/supabase/<domain>.ts`, `src/lib/demo/db/<domain>.ts` | implement the types in `src/lib/db/driver-types.ts`; `DATA_DRIVER` is read in `src/lib/data-driver.ts` only |
+| Demo data | `src/lib/demo/store.ts`, `src/lib/demo/seed/*` | rows typed from `database.types.ts`; the store mirrors RLS |
 | External client | `src/lib/plektan/`, `src/lib/telegram/`, `src/lib/r2/`, `src/lib/turnstile/`, `src/lib/geocode/`, `src/lib/llm/` | |
 | Supabase clients | `src/lib/supabase/server.ts`, `client.ts`, `admin.ts` | |
 | DB types | `src/lib/supabase/database.types.ts` | generated, never hand-edited |
@@ -52,6 +54,14 @@ Next.js (App Router) · React · TypeScript (strict) · Tailwind 4 · shadcn/ui 
 - Prices: integer amount + `currency` (`UAH` | `USD` | `EUR`). Format only through `formatPrice` (locale `uk-UA`). Keep the Plektan raw text in `raw` for debugging.
 - Keep Plektan's original payload (`raw jsonb`) and ids (`external_id` = `adid`) on synced rows; our own `id` is a uuid.
 - Slugs are stable once published (they're in Google's index).
+
+### Data drivers (spec 011)
+- Two drivers sit behind every data module: `supabase` (the queries) and `demo` (in-memory store seeded from `src/lib/demo/seed/`). `DATA_DRIVER=demo|supabase`; empty = `supabase` if the Supabase env is set, else `demo`.
+- Callers import the facade `src/lib/db/<domain>.ts` and never branch on the driver (`isDemoMode()` / `hasPublicData()` live in `src/lib/data-driver.ts`, used by infrastructure such as `proxy.ts`, not by features). Shared pure logic (zod schemas, types, constants, derive helpers) stays in the facade or a `<domain>-query.ts` / `-values.ts` file next to it, never inside a driver.
+- The facade owns caching (`unstable_cache`, tags) and puts the driver into the cache key, so both drivers cache the same way. The facade loads a driver with a dynamic `import()`, so the other one never enters the request.
+- A demo driver must behave like SQL + RLS: public reads see only published, non-hidden properties (plus the 7-day sold window on detail) and active agents; return copies, never store rows; private columns (`raw`, `house`, `agent_id`) stay out of public results.
+- Env is read lazily (inside functions), never at import time. Nothing on the demo path may call a Supabase client.
+- A new data function adds: its type in `driver-types.ts`, both implementations, and a case in `src/lib/db/driver-contract.test.ts` (runs on the demo driver always, on Supabase when a local DB is reachable).
 
 ## Integrations
 - One client per service in `src/lib/<service>/`, typed, with a timeout and a **fixture mode** when the key is empty (fixtures in `src/lib/<service>/fixtures/`).
