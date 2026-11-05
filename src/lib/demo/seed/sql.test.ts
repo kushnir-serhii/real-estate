@@ -21,7 +21,7 @@ describe("supabase/seed.sql", () => {
 
   it("fills every seeded table in foreign-key order", () => {
     const sql = generateSeedSql();
-    const order = ["agents", "properties", "property_photos", "pages", "auth.users", "admins", "leads", "ai_conversations", "ai_messages"].map(
+    const order = ["agents", "properties", "property_photos", "pages", "posts", "post_properties", "auth.users", "admins", "leads", "ai_conversations", "ai_messages"].map(
       (table) => sql.indexOf(`insert into ${table.includes(".") ? table : `public.${table}`} `),
     );
     expect(order.every((index) => index >= 0)).toBe(true);

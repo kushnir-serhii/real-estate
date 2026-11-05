@@ -1,12 +1,14 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import { resetDemoStore } from "@/lib/demo/store";
+import { getDemoStore, resetDemoStore } from "@/lib/demo/store";
 import { demoAgentsDriver } from "@/lib/demo/db/agents";
 import { demoPagesDriver } from "@/lib/demo/db/pages";
+import { demoPostsDriver } from "@/lib/demo/db/posts";
 import { demoPropertiesDriver } from "@/lib/demo/db/properties";
 import { demoSettingsDriver } from "@/lib/demo/db/settings";
 import { buildDemoSeed } from "@/lib/demo/seed";
 import type { Database } from "@/lib/supabase/database.types";
-import type { AgentsDriver, PagesDriver, PropertiesDriver, SettingsDriver } from "./driver-types";
+import type { AgentsDriver, PagesDriver, PostsDriver, PropertiesDriver, SettingsDriver } from "./driver-types";
+import { BLOG_PAGE_SIZE, BLOG_RELATED_MAX } from "@/constants/blog";
 import { PAGE_SIZE, propertyFiltersSchema } from "./property-query";
 import type { PropertyFiltersInput } from "./property-query";
 
@@ -23,6 +25,7 @@ type Drivers = {
   pages: PagesDriver;
   agents: AgentsDriver;
   settings: SettingsDriver;
+  posts: PostsDriver;
 };
 
 const filters = (input: PropertyFiltersInput = {}) => propertyFiltersSchema.parse(input);
@@ -284,6 +287,76 @@ const runContract = (name: string, getDrivers: () => Drivers | Promise<Drivers>,
       });
     });
 
+    describe("blog", () => {
+      const seedPosts = buildDemoSeed(Date.now()).posts;
+      const publishedPosts = seedPosts.filter((post) => post.status === "published");
+      const draft = seedPosts.find((post) => post.status === "draft");
+      const newestFirst = [...publishedPosts].sort((a, b) => Date.parse(b.published_at ?? "") - Date.parse(a.published_at ?? ""));
+
+      it("lists published posts only, newest first, 6 per page, without the body", async () => {
+        const first = await d.posts.fetchPublishedPosts({ page: 1 });
+        expect(first.total).toBe(publishedPosts.length);
+        expect(first.pageCount).toBe(Math.ceil(publishedPosts.length / BLOG_PAGE_SIZE));
+        expect(first.posts).toHaveLength(BLOG_PAGE_SIZE);
+        const second = await d.posts.fetchPublishedPosts({ page: 2 });
+        const slugs = [...first.posts, ...second.posts].map((post) => post.slug);
+        expect(slugs).toEqual(newestFirst.map((post) => post.slug));
+        expect(slugs).not.toContain(draft?.slug);
+        for (const post of first.posts) {
+          expect(post).not.toHaveProperty("body");
+          expect(post).not.toHaveProperty("status");
+          expect(post).not.toHaveProperty("author_agent_id");
+        }
+      });
+
+      it("filters by category and returns an empty page past the end with the real total", async () => {
+        const market = await d.posts.fetchPublishedPosts({ category: "market", page: 1 });
+        const expected = publishedPosts.filter((post) => post.category === "market");
+        expect(expected.length).toBeGreaterThan(0);
+        expect(market.posts.map((post) => post.slug).sort()).toEqual(expected.map((post) => post.slug).sort());
+        const past = await d.posts.fetchPublishedPosts({ page: 9 });
+        expect(past).toMatchObject({ posts: [], total: publishedPosts.length });
+      });
+
+      it("hides a draft by slug and returns a published post with its author and related properties", async () => {
+        expect(draft).toBeDefined();
+        expect(await d.posts.fetchPostBySlug(draft?.slug ?? "")).toBeNull();
+        expect(await d.posts.fetchPostBySlug("no-such-post")).toBeNull();
+
+        const slug = "yaki-dokumenty-pereviryty-pered-kupivleiu-kvartyry";
+        const post = await d.posts.fetchPostBySlug(slug);
+        expect(post?.body).toContain("##");
+        expect(post).not.toHaveProperty("status");
+        expect(post).not.toHaveProperty("author_agent_id");
+        expect(post?.author?.name).toBe("Олена Коваленко");
+        expect(post?.related.length).toBeGreaterThan(0);
+        expect(post?.related.length).toBeLessThanOrEqual(BLOG_RELATED_MAX);
+        for (const property of post?.related ?? []) {
+          expect(property.status).toBe("published");
+          expect(property).not.toHaveProperty("raw");
+          expect(property).toHaveProperty("property_photos");
+        }
+      });
+
+      it("a post without an agent has no author; one without a cover has no cover key", async () => {
+        const noAgent = seedPosts.find((post) => post.status === "published" && post.author_agent_id === null);
+        const noCover = seedPosts.find((post) => post.status === "published" && post.cover_key === null);
+        expect((await d.posts.fetchPostBySlug(noAgent?.slug ?? ""))?.author).toBeNull();
+        expect((await d.posts.fetchPostBySlug(noCover?.slug ?? ""))?.cover_key).toBeNull();
+      });
+
+      it("returns the latest published posts and the indexable ones for the sitemap", async () => {
+        const latest = await d.posts.fetchLatestPosts(3);
+        expect(latest.map((post) => post.slug)).toEqual(newestFirst.slice(0, 3).map((post) => post.slug));
+        expect(await d.posts.fetchLatestPosts(0)).toEqual([]);
+        const sitemap = await d.posts.fetchSitemapPosts();
+        expect(sitemap.map((post) => post.slug).sort()).toEqual(
+          publishedPosts.filter((post) => !post.noindex).map((post) => post.slug).sort(),
+        );
+        expect(sitemap.map((post) => post.slug)).not.toContain(draft?.slug);
+      });
+    });
+
     describe("agents, pages, settings", () => {
       it("lists active agents only", async () => {
         const names = (await d.agents.fetchActiveAgents()).map((a) => a.name);
@@ -313,7 +386,13 @@ runContract(
   "demo",
   () => {
     resetDemoStore();
-    return { properties: demoPropertiesDriver, pages: demoPagesDriver, agents: demoAgentsDriver, settings: demoSettingsDriver };
+    return {
+      properties: demoPropertiesDriver,
+      pages: demoPagesDriver,
+      agents: demoAgentsDriver,
+      settings: demoSettingsDriver,
+      posts: demoPostsDriver,
+    };
   },
   false,
 );
@@ -346,8 +425,41 @@ describe("demo store (RLS mirror)", () => {
     expect(again.items[0].title).not.toBe("changed");
   });
 
+  it("blog reads return copies, never the store's own rows", async () => {
+    const page = await demoPostsDriver.fetchPublishedPosts({ page: 1 });
+    page.posts[0].title = "changed";
+    page.posts[0].tags.push("changed");
+    const post = await demoPostsDriver.fetchPostBySlug(page.posts[0].slug);
+    if (!post) throw new Error("seed post missing");
+    post.title = "changed";
+    post.tags.push("changed");
+    const again = await demoPostsDriver.fetchPostBySlug(page.posts[0].slug);
+    expect(again?.title).not.toBe("changed");
+    expect(again?.tags).not.toContain("changed");
+    expect((await demoPostsDriver.fetchPublishedPosts({ page: 1 })).posts[0].title).not.toBe("changed");
+  });
+
+  it("a hidden or draft property linked to a post is not returned as related; an unpublished post hides its links", async () => {
+    const store = getDemoStore();
+    const post = store.posts.find((row) => row.status === "published" && store.post_properties.some((l) => l.post_id === row.id));
+    if (!post) throw new Error("seed has no post with related properties");
+    const links = store.post_properties.filter((l) => l.post_id === post.id).sort((a, b) => a.position - b.position);
+    const before = await demoPostsDriver.fetchPostBySlug(post.slug);
+    expect(before?.related.map((p) => p.id)).toEqual(links.map((l) => l.property_id));
+
+    const target = store.properties.find((p) => p.id === links[0].property_id);
+    if (!target) throw new Error("linked property missing");
+    target.status = "hidden";
+    target.hidden_at = new Date(0).toISOString();
+    const after = await demoPostsDriver.fetchPostBySlug(post.slug);
+    expect(after?.related.map((p) => p.id)).toEqual(links.slice(1).map((l) => l.property_id));
+
+    post.status = "draft";
+    expect(await demoPostsDriver.fetchPostBySlug(post.slug)).toBeNull();
+    resetDemoStore();
+  });
+
   it("resetDemoStore restores the seed", async () => {
-    const { getDemoStore } = await import("@/lib/demo/store");
     getDemoStore().properties.length = 0;
     resetDemoStore();
     expect(getDemoStore().properties.length).toBe(seedRows.length);
@@ -380,6 +492,7 @@ runContract(
     pages: (await import("./supabase/pages")).supabasePagesDriver,
     agents: (await import("./supabase/agents")).supabaseAgentsDriver,
     settings: (await import("./supabase/settings")).supabaseSettingsDriver,
+    posts: (await import("./supabase/posts")).supabasePostsDriver,
   }),
   !supabaseReachable,
 );

@@ -137,6 +137,8 @@ update public.settings set exchange_rates = ${jsonSql(seed.settings.exchange_rat
     table("properties (price_usd / price_per_m2 are precomputed)", "properties", seed.properties),
     table("property_photos", "property_photos", seed.property_photos),
     table("pages", "pages", seed.pages),
+    table("posts", "posts", seed.posts),
+    table("post_properties", "post_properties", seed.post_properties),
     authSql(),
     table("admins", "admins", seed.admins),
     table("leads", "leads", seed.leads),

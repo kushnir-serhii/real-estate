@@ -1,6 +1,6 @@
 # 015 — Blog
 
-**Status:** ready · **Depends on:** 014 · **Route(s):** `/blog`, `/blog/[slug]`, `/`, `/admin/blog`, `/admin/blog/new`, `/admin/blog/[id]`
+**Status:** in-progress · **Depends on:** 014 · **Route(s):** `/blog`, `/blog/[slug]`, `/`, `/admin/blog`, `/admin/blog/new`, `/admin/blog/[id]`
 
 ## Goal
 The agency can publish useful articles (buying, selling, renting, the market) that bring search traffic and trust, and lead readers to the catalog and the request form. When this is done, visitors read posts at `/blog`, filter them by category, see related properties under a post; the admin writes posts in a visual editor, uploads a cover, saves drafts and publishes.
@@ -26,14 +26,14 @@ The agency can publish useful articles (buying, selling, renting, the market) th
 
 ## Slices
 
-### [ ] 1. Data: posts tables, drivers, demo seed
+### [x] 1. Data: posts tables, drivers, demo seed
 - **Build:** migration with RLS, `database.types.ts` updated, `src/constants/blog.ts` (categories, page size), public + admin facades and both drivers, demo store + 8 published + 1 draft seed posts, `pnpm seed:sql`, driver contract tests, `docs/setup.md` migration line.
 - **Files:** `supabase/migrations/*_blog.sql`, `src/lib/supabase/database.types.ts`, `src/constants/blog.ts`, `src/lib/db/{posts,admin-posts,driver-types,cache-tags}.ts`, `src/lib/db/supabase/{posts,admin-posts}.ts`, `src/lib/demo/db/{posts,admin-posts}.ts`, `src/lib/demo/{store.ts,seed/posts.ts,seed/index.ts,seed/sql.ts}`, `supabase/seed.sql`, contract tests, `docs/setup.md`
 - **Agent:** backend · **Model:** sonnet
 - **Accept:**
-  - [ ] both tables have RLS; anon sees only published posts and their links (contract test on demo; on Supabase when a local DB is up)
-  - [ ] demo driver hides drafts from public reads, returns copies
-  - [ ] `pnpm test` green including seed drift; typecheck, lint, build green
+  - [x] both tables have RLS; anon sees only published posts and their links (contract test on demo; on Supabase when a local DB is up)
+  - [x] demo driver hides drafts from public reads, returns copies
+  - [x] `pnpm test` green including seed drift; typecheck, lint, build green
 
 ### [ ] 2. Public blog: list and post pages, menu
 - **Build:** `/blog` (cards: cover, category, title, excerpt, date; category chips in the URL `?category=`; pagination `?page=`), `/blog/[slug]` (article layout, Markdown body via the existing renderer with article typography, author card, related properties as property cards, CTA), `loading.tsx` / `error.tsx` / `not-found`, empty states, missing cover placeholder. «Блог» in header, mobile menu, footer. Works without JS.
@@ -86,7 +86,10 @@ The agency can publish useful articles (buying, selling, renting, the market) th
   - **Demo seed:** 8 published posts (2 pages) + 1 draft, all categories.
   - **Placement:** header / mobile menu / footer «Купити · Орендувати · Про нас · Блог · Контакти»; home block «Останні статті» after the agents section, before testimonials.
   - Slug generated from the title (transliterated), editable while draft, locked once published. TipTap is a new dependency, admin only.
+  - Publishing (not saving a draft) requires a non-empty excerpt and body; checked in the slice 4 action.
+- **Note (slice 1):** `database.types.ts` was hand-edited (no local Supabase running) — regenerate with `pnpm db:types` when a local DB is up. The slug locks once `published_at` is set (unpublishing does not unlock it). On Supabase `setPostProperties` is delete + insert (not one transaction). Slice 4 actions must `revalidateTag(postTag(slug))` besides `posts`.
 
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
+| 2026-11-05 | 1 | done: migration `20261105120000_blog.sql` (`posts` with category / status checks, `set_updated_at` trigger, listing indexes; `post_properties` position 0..2; RLS: public selects published posts and their links only, no write policies); `database.types.ts` hand-edited; `src/constants/blog.ts`; public facade `posts.ts` (+ `post-query.ts`), admin facade `admin-posts.ts` (discriminated results, slug lock, first-publish `published_at`, ≤3 related, cover returns the old key), `post-schemas.ts`, `post-slug.ts` (reuses `slugifyBase`); both drivers; related properties via `fetchPropertiesByIds`, published only; seed 8 published + 1 draft (covers `placeholders/*.webp`, one without), `seed.sql` regenerated; contract + seed tests: 676 passed / 56 skipped (Supabase run skipped, no local DB) | `supabase/migrations/20261105120000_blog.sql`, `src/lib/supabase/database.types.ts`, `src/constants/blog.ts`, `src/lib/db/{posts,admin-posts,post-query,post-schemas,post-slug,driver-types,cache-tags}.ts`, `src/lib/db/{supabase,../demo/db}/{posts,admin-posts}.ts`, `src/lib/demo/{store.ts,seed/*}`, `supabase/seed.sql`, `docs/setup.md` |
