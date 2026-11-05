@@ -21,7 +21,7 @@ export const BlogCategoryChips = ({ state }: { state: BlogState }) => {
   ];
   return (
     <nav aria-label={BLOG_PAGE.filterLabel}>
-      <ul className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 py-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
+      <ul className="flex flex-wrap gap-2 py-1">
         {items.map((item) => (
           <li key={item.key} className="shrink-0">
             <Link
