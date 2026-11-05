@@ -6,7 +6,8 @@ import { expect, test } from '@playwright/test'
 test.use({ javaScriptEnabled: false })
 
 const PUBLISHED = '/catalog/2-kimnatna-kvartyra-na-oboloni-3f9a1c'
-const SOLD = '/catalog/ofis-na-oboloni-biznes-tsentr-2c49e5'
+const BLOG_POST = '/blog/yaki-dokumenty-pereviryty-pered-kupivleiu-kvartyry'
+const SOLD ='/catalog/ofis-na-oboloni-biznes-tsentr-2c49e5'
 
 type Case = { route: string; status?: number; key: (page: import('@playwright/test').Page) => import('@playwright/test').Locator }
 
@@ -16,6 +17,10 @@ const CASES: Case[] = [
   { route: '/catalog?deal=sale&page=2', key: (p) => p.locator('main ul article').first() },
   { route: PUBLISHED, key: (p) => p.getByText(/\d\s?(грн|₴|\$|€|USD|UAH)/).filter({ visible: true }).first() },
   { route: SOLD, key: (p) => p.locator('main').getByText(/продан|орендовано|здано/i).first() },
+  { route: '/blog', key: (p) => p.locator('main ul article').first() },
+  { route: '/blog?category=buyers', key: (p) => p.locator('main ul article').first() },
+  { route: '/blog?page=2', key: (p) => p.locator('main ul article').first() },
+  { route: BLOG_POST, key: (p) => p.locator('main article').first() },
   { route: '/about', key: (p) => p.locator('main p').first() },
   { route: '/contacts', key: (p) => p.locator('main').getByText(/Наша команда|Команда/).first() },
   { route: '/favorites', key: (p) => p.locator('main p, main a').first() },
@@ -70,4 +75,23 @@ test('no-js catalog sort submits the native select', async ({ page }) => {
   await page.locator('select[name="sort"]').selectOption('price_asc')
   await page.getByRole('button', { name: 'Застосувати' }).click()
   await expect(page).toHaveURL(/sort=price_asc/)
+})
+
+// Spec 015: the blog filter and pagination are plain links.
+test('no-js blog category chip and page 2 link navigate', async ({ page }) => {
+  await page.goto('/blog')
+  await page.getByRole('navigation', { name: 'Категорії статей' }).getByRole('link', { name: 'Покупцям' }).click()
+  await expect(page).toHaveURL(/\/blog\?category=buyers/)
+  await page.goto('/blog')
+  await page.getByRole('link', { name: 'Наступна сторінка' }).click()
+  await expect(page).toHaveURL(/\/blog\?page=2/)
+  await expect(page.locator('main ul article').first()).toBeVisible()
+})
+
+test('blog unknown category shows all posts, draft slug is 404', async ({ page }) => {
+  const all = await page.goto('/blog?category=nope')
+  expect(all?.status()).toBe(200)
+  await expect(page.locator('main ul article')).toHaveCount(6)
+  const draft = await page.goto('/blog/5-pomylok-pry-oformlenni-orendy-chernetka')
+  expect(draft?.status()).toBe(404)
 })

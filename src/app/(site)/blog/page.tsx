@@ -1,0 +1,36 @@
+import type { Metadata } from "next";
+
+import { PageHeader } from "@/components/page-header";
+import { BLOG_PAGE, blogCategoryLabel } from "@/constants/blog";
+import { BlogCategoryChips } from "@/features/blog/blog-category-chips";
+import { blogHref, parseBlogState } from "@/features/blog/blog-params";
+import type { BlogSearchParams } from "@/features/blog/blog-params";
+import { BlogResults } from "@/features/blog/blog-results";
+
+type BlogPageProps = { searchParams: Promise<BlogSearchParams> };
+
+export const generateMetadata = async ({ searchParams }: BlogPageProps): Promise<Metadata> => {
+  const state = parseBlogState(await searchParams);
+  const base = state.category ? `${BLOG_PAGE.eyebrow}: ${blogCategoryLabel(state.category)}` : BLOG_PAGE.title;
+  return {
+    title: state.page > 1 ? `${base} — сторінка ${state.page}` : base,
+    description: BLOG_PAGE.lead,
+    alternates: { canonical: blogHref(state) },
+  };
+};
+
+const BlogPage = async ({ searchParams }: BlogPageProps) => {
+  const state = parseBlogState(await searchParams);
+
+  return (
+    <div className="pb-16 sm:pb-24">
+      <PageHeader eyebrow={BLOG_PAGE.eyebrow} title={BLOG_PAGE.title} lead={BLOG_PAGE.lead} />
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4">
+        <BlogCategoryChips state={state} />
+        <BlogResults state={state} />
+      </div>
+    </div>
+  );
+};
+
+export default BlogPage;

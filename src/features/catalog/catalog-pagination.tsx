@@ -8,10 +8,10 @@ import type { CatalogState } from "./catalog-params";
 
 type CatalogPaginationProps = { state: CatalogState; pageCount: number };
 
-type Item = { kind: "page"; page: number } | { kind: "gap"; key: string };
+export type Item = { kind: "page"; page: number } | { kind: "gap"; key: string };
 
 /** 1 … 4 5 6 … 12: first, last, current ±1; a single hidden page is shown instead of «…». */
-const pageItems = (current: number, count: number): Item[] => {
+export const pageItems = (current: number, count: number): Item[] => {
   const pages = new Set([1, count, current - 1, current, current + 1]);
   const sorted = [...pages].filter((p) => p >= 1 && p <= count).sort((a, b) => a - b);
   const items: Item[] = [];

@@ -35,15 +35,15 @@ The agency can publish useful articles (buying, selling, renting, the market) th
   - [x] demo driver hides drafts from public reads, returns copies
   - [x] `pnpm test` green including seed drift; typecheck, lint, build green
 
-### [ ] 2. Public blog: list and post pages, menu
+### [x] 2. Public blog: list and post pages, menu
 - **Build:** `/blog` (cards: cover, category, title, excerpt, date; category chips in the URL `?category=`; pagination `?page=`), `/blog/[slug]` (article layout, Markdown body via the existing renderer with article typography, author card, related properties as property cards, CTA), `loading.tsx` / `error.tsx` / `not-found`, empty states, missing cover placeholder. «Блог» in header, mobile menu, footer. Works without JS.
 - **Files:** `src/app/(site)/blog/**`, `src/features/blog/*`, `src/components/layout/{nav-config,site-footer}.ts(x)`, `e2e/no-js.spec.ts`
 - **Agent:** designer · **Model:** sonnet
 - **Accept:**
-  - [ ] list, filter, pagination and post page at 375 and 1280, both themes, without JS
-  - [ ] draft slug → 404; unknown category → all posts (or canonical redirect)
-  - [ ] states: loading, empty (no posts / none in category), error with retry, long titles, missing cover
-  - [ ] first-load JS on `/blog/[slug]` within the budget of a property page; no TipTap on public routes
+  - [x] list, filter, pagination and post page at 375 and 1280, both themes, without JS
+  - [x] draft slug → 404; unknown category → all posts (or canonical redirect)
+  - [x] states: loading, empty (no posts / none in category), error with retry, long titles, missing cover
+  - [x] first-load JS on `/blog/[slug]` within the budget of a property page; no TipTap on public routes
 
 ### [ ] 3. SEO and «Останні статті» on home
 - **Build:** `generateMetadata` for list and post (canonical, OG, `noindex`), `BlogPosting` + `BreadcrumbList` JSON-LD, posts in `sitemap.ts`, the home block with the 3 latest posts.
@@ -87,9 +87,11 @@ The agency can publish useful articles (buying, selling, renting, the market) th
   - **Placement:** header / mobile menu / footer «Купити · Орендувати · Про нас · Блог · Контакти»; home block «Останні статті» after the agents section, before testimonials.
   - Slug generated from the title (transliterated), editable while draft, locked once published. TipTap is a new dependency, admin only.
   - Publishing (not saving a draft) requires a non-empty excerpt and body; checked in the slice 4 action.
+- **Decided (slice 2):** no route-level `loading.tsx` for the blog (same reason as 013: with JS off the streamed fallback never swaps; `NavProgress` covers client navigation). The post CTA links to `/contacts#zv-yazok` with phone + messengers (no form JS on articles). Unknown category → all posts with canonical `/blog`; a page past the last → empty state (same as the catalog). Covers render in a fixed 16:9 box; add `srcSet` if slice 5 stores WebP sizes.
 - **Note (slice 1):** `database.types.ts` was hand-edited (no local Supabase running) — regenerate with `pnpm db:types` when a local DB is up. The slug locks once `published_at` is set (unpublishing does not unlock it). On Supabase `setPostProperties` is delete + insert (not one transaction). Slice 4 actions must `revalidateTag(postTag(slug))` besides `posts`.
 
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
 | 2026-11-05 | 1 | done: migration `20261105120000_blog.sql` (`posts` with category / status checks, `set_updated_at` trigger, listing indexes; `post_properties` position 0..2; RLS: public selects published posts and their links only, no write policies); `database.types.ts` hand-edited; `src/constants/blog.ts`; public facade `posts.ts` (+ `post-query.ts`), admin facade `admin-posts.ts` (discriminated results, slug lock, first-publish `published_at`, ≤3 related, cover returns the old key), `post-schemas.ts`, `post-slug.ts` (reuses `slugifyBase`); both drivers; related properties via `fetchPropertiesByIds`, published only; seed 8 published + 1 draft (covers `placeholders/*.webp`, one without), `seed.sql` regenerated; contract + seed tests: 676 passed / 56 skipped (Supabase run skipped, no local DB) | `supabase/migrations/20261105120000_blog.sql`, `src/lib/supabase/database.types.ts`, `src/constants/blog.ts`, `src/lib/db/{posts,admin-posts,post-query,post-schemas,post-slug,driver-types,cache-tags}.ts`, `src/lib/db/{supabase,../demo/db}/{posts,admin-posts}.ts`, `src/lib/demo/{store.ts,seed/*}`, `supabase/seed.sql`, `docs/setup.md` |
+| 2026-11-05 | 2 | done: `/blog` (cards, category chips as links with `aria-current`, `?page=` pagination reusing catalog `pageItems`, empty / none-in-category / out-of-range states, load error alert + retry), `/blog/[slug]` (breadcrumbs, category chip, date + reading time, cover `fetchPriority=high` in a 16:9 box, Markdown body ~68ch, tag chips, author card, CTA, related property cards), `error.tsx`, `not-found.tsx`; «Блог» in `NAV_LINKS` (header, mobile menu, footer), `NavLink` prefix match; Markdown renderer gained `ol` / `blockquote` / `em` styles (also on about / privacy). `e2e/no-js.spec.ts` 33/33 on `next start`; post page ships fewer chunks than a property page (+~1.9 KB gz blog-only chunks); screenshots reviewed (list 1280 dark, post 375 light) | `src/app/(site)/blog/**`, `src/features/blog/*`, `src/constants/blog.ts`, `src/components/layout/{nav-config,nav-link}.ts(x)`, `src/features/pages/markdown.tsx`, `src/features/catalog/catalog-pagination.tsx`, `e2e/no-js.spec.ts` |

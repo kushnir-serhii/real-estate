@@ -14,6 +14,11 @@ const COMPONENTS: Components = {
   ),
   p: ({ children }) => <p className="mb-4 leading-7 last:mb-0">{children}</p>,
   ul: ({ children }) => <ul className="mb-4 list-disc space-y-2 pl-6 marker:text-dawn-text">{children}</ul>,
+  ol: ({ children }) => <ol className="mb-4 list-decimal space-y-2 pl-6 marker:font-semibold marker:text-dawn-text">{children}</ol>,
+  blockquote: ({ children }) => (
+    <blockquote className="my-6 border-l-4 border-dawn pl-4 text-foreground [&>p]:mb-0">{children}</blockquote>
+  ),
+  em: ({ children }) => <em className="italic">{children}</em>,
   li: ({ children }) => <li className="leading-7">{children}</li>,
   strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
   a: ({ href, children }) => (
