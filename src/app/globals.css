@@ -3,6 +3,8 @@
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
+/* inside the site header while it is transparent over a hero (`[data-hero]` on the page, header not scrolled): light text */
+@custom-variant on-hero (body:has([data-hero]) [data-tone="light"] &);
 
 /* Tokens. Swap the look here only: colors, radius, fonts. */
 @theme inline {
@@ -56,6 +58,8 @@
 
   /* AI assistant launcher (round floating button) → size-chat-button */
   --spacing-chat-button: 3.5rem;
+  /* site header slot (its tallest state). On the home page the hero slides under it → -mt-header */
+  --spacing-header: 5rem;
   /* height of the property page's mobile bar (button + padding + border), without the safe area */
   --spacing-property-bar: 4.625rem;
   /* chat panel width from the sm breakpoint → sm:max-w-(--container-chat-panel) */

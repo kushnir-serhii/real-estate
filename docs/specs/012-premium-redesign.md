@@ -60,16 +60,16 @@ Neutrals are tinted (warm in light, blue in dark), never pure grey. Links and te
   - [x] no raw colours outside `globals.css` (and the brand-asset script); typecheck, lint, build green
   - [x] `/design` shows the new palette, fonts and button variants in both themes
 
-### [ ] 2. Header, theme toggle, mobile menu, footer
+### [x] 2. Header, theme toggle, mobile menu, footer
 - **Build:** header per **Design direction**: centered nav with an animated underline for the active item, compact phone, one theme icon button (light ↔ dark; the stored value can still be `system` until first click; icon reflects the current resolved theme, `aria-label` says what it switches to), dawn CTA. Transparent over the hero on `/` (light text on the hero scrim) and solid / blurred + shorter after ~40px of scroll; solid on other routes. Prefer a CSS scroll-driven approach; if JS is needed, one tiny client component with a passive listener. Mobile menu restyled (full-height sheet with large nav links, contacts, CTA, theme). Footer: ink surface with a top CTA band ("Підберемо об'єкт за 24 години" style copy, phone + messengers), columns (brand + tagline, navigation, contacts, socials), bottom row (©, privacy, demo note). Plektan badge keeps working when enabled.
 - **Files:** `src/components/layout/{site-header,nav-link,mobile-menu,site-footer,logo,favorites-link,messenger-links}.tsx`, `src/components/theme-toggle.tsx`, `src/app/(site)/layout.tsx`, `src/app/globals.css`
 - **Agent:** designer · **Model:** sonnet
 - **Accept:**
-  - [ ] desktop header has at most 5 controls on the right (phone, favorites, theme, CTA, + menu below lg); nav is centered
-  - [ ] on `/` the header is readable over the hero and after scrolling (AA in both states, both themes); no layout shift (CLS 0) when it changes
-  - [ ] theme toggle: one button, keyboard reachable, `aria-label`, no flash of wrong theme
-  - [ ] 375px: logo, favorites, phone, menu fit with 44px targets; mobile menu traps focus and closes on Escape
-  - [ ] footer on ink surface passes AA; all footer links work
+  - [x] desktop header has at most 5 controls on the right (phone, favorites, theme, CTA, + menu below lg); nav is centered
+  - [x] on `/` the header is readable over the hero and after scrolling (AA in both states, both themes); no layout shift (CLS 0) when it changes
+  - [x] theme toggle: one button, keyboard reachable, `aria-label`, no flash of wrong theme
+  - [x] 375px: logo, favorites, phone, menu fit with 44px targets; mobile menu traps focus and closes on Escape
+  - [x] footer on ink surface passes AA; all footer links work
 
 ### [ ] 3. Hero and quick search
 - **Build:** taller full-bleed hero (≈ 88vh desktop, ≈ 78svh mobile, min heights so content never clips) with a directional midnight gradient instead of the flat 62% scrim; eyebrow chip (e.g. "AI-асистент 24/7 · Київ і область"), Unbounded headline, lead, two CTAs (dawn "Підібрати об'єкт" → catalog, ghost-on-scrim "Залишити заявку"), trust row (3 short facts). Very slow scale-in of the photo on load (off under reduced motion). Quick search becomes a floating glass / card panel overlapping the hero edge with deal tabs (Купити / Орендувати) and the existing fields; same URL params as today.
@@ -126,9 +126,12 @@ Neutrals are tinted (warm in light, blue in dark), never pure grey. Links and te
 - **Decided (2026-11-05):** new home sections: trust numbers, districts, how we work (+ AI / CRM), agents + static testimonials.
 - **Decided (2026-11-05):** theme toggle: one icon button in the header.
 - **Open (2026-11-05):** Unbounded is much wider than Manrope; existing `h1–h3` (cards, admin) may crowd in Ukrainian — checked per page in slices 4 and 7.
+- **Decided (2026-11-05):** header phone number shows from `2xl` (icon + aria-label below): at 1280px the number + centered nav + CTA don't fit.
+- **Open (2026-11-05):** Plektan badge PNG not yet seen on the ink footer (needs `PLEKTAN_API_KEY`).
 - **Decided (2026-11-05):** 011 has one open criterion (`pnpm preview` on Windows, environment-only); 012 builds on the 011 branch anyway.
 
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
 | 2026-11-05 | 1 | done: Midnight Sky tokens (light + dark) + `dawn` / `dawn-text` / `sky` / `ink` / `on-ink` / `ink-muted` / `ink-border`; AA: light fg 15.7 on page, primary 15.9, muted-fg 6.75, control 3.58, dawn+midnight 7.98, dawn-text 5.64, on-ink 15.9; dark fg 16.4, dawn primary 7.98 / 8.49 on page, muted-fg 8.0, control 4.31, on-ink 14.7. Unbounded self-hosted (latin + cyrillic, OFL), `font-heading`, fluid type scale (`text-display/h1/h2/h3`, `eyebrow`), motion tokens + scroll-driven `reveal` with fallback, button `dawn` variant + lift + arrow nudge, radius 0.75rem, `/design` updated, favicon / OG regenerated (midnight + dawn). package.json unchanged | `src/app/{globals.css,layout.tsx,icon.svg,favicon.ico}`, `src/app/fonts/{unbounded.ts,unbounded-*.woff2,OFL.txt}`, `src/components/ui/button.tsx`, `src/app/design/page.tsx`, `scripts/generate-brand-assets.mjs`, `public/og-default.png` |
+| 2026-11-05 | 2 | done: `HeaderShell` (tiny client: pathname + passive scroll via `useSyncExternalStore`, ~0.4 KB) sets `data-tone` / `data-scrolled`; `on-hero:` variant (`body:has([data-hero])`); fixed `h-header` slot, inner bar h-20 → h-16 (no shift), hero `-mt-header`; centered nav (grid from lg) with growing underline; one theme icon button (both icons rendered, swapped by `dark:`); full mobile sheet; ink footer with CTA band + columns. Header over hero ≥ 5.5:1 worst case; footer on-ink ~15:1, ink-muted ~9:1 | `src/components/layout/{header-shell,site-header,nav-link,nav-config,logo,favorites-link,mobile-menu,messenger-links,site-footer}.tsx?`, `src/components/theme-toggle.tsx`, `src/constants/footer.ts`, `src/app/globals.css`, `src/features/home/hero.tsx` |

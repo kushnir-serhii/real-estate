@@ -1,51 +1,48 @@
 "use client";
 
-import { useEffect, useSyncExternalStore } from "react";
-import { Monitor, Moon, Sun } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { useSyncExternalStore } from "react";
+import { Moon, Sun } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
   THEME_STORAGE_KEY,
   applyTheme,
   readStoredTheme,
-  type Theme,
 } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 
 const THEME_EVENT = "7sky-theme-change";
 
-const OPTIONS: { value: Theme; label: string; Icon: LucideIcon }[] = [
-  { value: "light", label: "Світла", Icon: Sun },
-  { value: "dark", label: "Темна", Icon: Moon },
-  { value: "system", label: "Як у системі", Icon: Monitor },
-];
-
 const subscribe = (onChange: () => void) => {
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
+  // Follow the OS while "system" is stored.
+  const onMedia = () => {
+    if (readStoredTheme() === "system") applyTheme("system");
+    onChange();
+  };
   window.addEventListener("storage", onChange);
   window.addEventListener(THEME_EVENT, onChange);
+  media.addEventListener("change", onMedia);
   return () => {
     window.removeEventListener("storage", onChange);
     window.removeEventListener(THEME_EVENT, onChange);
+    media.removeEventListener("change", onMedia);
   };
 };
 
-export const ThemeToggle = () => {
-  const theme = useSyncExternalStore<Theme>(
-    subscribe,
-    readStoredTheme,
-    () => "system",
-  );
+// The resolved theme is the `dark` class that THEME_INIT_SCRIPT / applyTheme put on <html>.
+const getIsDark = () => document.documentElement.classList.contains("dark");
 
-  // Follow the OS while "system" is selected.
-  useEffect(() => {
-    if (theme !== "system") return;
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = () => applyTheme("system");
-    media.addEventListener("change", onChange);
-    return () => media.removeEventListener("change", onChange);
-  }, [theme]);
+type ThemeToggleProps = { className?: string };
 
-  const select = (next: Theme) => {
+/** One button, light <-> dark. Both icons are always rendered and swapped with CSS (`dark:`), so the server HTML never shows the wrong one. */
+export const ThemeToggle = ({ className }: ThemeToggleProps) => {
+  const isDark = useSyncExternalStore(subscribe, getIsDark, () => false);
+  const label = isDark ? "Увімкнути світлу тему" : "Увімкнути темну тему";
+
+  const toggle = () => {
+    // from "system" too: go to the opposite of what is shown now
+    const next = getIsDark() ? "light" : "dark";
     try {
       localStorage.setItem(THEME_STORAGE_KEY, next);
     } catch {
@@ -56,21 +53,23 @@ export const ThemeToggle = () => {
   };
 
   return (
-    <div role="group" aria-label="Тема оформлення" className="flex gap-1">
-      {OPTIONS.map(({ value, label, Icon }) => (
-        <Button
-          key={value}
-          type="button"
-          variant={theme === value ? "secondary" : "ghost"}
-          size="icon"
-          aria-label={label}
-          aria-pressed={theme === value}
-          title={label}
-          onClick={() => select(value)}
-        >
-          <Icon />
-        </Button>
-      ))}
-    </div>
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon"
+      aria-label={label}
+      title={label}
+      onClick={toggle}
+      className={cn("relative", className)}
+    >
+      <Sun
+        aria-hidden="true"
+        className="transition-[transform,opacity] duration-(--duration-base) ease-out-soft dark:-rotate-90 dark:scale-50 dark:opacity-0 motion-reduce:transition-none"
+      />
+      <Moon
+        aria-hidden="true"
+        className="absolute rotate-90 scale-50 opacity-0 transition-[transform,opacity] duration-(--duration-base) ease-out-soft dark:rotate-0 dark:scale-100 dark:opacity-100 motion-reduce:transition-none"
+      />
+    </Button>
   );
 };
