@@ -78,3 +78,84 @@ export const ABOUT = {
     tertiary: { src: "/placeholders/building-facade-1.webp", width: 1100, height: 733 },
   },
 } as const;
+
+// Mock — replace for the real agency. `name` must match a district in the catalog data (it is the `district` filter value).
+export const DISTRICTS = {
+  eyebrow: "Райони",
+  title: "Шукайте за районом",
+  description: "Оберіть район Києва, де хочете жити.",
+  cta: "Дивитись",
+  items: [
+    {
+      name: "Печерський",
+      tagline: "Центр, парки і Лавра",
+      image: { src: "/placeholders/building-facade-1.webp", width: 1100, height: 733 },
+    },
+    {
+      name: "Подільський",
+      tagline: "Історичний Поділ біля Дніпра",
+      image: { src: "/placeholders/house-exterior-1.webp", width: 1280, height: 849 },
+    },
+    {
+      name: "Голосіївський",
+      tagline: "Зелені двори й нові ЖК",
+      image: { src: "/placeholders/flat-bedroom-1.webp", width: 1000, height: 667 },
+    },
+    {
+      name: "Оболонський",
+      tagline: "Набережна й тихі квартали",
+      image: { src: "/placeholders/house-exterior-2.webp", width: 1100, height: 733 },
+    },
+    {
+      name: "Шевченківський",
+      tagline: "Метро, університети, кафе",
+      image: { src: "/placeholders/flat-living-1.webp", width: 1280, height: 1129 },
+    },
+    {
+      name: "Дарницький",
+      tagline: "Лівий берег, доступні ціни",
+      image: { src: "/placeholders/flat-living-3.webp", width: 1280, height: 854 },
+    },
+  ],
+} as const;
+
+// Mock — replace for the real agency.
+export const AGENTS = {
+  eyebrow: "Команда",
+  title: "Наші агенти",
+  description: "Живі люди, які відповідають на дзвінки й супроводжують угоди.",
+  role: "Агент з нерухомості",
+  max: 4,
+} as const;
+
+// Mock — replace for the real agency (real, consented reviews only).
+export const TESTIMONIALS = {
+  eyebrow: "Відгуки",
+  title: "Що кажуть клієнти",
+  items: [
+    {
+      name: "Олена К.",
+      deal: "Купівля 2-кімн. квартири, Поділ",
+      text: "Підібрали квартиру за два тижні, юрист перевірив усі документи. Жодних сюрпризів на угоді.",
+      rating: 5,
+    },
+    {
+      name: "Андрій М.",
+      deal: "Оренда 1-кімн. квартири, Оболонь",
+      text: "Відповіли в чаті вночі й уже вранці показали три варіанти. Переїхали за тиждень.",
+      rating: 5,
+    },
+    {
+      name: "Ірина та Максим П.",
+      deal: "Продаж будинку, Київська область",
+      text: "Продали швидше, ніж очікували, і за ціною, яку обговорювали. Менеджер тримав на зв'язку весь час.",
+      rating: 5,
+    },
+  ],
+} as const;
+
+// Mock — replace for the real agency.
+export const HOME_CTA = {
+  title: "Не знайшли потрібне?",
+  lead: "Розкажіть, що шукаєте, і ми підберемо варіанти. Залиште заявку або зателефонуйте чи напишіть.",
+} as const;

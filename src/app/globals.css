@@ -314,6 +314,10 @@
     linear-gradient(to bottom, var(--veil-top), transparent 22%),
     linear-gradient(to top right, var(--veil-strong) 0%, var(--veil-mid) 45%, var(--veil-soft) 100%);
 }
+/* Photo tile veil (districts): text sits at the bottom, on >= 85% midnight, so on-scrim stays >= 4.5:1 over any photo */
+@utility tile-veil {
+  background-image: linear-gradient(to top, var(--veil-strong) 0%, var(--veil-mid) 40%, var(--veil-soft) 100%);
+}
 @keyframes hero-zoom {
   from {
     transform: scale(1.08);
