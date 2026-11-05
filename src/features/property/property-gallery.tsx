@@ -2,7 +2,7 @@
 
 import { Building2, ChevronLeft, ChevronRight, Expand, XIcon } from "lucide-react";
 import { Dialog } from "radix-ui";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent, RefObject, UIEvent } from "react";
 
 import { cn } from "@/lib/utils";
@@ -12,6 +12,8 @@ export type GalleryPhoto = {
   id: string;
   src: string;
   srcSet?: string;
+  /** Narrowest stored size, for thumbnails. */
+  thumb?: string;
   width: number;
   height: number;
 };
@@ -80,6 +82,70 @@ const useStrip = (count: number, initial: number, onChange?: (index: number) => 
   return { stripRef, index, go, step, onScroll, onTouchStart };
 };
 
+type ThumbStripProps = {
+  photos: GalleryPhoto[];
+  index: number;
+  onSelect: (index: number) => void;
+  /** Tailwind width of one thumb. */
+  thumbClassName: string;
+  className?: string;
+};
+
+/** Row of photo thumbnails; the active one is ringed and kept in view inside the strip (the page never jumps). */
+const ThumbStrip = ({ photos, index, onSelect, thumbClassName, className }: ThumbStripProps) => {
+  const listRef = useRef<HTMLUListElement>(null);
+  const count = photos.length;
+
+  useEffect(() => {
+    const list = listRef.current;
+    const thumb = list?.children[index] as HTMLElement | undefined;
+    if (!list || !thumb) return;
+    const left = thumb.offsetLeft - list.offsetLeft;
+    const right = left + thumb.offsetWidth;
+    const behavior = prefersReducedMotion() ? "auto" : "smooth";
+    if (left < list.scrollLeft) list.scrollTo({ left: left - 8, behavior });
+    else if (right > list.scrollLeft + list.clientWidth) list.scrollTo({ left: right - list.clientWidth + 8, behavior });
+  }, [index]);
+
+  return (
+    <ul
+      ref={listRef}
+      aria-label="Мініатюри фото"
+      className={cn("flex snap-x gap-2 overflow-x-auto overscroll-x-contain p-1.5 scrollbar-none", className)}
+    >
+      {photos.map((photo, i) => {
+        const active = i === index;
+        return (
+          <li key={photo.id} className={cn("shrink-0 snap-start", thumbClassName)}>
+            <button
+              type="button"
+              aria-label={`Фото ${i + 1} з ${count}`}
+              aria-current={active ? "true" : undefined}
+              onClick={() => onSelect(i)}
+              className={cn(
+                "block aspect-4/3 w-full overflow-hidden rounded-xl bg-muted outline-none ring-offset-2 ring-offset-background transition-opacity duration-(--duration-fast) ease-(--ease-out-soft) focus-visible:ring-3 focus-visible:ring-ring",
+                active ? "opacity-100 ring-2 ring-dawn" : "opacity-60 hover:opacity-100 focus-visible:opacity-100",
+              )}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element -- photos come from R2/public; Workers has no image optimizer */}
+              <img
+                src={photo.thumb ?? photo.src}
+                alt=""
+                width={photo.width}
+                height={photo.height}
+                loading="lazy"
+                decoding="async"
+                draggable={false}
+                className="size-full object-cover"
+              />
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  );
+};
+
 export const PropertyGallery = ({ photos, title }: PropertyGalleryProps) => {
   const regionRef = useRef<HTMLDivElement>(null);
   const openerRef = useRef<HTMLElement | null>(null);
@@ -90,7 +156,7 @@ export const PropertyGallery = ({ photos, title }: PropertyGalleryProps) => {
 
   if (count === 0) {
     return (
-      <div className="-mx-4 flex aspect-4/3 flex-col items-center justify-center gap-2 bg-muted text-muted-foreground sm:mx-0 sm:aspect-3/2 sm:rounded-xl">
+      <div className="-mx-4 flex aspect-4/3 flex-col items-center justify-center gap-2 bg-muted text-muted-foreground sm:mx-0 sm:aspect-3/2 sm:rounded-2xl">
         <Building2 className="size-10" aria-hidden="true" />
         <p className="text-base">Фото незабаром</p>
       </div>
@@ -121,106 +187,115 @@ export const PropertyGallery = ({ photos, title }: PropertyGalleryProps) => {
   };
 
   return (
-    <div
-      ref={regionRef}
-      role="region"
-      aria-roledescription="карусель"
-      aria-label={`Фото: ${title}`}
-      tabIndex={0}
-      onKeyDown={onKeyDown}
-      className="group/gallery relative -mx-4 outline-none focus-visible:ring-3 focus-visible:ring-ring sm:mx-0 sm:rounded-xl"
-    >
-      <ul
-        ref={stripRef}
-        onScroll={onScroll}
-        onTouchStart={onTouchStart}
-        className="flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain bg-muted scrollbar-none sm:rounded-xl"
+    <div className="flex flex-col gap-1">
+      <div
+        ref={regionRef}
+        role="region"
+        aria-roledescription="карусель"
+        aria-label={`Фото: ${title}`}
+        tabIndex={0}
+        onKeyDown={onKeyDown}
+        className="group/gallery relative -mx-4 outline-none focus-visible:ring-3 focus-visible:ring-ring sm:mx-0 sm:rounded-2xl"
       >
-        {photos.map((photo, i) => (
-          <li
-            key={photo.id}
-            role="group"
-            aria-roledescription="слайд"
-            aria-label={`${i + 1} з ${count}`}
-            className="aspect-4/3 w-full shrink-0 snap-start snap-always sm:aspect-3/2"
-          >
-            {/* Click/tap opens the viewer; keyboard users have the «На весь екран» button. */}
+        <ul
+          ref={stripRef}
+          onScroll={onScroll}
+          onTouchStart={onTouchStart}
+          className="flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain bg-muted scrollbar-none sm:rounded-2xl"
+        >
+          {photos.map((photo, i) => (
+            <li
+              key={photo.id}
+              role="group"
+              aria-roledescription="слайд"
+              aria-label={`${i + 1} з ${count}`}
+              className="aspect-4/3 w-full shrink-0 snap-start snap-always sm:aspect-3/2"
+            >
+              {/* Click/tap opens the viewer; keyboard users have the «На весь екран» button. */}
+              <button
+                type="button"
+                tabIndex={-1}
+                aria-label={`Відкрити фото ${i + 1} на весь екран`}
+                onClick={() => openViewer(i)}
+                className="block size-full cursor-zoom-in"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element -- photos come from R2/public; Workers has no image optimizer */}
+                <img
+                  src={photo.src}
+                  srcSet={photo.srcSet}
+                  sizes={photo.srcSet ? STRIP_SIZES : undefined}
+                  alt=""
+                  width={photo.width}
+                  height={photo.height}
+                  loading={i === 0 ? "eager" : "lazy"}
+                  fetchPriority={i === 0 ? "high" : undefined}
+                  decoding="async"
+                  draggable={false}
+                  className="size-full object-cover"
+                />
+              </button>
+            </li>
+          ))}
+        </ul>
+
+        {many && (
+          <>
             <button
               type="button"
-              tabIndex={-1}
-              aria-label={`Відкрити фото ${i + 1} на весь екран`}
-              onClick={() => openViewer(i)}
-              className="block size-full cursor-zoom-in"
+              aria-label="Попереднє фото"
+              onClick={() => stepBy(-1)}
+              className={cn(
+                ROUND_BUTTON,
+                "absolute top-1/2 left-3 -translate-y-1/2 bg-background/90 text-foreground shadow-sm hover:bg-background",
+              )}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element -- photos come from R2/public; Workers has no image optimizer */}
-              <img
-                src={photo.src}
-                srcSet={photo.srcSet}
-                sizes={photo.srcSet ? STRIP_SIZES : undefined}
-                alt=""
-                width={photo.width}
-                height={photo.height}
-                loading={i === 0 ? "eager" : "lazy"}
-                fetchPriority={i === 0 ? "high" : undefined}
-                decoding="async"
-                draggable={false}
-                className="size-full object-cover"
-              />
+              <ChevronLeft className="size-6" aria-hidden="true" />
             </button>
-          </li>
-        ))}
-      </ul>
+            <button
+              type="button"
+              aria-label="Наступне фото"
+              onClick={() => stepBy(1)}
+              className={cn(
+                ROUND_BUTTON,
+                "absolute top-1/2 right-3 -translate-y-1/2 bg-background/90 text-foreground shadow-sm hover:bg-background",
+              )}
+            >
+              <ChevronRight className="size-6" aria-hidden="true" />
+            </button>
+            <p
+              aria-live="polite"
+              aria-atomic="true"
+              className="absolute bottom-3 left-3 rounded-full bg-scrim px-3 py-1 text-sm font-medium text-on-scrim tabular-nums"
+            >
+              <span className="sr-only">Фото </span>
+              {index + 1} / {count}
+            </p>
+          </>
+        )}
+        <button
+          type="button"
+          onClick={() => openViewer(index)}
+          className={cn(ROUND_BUTTON, "absolute right-3 bottom-3 bg-scrim text-on-scrim hover:bg-viewer")}
+          aria-label="На весь екран"
+        >
+          <Expand className="size-5" aria-hidden="true" />
+        </button>
 
-      {many && (
-        <>
-          <button
-            type="button"
-            aria-label="Попереднє фото"
-            onClick={() => stepBy(-1)}
-            className={cn(ROUND_BUTTON, "absolute top-1/2 left-3 -translate-y-1/2 bg-background/90 text-foreground shadow-sm hover:bg-background")}
-          >
-            <ChevronLeft className="size-6" aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            aria-label="Наступне фото"
-            onClick={() => stepBy(1)}
-            className={cn(ROUND_BUTTON, "absolute top-1/2 right-3 -translate-y-1/2 bg-background/90 text-foreground shadow-sm hover:bg-background")}
-          >
-            <ChevronRight className="size-6" aria-hidden="true" />
-          </button>
-          <p
-            aria-live="polite"
-            aria-atomic="true"
-            className="absolute bottom-3 left-3 rounded-md bg-scrim px-2 py-1 text-sm font-medium text-on-scrim tabular-nums"
-          >
-            <span className="sr-only">Фото </span>
-            {index + 1} / {count}
-          </p>
-        </>
-      )}
-      <button
-        type="button"
-        onClick={() => openViewer(index)}
-        className={cn(ROUND_BUTTON, "absolute right-3 bottom-3 bg-scrim text-on-scrim hover:bg-viewer")}
-        aria-label="На весь екран"
-      >
-        <Expand className="size-5" aria-hidden="true" />
-      </button>
-
-      <Dialog.Root open={viewer.open} onOpenChange={(open) => !open && setViewer({ open: false })}>
-        <Dialog.Portal>
-          {viewer.open && (
-            <GalleryViewer
-              photos={photos}
-              title={title}
-              start={viewer.start}
-              indexRef={viewerIndexRef}
-              onClosed={restoreAfterViewer}
-            />
-          )}
-        </Dialog.Portal>
-      </Dialog.Root>
+        <Dialog.Root open={viewer.open} onOpenChange={(open) => !open && setViewer({ open: false })}>
+          <Dialog.Portal>
+            {viewer.open && (
+              <GalleryViewer
+                photos={photos}
+                title={title}
+                start={viewer.start}
+                indexRef={viewerIndexRef}
+                onClosed={restoreAfterViewer}
+              />
+            )}
+          </Dialog.Portal>
+        </Dialog.Root>
+      </div>
+      {many && <ThumbStrip photos={photos} index={index} onSelect={(i) => go(i)} thumbClassName="w-16 sm:w-24" />}
     </div>
   );
 };
@@ -238,7 +313,14 @@ type GalleryViewerProps = {
 const GalleryViewer = ({ photos, title, start, indexRef, onClosed }: GalleryViewerProps) => {
   const count = photos.length;
   const many = count > 1;
-  const { stripRef, index, step: stepBy, onScroll, onTouchStart } = useStrip(count, start, (next) => {
+  const {
+    stripRef,
+    index,
+    go,
+    step: stepBy,
+    onScroll,
+    onTouchStart,
+  } = useStrip(count, start, (next) => {
     indexRef.current = next;
   });
 
@@ -336,6 +418,15 @@ const GalleryViewer = ({ photos, title, start, indexRef, onClosed }: GalleryView
             </>
           )}
         </div>
+        {many && (
+          <ThumbStrip
+            photos={photos}
+            index={index}
+            onSelect={(i) => go(i)}
+            thumbClassName="w-16 sm:w-20"
+            className="shrink-0 px-2 sm:px-4"
+          />
+        )}
         <div className="pb-[env(safe-area-inset-bottom)]" />
       </Dialog.Content>
     </>

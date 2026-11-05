@@ -22,7 +22,7 @@ export const AssistantPanelHeader = ({ actions }: AssistantPanelHeaderProps) => 
       <SheetTitle className="flex flex-col text-base font-semibold">
         <span className="truncate">{ASSISTANT_PERSONA.name}</span>
         <span className="sr-only"> — </span>
-        <span className="truncate text-sm font-normal text-muted-foreground">асистент агенції</span>
+        <span className="truncate text-sm font-normal text-muted-foreground">віртуальний консультант</span>
       </SheetTitle>
       <SheetDescription className="sr-only">
         Допоможе підібрати житло та відповість на питання про агенцію.

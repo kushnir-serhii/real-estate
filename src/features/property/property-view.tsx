@@ -1,16 +1,16 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { Suspense } from "react";
 
 import { JsonLd } from "@/components/seo/json-ld";
 import { buttonVariants } from "@/components/ui/button";
+import { PROPERTY_PAGE } from "@/constants/inner-pages";
 import { FavoriteButton } from "@/features/favorites/favorite-button";
 import { PropertyRequestForm } from "@/features/leads/property-request-form";
 import { breadcrumbSchema, CATALOG_CRUMB, HOME_CRUMB, propertySchema } from "@/features/seo/schemas";
 import { getSiteUrl } from "@/lib/site-url";
 import { DEAL_LABELS, PROPERTY_TYPE_LABELS } from "@/features/properties/property-labels";
 import type { PublishedProperty } from "@/lib/db/properties";
-import { largestPhotoUrl, photoSrcSet } from "@/lib/photos/photo-src-set";
+import { largestPhotoUrl, photoSrcSet, smallestPhotoUrl } from "@/lib/photos/photo-src-set";
 import { photoUrl } from "@/lib/photos/photo-url";
 import { cn } from "@/lib/utils";
 import { PropertyContactCard } from "./property-contact-card";
@@ -43,6 +43,7 @@ const toGalleryPhotos = (property: PublishedProperty): GalleryPhoto[] =>
     id: photo.id,
     src: photoUrl(photo.r2_key),
     srcSet: photoSrcSet(photo.sizes),
+    thumb: smallestPhotoUrl(photo),
     width: photo.width ?? FALLBACK_WIDTH,
     height: photo.height ?? FALLBACK_HEIGHT,
   }));
@@ -64,7 +65,7 @@ export const PropertyView = ({ property }: PropertyViewProps) => {
   );
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 pt-2 sm:pt-4 lg:pb-16">
+    <div className="mx-auto w-full max-w-6xl px-4 pt-2 sm:pt-4 lg:pb-24">
       <JsonLd
         data={breadcrumbSchema(siteUrl, [
           HOME_CRUMB,
@@ -78,18 +79,18 @@ export const PropertyView = ({ property }: PropertyViewProps) => {
         className="inline-flex min-h-11 items-center gap-2 rounded-md text-sm font-medium text-muted-foreground outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
       >
         <ArrowLeft className="size-4" aria-hidden="true" />
-        До каталогу
+        {PROPERTY_PAGE.back}
       </Link>
 
       <div className="mt-2 lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-10">
-        <div className="flex min-w-0 flex-col gap-8">
+        <div className="flex min-w-0 flex-col gap-10">
           <PropertyGallery photos={toGalleryPhotos(property)} title={property.title} />
 
-          <header className="flex flex-col gap-2">
-            <p className="text-sm font-medium text-muted-foreground">
+          <header className="flex flex-col gap-3">
+            <p className="eyebrow text-dawn-text">
               {DEAL_LABELS[property.deal]} · {PROPERTY_TYPE_LABELS[property.property_type]}
             </p>
-            <h1 className="text-2xl font-bold break-words text-balance sm:text-3xl">{property.title}</h1>
+            <h1 className="text-h2 break-words">{property.title}</h1>
             {location && <p className="break-words text-muted-foreground">{location}</p>}
             <PropertyPrice
               price={price}
@@ -106,20 +107,21 @@ export const PropertyView = ({ property }: PropertyViewProps) => {
         </div>
 
         <aside aria-label="Ціна, заявка та контакти" className="mt-8 flex flex-col gap-4 lg:mt-0">
-          <div className="hidden rounded-xl bg-card p-5 text-card-foreground ring-1 ring-foreground/10 lg:block">
+          <div className="hidden rounded-2xl bg-card p-6 text-card-foreground ring-1 ring-foreground/10 lg:block">
             <PropertyPrice
               price={price}
               perSquareMeter={perSquareMeter}
               facts={facts}
               action={<FavoriteButton propertyId={property.id} variant="page" />}
             />
-            <a href={`#${REQUEST_ANCHOR}`} className={cn(buttonVariants({ size: "lg" }), "mt-5 w-full")}>
+            <a href={`#${REQUEST_ANCHOR}`} className={cn(buttonVariants({ variant: "dawn", size: "lg" }), "mt-5 w-full")}>
               Залишити заявку
+              <ArrowRight data-icon="inline-end" aria-hidden="true" />
             </a>
           </div>
           <section
             id={REQUEST_ANCHOR}
-            className="scroll-mt-24 rounded-xl bg-card p-5 text-card-foreground ring-1 ring-foreground/10"
+            className="scroll-mt-24 rounded-2xl bg-card p-6 text-card-foreground ring-1 ring-foreground/10"
           >
             <PropertyRequestForm propertyId={property.id} />
           </section>
@@ -127,9 +129,7 @@ export const PropertyView = ({ property }: PropertyViewProps) => {
         </aside>
       </div>
 
-      <Suspense fallback={null}>
-        <SimilarProperties property={property} className="mt-12" />
-      </Suspense>
+      <SimilarProperties property={property} className="mt-16 sm:mt-20" />
 
       <PropertyMobileBar phone={contactPhone(property)} />
     </div>

@@ -1,14 +1,19 @@
-import Link from "next/link";
-import { Suspense } from "react";
 import type { Metadata } from "next";
 
-import { HERO } from "@/constants/home";
+import { SectionHeading } from "@/components/section-heading";
+import { FEATURED, HERO } from "@/constants/home";
 import { FeaturedProperties } from "@/features/home/featured-properties";
-import { FeaturedSkeleton } from "@/features/home/featured-skeleton";
+import { Districts } from "@/features/home/districts";
 import { Hero } from "@/features/home/hero";
+import { HomeAgents } from "@/features/home/home-agents";
+import { Testimonials } from "@/features/home/testimonials";
+import { HomeSection } from "@/features/home/home-section";
 import { HomeAbout } from "@/features/home/home-about";
 import { HomeCta } from "@/features/home/home-cta";
+import { HowWeWork } from "@/features/home/how-we-work";
+import { ProptechFeatures } from "@/features/home/proptech-features";
 import { QuickSearch } from "@/features/home/quick-search";
+import { TrustStats } from "@/features/home/trust-stats";
 import { getPageContent } from "@/features/pages/get-page-content";
 import { pageSeoDescription, pageSeoTitle } from "@/features/pages/page-seo";
 
@@ -30,29 +35,32 @@ const HomePage = async () => {
   return (
     <>
       <Hero title={page.title} lead={HERO.lead} />
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-4 pb-12 sm:gap-16 sm:pb-16">
+      <div className="mx-auto w-full max-w-6xl px-4">
         <div className="relative -mt-16">
           <QuickSearch />
         </div>
-        <section aria-labelledby="featured-title" className="flex flex-col gap-6">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 id="featured-title" className="text-2xl font-bold">
-              Нові пропозиції
-            </h2>
-            <Link
-              href="/catalog"
-              className="inline-flex min-h-11 items-center text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
-            >
-              Усі об&apos;єкти
-            </Link>
-          </div>
-          <Suspense fallback={<FeaturedSkeleton />}>
-            <FeaturedProperties />
-          </Suspense>
-        </section>
-        <HomeAbout body={page.body} />
-        <HomeCta />
       </div>
+      <TrustStats />
+      <HomeSection labelledBy="featured-title" className="pt-4 sm:pt-8">
+        <div className="flex flex-col gap-6">
+          <div className="reveal">
+            <SectionHeading
+              id="featured-title"
+              eyebrow={FEATURED.eyebrow}
+              title={FEATURED.title}
+              action={{ href: "/catalog", label: FEATURED.action }}
+            />
+          </div>
+          <FeaturedProperties />
+        </div>
+      </HomeSection>
+      <Districts />
+      <HowWeWork />
+      <ProptechFeatures />
+      <HomeAbout body={page.body} />
+      <HomeAgents />
+      <Testimonials />
+      <HomeCta />
     </>
   );
 };

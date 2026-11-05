@@ -4,7 +4,7 @@ import { useId } from "react";
 
 import { cn } from "@/lib/utils";
 import { FieldError } from "./field-error";
-import type { LeadDeal } from "./lead-form-schema";
+import type { LeadDeal } from "./lead-form-values";
 
 const DEAL_OPTIONS: readonly { value: LeadDeal; label: string }[] = [
   { value: "buy", label: "Купити" },

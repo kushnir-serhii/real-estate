@@ -122,7 +122,7 @@ describe("processAssistantLead", () => {
   });
 
   it("refuses a stale card: unknown conversation, no Turnstile check, no proposal, or another proposal id", async () => {
-    const message = "Картка застаріла, попросіть асистента ще раз";
+    const message = "Картка застаріла, попросіть консультанта ще раз";
     mocks.getConversation.mockResolvedValue(null);
     expect(await processAssistantLead(input())).toEqual({ status: "error", message });
     mocks.getConversation.mockResolvedValue(conversation({ proposal: null }));

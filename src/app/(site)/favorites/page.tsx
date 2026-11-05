@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 
+import { PageHeader } from "@/components/page-header";
+import { FAVORITES_PAGE } from "@/constants/inner-pages";
 import { FavoritesList } from "@/features/favorites/favorites-list";
+import { FavoritesSuggestions } from "@/features/favorites/favorites-suggestions";
 
 export const metadata: Metadata = {
   title: "Обране",
@@ -9,13 +12,10 @@ export const metadata: Metadata = {
 };
 
 const FavoritesPage = () => (
-  <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:py-10">
-    <h1 className="text-2xl font-bold text-balance sm:text-3xl">Обране</h1>
-    <p className="mt-2 text-sm text-muted-foreground">
-      Список зберігається лише на цьому пристрої, у цьому браузері.
-    </p>
-    <div className="mt-6">
-      <FavoritesList />
+  <div>
+    <PageHeader eyebrow={FAVORITES_PAGE.eyebrow} title={FAVORITES_PAGE.title} lead={FAVORITES_PAGE.lead} />
+    <div className="mx-auto w-full max-w-6xl px-4 pb-16 sm:pb-24">
+      <FavoritesList suggestions={<FavoritesSuggestions />} />
     </div>
   </div>
 );

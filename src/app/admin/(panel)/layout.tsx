@@ -2,8 +2,10 @@ import { redirect } from "next/navigation";
 
 import { AdminForbidden } from "@/features/admin/admin-forbidden";
 import { AdminHeader } from "@/features/admin/admin-header";
+import { DemoBanner } from "@/features/admin/demo-banner";
 import { AdminUnconfigured } from "@/features/admin/admin-unconfigured";
 import { getAdminSession } from "@/lib/auth/admin-session";
+import { isDemoMode } from "@/lib/data-driver";
 
 const PanelLayout = async ({ children }: { children: React.ReactNode }) => {
   const session = await getAdminSession();
@@ -18,6 +20,7 @@ const PanelLayout = async ({ children }: { children: React.ReactNode }) => {
     case "admin":
       return (
         <div className="flex min-h-dvh flex-col">
+          {isDemoMode() ? <DemoBanner /> : null}
           <AdminHeader email={session.email} />
           <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:py-8">{children}</main>
         </div>

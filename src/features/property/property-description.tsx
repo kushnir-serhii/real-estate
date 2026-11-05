@@ -1,3 +1,4 @@
+import { PROPERTY_PAGE } from "@/constants/inner-pages";
 import { descriptionParagraphs } from "./property-details";
 
 type PropertyDescriptionProps = { text: string | null };
@@ -8,10 +9,10 @@ export const PropertyDescription = ({ text }: PropertyDescriptionProps) => {
   if (paragraphs.length === 0) return null;
   return (
     <section aria-labelledby="property-description-title">
-      <h2 id="property-description-title" className="text-xl font-bold">
-        Опис
+      <h2 id="property-description-title" className="text-h3">
+        {PROPERTY_PAGE.descriptionTitle}
       </h2>
-      <div className="mt-3 flex max-w-prose flex-col gap-4 text-base leading-relaxed">
+      <div className="mt-4 flex max-w-prose flex-col gap-4 text-base leading-7 text-foreground/90">
         {paragraphs.map((paragraph, i) => (
           <p key={i} className="break-words whitespace-pre-line">
             {paragraph}

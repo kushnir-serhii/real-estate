@@ -1,3 +1,6 @@
+/** Keys of photos uploaded in demo mode (kept in memory, served by `GET /api/demo/photos/...`). */
+export const DEMO_UPLOAD_PREFIX = "demo-uploads/";
+
 /**
  * Every R2 object key a photo row points to (the main key and each size). Only keys under `properties/` are
  * returned: the seed's placeholders live in the repo's `public/`, not in R2, and must never be deleted.

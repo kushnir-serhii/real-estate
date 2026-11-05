@@ -18,7 +18,9 @@ Next.js (App Router) · React · TypeScript (strict) · Tailwind 4 · shadcn/ui 
 | Shared UI | `src/components/layout/`, `src/components/` | |
 | shadcn primitive | `src/components/ui/button.tsx` | as the CLI generated it |
 | Agency-specific data | `src/constants/<topic>.ts` (`contacts`, `brand`, `home`, `pages`, …) | `UPPER_SNAKE_CASE` consts `as const`; mock values until the real agency's data arrives |
-| Data access | `src/lib/db/<domain>.ts` | `getPublishedProperties(…)` |
+| Data access (facade) | `src/lib/db/<domain>.ts` | `getPublishedProperties(…)`: the only thing `src/features/**` and `src/app/**` import; adds caching, picks the driver |
+| Data drivers | `src/lib/db/supabase/<domain>.ts`, `src/lib/demo/db/<domain>.ts` | implement the types in `src/lib/db/driver-types.ts`; `DATA_DRIVER` is read in `src/lib/data-driver.ts` only |
+| Demo data | `src/lib/demo/store.ts`, `src/lib/demo/seed/*` | rows typed from `database.types.ts`; the store mirrors RLS |
 | External client | `src/lib/plektan/`, `src/lib/telegram/`, `src/lib/r2/`, `src/lib/turnstile/`, `src/lib/geocode/`, `src/lib/llm/` | |
 | Supabase clients | `src/lib/supabase/server.ts`, `client.ts`, `admin.ts` | |
 | DB types | `src/lib/supabase/database.types.ts` | generated, never hand-edited |
@@ -53,6 +55,16 @@ Next.js (App Router) · React · TypeScript (strict) · Tailwind 4 · shadcn/ui 
 - Keep Plektan's original payload (`raw jsonb`) and ids (`external_id` = `adid`) on synced rows; our own `id` is a uuid.
 - Slugs are stable once published (they're in Google's index).
 
+### Data drivers (spec 011)
+- Two drivers sit behind every data module: `supabase` (the queries) and `demo` (in-memory store seeded from `src/lib/demo/seed/`). `DATA_DRIVER=demo|supabase`; empty = `supabase` if the Supabase env is set, else `demo`.
+- Callers import the facade `src/lib/db/<domain>.ts` and never branch on the driver (`isDemoMode()` / `hasPublicData()` live in `src/lib/data-driver.ts`, used by infrastructure such as `proxy.ts`, not by features). Shared pure logic (zod schemas, types, constants, derive helpers) stays in the facade or a `<domain>-query.ts` / `-values.ts` file next to it, never inside a driver.
+- The facade owns caching (`unstable_cache`, tags) and puts the driver into the cache key, so both drivers cache the same way. The facade loads a driver with a dynamic `import()`, so the other one never enters the request.
+- A demo driver must behave like SQL + RLS: public reads see only published, non-hidden properties (plus the 7-day sold window on detail) and active agents; return copies, never store rows; private columns (`raw`, `house`, `agent_id`) stay out of public results.
+- Env is read lazily (inside functions), never at import time. Nothing on the demo path may call a Supabase client.
+- `supabase/seed.sql` is generated output: change `src/lib/demo/seed/`, run `pnpm seed:sql` and commit both (a test fails on drift). The generator (`src/lib/demo/seed/sql.ts`) writes dates relative to `now()` and inserts in foreign-key order; a new table with seed rows is added there.
+- Production-build guard (`src/lib/build-guard.ts`, run from `next.config.ts`): `DATA_DRIVER=supabase` without the public Supabase env fails the build; the `demo` driver builds with nothing and logs «demo mode». `getSiteUrl()` without `NEXT_PUBLIC_SITE_URL` falls back to localhost with a warning on `demo`, and fails the build on `supabase`.
+- A new data function adds: its type in `driver-types.ts`, both implementations, and a case in `src/lib/db/driver-contract.test.ts` (runs on the demo driver always, on Supabase when a local DB is reachable).
+
 ## Integrations
 - One client per service in `src/lib/<service>/`, typed, with a timeout and a **fixture mode** when the key is empty (fixtures in `src/lib/<service>/fixtures/`).
 - Leads are written to Supabase before any external call. Each external delivery (Plektan, Telegram) has its own status column + error + attempts; failed ones are retried by the cron.
@@ -73,6 +85,13 @@ Next.js (App Router) · React · TypeScript (strict) · Tailwind 4 · shadcn/ui 
 - WCAG 2.1 AA contrast, visible focus, labels on all inputs (`<Label htmlFor>` + `useId`).
 - Touch targets ≥ 44px; icon-only buttons have `aria-label`; gallery works with keyboard and swipe.
 - Form results and errors are announced (`role="status"` / `role="alert"`).
+
+## Performance budget
+Checked with `pnpm perf` (needs `pnpm build`; mobile 375px, 4x CPU throttle, fast 4G; median of 3 warm runs; fails on a non-localhost request). Routes: `/`, `/catalog`, a property page.
+- LCP < 2.5 s, CLS < 0.1.
+- First-load JS (script tags in the HTML, gzip) does not grow: now ~220 KB gz on `/`, ~216 KB on `/catalog`, ~226 KB on a property page. A change that adds more than ~5 KB gz to a route needs a reason in the spec.
+- Client components import only light modules: no `zod`, no server-side data modules. Put constants / enums that forms and stores need in a `*-values.ts` file and keep the zod schemas in a separate file.
+- The first-screen photo has `fetchPriority="high"` and the right `sizes`; photos below the fold are lazy; the assistant panel is loaded on demand; loading skeletons are at least one viewport tall so the footer does not jump.
 
 ## States (every screen)
 Loading (skeleton) · empty (explanation + next action) · error (message + retry) · long values (truncate with title or wrap) · many items (pagination) · missing photo (placeholder).

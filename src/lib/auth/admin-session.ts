@@ -1,6 +1,9 @@
 import "server-only";
 
+import { cookies } from "next/headers";
 import { cache } from "react";
+import { isDemoMode } from "@/lib/data-driver";
+import { DEMO_ADMIN, DEMO_COOKIE_NAME, verifyDemoSession } from "@/lib/demo/session";
 import { getSupabasePublicEnvOrNull } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -12,6 +15,12 @@ export type AdminSession =
 
 /** Who is calling: one `getClaims` + one `is_admin()` call per request (shared by layout and page). */
 export const getAdminSession = cache(async (): Promise<AdminSession> => {
+  // Demo driver: the signed demo cookie, no Supabase call.
+  if (isDemoMode()) {
+    const session = await verifyDemoSession((await cookies()).get(DEMO_COOKIE_NAME)?.value);
+    return session ? { state: "admin", email: DEMO_ADMIN.email, userId: DEMO_ADMIN.userId } : { state: "anonymous" };
+  }
+
   if (!getSupabasePublicEnvOrNull()) return { state: "unconfigured" };
 
   const supabase = await createClient();

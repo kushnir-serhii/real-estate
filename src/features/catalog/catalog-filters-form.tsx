@@ -1,6 +1,7 @@
 import Form from "next/form";
 import Link from "next/link";
 
+import { FormSelect } from "@/components/form-select";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,7 +11,7 @@ import { CURRENCIES, PROP_KINDS_BY_PROPERTY, PROPERTY_TYPES } from "@/lib/db/pro
 import { cn } from "@/lib/utils";
 import { resetHref, typeHasArea, typeHasRooms } from "./catalog-params";
 import type { CatalogState } from "./catalog-params";
-import { DEAL_OPTIONS, SELECT_CLASS } from "./catalog-labels";
+import { DEAL_OPTIONS } from "./catalog-labels";
 
 type CatalogFiltersFormProps = {
   state: CatalogState;
@@ -22,9 +23,9 @@ type CatalogFiltersFormProps = {
 };
 
 const CHIP_CLASS =
-  "inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-lg border border-control bg-background px-3 text-sm font-medium transition-colors select-none hover:bg-muted has-checked:border-primary has-checked:bg-primary has-checked:text-primary-foreground has-focus-visible:ring-3 has-focus-visible:ring-ring/50 dark:bg-input/30";
+  "inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-xl border border-control bg-background px-3 text-sm font-medium transition-colors select-none hover:bg-muted has-checked:border-primary has-checked:bg-primary has-checked:font-semibold has-checked:text-primary-foreground has-checked:hover:bg-primary dark:has-checked:bg-primary has-focus-visible:ring-3 has-focus-visible:ring-ring/50 dark:bg-input/30";
 
-const LEGEND_CLASS = "mb-2 text-sm leading-none font-medium";
+const LEGEND_CLASS = "mb-2 text-sm leading-none font-medium text-foreground";
 
 type FieldProps = { label: string; htmlFor: string; children: React.ReactNode };
 
@@ -94,49 +95,39 @@ export const CatalogFiltersForm = ({
     state.district && !districts.includes(state.district) ? [state.district, ...districts] : districts;
 
   return (
-    <Form action="/catalog" aria-label="Фільтри" className="flex flex-col gap-5">
+    <Form action="/catalog" aria-label="Фільтри" className="flex flex-col gap-6">
       <Field label="Що потрібно" htmlFor={`${idPrefix}-deal`}>
-        <select id={`${idPrefix}-deal`} name="deal" defaultValue={state.deal ?? ""} className={SELECT_CLASS}>
-          <option value="">Усі варіанти</option>
-          {DEAL_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
+        <FormSelect
+          id={`${idPrefix}-deal`}
+          name="deal"
+          defaultValue={state.deal ?? ""}
+          options={[{ value: "", label: "Усі варіанти" }, ...DEAL_OPTIONS]}
+        />
       </Field>
 
       <Field label="Тип нерухомості" htmlFor={`${idPrefix}-type`}>
-        <select
+        <FormSelect
           id={`${idPrefix}-type`}
           name="property_type"
           defaultValue={state.property_type ?? ""}
-          className={SELECT_CLASS}
-        >
-          <option value="">Будь-який</option>
-          {PROPERTY_TYPES.map((t) => (
-            <option key={t} value={t}>
-              {PROPERTY_TYPE_LABELS[t]}
-            </option>
-          ))}
-        </select>
+          options={[
+            { value: "", label: "Будь-який" },
+            ...PROPERTY_TYPES.map((t) => ({ value: t, label: PROPERTY_TYPE_LABELS[t] })),
+          ]}
+        />
       </Field>
 
       {kinds.length > 0 && (
         <Field label="Вид" htmlFor={`${idPrefix}-kind`}>
-          <select
+          <FormSelect
             id={`${idPrefix}-kind`}
             name="prop_kind"
             defaultValue={state.prop_kind ?? ""}
-            className={SELECT_CLASS}
-          >
-            <option value="">Будь-який</option>
-            {kinds.map((k) => (
-              <option key={k} value={k}>
-                {PROP_KIND_LABELS[k]}
-              </option>
-            ))}
-          </select>
+            options={[
+              { value: "", label: "Будь-який" },
+              ...kinds.map((k) => ({ value: k, label: PROP_KIND_LABELS[k] })),
+            ]}
+          />
         </Field>
       )}
 
@@ -191,19 +182,15 @@ export const CatalogFiltersForm = ({
 
       {districtOptions.length > 0 && (
         <Field label="Район" htmlFor={`${idPrefix}-district`}>
-          <select
+          <FormSelect
             id={`${idPrefix}-district`}
             name="district"
             defaultValue={state.district ?? ""}
-            className={SELECT_CLASS}
-          >
-            <option value="">Будь-який</option>
-            {districtOptions.map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </select>
+            options={[
+              { value: "", label: "Будь-який" },
+              ...districtOptions.map((d) => ({ value: d, label: d })),
+            ]}
+          />
         </Field>
       )}
 
@@ -219,7 +206,7 @@ export const CatalogFiltersForm = ({
         <Link href={resetHref(state)} className={buttonVariants({ variant: "outline", size: "lg" })}>
           Скинути
         </Link>
-        <Button type="submit" size="lg">
+        <Button type="submit" variant="dawn" size="lg">
           Показати
         </Button>
       </div>

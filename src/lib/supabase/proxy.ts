@@ -1,5 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isDemoMode } from "@/lib/data-driver";
+import { DEMO_COOKIE_NAME, verifyDemoSession } from "@/lib/demo/session";
 import type { Database } from "./database.types";
 import { getSupabasePublicEnvOrNull } from "./env";
 
@@ -20,8 +22,24 @@ export const updateSession = async (request: NextRequest) => {
     return response;
   };
 
+  // Demo driver: the signed demo cookie decides, no Supabase call (even when its env happens to be set).
+  if (isDemoMode()) {
+    const signedIn = (await verifyDemoSession(request.cookies.get(DEMO_COOKIE_NAME)?.value)) !== null;
+    const redirectTo = (pathnameTarget: string, searchTarget = "") => {
+      const url = request.nextUrl.clone();
+      url.pathname = pathnameTarget;
+      url.search = searchTarget;
+      return finish(NextResponse.redirect(url));
+    };
+    if (admin && !signedIn && pathname !== SIGN_IN_PATH) {
+      return redirectTo(SIGN_IN_PATH, `?next=${encodeURIComponent(pathname + search)}`);
+    }
+    if (admin && signedIn && pathname === SIGN_IN_PATH) return redirectTo("/admin/leads");
+    return finish(NextResponse.next({ request }));
+  }
+
   const env = getSupabasePublicEnvOrNull();
-  // Not configured (local without keys, CI): pass through without calling Supabase.
+  // Supabase not configured (CI): pass through without calling it.
   if (!env) return finish(NextResponse.next({ request }));
 
   let response = NextResponse.next({ request });

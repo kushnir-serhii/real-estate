@@ -29,6 +29,13 @@ for (const route of ROUTES) {
     for (const theme of THEMES) {
       test(`${route} · ${viewport.name} · ${theme}`, async ({ page }) => {
         const errors: string[] = []
+        // every request must stay on localhost (links are not followed); data: / blob: are local too
+        const external: string[] = []
+        page.on('request', (request) => {
+          const { protocol, hostname } = new URL(request.url())
+          if (protocol === 'data:' || protocol === 'blob:' || protocol === 'about:') return
+          if (hostname !== 'localhost' && hostname !== '127.0.0.1') external.push(request.url())
+        })
         page.on('pageerror', (error) => errors.push(error.message))
         page.on('console', (message) => {
           if (message.type() !== 'error') return
@@ -42,7 +49,7 @@ for (const route of ROUTES) {
         await page.emulateMedia({ colorScheme: theme })
         await page.addInitScript((value) => {
           try {
-            localStorage.setItem('sofiacity-theme', value)
+            localStorage.setItem('7sky-theme', value)
           } catch {
             // storage blocked: the page falls back to the system theme
           }
@@ -76,6 +83,7 @@ for (const route of ROUTES) {
           fullPage: true,
         })
 
+        expect(external, 'requests to hosts other than localhost').toEqual([])
         expect(errors, 'console or page errors').toEqual([])
         const overflow = await page.evaluate(
           () => document.documentElement.scrollWidth - document.documentElement.clientWidth,

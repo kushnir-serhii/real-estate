@@ -1,10 +1,12 @@
 import "server-only";
 
+import { TriangleAlert } from "lucide-react";
+
 import { PropertyCard } from "@/features/properties/property-card";
 import { RetryButton } from "@/features/home/retry-button";
 import { getPublishedProperties } from "@/lib/db/properties";
 import type { PropertyFilters, PropertyPage } from "@/lib/db/properties";
-import { getSupabasePublicEnvOrNull } from "@/lib/supabase/env";
+import { hasPublicData } from "@/lib/data-driver";
 import { CatalogEmpty } from "./catalog-empty";
 import { CatalogGrid } from "./catalog-grid";
 import { CatalogPagination } from "./catalog-pagination";
@@ -23,7 +25,7 @@ type ResultsState =
 const CARD_SIZES = "(min-width: 1280px) 22rem, (min-width: 640px) 50vw, 100vw";
 
 const load = async (filters: PropertyFilters): Promise<ResultsState> => {
-  if (getSupabasePublicEnvOrNull() === null) return { kind: "empty" };
+  if (!hasPublicData()) return { kind: "empty" };
   try {
     const page = await getPublishedProperties(filters);
     if (page.items.length > 0) return { kind: "ready", page };
@@ -83,9 +85,12 @@ export const CatalogResults = async ({ state, filters }: CatalogResultsProps) =>
       return (
         <div
           role="alert"
-          className="flex flex-col items-start gap-4 rounded-xl border border-destructive/40 p-6"
+          className="flex flex-col items-start gap-4 rounded-2xl border border-destructive/40 bg-card p-6 sm:p-8"
         >
-          <p className="font-medium text-destructive">Не вдалося завантажити об&apos;єкти</p>
+          <p className="flex items-center gap-2 font-heading text-lg font-semibold text-destructive">
+            <TriangleAlert className="size-5 shrink-0" aria-hidden="true" />
+            Не вдалося завантажити об&apos;єкти
+          </p>
           <p className="text-muted-foreground">Перевірте з&apos;єднання і спробуйте ще раз.</p>
           <RetryButton />
         </div>

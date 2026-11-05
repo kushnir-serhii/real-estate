@@ -4,7 +4,7 @@ import { MessengerLinks } from "@/components/layout/messenger-links";
 import { buttonVariants } from "@/components/ui/button";
 import { CONTACTS } from "@/constants/contacts";
 import { GeneralRequestForm } from "@/features/leads/general-request-form";
-import type { LeadDeal } from "@/features/leads/lead-form-schema";
+import type { LeadDeal } from "@/features/leads/lead-form-values";
 import type { PublishedProperty } from "@/lib/db/properties";
 import { cn } from "@/lib/utils";
 import { CONTACT_ANCHOR } from "./property-details";
@@ -38,9 +38,9 @@ export const SoldContactBlock = ({ propertyId, deal, className }: SoldContactBlo
   <section
     id={CONTACT_ANCHOR}
     aria-labelledby={`${CONTACT_ANCHOR}-title`}
-    className={cn("scroll-mt-24 rounded-xl bg-card p-5 text-card-foreground ring-1 ring-foreground/10", className)}
+    className={cn("scroll-mt-24 rounded-2xl bg-card p-6 text-card-foreground ring-1 ring-foreground/10", className)}
   >
-    <h2 id={`${CONTACT_ANCHOR}-title`} className="text-lg font-bold">
+    <h2 id={`${CONTACT_ANCHOR}-title`} className="text-h3">
       Підберемо схожий
     </h2>
     <p className="mt-2 text-muted-foreground">

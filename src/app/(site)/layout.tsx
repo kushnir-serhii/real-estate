@@ -1,8 +1,11 @@
+import { Suspense } from "react";
+
 import { JsonLd } from "@/components/seo/json-ld";
 import { organizationSchema } from "@/features/seo/schemas";
 import { getSiteUrl } from "@/lib/site-url";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { AssistantLauncher } from "@/features/assistant/assistant-launcher";
+import { NavProgress } from "@/components/layout/nav-progress";
 import { SiteHeader } from "@/components/layout/site-header";
 
 const SiteLayout = ({ children }: { children: React.ReactNode }) => (
@@ -14,6 +17,10 @@ const SiteLayout = ({ children }: { children: React.ReactNode }) => (
       Перейти до змісту
     </a>
     <JsonLd data={organizationSchema(getSiteUrl())} />
+    {/* useSearchParams needs a boundary; it renders nothing, so no content is hidden in the HTML */}
+    <Suspense fallback={null}>
+      <NavProgress />
+    </Suspense>
     <SiteHeader />
     <main id="main" className="flex-1">
       {children}

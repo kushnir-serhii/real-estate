@@ -20,11 +20,16 @@ export const getSupabasePublicEnvOrNull = (): SupabasePublicEnv | null => {
   return parsed.success ? parsed.data : null;
 };
 
+/** Same check on an explicit env object (build guard, site URL); the literal reads above stay for Next inlining. */
+export const hasSupabasePublicEnv = (env: Record<string, string | undefined>): boolean =>
+  publicEnvSchema.safeParse({ url: env.NEXT_PUBLIC_SUPABASE_URL, anonKey: env.NEXT_PUBLIC_SUPABASE_ANON_KEY }).success;
+
 export const getSupabasePublicEnv = (): SupabasePublicEnv => {
   const env = getSupabasePublicEnvOrNull();
   if (!env) {
     throw new Error(
-      "Supabase is not configured: set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.",
+      "Supabase is not configured: set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY " +
+        "(or use DATA_DRIVER=demo, which never calls Supabase).",
     );
   }
   return env;

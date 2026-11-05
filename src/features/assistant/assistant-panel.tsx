@@ -20,8 +20,8 @@ type AssistantPanelProps = {
 };
 
 const LOCK_NOTES: Record<ComposerLock, string> = {
-  budget: "Асистент зараз не може відповідати. Скористайтеся заявкою або контактами вище.",
-  conversation_limit: "Щоб продовжити з асистентом, почніть нову розмову.",
+  budget: "Віртуальний консультант зараз не може відповідати. Скористайтеся заявкою або контактами вище.",
+  conversation_limit: "Щоб продовжити з консультантом, почніть нову розмову.",
 };
 
 type LockedComposerProps = { lock: ComposerLock; onReset: () => void };

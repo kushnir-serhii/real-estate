@@ -8,17 +8,22 @@ import {
   type PhotoUploadResponse,
 } from "@/features/admin/properties/photos/photo-limits";
 import { requireAdmin } from "@/lib/auth/admin-session";
+import { isDemoMode } from "@/lib/data-driver";
+import { checkDemoUploadCaps, deleteDemoObjects, putDemoObject } from "@/lib/demo/photos";
 import { getAdminProperty } from "@/lib/db/admin-properties";
 import { appendPhoto, countPhotos } from "@/lib/db/admin-property-photos";
 import { canEditProperty } from "@/lib/db/property-permissions";
 import { revalidateProperty } from "@/lib/db/revalidate-property";
 import { getSettings } from "@/lib/db/settings";
+import { DEMO_UPLOAD_PREFIX } from "@/lib/photos/photo-keys";
 import { hasImageMagic, parseWidthField, photoKey, pickMainWidth, randomToken } from "@/lib/photos/photo-upload";
 import { deleteObjects, putObject } from "@/lib/r2";
 
 /**
  * Admin photo upload: the browser already resized the photo, this stores the 1-3 outputs in R2 and appends
  * a `property_photos` row. Form fields and limits: `photos/photo-limits.ts`. Workers-compatible: no sharp.
+ * Demo driver (spec 011): the same checks, but the bytes stay in memory under `demo-uploads/` keys (size caps from
+ * `DEMO_UPLOAD_MAX_MB`) and `GET /api/demo/photos/...` serves them.
  */
 
 const MAX_BODY_BYTES = 3 * MAX_UPLOAD_BYTES + 256 * 1024;
@@ -79,6 +84,8 @@ export const POST = async (request: Request) => {
     }
 
     const contentType = PHOTO_CONTENT_TYPES[ext];
+    const demo = isDemoMode();
+    const keyPrefix = demo ? DEMO_UPLOAD_PREFIX : "";
     const outputs: { width: number; key: string; body: Uint8Array }[] = [];
     const token = randomToken();
     for (const [outputWidth, file] of [...files.entries()].sort((a, b) => a[0] - b[0])) {
@@ -86,7 +93,12 @@ export const POST = async (request: Request) => {
       if (file.size > MAX_UPLOAD_BYTES) return fail(413, "Файл завеликий. Спробуйте менше фото.");
       const body = new Uint8Array(await file.arrayBuffer());
       if (!hasImageMagic(body, ext)) return fail(400, "Файл не схожий на фото.");
-      outputs.push({ width: outputWidth, key: photoKey(propertyId, token, outputWidth, ext), body });
+      outputs.push({ width: outputWidth, key: `${keyPrefix}${photoKey(propertyId, token, outputWidth, ext)}`, body });
+    }
+
+    if (demo) {
+      const caps = checkDemoUploadCaps(outputs.reduce((sum, output) => sum + output.body.byteLength, 0));
+      if (!caps.ok) return fail(413, caps.message);
     }
 
     const mainWidth = pickMainWidth(outputs.map((output) => output.width));
@@ -94,10 +106,17 @@ export const POST = async (request: Request) => {
     if (main === undefined) return fail(400, "Некоректні дані фото.");
 
     const keys = outputs.map((output) => output.key);
+    const removeObjects = async (): Promise<void> => {
+      if (demo) deleteDemoObjects(keys);
+      else await deleteObjects(keys).catch(() => undefined);
+    };
     try {
-      for (const output of outputs) await putObject(output.key, output.body, contentType);
+      for (const output of outputs) {
+        if (demo) putDemoObject(output.key, output.body, contentType);
+        else await putObject(output.key, output.body, contentType);
+      }
     } catch (error) {
-      await deleteObjects(keys).catch(() => undefined);
+      await removeObjects();
       throw error;
     }
 
@@ -106,7 +125,7 @@ export const POST = async (request: Request) => {
     try {
       photo = await appendPhoto(propertyId, { r2_key: main.key, sizes, width, height });
     } catch (error) {
-      await deleteObjects(keys).catch(() => undefined);
+      await removeObjects();
       throw error;
     }
 

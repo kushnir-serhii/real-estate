@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ConsentField } from "@/features/leads/consent-field";
 import { HoneypotField } from "@/features/leads/honeypot-field";
 import { LeadFormFields } from "@/features/leads/lead-form-fields";
-import { HONEYPOT_FIELD } from "@/features/leads/lead-form-schema";
+import { HONEYPOT_FIELD } from "@/features/leads/lead-form-values";
 import { submitLeadCard } from "./assistant-chat-store";
 import type { LeadCardFields } from "./assistant-chat-store";
 import type { LeadCardPart } from "./chat-reducer";

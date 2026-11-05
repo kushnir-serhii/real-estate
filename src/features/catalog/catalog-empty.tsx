@@ -1,3 +1,4 @@
+import { SearchX } from "lucide-react";
 import Link from "next/link";
 
 import { buttonVariants } from "@/components/ui/button";
@@ -26,25 +27,31 @@ const TEXT: Record<CatalogEmptyProps["kind"], { title: string; body: string }> =
 export const CatalogEmpty = (props: CatalogEmptyProps) => {
   const text = TEXT[props.kind];
   return (
-    <div className="flex flex-col items-start gap-4 rounded-xl border border-dashed border-border p-6">
+    <div className="flex flex-col items-start gap-5 rounded-2xl border border-dashed border-control bg-card p-6 sm:p-10">
+      <span
+        aria-hidden="true"
+        className="flex size-14 items-center justify-center rounded-full bg-dawn text-dawn-foreground"
+      >
+        <SearchX className="size-6" />
+      </span>
       <div className="flex flex-col gap-2">
-        <h2 className="text-lg font-bold">{text.title}</h2>
+        <h2 className="text-h3">{text.title}</h2>
         <p className="max-w-prose text-muted-foreground">{text.body}</p>
       </div>
       <div className="flex flex-wrap gap-2">
         {props.kind === "filtered" && (
-          <Link href={props.resetHref} className={buttonVariants()}>
+          <Link href={props.resetHref} className={buttonVariants({ variant: "dawn" })}>
             Скинути фільтри
           </Link>
         )}
         {props.kind === "out-of-range" && (
-          <Link href={props.firstPageHref} className={buttonVariants()}>
+          <Link href={props.firstPageHref} className={buttonVariants({ variant: "dawn" })}>
             На першу сторінку
           </Link>
         )}
         <a
           href={CONTACTS.phone.href}
-          className={buttonVariants({ variant: props.kind === "nothing" ? "default" : "outline" })}
+          className={buttonVariants({ variant: props.kind === "nothing" ? "dawn" : "outline" })}
         >
           <span className="tabular-nums">{CONTACTS.phone.display}</span>
         </a>

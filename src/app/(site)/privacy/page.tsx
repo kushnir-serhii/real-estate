@@ -1,6 +1,8 @@
 import { TriangleAlert } from "lucide-react";
 import type { Metadata } from "next";
 
+import { PageHeader } from "@/components/page-header";
+import { PRIVACY_PAGE } from "@/constants/inner-pages";
 import { Markdown } from "@/features/pages/markdown";
 import { getPageContent } from "@/features/pages/get-page-content";
 import { pageSeoDescription, pageSeoTitle } from "@/features/pages/page-seo";
@@ -21,18 +23,20 @@ const PrivacyPage = async () => {
   const page = await getPageContent("privacy");
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8 sm:py-12">
-      <h1 className="text-3xl font-bold text-balance break-words sm:text-4xl">{page.title}</h1>
-      {page.is_draft ? (
-        <p
-          role="note"
-          className="flex items-start gap-3 rounded-lg border border-border bg-muted p-4 text-sm font-medium text-foreground"
-        >
-          <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-          Чернетка: текст має перевірити агентство або юрист перед запуском.
-        </p>
-      ) : null}
-      <Markdown>{page.body}</Markdown>
+    <div className="pb-16 sm:pb-24">
+      <PageHeader width="narrow" eyebrow={PRIVACY_PAGE.eyebrow} title={page.title} />
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4">
+        {page.is_draft ? (
+          <p
+            role="note"
+            className="flex items-start gap-3 rounded-2xl border border-border bg-muted p-4 text-sm font-medium text-foreground"
+          >
+            <TriangleAlert className="mt-0.5 size-4 shrink-0 text-dawn-text" aria-hidden="true" />
+            {PRIVACY_PAGE.draftNote}
+          </p>
+        ) : null}
+        <Markdown>{page.body}</Markdown>
+      </div>
     </div>
   );
 };

@@ -2,9 +2,9 @@
 
 import { useId } from "react";
 
+import { FormSelect } from "@/components/form-select";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
-import { SELECT_CLASS, SORT_OPTIONS } from "./catalog-labels";
+import { SORT_OPTIONS } from "./catalog-labels";
 import type { Sort } from "./catalog-params";
 
 type SortSelectProps = { value: Sort };
@@ -17,19 +17,14 @@ export const SortSelect = ({ value }: SortSelectProps) => {
       <Label htmlFor={id} className="sr-only">
         Сортування
       </Label>
-      <select
+      <FormSelect
         id={id}
         name="sort"
         defaultValue={value}
-        onChange={(e) => e.currentTarget.form?.requestSubmit()}
-        className={cn(SELECT_CLASS, "w-auto")}
-      >
-        {SORT_OPTIONS.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
+        options={SORT_OPTIONS}
+        submitOnChange
+        className="w-auto min-w-48"
+      />
     </>
   );
 };

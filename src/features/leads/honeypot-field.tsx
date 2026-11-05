@@ -2,7 +2,7 @@
 
 import { useId } from "react";
 
-import { HONEYPOT_FIELD } from "./lead-form-schema";
+import { HONEYPOT_FIELD } from "./lead-form-values";
 
 /** Trap for bots: hidden from people and screen readers, must stay empty. */
 export const HoneypotField = () => {

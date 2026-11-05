@@ -14,6 +14,12 @@ export const ADMIN_PROPERTY_TYPE_FILTERS = ["all", ...PROPERTY_TYPES] as const;
 /** `draft` = hidden and never published; `hidden` = hidden after being published. */
 export type AdminListStatus = "published" | "hidden" | "draft";
 
+/** `published` stays; a hidden row is a `draft` until it has been published once. */
+export const toListStatus = (status: "published" | "hidden", publishedAt: string | null): AdminListStatus => {
+  if (status === "published") return "published";
+  return publishedAt === null ? "draft" : "hidden";
+};
+
 const first = (v: unknown): unknown => (Array.isArray(v) ? v[0] : v);
 
 const choice = <T extends readonly [string, ...string[]]>(values: T) =>

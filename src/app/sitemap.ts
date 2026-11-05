@@ -7,13 +7,13 @@ import { buildSitemapEntries } from "@/features/seo/sitemap-entries";
 import { getSitemapProperties } from "@/lib/db/properties";
 import type { SitemapProperty } from "@/lib/db/properties";
 import { getSiteUrl } from "@/lib/site-url";
-import { getSupabasePublicEnvOrNull } from "@/lib/supabase/env";
+import { hasPublicData } from "@/lib/data-driver";
 
 // Refreshed by the `properties` / `pages` cache tags; also at most hourly.
 export const revalidate = 3600;
 
 const loadProperties = async (): Promise<SitemapProperty[]> => {
-  if (getSupabasePublicEnvOrNull() === null) return [];
+  if (!hasPublicData()) return [];
   try {
     return await getSitemapProperties();
   } catch (error) {

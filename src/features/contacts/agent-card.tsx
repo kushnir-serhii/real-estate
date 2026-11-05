@@ -5,10 +5,10 @@ import { toTel } from "@/lib/format/to-tel";
 import { photoUrl } from "@/lib/photos/photo-url";
 
 const LINK_CLASS =
-  "inline-flex min-h-11 items-center rounded-md break-all text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50";
+  "inline-flex min-h-11 items-center rounded-md break-all text-foreground underline-offset-4 outline-none hover:text-dawn-text hover:underline focus-visible:ring-3 focus-visible:ring-ring/50";
 
 export const AgentCard = ({ agent }: { agent: Agent }) => (
-  <li className="flex gap-4 rounded-xl bg-card p-4 ring-1 ring-foreground/10">
+  <li className="flex gap-4 rounded-2xl bg-card p-5 ring-1 ring-foreground/10">
     {agent.photo_url ? (
       // eslint-disable-next-line @next/next/no-img-element -- external photo in a fixed-size box
       <img
@@ -17,18 +17,18 @@ export const AgentCard = ({ agent }: { agent: Agent }) => (
         width={64}
         height={64}
         loading="lazy"
-        className="size-16 shrink-0 rounded-full bg-muted object-cover"
+        className="size-16 shrink-0 rounded-full bg-muted object-cover ring-2 ring-dawn"
       />
     ) : (
       <div
         aria-hidden="true"
-        className="flex size-16 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"
+        className="flex size-16 shrink-0 items-center justify-center rounded-full bg-secondary text-dawn-text ring-2 ring-dawn"
       >
         <User className="size-7" />
       </div>
     )}
     <div className="flex min-w-0 flex-col">
-      <h3 className="text-lg font-semibold break-words">{agent.name}</h3>
+      <h3 className="font-heading text-base font-semibold tracking-tight break-words">{agent.name}</h3>
       {agent.phones.map((phone) => (
         <a key={phone} href={`tel:${toTel(phone)}`} className={`${LINK_CLASS} tabular-nums`}>
           {phone}

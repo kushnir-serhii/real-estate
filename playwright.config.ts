@@ -20,5 +20,7 @@ export default defineConfig({
     url: `http://localhost:${PORT}`,
     reuseExistingServer: true,
     timeout: 120_000,
+    // demo driver: no Supabase, no keys, no network; the check must pass offline
+    env: { DATA_DRIVER: 'demo', SEO_ALLOW_LOCALHOST: '1' },
   },
 })

@@ -7,6 +7,9 @@ node_modules/
 .wrangler/
 out/
 
+# agent worktrees (each has its own .next / node_modules)
+.claude/worktrees/
+
 # env / secrets
 .env
 .env.*

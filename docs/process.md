@@ -33,7 +33,7 @@ Every task gets one spec file in [specs/](specs/). Every spec is split into **sl
 
 ## Safety rules (every agent)
 
-- Never run anything against remote Supabase, Cloudflare, Plektan, Telegram or the LLM with real keys; no deploys, no `supabase db push`. Local Supabase and fixture modes only. The user applies migrations and deploys.
+- Never run anything against remote Supabase, Cloudflare, Plektan, Telegram or the LLM with real keys; no deploys, no `supabase db push`. The demo driver (mock data in memory) and fixture modes are the default; a local Supabase (Docker) is optional, only to test the `supabase` driver. The user applies migrations and deploys.
 - Never commit `.env*` (except `.env.example`) or `.dev.vars`. A new env var goes into `.env.example` with a comment.
 - Never edit an applied migration; add a new one.
 - A new migration, account or key also goes into [setup.md](setup.md), so the user can connect everything later.
@@ -74,7 +74,7 @@ Arguments: none (next slice from the plan) · `005` (next open slice of that spe
    ```sh
    SPEC=<spec #> ROUTES=<route>,<route> pnpm ui-check
    ```
-   Routes go without the leading slash (`catalog,catalog/some-slug`; `root` is `/`). Every route is opened at 375px and 1280px. It fails on console or page errors and on horizontal scroll, and saves full-page screenshots to `e2e/screenshots/<spec #>/` (git-ignored). Look at every screenshot against the spec and [conventions.md](conventions.md). Fix what's wrong like a slice (commit `fix: <spec #> — <summary>`), then run it again.
+   Routes go without the leading slash (`catalog,catalog/some-slug`; `root` is `/`). Every route is opened at 375px and 1280px. It runs on the demo driver (no `.env.local`, no Docker, no keys), fails on console or page errors, on requests to any host other than `localhost` and on horizontal scroll, and saves full-page screenshots to `e2e/screenshots/<spec #>/` (git-ignored). Look at every screenshot against the spec and [conventions.md](conventions.md). Fix what's wrong like a slice (commit `fix: <spec #> — <summary>`), then run it again.
 9. **Report once, when the spec is done** (or blocked): what was built per slice, the commits, open questions, external needs (keys, accounts, migrations to apply), what to look at, and what comes next. You merge the branch (PR) into `main`.
 
 Scope changes go into the spec first, then into the code.

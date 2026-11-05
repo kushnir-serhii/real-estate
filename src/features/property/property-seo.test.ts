@@ -52,7 +52,7 @@ describe("propertySeoTitle", () => {
   it("keeps plain titles within 60 chars with the brand and absolute ones within 70", () => {
     for (const p of Object.values(FIXTURES)) {
       const t = propertySeoTitle(p);
-      if (typeof t === "string") expect(`${t} — Sofiacity`.length).toBeLessThanOrEqual(60);
+      if (typeof t === "string") expect(`${t} — 7 SKY`.length).toBeLessThanOrEqual(60);
       else expect(t.absolute.length).toBeLessThanOrEqual(70);
     }
   });
@@ -69,14 +69,14 @@ describe("propertySeoDescription", () => {
       const d = propertySeoDescription(p);
       expect(d.length, name).toBeGreaterThanOrEqual(120);
       expect(d.length, name).toBeLessThanOrEqual(155);
-      expect(d).toContain("Sofiacity");
+      expect(d).toContain("7 SKY");
     }
   });
 
   it("stays within the maximum for sparse data and keeps the brand", () => {
     const d = propertySeoDescription(FIXTURES.sparse);
     expect(d.length).toBeLessThanOrEqual(155);
-    expect(d).toContain("Sofiacity");
+    expect(d).toContain("7 SKY");
   });
 
   it("trims an overlong fact sentence on a word", () => {

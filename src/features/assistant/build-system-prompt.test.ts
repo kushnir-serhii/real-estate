@@ -19,7 +19,7 @@ const property: PromptProperty = {
 describe("buildSystemPrompt", () => {
   it("includes the persona, rules and every FAQ entry", () => {
     const prompt = buildSystemPrompt();
-    expect(prompt).toContain("Софія");
+    expect(prompt).toContain("Ніка");
     expect(prompt).toContain("Ніколи не вигадуй");
     for (const entry of ASSISTANT_FAQ) expect(prompt).toContain(entry.question);
     expect(prompt).not.toContain("цей об'єкт нашого каталогу");

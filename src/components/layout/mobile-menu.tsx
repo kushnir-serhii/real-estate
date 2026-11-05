@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, Phone } from "lucide-react";
+import { ArrowRight, Menu, Phone } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +15,11 @@ import {
 } from "@/components/ui/sheet";
 import { MessengerLinks } from "@/components/layout/messenger-links";
 import { NavLink } from "@/components/layout/nav-link";
-import { CTA_LINK, NAV_LINKS } from "@/components/layout/nav-config";
+import {
+  CTA_LINK,
+  HEADER_ICON_CLASS,
+  NAV_LINKS,
+} from "@/components/layout/nav-config";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { CONTACTS } from "@/constants/contacts";
 
@@ -26,26 +30,34 @@ export const MobileMenu = () => {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Відкрити меню">
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Відкрити меню"
+          className={HEADER_ICON_CLASS}
+        >
           <Menu />
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="overflow-y-auto">
+      <SheetContent
+        side="right"
+        className="gap-6 overflow-y-auto data-[side=right]:w-full"
+      >
         <SheetHeader>
-          <SheetTitle>Меню</SheetTitle>
+          <SheetTitle className="eyebrow text-muted-foreground">Меню</SheetTitle>
           <SheetDescription className="sr-only">
             Навігація по сайту та контакти
           </SheetDescription>
         </SheetHeader>
         <nav aria-label="Основна навігація" className="px-4">
-          <ul className="flex flex-col gap-1">
+          <ul className="flex flex-col gap-2">
             {NAV_LINKS.map((link) => (
               <li key={link.href}>
                 <NavLink
                   href={link.href}
                   activePath={link.activePath}
                   onNavigate={close}
-                  className="w-full text-base"
+                  className="min-h-14 px-0 font-heading text-2xl font-medium tracking-tight after:inset-x-0 after:bottom-2"
                 >
                   {link.label}
                 </NavLink>
@@ -54,9 +66,10 @@ export const MobileMenu = () => {
           </ul>
         </nav>
         <div className="flex flex-col gap-4 px-4">
-          <Button asChild size="lg">
+          <Button asChild variant="dawn" size="lg">
             <Link href={CTA_LINK.href} onClick={close}>
               {CTA_LINK.label}
+              <ArrowRight data-icon="inline-end" aria-hidden="true" />
             </Link>
           </Button>
           <a
@@ -69,7 +82,7 @@ export const MobileMenu = () => {
           <MessengerLinks />
         </div>
         <div className="mt-auto flex items-center justify-between gap-2 border-t p-4">
-          <span className="text-sm text-muted-foreground">Тема</span>
+          <span className="text-sm text-muted-foreground">Тема оформлення</span>
           <ThemeToggle />
         </div>
       </SheetContent>

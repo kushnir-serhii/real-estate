@@ -1,12 +1,35 @@
 # Connecting accounts
 
-Everything so far runs locally (local Supabase in Docker, fixture modes). This file collects what the user does to connect the real accounts. Agents never do these steps; they add to this file when a spec needs a new account, key or migration.
+Everything runs in **demo mode** out of the box: mock data in memory, no Docker, no keys, no network (spec 011). This file collects what the user does to leave it and connect the real accounts. Agents never do these steps; they add to this file when a spec needs a new account, key or migration.
+
+## Leaving demo mode
+
+The demo is the same code on a different data driver, so leaving it is configuration, not a rewrite. Connect the accounts in the order of [template.md](template.md); the steps here are the switch itself.
+
+1. **Set the driver and the keys.** In Cloudflare (and in `.env.local` / `.dev.vars` to try it locally) set `DATA_DRIVER=supabase` plus `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` (see **Supabase**). A build with `DATA_DRIVER=supabase` and no public Supabase env fails on purpose. Leaving `DATA_DRIVER` empty also selects `supabase` as soon as the Supabase env is set.
+2. **Unset the `DEMO_*` variables.** `DEMO_SESSION_SECRET` and `DEMO_UPLOAD_MAX_MB` only matter on the demo driver. On the `supabase` driver the demo sign-in button, `/api/demo/*` and the demo banner are gone (404).
+3. **Admin.** Create the first admin (see **Admin**); the one-click demo admin disappears.
+4. **Photos.** The demo keeps uploads in memory and needs no R2 binding, so `wrangler.jsonc` has none (deploying with a binding to a missing bucket fails). Create the R2 bucket and add the `PHOTOS_BUCKET` binding (see **Admin photos: R2 binding**).
+5. **Site URL.** Set `NEXT_PUBLIC_SITE_URL` (see **Site URL**). A demo build without it only warns and uses `http://localhost:3000`; a `supabase` build fails.
+6. **Replace the demo content.** Brand, contacts and texts in `src/constants/` (see [template.md](template.md)); the listings and pages in `src/lib/demo/seed/` are demo-only. `supabase/seed.sql` is that same demo data for a local Supabase: never seed production with it.
+7. Connect the rest: Turnstile, Telegram, Plektan (optional), the LLM key.
+
+What the demo replaces, and what takes over:
+
+| Demo (`DATA_DRIVER=demo`) | Real (`DATA_DRIVER=supabase`) |
+| --- | --- |
+| Data store: typed mock data in memory (`src/lib/demo/`); resets on restart and with «Скинути демо-дані» | Supabase Postgres with RLS (migrations below) |
+| Admin auth: one-click demo sign-in, a signed `httpOnly` cookie (`DEMO_SESSION_SECRET`) | Supabase Auth, email + password, `admins` table |
+| Photo storage: uploads kept in memory, served by `/api/demo/photos/...`; seed photos are the files in `public/placeholders/` | Cloudflare R2 (binding `PHOTOS_BUCKET`, public URL) |
+| Fonts and maps: local Manrope, a static SVG map; nothing is loaded from third parties | unchanged: they stay local |
+| Plektan: `pnpm sync` prints a notice and exits 0; the Plektan badge is hidden | sync and badge once `PLEKTAN_API_KEY` is set |
+| Plektan leads, Telegram, Turnstile, LLM, geocoder: fixture modes while their keys are empty | the real services once their keys are set |
 
 ## Status
 
 | Service | Status | Needed from |
 | --- | --- | --- |
-| Supabase | not connected — local only; 007 adds admin auth (email + password, sign-ups off, `admins` table) | 002 (now), 007 (auth) |
+| Supabase | not connected: demo mode (mock data in memory); a local Supabase in Docker is optional, only to test the `supabase` driver | 002, 007 (auth) |
 | Cloudflare (Workers, R2) | not connected | deploy, 003 (R2) |
 | Cloudflare Turnstile | not connected — the check passes in fixture mode, no widget | 006 |
 | Plektan | not connected — fixtures; 003 sync is ready, needs the API key and `PLEKTAN_*_ID`; leads are `skipped` until the key exists (local: `PLEKTAN_LEADS_FIXTURE`) | 003, 006 |
@@ -15,7 +38,7 @@ Everything so far runs locally (local Supabase in Docker, fixture modes). This f
 
 ## Site URL
 
-Set `NEXT_PUBLIC_SITE_URL` to the production domain (for example `https://sofiacity.example`, no trailing path) in Cloudflare, for **build and runtime** (`NEXT_PUBLIC_*` are inlined at build time). It sets `metadataBase` and canonical URLs. Empty means `http://localhost:3000` in `pnpm dev` only: a production build (`pnpm build`, `pnpm preview`, `pnpm deploy`) fails with a clear error if it is empty or not a valid URL. For a local production build without a domain put `SEO_ALLOW_LOCALHOST=1` in `.env.local` (never in Cloudflare).
+Set `NEXT_PUBLIC_SITE_URL` to the production domain (for example `https://7sky.example`, no trailing path) in Cloudflare, for **build and runtime** (`NEXT_PUBLIC_*` are inlined at build time). It sets `metadataBase` and canonical URLs. Empty means `http://localhost:3000` in `pnpm dev`. A production build (`pnpm build`, `pnpm preview`, `pnpm deploy`) on the `demo` driver warns and uses localhost; on the `supabase` driver it fails with a clear error if the value is empty or not a valid URL. For a local `supabase` build without a domain put `SEO_ALLOW_LOCALHOST=1` in `.env.local` (never in Cloudflare).
 
 ## Supabase
 
@@ -70,7 +93,7 @@ Migrations to apply (in order; add new ones here when a spec adds them):
 
 ## Admin (spec 007)
 
-Email + password sign-in; no SMTP needed. The local demo admin (`admin@sofiacity.local` / `admin12345`, plus a non-admin `user@sofiacity.local`) exists only in `supabase/seed.sql`; never seeded in production.
+Email + password sign-in; no SMTP needed. On the demo driver sign-in is one click and needs no account. On a **local** Supabase the seed creates `demo@example.com` / `admin12345` (an admin) and a non-admin `user@example.com` / `user12345`; they exist only in `supabase/seed.sql`, which is never run in production.
 
 ### Auth settings (Supabase dashboard)
 - Authentication → Sign In / Providers → turn **off** "Allow new users to sign up". Keep the **Email** provider on with password sign-in.
@@ -138,7 +161,7 @@ GitHub → repo → Settings → Secrets and variables → Actions → New repos
 | `PLEKTAN_API_KEY` | from the agency (Plektan account); empty = the job is skipped |
 | `PLEKTAN_COUNTRY_ID`, `PLEKTAN_REGION_ID`, `PLEKTAN_LOCALITY_ID` | Plektan geography ids of the agency's area; `search` needs a geography. Empty ones are left out of the request |
 | `CRON_SECRET` | any long random string (for example `openssl rand -hex 32`); the **same** value must be set as a runtime secret in Cloudflare, where `/api/cron/revalidate` checks it |
-| `NEXT_PUBLIC_SITE_URL` | the production domain, for example `https://sofiacity.example`; the script posts the cache purge to it |
+| `NEXT_PUBLIC_SITE_URL` | the production domain, for example `https://7sky.example`; the script posts the cache purge to it |
 | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `NEXT_PUBLIC_R2_PUBLIC_URL` | Cloudflare R2 (used by the photo step, spec 003 slice 4) |
 | `GEOCODER_CONTACT_EMAIL` | a real, monitored email for Nominatim's User-Agent (usage policy: max 1 request/s, identify yourself); empty = fixture mode with fake coordinates, so never leave it empty in production. Coordinates are rounded to ~100 m. Wherever coordinates or a map are shown (spec 005) the page must carry the attribution "© OpenStreetMap contributors" |
 

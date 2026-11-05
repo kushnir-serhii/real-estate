@@ -11,6 +11,6 @@ export type AssistantLeadState =
   | { status: "error"; message: string };
 
 export const ASSISTANT_LEAD_MESSAGES = {
-  stale: "Картка застаріла, попросіть асистента ще раз",
+  stale: "Картка застаріла, попросіть консультанта ще раз",
   save: "Не вдалося надіслати заявку. Спробуйте ще раз.",
 } as const;

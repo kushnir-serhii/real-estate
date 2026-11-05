@@ -1,7 +1,9 @@
 # Product
 
 ## What it is
-The website and admin for **Sofiacity**, a real estate agency in Ukraine. Visitors browse the agency's properties (sale and rent), leave a request or talk to an AI assistant; the manager gets every lead in Telegram and in the admin. Properties come from the agency's CRM (Plektan) or are entered in the admin.
+The website and admin for **7 SKY**, a fictional real estate agency in Kyiv, Ukraine: the repo is a working demo and a template for a real agency site (see [template.md](template.md)). Until real accounts are connected it runs on mock data. Visitors browse the agency's properties (sale and rent), leave a request or talk to an AI assistant; the manager gets every lead in Telegram and in the admin. Properties come from the agency's CRM (Plektan) or are entered in the admin.
+
+**Demo mode (spec 011):** with no keys the whole product works on typed mock data held in memory (`DATA_DRIVER=demo`): catalog, forms and lead pipeline, AI assistant (scripted), the admin behind a one-click demo sign-in, photo uploads. Data resets on restart and with «Скинути демо-дані» in the admin. Leaving it is a config change: [setup.md](setup.md) → «Leaving demo mode».
 
 **The site is the foundation, the CRM is optional.** The owner (Andrii) may drop Plektan. Properties, photos, leads and clients therefore live in our Supabase + R2; Plektan is an external source and the channel to the portals, not the store. Without Plektan only portal publishing disappears.
 
@@ -42,14 +44,14 @@ Background, costs and stages: [reference/stack.md](reference/stack.md).
 | Admin: SEO + pages | `/admin/pages` | [009](specs/009-seo.md) |
 | AI assistant — chat widget on every page | — | [010](specs/010-ai-assistant.md) |
 
-The Plektan partner button ("Ми працюємо з Plektan") is mandatory in the footer of every page.
+The Plektan partner button ("Ми працюємо з Plektan") is in the footer of every page **only when the Plektan integration is on** (`PLEKTAN_API_KEY` set); the demo doesn't show it.
 
 Build order and status: [roadmap.md](roadmap.md). Later options (client login via Telegram/Google, saved searches with Telegram alerts, price-drop alerts, XML feed to LUN, simple lead pipeline) are in [reference/stack.md](reference/stack.md) → «Можливий функціонал»; not planned yet.
 
 ## Design principles
-**Template, mock data:** for now the site is a template for the real project. All agency data (name, contacts, messengers, texts, coordinates) is mock and lives only as consts in `src/constants/`, so the real agency's data replaces it in one place. Components never hardcode agency data. The seed (`supabase/seed.sql`) is demo data too.
+**Template, mock data:** the site is a template for the real project. All agency data (name, contacts, messengers, texts, coordinates) is mock and lives only as consts in `src/constants/` and the typed seed in `src/lib/demo/seed/`, so the real agency's data replaces it in one place. Components never hardcode agency data. `supabase/seed.sql` is generated from that seed (`pnpm seed:sql`).
 
-**Design status:** brand, logo and visual design are not defined yet. Build with a neutral placeholder look (shadcn neutral palette, one accent, text wordmark "Sofiacity", placeholder photos). Everything visual goes through tokens in `globals.css` and one `logo.tsx`, so the real design replaces it later without touching pages. Don't ask about branding before it exists.
+**Design status:** the demo brand is 7 SKY (cloud-and-buildings mark, sky-blue accent, placeholder photos); the real brand is not defined. Everything visual goes through tokens in `globals.css` and one `logo.tsx`, so the real design replaces it later without touching pages. Don't ask about branding before it exists.
 
 1. Photos first; clean, calm, trustworthy. Neutral palette + one accent.
 2. Mobile-first: catalog, property page and forms must be perfect at 375px.
@@ -60,6 +62,7 @@ Build order and status: [roadmap.md](roadmap.md). Later options (client login vi
 
 ## Technical frame
 - Next.js (App Router, TypeScript) at the repo root, deployed to Cloudflare Workers via OpenNext. SSR/ISR for SEO.
+- **Demo mode:** `DATA_DRIVER=demo` (the default without Supabase env) swaps the data store, admin auth and photo storage for in-memory equivalents behind the same interfaces (`src/lib/db/`, `src/lib/demo/`); nothing is loaded from third parties (fonts, maps and badge are local). `pnpm install && pnpm dev` needs no Docker, keys or network. `DATA_DRIVER=supabase` is the real stack below.
 - Supabase Postgres (Pro) with RLS; Supabase Auth for the admin.
 - Cloudflare R2 for photos (WebP, 2–3 sizes), Turnstile against spam.
 - Plektan CRM API (sync + `addAdvert`), Telegram Bot API (manager notifications), an LLM API for the assistant.

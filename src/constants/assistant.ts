@@ -3,7 +3,7 @@ import { CONTACTS } from "@/constants/contacts";
 
 // Mock — replace with the agency's real assistant persona, FAQ and rules (spec 010, external needs).
 export const ASSISTANT_PERSONA = {
-  name: "Софія",
+  name: "Ніка",
   role: `віртуальна помічниця агентства нерухомості ${BRAND.name}`,
 } as const;
 

@@ -42,7 +42,8 @@ export const AssistantLauncher = () => {
       <SheetTrigger asChild>
         <Button
           size="icon"
-          aria-label="Відкрити чат з асистентом"
+          aria-label="Відкрити чат з віртуальним консультантом"
+          data-assistant-launcher=""
           onPointerEnter={preloadPanel}
           onFocus={preloadPanel}
           // `chat-launcher-bottom` also lifts it above the property page's mobile bar (globals.css).

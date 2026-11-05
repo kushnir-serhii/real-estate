@@ -21,7 +21,7 @@ const formatCount = new Intl.NumberFormat("uk-UA").format;
 export const LIMIT_MESSAGES: Record<AssistantLimitReason, string> = {
   rate_limit: "Забагато повідомлень за короткий час. Спробуйте за кілька хвилин.",
   conversation_limit: "Ця розмова вже довга. Залиште заявку — менеджер допоможе особисто.",
-  budget: "Асистент зараз недоступний.",
+  budget: "Віртуальний консультант зараз недоступний.",
   message_too_long: `Повідомлення задовге — до ${formatCount(ASSISTANT_MESSAGE_MAX_LENGTH)} символів.`,
   turnstile: "Не вдалося пройти перевірку. Спробуйте ще раз.",
 };
