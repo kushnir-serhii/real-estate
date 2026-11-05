@@ -116,6 +116,37 @@ Neutrals are tinted (warm in light, blue in dark), never pure grey. Links and te
   - [x] every state from `docs/conventions.md` → States still designed on the touched pages
   - [x] admin pages: no contrast or layout regressions
 
+### [x] 8. Build clears the stale route cache
+- **Build:** `prebuild` script removes `.next/server/route-cache` (Node `fs.rmSync`, cross-platform), so `pnpm build` + `next start` never serves a page from an older build.
+- **Files:** `package.json`, `scripts/clean-route-cache.mjs`
+- **Model:** main session (trivial)
+- **Accept:**
+  - [x] after `pnpm build`, `next start` serves `/` from the new build (checked by a section id that only the new build has)
+
+### [ ] 9. Less "AI" in the public copy
+- **Build:** the user wants fewer AI mentions and icons. Public marketing copy says «віртуальний консультант» (or nothing) instead of «AI-асистент» / «AI»: hero eyebrow, trust stat, proptech block (the big card keeps one entry point to the chat, softer wording, fewer sparkles / bot icons), how-we-work, about band, footer, assistant launcher labels and panel title if they say AI. Keep the honest disclaimer in the chat panel («Відповіді генерує ШІ…»). Admin wording unchanged.
+- **Files:** `src/constants/{home,assistant,inner-pages,footer}.ts`, `src/features/home/*`, `src/features/assistant/*` (labels only)
+- **Agent:** designer · **Model:** sonnet
+- **Accept:**
+  - [ ] no «AI» / «ШІ» on public pages except the chat disclaimer; at most one assistant mention in the home hero area
+  - [ ] layouts still look balanced after icon / copy removals
+
+### [ ] 10. Richer mock content: no empty-looking pages
+- **Build:** demo seed gets more published listings so every district tile on `/` opens at least 3 results, each deal (sale, long rent, daily rent) has ≥ 4, each property page has ≥ 3 similar; 4 active agents (+ the existing inactive one), agent photos as local placeholders if there are none. `/favorites` with no favourites shows the empty state plus a «Можливо, вам сподобається» row of 3 real listings. Any other public block that renders empty on the demo gets mock rows. Regenerate `supabase/seed.sql` (`pnpm seed:sql`); tests and contract counts updated.
+- **Files:** `src/lib/demo/seed/*`, `supabase/seed.sql`, `public/placeholders/*` (if needed), `src/features/favorites/*`, tests that pin seed counts
+- **Agent:** designer (seed is typed data, follow `docs/conventions.md` → Data drivers) · **Model:** sonnet
+- **Accept:**
+  - [ ] the counts above hold on the demo driver (checked by a test or a script, written in the log)
+  - [ ] `pnpm test` green, seed.sql drift test green
+
+### [ ] 11. Gallery thumbnails
+- **Build:** property gallery gets a thumbnail strip (desktop: below the main photo; mobile: scrollable strip or dots + count), active thumbnail highlighted (dawn ring), click / keyboard selects, scrolls the active thumb into view; fullscreen viewer gets thumbnails too if cheap. Lazy thumbs from the smallest R2 size. Keyboard and swipe keep working.
+- **Files:** `src/features/property/property-gallery.tsx` (+ small helpers)
+- **Agent:** designer · **Model:** sonnet
+- **Accept:**
+  - [ ] thumbnails are buttons with `aria-label` («Фото 3 з 8»), `aria-current` on the active one, 44px targets
+  - [ ] first-load JS on a property page grows ≤ 2 KB gz; no CLS
+
 ## External needs
 - None: no keys, accounts or migrations. Fonts are self-hosted (OFL).
 - Later, the real agency: real stats, districts photos, testimonials and agent photos replace the mock consts.
@@ -133,6 +164,7 @@ Neutrals are tinted (warm in light, blue in dark), never pure grey. Links and te
 - **Open (2026-11-05):** the proptech "ask the assistant" button opens the launcher via `[data-assistant-launcher]`; a shared open-event / store would be cleaner if more entry points appear.
 - **Open (2026-11-05):** `next start` can serve a stale page from `.next/server/route-cache/` that `next build` doesn't clear (seen on `/`: a slice-4 page after the slice-6 build). Delete `.next` before `pnpm build` when verifying; `pnpm perf` numbers for slices 5–6 may have been measured on the stale page and are re-measured at the end of the spec.
 - **Open (2026-11-05):** property gallery has arrows, counter and fullscreen but no thumbnails; adding them changes the client gallery (left as is).
+- **Decided (2026-11-05, review round):** add slices 8–11: build clears route cache, less AI copy («віртуальний консультант» is fine), richer mock content so no page looks empty, gallery thumbnails. The no-JS issue becomes spec 013.
 - **Decided (2026-11-05):** 011 has one open criterion (`pnpm preview` on Windows, environment-only); 012 builds on the 011 branch anyway.
 
 ## Log
@@ -145,3 +177,4 @@ Neutrals are tinted (warm in light, blue in dark), never pure grey. Links and te
 | 2026-11-05 | 5 | done: CSS `reveal` / `reveal-stagger` on home sections; `TrustStats` (4 stats, Unbounded, dawn bars, `CountUp` client leaf: final value in server HTML, animates only on intersect + motion allowed, manual uk formatting); `HowWeWork` (full-bleed ink, 4 steps, dawn numbers, connector vertical → horizontal from lg); `ProptechFeatures` bento (large ink AI card with sky / dawn glow + `OpenAssistantButton` clicking `[data-assistant-launcher]`, no panel in first load; CRM, Telegram, favorites cards); `HomeAbout` two columns + 3-photo collage + stat chip; shared `HomeSection`; copy in `home.ts`. Reduced motion: all visible, final numbers. No-JS: numbers in HTML, but the page body is hidden by the pre-existing route loading boundary (see Open questions). `pnpm perf` `/`: LCP 1272 ms, CLS 0.000, first-load JS 189.2 KB gz (+0.5) | `src/features/home/{home-section,trust-stats,count-up,how-we-work,proptech-features,open-assistant-button,home-about,home-cta,featured-grid}.tsx`, `src/app/(site)/page.tsx`, `src/constants/home.ts`, `src/components/section-heading.tsx`, `src/features/assistant/assistant-launcher.tsx` |
 | 2026-11-05 | 6 | done: `Districts` bento (6 tiles, `tile-veil`, ≥ 85% midnight under text; scroll-snap strip on mobile; all 6 open the catalog with results in demo), `HomeAgents` (Suspense + skeleton, hidden on empty / error with `console.error`, ≤ 4, photo or initials, tel + email), `Testimonials` (3 static, dawn quote, «Оцінка 5 з 5»), `HomeCta` ink panel + unchanged form; final order hero → search → trust → featured → districts → how → proptech → about → agents → testimonials → CTA. Reviewed in the browser after a clean `.next` (stale route-cache, see Open questions). To polish in slice 7: «24/7» should not count up; 2 demo agents leave the grid half empty | `src/features/home/{districts,home-agents,testimonials,home-cta}.tsx`, `src/app/(site)/page.tsx`, `src/constants/home.ts`, `src/app/globals.css` |
 | 2026-11-05 | 7 | done: home polish («24/7» static via `animate: false`; agents = intro column + dawn CTA + 2-col grid from lg); `PageHeader` + `src/constants/inner-pages.ts`; catalog (filters card, dawn «Показати», round pagination, designed empty state, skeleton / error), property (Unbounded title / price, icon fact cards, ink agent card with dawn call, dawn CTAs, `SectionHeading` similar, 2xl corners; sold view restyled), about (+ `TrustStats` band), contacts, favorites empty state, privacy prose, 404 + 3 error pages. Admin checked in both themes: no regressions, no changes. Tests 647 passed / 51 skipped. Clean-build `pnpm perf`: `/` LCP 960 ms, CLS 0, 189.5 KB gz; `/catalog` 752 ms, 0, 184.6 KB; property 792 ms, 0, 194.7 KB (all below the ~221 / 216 / 226 KB baseline). Error pages checked by code only | `src/components/page-header.tsx`, `src/constants/{inner-pages,home}.ts`, `src/features/home/{trust-stats,home-agents}.tsx`, `src/app/not-found.tsx`, `src/app/(site)/**/{page,loading,error}.tsx`, `src/features/{catalog,property,contacts,favorites,pages,map}/*` |
+| 2026-11-05 | 8 | done: `prebuild` → `scripts/clean-route-cache.mjs` removes `.next/server/route-cache` (pnpm runs it before `pnpm build`; checked: the folder is gone after the build, `/` served from the new build) | `package.json`, `scripts/clean-route-cache.mjs` |
