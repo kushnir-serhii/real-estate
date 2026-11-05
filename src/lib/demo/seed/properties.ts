@@ -512,7 +512,7 @@ export const SEED_PROPERTIES: SeedProperty[] = [
     slug: "studiia-podobovo-povitroflotskyi-prospekt-f3b7c5",
     agent: "a2",
     raw: null,
-    publishedDaysAgo: 1,
+    publishedDaysAgo: 40,
     seo_title: null,
     seo_description: null,
     hiddenDaysAgo: null,

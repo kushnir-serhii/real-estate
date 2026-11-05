@@ -123,29 +123,29 @@ Neutrals are tinted (warm in light, blue in dark), never pure grey. Links and te
 - **Accept:**
   - [x] after `pnpm build`, `next start` serves `/` from the new build (checked by a section id that only the new build has)
 
-### [ ] 9. Less "AI" in the public copy
+### [x] 9. Less "AI" in the public copy
 - **Build:** the user wants fewer AI mentions and icons. Public marketing copy says «віртуальний консультант» (or nothing) instead of «AI-асистент» / «AI»: hero eyebrow, trust stat, proptech block (the big card keeps one entry point to the chat, softer wording, fewer sparkles / bot icons), how-we-work, about band, footer, assistant launcher labels and panel title if they say AI. Keep the honest disclaimer in the chat panel («Відповіді генерує ШІ…»). Admin wording unchanged.
 - **Files:** `src/constants/{home,assistant,inner-pages,footer}.ts`, `src/features/home/*`, `src/features/assistant/*` (labels only)
 - **Agent:** designer · **Model:** sonnet
 - **Accept:**
-  - [ ] no «AI» / «ШІ» on public pages except the chat disclaimer; at most one assistant mention in the home hero area
-  - [ ] layouts still look balanced after icon / copy removals
+  - [x] no «AI» / «ШІ» on public pages except the chat disclaimer; at most one assistant mention in the home hero area
+  - [x] layouts still look balanced after icon / copy removals
 
-### [ ] 10. Richer mock content: no empty-looking pages
+### [x] 10. Richer mock content: no empty-looking pages
 - **Build:** demo seed gets more published listings so every district tile on `/` opens at least 3 results, each deal (sale, long rent, daily rent) has ≥ 4, each property page has ≥ 3 similar; 4 active agents (+ the existing inactive one), agent photos as local placeholders if there are none. `/favorites` with no favourites shows the empty state plus a «Можливо, вам сподобається» row of 3 real listings. Any other public block that renders empty on the demo gets mock rows. Regenerate `supabase/seed.sql` (`pnpm seed:sql`); tests and contract counts updated.
 - **Files:** `src/lib/demo/seed/*`, `supabase/seed.sql`, `public/placeholders/*` (if needed), `src/features/favorites/*`, tests that pin seed counts
 - **Agent:** designer (seed is typed data, follow `docs/conventions.md` → Data drivers) · **Model:** sonnet
 - **Accept:**
-  - [ ] the counts above hold on the demo driver (checked by a test or a script, written in the log)
-  - [ ] `pnpm test` green, seed.sql drift test green
+  - [x] the counts above hold on the demo driver (checked by a test or a script, written in the log)
+  - [x] `pnpm test` green, seed.sql drift test green
 
-### [ ] 11. Gallery thumbnails
+### [x] 11. Gallery thumbnails
 - **Build:** property gallery gets a thumbnail strip (desktop: below the main photo; mobile: scrollable strip or dots + count), active thumbnail highlighted (dawn ring), click / keyboard selects, scrolls the active thumb into view; fullscreen viewer gets thumbnails too if cheap. Lazy thumbs from the smallest R2 size. Keyboard and swipe keep working.
 - **Files:** `src/features/property/property-gallery.tsx` (+ small helpers)
 - **Agent:** designer · **Model:** sonnet
 - **Accept:**
-  - [ ] thumbnails are buttons with `aria-label` («Фото 3 з 8»), `aria-current` on the active one, 44px targets
-  - [ ] first-load JS on a property page grows ≤ 2 KB gz; no CLS
+  - [x] thumbnails are buttons with `aria-label` («Фото 3 з 8»), `aria-current` on the active one, 44px targets
+  - [x] first-load JS on a property page grows ≤ 2 KB gz; no CLS
 
 ## External needs
 - None: no keys, accounts or migrations. Fonts are self-hosted (OFL).
@@ -165,6 +165,7 @@ Neutrals are tinted (warm in light, blue in dark), never pure grey. Links and te
 - **Open (2026-11-05):** `next start` can serve a stale page from `.next/server/route-cache/` that `next build` doesn't clear (seen on `/`: a slice-4 page after the slice-6 build). Delete `.next` before `pnpm build` when verifying; `pnpm perf` numbers for slices 5–6 may have been measured on the stale page and are re-measured at the end of the spec.
 - **Open (2026-11-05):** property gallery has arrows, counter and fullscreen but no thumbnails; adding them changes the client gallery (left as is).
 - **Decided (2026-11-05, review round):** add slices 8–11: build clears route cache, less AI copy («віртуальний консультант» is fine), richer mock content so no page looks empty, gallery thumbnails. The no-JS issue becomes spec 013.
+- **Open (2026-11-05):** no portrait placeholders in the repo, so agents show initials; commercial rows reuse interior photos and plots have one landscape photo — real photos needed for a sales demo.
 - **Decided (2026-11-05):** 011 has one open criterion (`pnpm preview` on Windows, environment-only); 012 builds on the 011 branch anyway.
 
 ## Log
@@ -178,3 +179,6 @@ Neutrals are tinted (warm in light, blue in dark), never pure grey. Links and te
 | 2026-11-05 | 6 | done: `Districts` bento (6 tiles, `tile-veil`, ≥ 85% midnight under text; scroll-snap strip on mobile; all 6 open the catalog with results in demo), `HomeAgents` (Suspense + skeleton, hidden on empty / error with `console.error`, ≤ 4, photo or initials, tel + email), `Testimonials` (3 static, dawn quote, «Оцінка 5 з 5»), `HomeCta` ink panel + unchanged form; final order hero → search → trust → featured → districts → how → proptech → about → agents → testimonials → CTA. Reviewed in the browser after a clean `.next` (stale route-cache, see Open questions). To polish in slice 7: «24/7» should not count up; 2 demo agents leave the grid half empty | `src/features/home/{districts,home-agents,testimonials,home-cta}.tsx`, `src/app/(site)/page.tsx`, `src/constants/home.ts`, `src/app/globals.css` |
 | 2026-11-05 | 7 | done: home polish («24/7» static via `animate: false`; agents = intro column + dawn CTA + 2-col grid from lg); `PageHeader` + `src/constants/inner-pages.ts`; catalog (filters card, dawn «Показати», round pagination, designed empty state, skeleton / error), property (Unbounded title / price, icon fact cards, ink agent card with dawn call, dawn CTAs, `SectionHeading` similar, 2xl corners; sold view restyled), about (+ `TrustStats` band), contacts, favorites empty state, privacy prose, 404 + 3 error pages. Admin checked in both themes: no regressions, no changes. Tests 647 passed / 51 skipped. Clean-build `pnpm perf`: `/` LCP 960 ms, CLS 0, 189.5 KB gz; `/catalog` 752 ms, 0, 184.6 KB; property 792 ms, 0, 194.7 KB (all below the ~221 / 216 / 226 KB baseline). Error pages checked by code only | `src/components/page-header.tsx`, `src/constants/{inner-pages,home}.ts`, `src/features/home/{trust-stats,home-agents}.tsx`, `src/app/not-found.tsx`, `src/app/(site)/**/{page,loading,error}.tsx`, `src/features/{catalog,property,contacts,favorites,pages,map}/*` |
 | 2026-11-05 | 8 | done: `prebuild` → `scripts/clean-route-cache.mjs` removes `.next/server/route-cache` (pnpm runs it before `pnpm build`; checked: the folder is gone after the build, `/` served from the new build) | `package.json`, `scripts/clean-route-cache.mjs` |
+| 2026-11-05 | 9 | done (parallel worktree, cherry-picked): hero eyebrow «Київ і область · з 2014 року»; stat «24/7 AI» → «300+ об'єктів у базі»; proptech → «Сервіс / Зручно на кожному кроці», card «Віртуальний консультант», CTA «Розпочати чат», Sparkles icon removed; assistant launcher / panel / notices say «віртуальний консультант»; chat disclaimer about ШІ kept; prompts and admin unchanged | `src/constants/home.ts`, `src/features/home/{proptech-features,trust-stats}.tsx`, `src/features/assistant/*` (labels + test) |
+| 2026-11-05 | 10 | done (parallel worktree, cherry-picked): +52 published listings (`extra-properties.ts`, 79 published), districts 6–8 each, every deal ≥ 4, similar ≥ 3 for every listing, 4 active agents + 1 inactive; `coverage.test.ts` asserts it; `/favorites` empty state + «Можливо, вам сподобається» (3 newest); `seed.sql` regenerated. Review fix: the newest listing had no photo (shown first on `/`) → moved to 40 days ago | `src/lib/demo/seed/{extra-properties,coverage.test,agents,index,properties}.ts`, `supabase/seed.sql`, `src/lib/db/driver-contract.test.ts`, `src/features/favorites/{favorites-suggestions,favorites-list}.tsx`, `src/app/(site)/favorites/page.tsx`, `src/constants/inner-pages.ts` |
+| 2026-11-05 | 11 | done (parallel worktree, cherry-picked): `ThumbStrip` under the main photo and in the fullscreen viewer, scroll-snap, dawn ring on the active thumb, buttons «Фото N з M» + `aria-current`, lazy smallest-size thumbs, no strip for 0–1 photos, strip height reserved (CLS 0); property page LCP 832 ms, first-load JS 195.1 KB gz (+0.4) | `src/features/property/{property-gallery,property-view}.tsx` |
