@@ -11,7 +11,7 @@ import { breadcrumbSchema, CATALOG_CRUMB, HOME_CRUMB, propertySchema } from "@/f
 import { getSiteUrl } from "@/lib/site-url";
 import { DEAL_LABELS, PROPERTY_TYPE_LABELS } from "@/features/properties/property-labels";
 import type { PublishedProperty } from "@/lib/db/properties";
-import { largestPhotoUrl, photoSrcSet } from "@/lib/photos/photo-src-set";
+import { largestPhotoUrl, photoSrcSet, smallestPhotoUrl } from "@/lib/photos/photo-src-set";
 import { photoUrl } from "@/lib/photos/photo-url";
 import { cn } from "@/lib/utils";
 import { PropertyContactCard } from "./property-contact-card";
@@ -44,6 +44,7 @@ const toGalleryPhotos = (property: PublishedProperty): GalleryPhoto[] =>
     id: photo.id,
     src: photoUrl(photo.r2_key),
     srcSet: photoSrcSet(photo.sizes),
+    thumb: smallestPhotoUrl(photo),
     width: photo.width ?? FALLBACK_WIDTH,
     height: photo.height ?? FALLBACK_HEIGHT,
   }));
