@@ -45,3 +45,21 @@ for (const { route, status, key } of CASES) {
     })
   }
 }
+
+// Spec 014: styled selects fall back to native ones (noscript) and still submit the same params.
+test('no-js quick search submits native selects', async ({ page }) => {
+  await page.goto('/')
+  const form = page.getByRole('form', { name: 'Швидкий пошук' })
+  await form.locator('select[name="property_type"]').selectOption('flat')
+  await form.locator('select[name="rooms"]').selectOption('2')
+  await form.getByRole('button', { name: 'Знайти' }).click()
+  await expect(page).toHaveURL(/\/catalog\?.*property_type=flat/)
+  await expect(page).toHaveURL(/rooms=2/)
+})
+
+test('no-js catalog sort submits the native select', async ({ page }) => {
+  await page.goto('/catalog')
+  await page.locator('select[name="sort"]').selectOption('price_asc')
+  await page.getByRole('button', { name: 'Застосувати' }).click()
+  await expect(page).toHaveURL(/sort=price_asc/)
+})

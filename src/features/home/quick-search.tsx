@@ -1,15 +1,12 @@
 import { Search } from "lucide-react";
 import { useId } from "react";
 
+import { FormSelect } from "@/components/form-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PROPERTY_TYPE_LABELS } from "@/features/properties/property-labels";
 import { CURRENCIES } from "@/lib/db/property-values";
-import { cn } from "@/lib/utils";
-
-const SELECT_CLASS =
-  "h-11 w-full min-w-0 rounded-lg border border-control bg-background px-3 text-base text-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30";
 
 const DEAL_OPTIONS = [
   { value: "sell", label: "Купити" },
@@ -17,7 +14,17 @@ const DEAL_OPTIONS = [
   { value: "rent_day", label: "Подобово" },
 ] as const;
 
-const ROOM_CHOICES = ["1", "2", "3", "4", "5+"] as const;
+const TYPE_OPTIONS = [
+  { value: "", label: "Будь-який" },
+  ...Object.entries(PROPERTY_TYPE_LABELS).map(([value, label]) => ({ value, label })),
+];
+
+const ROOM_OPTIONS = [
+  { value: "", label: "Будь-яка" },
+  ...["1", "2", "3", "4", "5+"].map((r) => ({ value: r, label: r })),
+];
+
+const CURRENCY_OPTIONS = CURRENCIES.map((c) => ({ value: c, label: c }));
 
 type FieldProps = { label: string; htmlFor: string; children: React.ReactNode };
 
@@ -49,7 +56,7 @@ export const QuickSearch = () => {
           {DEAL_OPTIONS.map((o) => (
             <label
               key={o.value}
-              className="relative flex h-11 cursor-pointer items-center justify-center rounded-xl px-2 text-sm font-semibold text-muted-foreground transition-colors duration-(--duration-fast) hover:text-foreground has-checked:bg-primary has-checked:text-primary-foreground has-focus-visible:ring-3 has-focus-visible:ring-ring/50"
+              className="relative flex h-11 cursor-pointer items-center justify-center rounded-xl px-2 text-sm font-semibold text-muted-foreground transition-colors duration-(--duration-fast) hover:text-foreground has-checked:bg-primary has-checked:text-primary-foreground has-checked:hover:text-primary-foreground has-focus-visible:ring-3 has-focus-visible:ring-ring/50"
             >
               <input
                 type="radio"
@@ -65,24 +72,18 @@ export const QuickSearch = () => {
       </fieldset>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[repeat(3,1fr)_auto]">
         <Field label="Тип" htmlFor={typeId}>
-          <select id={typeId} name="property_type" defaultValue="" className={SELECT_CLASS}>
-            <option value="">Будь-який</option>
-            {Object.entries(PROPERTY_TYPE_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+          <FormSelect
+            id={typeId}
+            name="property_type"
+            options={TYPE_OPTIONS}
+          />
         </Field>
         <Field label="Кімнат" htmlFor={roomsId}>
-          <select id={roomsId} name="rooms" defaultValue="" className={SELECT_CLASS}>
-            <option value="">Будь-яка</option>
-            {ROOM_CHOICES.map((r) => (
-              <option key={r} value={r}>
-                {r}
-              </option>
-            ))}
-          </select>
+          <FormSelect
+            id={roomsId}
+            name="rooms"
+            options={ROOM_OPTIONS}
+          />
         </Field>
         <Field label="Бюджет до" htmlFor={budgetId}>
           <div className="flex gap-2">
@@ -94,19 +95,14 @@ export const QuickSearch = () => {
               min={0}
               placeholder="Будь-який"
             />
-            <select
+            <FormSelect
               id={currencyId}
               name="currency"
               defaultValue="USD"
               aria-label="Валюта"
-              className={cn(SELECT_CLASS, "w-24 shrink-0")}
-            >
-              {CURRENCIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
+              options={CURRENCY_OPTIONS}
+              className="w-28 shrink-0"
+            />
           </div>
         </Field>
         <Button
