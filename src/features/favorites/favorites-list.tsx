@@ -1,7 +1,7 @@
 "use client";
 
 import { RefreshCw } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -40,7 +40,12 @@ const fetchFavorites = async (ids: string[], signal: AbortSignal): Promise<Favor
 /** id -> loaded property, or `null` when the server doesn't return it (unavailable). */
 type Cache = Record<string, FavoriteProperty | null>;
 
-export const FavoritesList = () => {
+type FavoritesListProps = {
+  /** Server-rendered listings shown under the empty state only (never when there are favourites). */
+  suggestions?: ReactNode;
+};
+
+export const FavoritesList = ({ suggestions }: FavoritesListProps) => {
   const hydrated = useHydrated();
   const ids = useFavorites();
   const [cache, setCache] = useState<Cache>({});
@@ -68,7 +73,14 @@ export const FavoritesList = () => {
   }, [hydrated, ids, cache, failed]);
 
   if (!hydrated) return <CatalogSkeleton />;
-  if (ids.length === 0) return <FavoritesEmpty />;
+  if (ids.length === 0) {
+    return (
+      <div className="flex flex-col gap-12 sm:gap-16">
+        <FavoritesEmpty />
+        {suggestions}
+      </div>
+    );
+  }
 
   if (failed && ids.some((id) => !(id in cache))) {
     return (

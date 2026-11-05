@@ -27,6 +27,9 @@ export const FAVORITES_PAGE = {
   eyebrow: "Збережене",
   title: "Обране",
   lead: "Список зберігається лише на цьому пристрої, у цьому браузері.",
+  suggestionsEyebrow: "Нове в каталозі",
+  suggestionsTitle: "Можливо, вам сподобається",
+  suggestionsAction: "Увесь каталог",
 } as const;
 
 export const PRIVACY_PAGE = {

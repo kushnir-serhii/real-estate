@@ -5,6 +5,7 @@ import { SEED_AGENT_KEYS, SEED_AGENTS } from "./agents";
 import { buildSeedLeads } from "./leads";
 import { SEED_PAGES } from "./pages";
 import { SEED_PHOTO_FILES, SEED_PHOTO_SETS } from "./photos";
+import { EXTRA_PHOTO_SETS, EXTRA_SEED_PROPERTIES } from "./extra-properties";
 import { SEED_PROPERTIES } from "./properties";
 
 type PropertyRow = Database["public"]["Tables"]["properties"]["Row"];
@@ -32,7 +33,7 @@ export const buildDemoSeed = (now: number): DemoData => {
 
   const agents = SEED_AGENT_KEYS.map((key) => ({ ...SEED_AGENTS[key], created_at: nowIso, updated_at: nowIso }));
 
-  const properties = SEED_PROPERTIES.map(({ agent, publishedDaysAgo, hiddenDaysAgo, ...fields }, index): PropertyRow => {
+  const properties = [...SEED_PROPERTIES, ...EXTRA_SEED_PROPERTIES].map(({ agent, publishedDaysAgo, hiddenDaysAgo, ...fields }, index): PropertyRow => {
     const publishedAt = publishedDaysAgo === null ? null : daysAgo(now, publishedDaysAgo);
     const { price_amount, area_total } = fields;
     return {
@@ -52,7 +53,7 @@ export const buildDemoSeed = (now: number): DemoData => {
 
   const idBySlug = new Map(properties.map((p) => [p.slug, p.id]));
   let photoIndex = 0;
-  const property_photos = Object.entries(SEED_PHOTO_SETS).flatMap(([slug, files]) => {
+  const property_photos = Object.entries({ ...SEED_PHOTO_SETS, ...EXTRA_PHOTO_SETS }).flatMap(([slug, files]) => {
     const property_id = idBySlug.get(slug);
     if (!property_id) throw new Error(`Demo seed: photo set for unknown property "${slug}"`);
     return files.map((file, position) => ({

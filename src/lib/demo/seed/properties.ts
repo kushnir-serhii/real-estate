@@ -1,10 +1,11 @@
 import type { Database } from "@/lib/supabase/database.types";
+import type { SeedAgentKey } from "./agents";
 
 type PropertyRow = Database["public"]["Tables"]["properties"]["Row"];
 
 /** A property row as the seed describes it: relative dates (days ago) and the agent as a short key; the store fills the rest. */
 export type SeedProperty = Pick<PropertyRow, "source" | "external_id" | "status" | "deal" | "property_type" | "prop_kind" | "price_amount" | "currency" | "area_total" | "area_life" | "area_kitchen" | "area_lot" | "room_count" | "storey" | "storeys" | "repair" | "wall_material" | "housing_class" | "is_newbuilding" | "locality" | "district" | "street" | "house" | "lat" | "lng" | "title" | "description" | "slug" | "raw" | "seo_title" | "seo_description"> & {
-  agent: "a1" | "a2" | "a3" | null;
+  agent: SeedAgentKey | null;
   publishedDaysAgo: number | null;
   /** Days since the property was hidden; null for drafts and published rows. */
   hiddenDaysAgo: number | null;

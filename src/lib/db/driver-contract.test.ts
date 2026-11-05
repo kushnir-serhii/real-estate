@@ -287,7 +287,7 @@ const runContract = (name: string, getDrivers: () => Drivers | Promise<Drivers>,
     describe("agents, pages, settings", () => {
       it("lists active agents only", async () => {
         const names = (await d.agents.fetchActiveAgents()).map((a) => a.name);
-        expect(names).toHaveLength(2);
+        expect(names).toHaveLength(4);
         expect(names).not.toContain("Ірина Савченко");
       });
 
