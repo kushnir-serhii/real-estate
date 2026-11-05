@@ -1,14 +1,15 @@
 // Generates the raster brand assets from the mark: src/app/favicon.ico and public/og-default.png.
 // Run after changing the brand: `node scripts/generate-brand-assets.mjs` (uses sharp, no network).
-// BRAND_* colours below mirror --primary in src/app/globals.css (light): keep them in sync.
+// BRAND_* colours below mirror --ink, --on-ink and --dawn in src/app/globals.css (light): keep them in sync.
 import { readFileSync, writeFileSync } from "node:fs";
 import sharp from "sharp";
 
 const NAME = "7 SKY";
 const TAGLINE = "Агентство нерухомості в Києві";
 const SUBLINE = "Купівля, продаж та оренда квартир і будинків";
-const BRAND_BG = "#0068ad";
-const BRAND_FG = "#ffffff";
+const BRAND_BG = "#0d1b2e"; // midnight (--ink)
+const BRAND_FG = "#f6f4ef"; // off-white (--on-ink)
+const BRAND_ACCENT = "#e8a15c"; // dawn (--dawn)
 
 const icon = readFileSync("src/app/icon.svg");
 
@@ -34,7 +35,7 @@ writeFileSync("src/app/favicon.ico", Buffer.concat([header, ...entries, ...pngs]
 
 // og-default.png: 1200x630, mark + wordmark + tagline on the brand colour.
 const mark = `
-  <g transform="translate(96 84) scale(3.2) translate(-4 -6)" fill="none" stroke="${BRAND_FG}" stroke-width="4" stroke-linejoin="miter" stroke-linecap="butt">
+  <g transform="translate(96 84) scale(3.2) translate(-4 -6)" fill="none" stroke="${BRAND_ACCENT}" stroke-width="4" stroke-linejoin="miter" stroke-linecap="butt">
     <path d="M40 68H24A15.5 15.5 0 0 1 26 38A30 30 0 0 1 84 30A20.5 20.5 0 0 1 96 68H76"/>
     <path d="M40 70V54L48 50"/>
     <path d="M48 70V30L66 20V44"/>

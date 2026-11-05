@@ -1,6 +1,6 @@
 # 012 — Premium redesign: Midnight Sky
 
-**Status:** ready · **Depends on:** 011 · **Route(s):** every public route (`/`, `/catalog`, property pages, `/about`, `/contacts`, `/favorites`, `/privacy`, `/design`); admin gets the new tokens only
+**Status:** in-progress · **Depends on:** 011 · **Route(s):** every public route (`/`, `/catalog`, property pages, `/about`, `/contacts`, `/favorites`, `/privacy`, `/design`); admin gets the new tokens only
 
 ## Goal
 The template is being sold as a **proptech product** to real estate agencies. Today it looks like a stock WordPress theme: a default corporate blue, one font for everything, a cluttered header, flat grey sections and almost no motion. When this spec is done, the public site has its own fresh, premium and still business-like look ("Midnight Sky"): a night-blue and warm-dawn palette, a recognizable display font, a clean header that reacts to scroll, photo-led cards with hover effects, restrained motion, and new home sections that sell trust (numbers, districts, process, agents, reviews). A buyer opening the demo sees a product, not a theme.
@@ -50,15 +50,15 @@ Neutrals are tinted (warm in light, blue in dark), never pure grey. Links and te
 
 ## Slices
 
-### [ ] 1. Tokens, fonts, buttons, motion foundation
+### [x] 1. Tokens, fonts, buttons, motion foundation
 - **Build:** new Midnight Sky tokens in `globals.css` for `:root` and `.dark` (background, foreground, card, popover, primary, secondary, muted, accent (hover tint), border, input, control, ring, success / warning / destructive re-checked) plus new tokens `dawn` / `dawn-foreground`, `sky`, `ink` / `on-ink`, mapped in `@theme inline`. Unbounded self-hosted like Manrope (temporary `pnpm add @fontsource-variable/unbounded`, copy latin + cyrillic woff2 into `src/app/fonts/`, add its OFL text, remove the package; user approved). `--font-heading` = Unbounded; base styles so `h1–h3` use it. A small type scale (display / h1 / h2 / h3 / eyebrow) as utilities. Motion tokens (`--ease-out-soft`, durations) and utilities for reveal (scroll-driven, with fallback) and reduced motion. Button: `default` = primary, new `dawn` variant for main CTAs, refreshed hover / active (lift, arrow nudge via `data-icon`). `/design` page shows the new swatches, fonts, buttons. `scripts/generate-brand-assets.mjs` uses the new colours; regenerate `icon.svg`, `favicon.ico`, `og-default.png`.
 - **Files:** `src/app/globals.css`, `src/app/fonts/*`, `src/app/layout.tsx`, `src/components/ui/button.tsx`, `src/app/design/page.tsx`, `scripts/generate-brand-assets.mjs`, `src/app/{icon.svg,favicon.ico}`, `public/og-default.png`
 - **Agent:** designer · **Model:** sonnet
 - **Accept:**
-  - [ ] every text / background pair in the token table passes WCAG AA (4.5:1 text, 3:1 large text and UI), both themes; ratios written in the log
-  - [ ] Unbounded loads from local files only (no third-party request), cyrillic file only for cyrillic ranges; `package.json` has no fontsource dependency
-  - [ ] no raw colours outside `globals.css` (and the brand-asset script); typecheck, lint, build green
-  - [ ] `/design` shows the new palette, fonts and button variants in both themes
+  - [x] every text / background pair in the token table passes WCAG AA (4.5:1 text, 3:1 large text and UI), both themes; ratios written in the log
+  - [x] Unbounded loads from local files only (no third-party request), cyrillic file only for cyrillic ranges; `package.json` has no fontsource dependency
+  - [x] no raw colours outside `globals.css` (and the brand-asset script); typecheck, lint, build green
+  - [x] `/design` shows the new palette, fonts and button variants in both themes
 
 ### [ ] 2. Header, theme toggle, mobile menu, footer
 - **Build:** header per **Design direction**: centered nav with an animated underline for the active item, compact phone, one theme icon button (light ↔ dark; the stored value can still be `system` until first click; icon reflects the current resolved theme, `aria-label` says what it switches to), dawn CTA. Transparent over the hero on `/` (light text on the hero scrim) and solid / blurred + shorter after ~40px of scroll; solid on other routes. Prefer a CSS scroll-driven approach; if JS is needed, one tiny client component with a passive listener. Mobile menu restyled (full-height sheet with large nav links, contacts, CTA, theme). Footer: ink surface with a top CTA band ("Підберемо об'єкт за 24 години" style copy, phone + messengers), columns (brand + tagline, navigation, contacts, socials), bottom row (©, privacy, demo note). Plektan badge keeps working when enabled.
@@ -125,8 +125,10 @@ Neutrals are tinted (warm in light, blue in dark), never pure grey. Links and te
 - **Decided (2026-11-05):** headings in Unbounded (Fraunces / Instrument Serif have no cyrillic); body stays Manrope · temporary `@fontsource-variable/unbounded` install to copy the woff2 is approved.
 - **Decided (2026-11-05):** new home sections: trust numbers, districts, how we work (+ AI / CRM), agents + static testimonials.
 - **Decided (2026-11-05):** theme toggle: one icon button in the header.
+- **Open (2026-11-05):** Unbounded is much wider than Manrope; existing `h1–h3` (cards, admin) may crowd in Ukrainian — checked per page in slices 4 and 7.
 - **Decided (2026-11-05):** 011 has one open criterion (`pnpm preview` on Windows, environment-only); 012 builds on the 011 branch anyway.
 
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
+| 2026-11-05 | 1 | done: Midnight Sky tokens (light + dark) + `dawn` / `dawn-text` / `sky` / `ink` / `on-ink` / `ink-muted` / `ink-border`; AA: light fg 15.7 on page, primary 15.9, muted-fg 6.75, control 3.58, dawn+midnight 7.98, dawn-text 5.64, on-ink 15.9; dark fg 16.4, dawn primary 7.98 / 8.49 on page, muted-fg 8.0, control 4.31, on-ink 14.7. Unbounded self-hosted (latin + cyrillic, OFL), `font-heading`, fluid type scale (`text-display/h1/h2/h3`, `eyebrow`), motion tokens + scroll-driven `reveal` with fallback, button `dawn` variant + lift + arrow nudge, radius 0.75rem, `/design` updated, favicon / OG regenerated (midnight + dawn). package.json unchanged | `src/app/{globals.css,layout.tsx,icon.svg,favicon.ico}`, `src/app/fonts/{unbounded.ts,unbounded-*.woff2,OFL.txt}`, `src/components/ui/button.tsx`, `src/app/design/page.tsx`, `scripts/generate-brand-assets.mjs`, `public/og-default.png` |

@@ -7,7 +7,8 @@
 /* Tokens. Swap the look here only: colors, radius, fonts. */
 @theme inline {
   --font-sans: var(--font-manrope-cyrillic), var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
-  --font-heading: var(--font-sans);
+  /* Unbounded: headings, hero, prices, big numbers (weights 500-700). Cyrillic face first, as for sans. */
+  --font-heading: var(--font-unbounded-cyrillic), var(--font-unbounded), var(--font-sans);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -33,6 +34,17 @@
   --color-scrim: var(--scrim);
   --color-on-scrim: var(--on-scrim);
   --color-viewer: var(--viewer);
+  --color-dawn: var(--dawn);
+  --color-dawn-foreground: var(--dawn-foreground);
+  --color-dawn-text: var(--dawn-text);
+  --color-sky: var(--sky);
+  --color-ink: var(--ink);
+  --color-on-ink: var(--on-ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-border: var(--ink-border);
+
+  /* one shared easing for all motion; durations are --duration-fast / base / slow in :root */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
@@ -66,63 +78,90 @@
 
 :root {
   color-scheme: light;
-  --radius: 0.625rem;
+  --radius: 0.75rem;
 
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  /* the one accent: calm sky blue (7 SKY) */
-  --primary: oklch(0.5 0.14 245);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.96 0.006 245);
-  --secondary-foreground: oklch(0.25 0.03 245);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.45 0 0);
-  --accent: oklch(0.95 0.02 245);
-  --accent-foreground: oklch(0.25 0.05 245);
-  --destructive: oklch(0.52 0.2 27);
-  /* status text and icons (delivery badges); AA on the page and on their own 10% tint */
-  --success: oklch(0.47 0.12 150);
-  --warning: oklch(0.5 0.11 65);
-  --border: oklch(0.9 0 0);
-  --input: oklch(0.9 0 0);
+  /* Midnight Sky. Neutrals are tinted (warm in light, blue in dark), never pure grey. */
+  --background: oklch(0.967 0.007 88.6);
+  --foreground: oklch(0.22 0.042 256);
+  --card: oklch(0.995 0.003 88);
+  --card-foreground: oklch(0.22 0.042 256);
+  --popover: oklch(0.995 0.003 88);
+  --popover-foreground: oklch(0.22 0.042 256);
+  /* primary = midnight; the main CTA uses dawn */
+  --primary: oklch(0.22 0.042 256);
+  --primary-foreground: oklch(0.97 0.007 88);
+  --secondary: oklch(0.94 0.01 85);
+  --secondary-foreground: oklch(0.26 0.04 256);
+  --muted: oklch(0.94 0.008 85);
+  --muted-foreground: oklch(0.45 0.03 256);
+  /* subtle hover / selected tint */
+  --accent: oklch(0.92 0.022 80);
+  --accent-foreground: oklch(0.22 0.042 256);
+  --destructive: oklch(0.5 0.2 27);
+  /* status text and icons (delivery badges); AA on the page, cards and their own 10% tint */
+  --success: oklch(0.46 0.12 150);
+  --warning: oklch(0.48 0.11 65);
+  --border: oklch(0.89 0.01 85);
+  --input: oklch(0.89 0.01 85);
   /* form control outline, needs 3:1 against the page */
-  --control: oklch(0.58 0 0);
-  --ring: oklch(0.58 0.13 245);
+  --control: oklch(0.6 0.03 256);
+  --ring: oklch(0.55 0.07 256);
+
+  /* the one accent: dawn. Always with dawn-foreground (midnight) on it. As text on a light page use dawn-text. */
+  --dawn: oklch(0.764 0.12 63.5);
+  --dawn-foreground: oklch(0.22 0.042 256);
+  --dawn-text: oklch(0.5 0.11 60);
+  /* secondary decoration: map, gradients, icons (3:1 on the page) */
+  --sky: oklch(0.63 0.069 256.5);
+  /* dark sections (footer, CTA band, how-we-work); text on them uses on-ink / ink-muted */
+  --ink: oklch(0.22 0.042 256);
+  --on-ink: oklch(0.97 0.007 88);
+  --ink-muted: oklch(0.78 0.03 256);
+  --ink-border: oklch(1 0 0 / 12%);
+
   /* dark veil over photos, same in both themes; text on it uses on-scrim */
-  --scrim: oklch(0.16 0 0 / 62%);
-  --on-scrim: oklch(0.985 0 0);
+  --scrim: oklch(0.17 0.04 258 / 62%);
+  --on-scrim: oklch(0.985 0.004 88);
   /* fullscreen photo viewer backdrop, same in both themes; text and controls use on-scrim */
-  --viewer: oklch(0.12 0 0);
+  --viewer: oklch(0.13 0.03 258);
+
+  /* motion */
+  --duration-fast: 150ms;
+  --duration-base: 300ms;
+  --duration-slow: 600ms;
 }
 
 .dark {
   color-scheme: dark;
 
-  --background: oklch(0.16 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.21 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.21 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.78 0.11 240);
-  --primary-foreground: oklch(0.2 0.03 245);
-  --secondary: oklch(0.27 0.01 245);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.27 0 0);
-  --muted-foreground: oklch(0.72 0 0);
-  --accent: oklch(0.3 0.03 245);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.72 0.18 22);
+  --background: oklch(0.191 0.036 259.5);
+  --foreground: oklch(0.96 0.008 88);
+  --card: oklch(0.23 0.043 258.7);
+  --card-foreground: oklch(0.96 0.008 88);
+  --popover: oklch(0.23 0.043 258.7);
+  --popover-foreground: oklch(0.96 0.008 88);
+  /* primary = dawn with midnight text */
+  --primary: oklch(0.764 0.12 63.5);
+  --primary-foreground: oklch(0.22 0.042 256);
+  --secondary: oklch(0.28 0.04 258);
+  --secondary-foreground: oklch(0.96 0.008 88);
+  --muted: oklch(0.27 0.035 258);
+  --muted-foreground: oklch(0.74 0.03 256);
+  --accent: oklch(0.31 0.04 258);
+  --accent-foreground: oklch(0.96 0.008 88);
+  --destructive: oklch(0.74 0.17 22);
   --success: oklch(0.78 0.14 150);
   --warning: oklch(0.82 0.12 80);
-  --border: oklch(1 0 0 / 14%);
-  --input: oklch(1 0 0 / 15%);
-  --control: oklch(0.65 0 0);
-  --ring: oklch(0.72 0.11 240);
+  --border: oklch(0.8 0.05 256 / 16%);
+  --input: oklch(0.8 0.05 256 / 18%);
+  --control: oklch(0.58 0.05 256);
+  --ring: oklch(0.764 0.12 63.5);
+
+  --dawn-text: oklch(0.764 0.12 63.5);
+  --sky: oklch(0.74 0.07 256.5);
+  /* slightly lifted midnight, so ink sections still separate from the page */
+  --ink: oklch(0.25 0.045 257);
+  --ink-border: oklch(1 0 0 / 10%);
 }
 
 /* Scrollable strips (gallery) that draw their own controls */
@@ -153,6 +192,102 @@
   }
 }
 
+/* Type scale. Fluid: display is ~36px at 375px and ~68px from 1280px. */
+@utility text-display {
+  font-family: var(--font-heading);
+  font-size: clamp(2.125rem, 1.42rem + 3.54vw, 4.25rem);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  font-weight: 600;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+}
+@utility text-h1 {
+  font-family: var(--font-heading);
+  font-size: clamp(1.75rem, 1.3rem + 2vw, 2.75rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  font-weight: 600;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+}
+@utility text-h2 {
+  font-family: var(--font-heading);
+  font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2.25rem);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  font-weight: 600;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+}
+@utility text-h3 {
+  font-family: var(--font-heading);
+  font-size: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+}
+/* small uppercase tracked label above a heading (Manrope) */
+@utility eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Reveal on scroll: fade + 16px rise as the block enters the viewport. Pure CSS (scroll-driven).
+   Without support or with reduced motion nothing is applied and the content is simply visible. */
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@utility reveal {
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      animation: reveal-in 1ms var(--ease-out-soft) both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 35%;
+    }
+  }
+}
+/* children reveal one after another (first 5 get their own step, the rest share the last) */
+@utility reveal-stagger {
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      & > * {
+        animation: reveal-in 1ms var(--ease-out-soft) both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 35%;
+      }
+      & > :nth-child(2) {
+        animation-range: entry 6% entry 41%;
+      }
+      & > :nth-child(3) {
+        animation-range: entry 12% entry 47%;
+      }
+      & > :nth-child(4) {
+        animation-range: entry 18% entry 53%;
+      }
+      & > :nth-child(5) {
+        animation-range: entry 24% entry 59%;
+      }
+      & > :nth-child(n + 6) {
+        animation-range: entry 30% entry 65%;
+      }
+    }
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -162,6 +297,11 @@
   }
   html {
     @apply font-sans;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-heading tracking-tight text-balance;
   }
   /* Tailwind 4 dropped the pointer cursor on native controls */
   button:not(:disabled),
@@ -195,4 +335,16 @@ option,
 optgroup {
   background-color: var(--popover);
   color: var(--popover-foreground);
+}
+
+/* Reduced motion: no animation or smooth scrolling anywhere (state changes stay instant) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Search } from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
 
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -24,9 +24,15 @@ const SWATCHES = [
   { name: "background", className: "bg-background" },
   { name: "foreground", className: "bg-foreground" },
   { name: "card", className: "bg-card" },
-  { name: "primary (акцент)", className: "bg-primary" },
+  { name: "primary", className: "bg-primary" },
   { name: "primary-foreground", className: "bg-primary-foreground" },
   { name: "secondary", className: "bg-secondary" },
+  { name: "dawn (акцент)", className: "bg-dawn" },
+  { name: "dawn-text", className: "bg-dawn-text" },
+  { name: "sky", className: "bg-sky" },
+  { name: "ink", className: "bg-ink" },
+  { name: "on-ink", className: "bg-on-ink" },
+  { name: "ink-muted", className: "bg-ink-muted" },
   { name: "muted", className: "bg-muted" },
   { name: "muted-foreground", className: "bg-muted-foreground" },
   { name: "accent", className: "bg-accent" },
@@ -46,6 +52,7 @@ const RADII = [
 
 const VARIANTS = [
   "default",
+  "dawn",
   "secondary",
   "outline",
   "ghost",
@@ -61,7 +68,7 @@ const Section = ({
   children: React.ReactNode;
 }) => (
   <section className="flex flex-col gap-4">
-    <h2 className="text-xl font-semibold">{title}</h2>
+    <h2 className="text-h3">{title}</h2>
     {children}
   </section>
 );
@@ -70,8 +77,8 @@ const DesignPage = () => (
   <main className="mx-auto flex w-full max-w-3xl flex-col gap-10 px-4 py-8">
     <header className="flex flex-wrap items-center justify-between gap-4">
       <div className="min-w-0">
-        <h1 className="text-3xl font-bold">{BRAND.name}</h1>
-        <p className="text-muted-foreground">Дизайн-система (заглушка)</p>
+        <h1 className="text-h1">{BRAND.name}</h1>
+        <p className="text-muted-foreground">Дизайн-система · Midnight Sky</p>
       </div>
       <ThemeToggle />
     </header>
@@ -101,23 +108,39 @@ const DesignPage = () => (
     </Section>
 
     <Section title="Типографіка">
-      <div className="flex flex-col gap-2">
-        <p className="text-4xl font-bold">Знайдіть свій дім</p>
-        <p className="text-2xl font-semibold">Квартири в центрі Києва</p>
-        <p className="text-lg font-medium">Підзаголовок розділу</p>
-        <p className="text-base">
-          Основний текст: ґанок, їдальня, єдність, Львів, Чернігів.
-        </p>
-        <p className="text-sm text-muted-foreground">
-          Допоміжний текст: 3 кімнати, 78 м², 5 поверх із 9.
-        </p>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
+          <span className="eyebrow text-muted-foreground">Unbounded · display</span>
+          <p className="text-display">Знайдіть свій дім</p>
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="eyebrow text-muted-foreground">Unbounded · h1</span>
+          <p className="text-h1">Квартири в центрі Києва</p>
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="eyebrow text-muted-foreground">Unbounded · h2</span>
+          <p className="text-h2">Район, який вам підходить</p>
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="eyebrow text-muted-foreground">Unbounded · h3</span>
+          <p className="text-h3">Підзаголовок розділу</p>
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="eyebrow text-dawn-text">Eyebrow · Manrope</span>
+          <p className="text-base">
+            Основний текст Manrope: ґанок, їдальня, єдність, Львів, Чернігів.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Допоміжний текст: 3 кімнати, 78 м², 5 поверх із 9.
+          </p>
+        </div>
       </div>
       <div className="flex flex-col gap-1 rounded-xl border p-4">
         <span className="text-sm text-muted-foreground">
           Ціна (tabular-nums)
         </span>
-        <p className="text-3xl font-bold tabular-nums">85 000 $</p>
-        <p className="text-2xl font-semibold tabular-nums">2 450 000 ₴</p>
+        <p className="font-heading text-3xl font-semibold tabular-nums">85 000 $</p>
+        <p className="font-heading text-2xl font-medium tabular-nums">2 450 000 ₴</p>
         <p className="text-lg tabular-nums">1 111 111 € / 8 888 888 €</p>
       </div>
     </Section>
@@ -131,6 +154,10 @@ const DesignPage = () => (
         ))}
       </div>
       <div className="flex flex-wrap items-center gap-3">
+        <Button size="lg" variant="dawn">
+          Підібрати об’єкт
+          <ArrowRight data-icon="inline-end" />
+        </Button>
         <Button size="lg">Великий 48</Button>
         <Button>Звичайний 44</Button>
         <Button size="sm">Малий 28</Button>
@@ -149,6 +176,28 @@ const DesignPage = () => (
           Неактивна
         </Button>
         <Button variant="outline">Tab для фокусу</Button>
+      </div>
+    </Section>
+
+    <Section title="Темна поверхня (ink)">
+      <div className="flex flex-col gap-4 rounded-2xl bg-ink p-6 text-on-ink">
+        <span className="eyebrow text-dawn">Підберемо за 24 години</span>
+        <p className="text-h2">Розкажіть, що шукаєте</p>
+        <p className="text-ink-muted">
+          Допоміжний текст на темній поверхні: 3 кімнати, Печерський район.
+        </p>
+        <div className="flex flex-wrap gap-3">
+          <Button variant="dawn">Залишити заявку</Button>
+          <Button
+            variant="outline"
+            className="border-ink-border bg-transparent text-on-ink hover:bg-on-ink/10 hover:text-on-ink dark:bg-transparent"
+          >
+            Зателефонувати
+          </Button>
+        </div>
+        <div className="border-t border-ink-border pt-3 text-sm text-ink-muted">
+          © 7 SKY · Політика конфіденційності
+        </div>
       </div>
     </Section>
 
@@ -194,7 +243,7 @@ const DesignPage = () => (
           <CardDescription>78 м², 5 поверх із 9</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold tabular-nums">85 000 $</p>
+          <p className="font-heading text-2xl font-semibold tabular-nums">85 000 $</p>
         </CardContent>
         <CardFooter>
           <Button className="w-full">Показати телефон</Button>
