@@ -46,6 +46,14 @@ for (const { route, status, key } of CASES) {
   }
 }
 
+// Spec 014: the team on «Про нас» is server-rendered
+test('no-js about shows the team', async ({ page }) => {
+  await page.goto('/about')
+  const team = page.getByRole('region', { name: 'Наша команда' })
+  await expect(team.getByRole('heading', { level: 3 }).first()).toBeVisible()
+  await expect(team.locator('a[href^="tel:"]').first()).toBeVisible()
+})
+
 // Spec 014: styled selects fall back to native ones (noscript) and still submit the same params.
 test('no-js quick search submits native selects', async ({ page }) => {
   await page.goto('/')

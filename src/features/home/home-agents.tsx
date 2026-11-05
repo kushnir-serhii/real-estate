@@ -25,7 +25,7 @@ const initials = (name: string) =>
     .map((part) => part.charAt(0).toUpperCase())
     .join("");
 
-const AgentTile = ({ agent }: { agent: Agent }) => {
+export const AgentTile = ({ agent }: { agent: Agent }) => {
   const phone = agent.phones[0];
   return (
     <article className="flex h-full flex-col items-center gap-3 rounded-3xl bg-card p-6 text-center text-card-foreground ring-1 ring-foreground/10">

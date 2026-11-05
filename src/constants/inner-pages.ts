@@ -9,6 +9,9 @@ export const ABOUT_PAGE = {
   lead: "Команда, яка веде угоду від першого перегляду до ключів.",
   contactAction: "Зв'язатися з нами",
   catalogAction: "Перейти до каталогу",
+  teamEyebrow: "Команда",
+  teamTitle: "Наша команда",
+  teamDescription: "Рієлтори, які ведуть вас від першого перегляду до ключів. Телефонуйте напряму.",
 } as const;
 
 export const CONTACTS_PAGE = {

@@ -1,6 +1,6 @@
 # 014 — Styled selects and the team on «Про нас»
 
-**Status:** in-progress · **Depends on:** 013 · **Route(s):** `/`, `/catalog`, property pages, `/contacts`, `/about`
+**Status:** done · **Depends on:** 013 · **Route(s):** `/`, `/catalog`, property pages, `/contacts`, `/about`
 
 ## Goal
 After the 012 redesign two things still look unfinished: the open list of every native `<select>` is drawn by the browser (white / blue system popup on a midnight page), and «Про нас» talks about the team without showing it. When this is done, every dropdown on the public site opens a list in the Midnight Sky style, and «Про нас» shows the agency's agents.
@@ -31,22 +31,24 @@ After the 012 redesign two things still look unfinished: the open list of every 
   - [x] selected currency chip passes AA in dark
   - [x] first-load JS growth written in the log (≈ +21 KB gz, accepted: see Decided)
 
-### [ ] 2. Team on «Про нас»
+### [x] 2. Team on «Про нас»
 - **Build:** a team section on `/about` with the active agents (reuse the `/contacts` agent card or the home agents card; heading «Наша команда» via `SectionHeading`), hidden when there are none, errors don't break the page (same rules as the home agents section). Remove the duplicate text paragraph about the team from the about body if it is in the seed.
 - **Files:** `src/app/(site)/about/page.tsx`, `src/features/contacts/agent-card.tsx` or `src/features/home/home-agents.tsx`, `src/lib/demo/seed/pages.ts`, `supabase/seed.sql`
 - **Agent:** designer · **Model:** sonnet
 - **Accept:**
-  - [ ] `/about` shows the 4 demo agents with phone links, at 375 and 1280, both themes, and without JS
-  - [ ] `pnpm test` green (seed drift included)
+  - [x] `/about` shows the 4 demo agents with phone links, at 375 and 1280, both themes, and without JS
+  - [x] `pnpm test` green (seed drift included)
 
 ## External needs
 None. Local only: `DATA_DRIVER=demo` added to the user's `.env.local` (2026-11-05) so `pnpm dev` uses the mock data.
 
 ## Open questions
 - **Decided (2026-11-05):** Radix Select costs ≈ +21 KB gz first-load JS per route (popper / floating-ui / scroll lock). Accepted: routes stay below the pre-012 baseline (`/` 211.0 vs ~221, `/catalog` 206.0 vs ~216, property 216.5 vs ~226), LCP < 1.1 s, CLS 0; lazy-loading the select would add first-open delay and code for little gain.
+- **Note (2026-11-05):** a running `pnpm dev` keeps the demo store in memory (`globalThis`), so seed edits (e.g. the about body) show only after restarting it.
 - **Decided (2026-11-05):** keep 4 active agents · `pnpm dev` on demo via `DATA_DRIVER=demo` in `.env.local` (not a project rule change) · admin keeps native selects.
 
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
 | 2026-11-05 | 1 | done: `ui/select.tsx` (shadcn-style Radix Select on tokens: popover card, `shadow-float`, dawn check, 44px items, fade / zoom off under reduced motion) + `FormSelect` (sentinel `__empty` for ""; with JS a hidden input carries the value, without JS a native select in `<noscript>` and the Radix part in `.nojs-hide` — one named control at a time; `submitOnChange` for sort). Used in catalog filters + sheet, sort, quick search, `PropertyTypeField` (all lead forms). Dark selected currency chip fixed (`dark:has-checked:bg-primary`). URLs same as native (quick search `/catalog?deal=sell&property_type=flat&rooms=2&price_to=90000&currency=USD`, sort `?deal=sell&sort=price_asc`, filters same values). `e2e/no-js.spec.ts` +2 tests (quick search, sort with JS off): 22/22 on `next start`. `pnpm perf` first-load JS: `/` 190.1 → 211.0, `/catalog` 185.1 → 206.0, property 195.7 → 216.5 KB gz; LCP < 1.1 s, CLS 0 | `src/components/{ui/select,form-select}.tsx`, `src/features/catalog/{catalog-filters-form,sort-select}.tsx`, `src/features/home/quick-search.tsx`, `src/features/leads/property-type-field.tsx`, `e2e/no-js.spec.ts` |
+| 2026-11-05 | 2 | done: `AboutTeam` (server, awaited — no hiding Suspense; empty / error → hidden + `console.error`), `SectionHeading` «Команда / Наша команда» + 4 `AgentTile` cards (exported from `home-agents.tsx`); review fix: section in the same `max-w-3xl` column as the text, 2×2 grid (no left-edge shift); duplicate team paragraph removed from the about body (seed + default copy), `seed.sql` regenerated; `e2e/no-js.spec.ts` +1 (team visible with JS off): 23/23 on `next start`. Checked in the browser at 1280 dark | `src/features/about/about-team.tsx`, `src/app/(site)/about/page.tsx`, `src/constants/{inner-pages,pages}.ts`, `src/features/home/home-agents.tsx`, `src/lib/demo/seed/pages.ts`, `supabase/seed.sql`, `e2e/no-js.spec.ts` |
