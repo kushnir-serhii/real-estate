@@ -48,6 +48,9 @@
   /* one shared easing for all motion; durations are --duration-fast / base / slow in :root */
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 
+  /* floating panels (home quick search): soft, large, midnight-tinted */
+  --shadow-float: 0 1.75rem 3.5rem -1.25rem oklch(0.17 0.04 258 / 35%), 0 0.25rem 1rem oklch(0.17 0.04 258 / 8%);
+
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -128,6 +131,12 @@
   --on-scrim: oklch(0.985 0.004 88);
   /* fullscreen photo viewer backdrop, same in both themes; text and controls use on-scrim */
   --viewer: oklch(0.13 0.03 258);
+  /* hero veil stops (midnight at different opacity), same in both themes. Text sits on the strong/mid part (>= 85%),
+     which keeps on-scrim text >= 4.5:1 even over a pure white photo; the soft end lets the photo breathe top-right */
+  --veil-strong: oklch(0.15 0.04 258 / 92%);
+  --veil-mid: oklch(0.15 0.04 258 / 85%);
+  --veil-soft: oklch(0.15 0.04 258 / 38%);
+  --veil-top: oklch(0.15 0.04 258 / 60%);
 
   /* motion */
   --duration-fast: 150ms;
@@ -288,6 +297,62 @@
       & > :nth-child(n + 6) {
         animation-range: entry 30% entry 65%;
       }
+    }
+  }
+}
+
+/* Home hero: height, directional veil, slow photo scale-in and staggered text rise. Motion only without reduced motion;
+   text is visible without JS (CSS only) and the photo (the LCP element) is never delayed. */
+@utility hero-height {
+  min-height: max(36rem, 78svh);
+  @variant lg {
+    min-height: max(40rem, 88svh);
+  }
+}
+@utility hero-veil {
+  background-image:
+    linear-gradient(to bottom, var(--veil-top), transparent 22%),
+    linear-gradient(to top right, var(--veil-strong) 0%, var(--veil-mid) 45%, var(--veil-soft) 100%);
+}
+@keyframes hero-zoom {
+  from {
+    transform: scale(1.08);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@utility hero-zoom {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: hero-zoom 1600ms var(--ease-out-soft) both;
+  }
+}
+@utility hero-stagger {
+  @media (prefers-reduced-motion: no-preference) {
+    & > * {
+      animation: hero-rise var(--duration-slow) var(--ease-out-soft) both;
+    }
+    & > :nth-child(2) {
+      animation-delay: 80ms;
+    }
+    & > :nth-child(3) {
+      animation-delay: 160ms;
+    }
+    & > :nth-child(4) {
+      animation-delay: 240ms;
+    }
+    & > :nth-child(n + 5) {
+      animation-delay: 320ms;
     }
   }
 }
