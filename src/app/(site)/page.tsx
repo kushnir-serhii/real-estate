@@ -6,9 +6,13 @@ import { FEATURED, HERO } from "@/constants/home";
 import { FeaturedProperties } from "@/features/home/featured-properties";
 import { FeaturedSkeleton } from "@/features/home/featured-skeleton";
 import { Hero } from "@/features/home/hero";
+import { HomeSection } from "@/features/home/home-section";
 import { HomeAbout } from "@/features/home/home-about";
 import { HomeCta } from "@/features/home/home-cta";
+import { HowWeWork } from "@/features/home/how-we-work";
+import { ProptechFeatures } from "@/features/home/proptech-features";
 import { QuickSearch } from "@/features/home/quick-search";
+import { TrustStats } from "@/features/home/trust-stats";
 import { getPageContent } from "@/features/pages/get-page-content";
 import { pageSeoDescription, pageSeoTitle } from "@/features/pages/page-seo";
 
@@ -30,24 +34,31 @@ const HomePage = async () => {
   return (
     <>
       <Hero title={page.title} lead={HERO.lead} />
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-4 pb-12 sm:gap-16 sm:pb-16">
+      <div className="mx-auto w-full max-w-6xl px-4">
         <div className="relative -mt-16">
           <QuickSearch />
         </div>
-        <section aria-labelledby="featured-title" className="flex flex-col gap-6">
-          <SectionHeading
-            id="featured-title"
-            eyebrow={FEATURED.eyebrow}
-            title={FEATURED.title}
-            action={{ href: "/catalog", label: FEATURED.action }}
-          />
+      </div>
+      <TrustStats />
+      <HomeSection labelledBy="featured-title" className="pt-4 sm:pt-8">
+        <div className="flex flex-col gap-6">
+          <div className="reveal">
+            <SectionHeading
+              id="featured-title"
+              eyebrow={FEATURED.eyebrow}
+              title={FEATURED.title}
+              action={{ href: "/catalog", label: FEATURED.action }}
+            />
+          </div>
           <Suspense fallback={<FeaturedSkeleton />}>
             <FeaturedProperties />
           </Suspense>
-        </section>
-        <HomeAbout body={page.body} />
-        <HomeCta />
-      </div>
+        </div>
+      </HomeSection>
+      <HowWeWork />
+      <ProptechFeatures />
+      <HomeAbout body={page.body} />
+      <HomeCta />
     </>
   );
 };

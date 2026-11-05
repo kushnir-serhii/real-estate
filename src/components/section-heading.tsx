@@ -1,6 +1,8 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
+import { cn } from "@/lib/utils";
+
 type SectionHeadingProps = {
   /** Id of the h2, for the section's `aria-labelledby`. */
   id?: string;
@@ -8,16 +10,18 @@ type SectionHeadingProps = {
   title: string;
   description?: string;
   action?: { href: string; label: string };
+  /** `ink` when placed on the midnight surface. */
+  tone?: "default" | "ink";
 };
 
-export const SectionHeading = ({ id, eyebrow, title, description, action }: SectionHeadingProps) => (
+export const SectionHeading = ({ id, eyebrow, title, description, action, tone = "default" }: SectionHeadingProps) => (
   <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
     <div className="flex min-w-0 flex-col gap-2">
-      {eyebrow && <p className="eyebrow text-dawn-text">{eyebrow}</p>}
+      {eyebrow && <p className={cn("eyebrow", tone === "ink" ? "text-dawn" : "text-dawn-text")}>{eyebrow}</p>}
       <h2 id={id} className="text-h2">
         {title}
       </h2>
-      {description && <p className="max-w-prose text-muted-foreground">{description}</p>}
+      {description && <p className={cn("max-w-prose", tone === "ink" ? "text-ink-muted" : "text-muted-foreground")}>{description}</p>}
     </div>
     {action && (
       <Link

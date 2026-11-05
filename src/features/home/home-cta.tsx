@@ -3,16 +3,15 @@ import { Phone } from "lucide-react";
 import { MessengerLinks } from "@/components/layout/messenger-links";
 import { buttonVariants } from "@/components/ui/button";
 import { CONTACTS } from "@/constants/contacts";
+import { HomeSection } from "./home-section";
 import { GeneralRequestForm } from "@/features/leads/general-request-form";
 
 /** «Не знайшли потрібне?»: a request form, with the phone and messengers as the other way to reach us. */
 export const HomeCta = () => (
-  <section
-    aria-labelledby="home-cta-title"
-    className="grid gap-6 rounded-xl bg-secondary p-4 text-secondary-foreground sm:p-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-start lg:gap-10"
-  >
+  <HomeSection labelledBy="home-cta-title">
+    <div className="reveal grid gap-6 rounded-3xl bg-secondary p-4 text-secondary-foreground sm:p-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-start lg:gap-10">
     <div className="flex flex-col gap-4 px-2 pt-2 sm:p-0">
-      <h2 id="home-cta-title" className="text-2xl font-bold text-balance">
+      <h2 id="home-cta-title" className="text-h2">
         Не знайшли потрібне?
       </h2>
       <p className="max-w-2xl">
@@ -29,5 +28,6 @@ export const HomeCta = () => (
     <div className="rounded-xl bg-card p-5 text-card-foreground ring-1 ring-foreground/10 sm:p-6">
       <GeneralRequestForm title="Залишити заявку" />
     </div>
-  </section>
+    </div>
+  </HomeSection>
 );

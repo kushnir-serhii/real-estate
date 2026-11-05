@@ -43,6 +43,7 @@ export const AssistantLauncher = () => {
         <Button
           size="icon"
           aria-label="Відкрити чат з асистентом"
+          data-assistant-launcher=""
           onPointerEnter={preloadPanel}
           onFocus={preloadPanel}
           // `chat-launcher-bottom` also lifts it above the property page's mobile bar (globals.css).
