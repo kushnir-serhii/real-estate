@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DEMO_SESSION_MAX_AGE_S, signDemoSession, verifyDemoSession } from "./session";
 
-const flip = (text: string): string => `${text.slice(0, -1)}${text.endsWith("A") ? "B" : "A"}`;
+// Change the first character: the last base64url character of a 32-byte signature carries 2 padding bits, so
+// changing it can decode to the same bytes (a flaky test).
+const flip = (text: string): string => `${text.startsWith("A") ? "Q" : "A"}${text.slice(1)}`;
 
 describe("demo admin session", () => {
   beforeEach(() => {
