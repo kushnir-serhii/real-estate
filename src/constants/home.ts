@@ -10,3 +10,9 @@ export const HERO = {
   ],
   image: { src: "/placeholders/flat-living-2.webp", width: 1280, height: 853 },
 } as const;
+
+export const FEATURED = {
+  eyebrow: "Каталог",
+  title: "Нові пропозиції",
+  action: "Усі об'єкти",
+} as const;

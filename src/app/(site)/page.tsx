@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { Suspense } from "react";
 import type { Metadata } from "next";
 
-import { HERO } from "@/constants/home";
+import { SectionHeading } from "@/components/section-heading";
+import { FEATURED, HERO } from "@/constants/home";
 import { FeaturedProperties } from "@/features/home/featured-properties";
 import { FeaturedSkeleton } from "@/features/home/featured-skeleton";
 import { Hero } from "@/features/home/hero";
@@ -35,17 +35,12 @@ const HomePage = async () => {
           <QuickSearch />
         </div>
         <section aria-labelledby="featured-title" className="flex flex-col gap-6">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 id="featured-title" className="text-2xl font-bold">
-              Нові пропозиції
-            </h2>
-            <Link
-              href="/catalog"
-              className="inline-flex min-h-11 items-center text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
-            >
-              Усі об&apos;єкти
-            </Link>
-          </div>
+          <SectionHeading
+            id="featured-title"
+            eyebrow={FEATURED.eyebrow}
+            title={FEATURED.title}
+            action={{ href: "/catalog", label: FEATURED.action }}
+          />
           <Suspense fallback={<FeaturedSkeleton />}>
             <FeaturedProperties />
           </Suspense>
