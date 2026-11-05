@@ -422,6 +422,16 @@ optgroup {
   }
 }
 
+/* Reduced transparency: no frosted glass. Every blurred layer already sits on a dense (90–95%)
+   background or the hero scrim, so dropping the blur keeps text readable. */
+@media (prefers-reduced-transparency: reduce) {
+  *,
+  ::before,
+  ::after {
+    backdrop-filter: none !important;
+  }
+}
+
 /* Top bar for client-side navigations (NavProgress): invisible for the first 150 ms, then a sliding stripe. */
 @keyframes nav-progress-in {
   to {
