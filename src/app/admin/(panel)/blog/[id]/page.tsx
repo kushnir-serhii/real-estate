@@ -3,8 +3,11 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 
 import { PostEditHeader } from "@/features/admin/blog/post-edit-header";
+import { PostCoverSection } from "@/features/admin/blog/post-cover-section";
 import { PostForm } from "@/features/admin/blog/post-form";
 import { postToFormRaw } from "@/features/admin/blog/post-form-values";
+import { loadPickerSelection } from "@/features/admin/blog/post-picker-property";
+import { PostRelatedSection } from "@/features/admin/blog/post-related-section";
 import { requireAdmin } from "@/lib/auth/admin-session";
 import { getActiveAgents } from "@/lib/db/admin-properties";
 import { getAdminPost } from "@/lib/db/admin-posts";
@@ -34,7 +37,7 @@ const AdminPostPage = async ({ params }: AdminPostPageProps) => {
   const { id } = await params;
   const post = await loadPost(id);
   if (!post) notFound();
-  const agents = await getActiveAgents();
+  const [agents, related] = await Promise.all([getActiveAgents(), loadPickerSelection(post.property_ids)]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -47,6 +50,12 @@ const AdminPostPage = async ({ params }: AdminPostPageProps) => {
         published={post.status === "published"}
         agents={agents.map((agent) => ({ ...agent, inactive: false }))}
         siteUrl={getSiteUrl()}
+        mediaSections={
+          <>
+            <PostCoverSection postId={post.id} initialKey={post.cover_key} initialAlt={post.cover_alt} />
+            <PostRelatedSection postId={post.id} initial={related} />
+          </>
+        }
       />
     </div>
   );

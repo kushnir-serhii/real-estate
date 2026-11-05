@@ -42,6 +42,8 @@ type PostFormProps = {
   published: boolean;
   agents: PostAuthorOption[];
   siteUrl: string;
+  /** «Обкладинка» and «Об'єкти до статті» (they need a saved post); a new post gets a hint instead. */
+  mediaSections?: React.ReactNode;
 };
 
 type Notice = "draft" | "published" | "unpublished" | null;
@@ -64,9 +66,9 @@ const countTags = (value: string) => value.split(/[,\n]/).filter((part) => part.
 /**
  * Blog post editor: text (TipTap, saved as Markdown), address, category, tags, author, SEO and indexing, with
  * «save draft / publish» buttons. Controlled inputs: React resets uncontrolled forms after an action, which would
- * drop input. Cover and related properties (slice 5) get their own section between the text and the SEO.
+ * drop input. Cover and related properties (saved at once by their own actions) sit between the text and the SEO.
  */
-export const PostForm = ({ postId, initialValues, everPublished, published, agents, siteUrl }: PostFormProps) => {
+export const PostForm = ({ postId, initialValues, everPublished, published, agents, siteUrl, mediaSections }: PostFormProps) => {
   const id = useId();
   const router = useRouter();
   const fieldId = (field: PostTextField | "noindex") => `${id}-${field}`;
@@ -330,7 +332,15 @@ export const PostForm = ({ postId, initialValues, everPublished, published, agen
         </PropertyField>
       </PropertyFormSection>
 
-      {/* Slice 5: «Обкладинка» and «Об'єкти до статті» sections go here. */}
+      {isNew ? (
+        <PropertyFormSection id="media" title="Обкладинка та об’єкти">
+          <p className="max-w-prose text-sm text-muted-foreground">
+            Обкладинку й пов’язані об’єкти можна додати після збереження чернетки: натисніть «Зберегти чернетку».
+          </p>
+        </PropertyFormSection>
+      ) : (
+        mediaSections
+      )}
 
       <PropertyFormSection
         id="seo"

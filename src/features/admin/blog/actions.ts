@@ -4,6 +4,7 @@ import { z } from "zod";
 import { requireAdmin } from "@/lib/auth/admin-session";
 import { createPost, deletePost, getAdminPost, updatePost } from "@/lib/db/admin-posts";
 import { revalidatePost } from "@/lib/db/revalidate-post";
+import { deletePostCoverObject } from "@/lib/photos/post-cover-storage";
 import { parsePostForm, readPostFormRaw, readPostIntent } from "./post-form-schema";
 import type { PostDeleteState, PostFormState } from "./post-form-values";
 
@@ -90,6 +91,7 @@ export const deletePostAction = async (_prev: PostDeleteState, formData: FormDat
     const result = await deletePost(id.data);
     if (!result.ok) return { status: "error", message: NOT_FOUND };
     revalidatePost(id.data, [result.slug]);
+    await deletePostCoverObject(result.cover_key);
     return { status: "deleted" };
   } catch (error) {
     logFailure("deletePostAction", error);

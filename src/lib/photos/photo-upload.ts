@@ -33,3 +33,7 @@ export const randomToken = (): string => {
   const bytes = crypto.getRandomValues(new Uint8Array(5));
   return [...bytes].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 };
+
+/** `posts/<post_id>/<10 hex>-<w>.<ext>` (blog cover; one size per upload). */
+export const postCoverKey = (postId: string, token: string, width: number, ext: PhotoExt): string =>
+  `posts/${postId}/${token}-${width}.${ext}`;
