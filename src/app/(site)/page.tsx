@@ -1,13 +1,11 @@
-import { Suspense } from "react";
 import type { Metadata } from "next";
 
 import { SectionHeading } from "@/components/section-heading";
 import { FEATURED, HERO } from "@/constants/home";
 import { FeaturedProperties } from "@/features/home/featured-properties";
-import { FeaturedSkeleton } from "@/features/home/featured-skeleton";
 import { Districts } from "@/features/home/districts";
 import { Hero } from "@/features/home/hero";
-import { HomeAgents, HomeAgentsSkeleton } from "@/features/home/home-agents";
+import { HomeAgents } from "@/features/home/home-agents";
 import { Testimonials } from "@/features/home/testimonials";
 import { HomeSection } from "@/features/home/home-section";
 import { HomeAbout } from "@/features/home/home-about";
@@ -53,18 +51,14 @@ const HomePage = async () => {
               action={{ href: "/catalog", label: FEATURED.action }}
             />
           </div>
-          <Suspense fallback={<FeaturedSkeleton />}>
-            <FeaturedProperties />
-          </Suspense>
+          <FeaturedProperties />
         </div>
       </HomeSection>
       <Districts />
       <HowWeWork />
       <ProptechFeatures />
       <HomeAbout body={page.body} />
-      <Suspense fallback={<HomeAgentsSkeleton />}>
-        <HomeAgents />
-      </Suspense>
+      <HomeAgents />
       <Testimonials />
       <HomeCta />
     </>

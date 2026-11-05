@@ -1,6 +1,5 @@
 import { ArrowLeft, ArrowRight, CircleCheck } from "lucide-react";
 import Link from "next/link";
-import { Suspense } from "react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { DEAL_LABELS, PROPERTY_TYPE_LABELS } from "@/features/properties/property-labels";
@@ -66,9 +65,7 @@ export const SoldPropertyView = ({ property }: SoldPropertyViewProps) => {
         </aside>
       </div>
 
-      <Suspense fallback={null}>
-        <SimilarProperties property={property} className="mt-16 sm:mt-20" />
-      </Suspense>
+      <SimilarProperties property={property} className="mt-16 sm:mt-20" />
 
       <Link href="/catalog" className={cn(buttonVariants({ variant: "outline", size: "lg" }), "mt-8")}>
         Усі об&apos;єкти в каталозі

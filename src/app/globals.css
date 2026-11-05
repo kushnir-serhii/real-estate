@@ -421,3 +421,31 @@ optgroup {
     scroll-behavior: auto !important;
   }
 }
+
+/* Top bar for client-side navigations (NavProgress): invisible for the first 150 ms, then a sliding stripe. */
+@keyframes nav-progress-in {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes nav-progress-slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}
+.nav-progress {
+  opacity: 0;
+  animation: nav-progress-in 150ms linear 150ms forwards;
+}
+.nav-progress-bar {
+  animation: nav-progress-slide 1.1s var(--ease-out-soft) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-progress-bar {
+    width: 100%;
+    animation: none;
+  }
+}

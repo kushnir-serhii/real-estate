@@ -3,7 +3,6 @@ import Link from "next/link";
 
 import { SectionHeading } from "@/components/section-heading";
 import { buttonVariants } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { AGENTS } from "@/constants/home";
 import { getActiveAgents } from "@/lib/db/agents";
 import type { Agent } from "@/lib/db/agents";
@@ -113,22 +112,3 @@ export const HomeAgents = async () => {
     </Frame>
   );
 };
-
-const SKELETON_KEYS = ["a", "b"] as const;
-
-export const HomeAgentsSkeleton = () => (
-  <Frame>
-    <ul className={LIST} aria-hidden="true">
-      {SKELETON_KEYS.map((key) => (
-        <li key={key} className={ITEM}>
-          <div className="flex flex-col items-center gap-3 rounded-3xl bg-card p-6 ring-1 ring-foreground/10">
-            <Skeleton className="size-24 rounded-full" />
-            <Skeleton className="h-6 w-2/3" />
-            <Skeleton className="h-4 w-1/2" />
-            <Skeleton className="h-11 w-3/4" />
-          </div>
-        </li>
-      ))}
-    </ul>
-  </Frame>
-);

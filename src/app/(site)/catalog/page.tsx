@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import type { Metadata } from "next";
 import { SlidersHorizontal } from "lucide-react";
 import { redirect } from "next/navigation";
@@ -18,7 +17,6 @@ import {
 } from "@/features/catalog/catalog-params";
 import type { SearchParams } from "@/features/catalog/catalog-params";
 import { CatalogResults } from "@/features/catalog/catalog-results";
-import { CatalogSkeleton } from "@/features/catalog/catalog-skeleton";
 import { CatalogSort } from "@/features/catalog/catalog-sort";
 import { FiltersSheet } from "@/features/catalog/filters-sheet";
 import { loadDistrictOptions } from "@/features/catalog/load-district-options";
@@ -91,9 +89,7 @@ const CatalogPage = async ({ searchParams }: CatalogPageProps) => {
             </div>
           </div>
 
-          <Suspense key={query} fallback={<CatalogSkeleton />}>
-            <CatalogResults state={state} filters={filters} />
-          </Suspense>
+          <CatalogResults state={state} filters={filters} />
         </div>
       </div>
     </div>

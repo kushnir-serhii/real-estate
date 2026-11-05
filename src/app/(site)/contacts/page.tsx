@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import type { Metadata } from "next";
 
 import { PageHeader } from "@/components/page-header";
@@ -6,7 +5,6 @@ import { SectionHeading } from "@/components/section-heading";
 import { CONTACTS } from "@/constants/contacts";
 import { CONTACTS_PAGE } from "@/constants/inner-pages";
 import { AgentsSection } from "@/features/contacts/agents-section";
-import { AgentsSkeleton } from "@/features/contacts/agents-skeleton";
 import { ContactBlock } from "@/features/contacts/contact-block";
 import { StaticMap } from "@/features/map/static-map";
 import { GeneralRequestForm } from "@/features/leads/general-request-form";
@@ -46,9 +44,7 @@ const ContactsPage = async () => {
             />
           </section>
         </div>
-        <Suspense fallback={<AgentsSkeleton />}>
-          <AgentsSection />
-        </Suspense>
+        <AgentsSection />
         <section aria-labelledby="map-title" className="flex flex-col gap-6">
           <SectionHeading id="map-title" eyebrow={CONTACTS_PAGE.mapEyebrow} title={CONTACTS_PAGE.mapTitle} />
           <StaticMap lat={CONTACTS.coordinates.lat} lng={CONTACTS.coordinates.lng} address={CONTACTS.address} />

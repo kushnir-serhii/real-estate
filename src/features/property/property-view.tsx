@@ -1,6 +1,5 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { Suspense } from "react";
 
 import { JsonLd } from "@/components/seo/json-ld";
 import { buttonVariants } from "@/components/ui/button";
@@ -130,9 +129,7 @@ export const PropertyView = ({ property }: PropertyViewProps) => {
         </aside>
       </div>
 
-      <Suspense fallback={null}>
-        <SimilarProperties property={property} className="mt-16 sm:mt-20" />
-      </Suspense>
+      <SimilarProperties property={property} className="mt-16 sm:mt-20" />
 
       <PropertyMobileBar phone={contactPhone(property)} />
     </div>

@@ -25,7 +25,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => (
     <head>
       <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       <noscript>
-        <style>{".nojs-only{display:block!important}"}</style>
+        <style>{".nojs-only{display:block!important}.nojs-hide{display:none!important}"}</style>
       </noscript>
     </head>
     <body>{children}</body>

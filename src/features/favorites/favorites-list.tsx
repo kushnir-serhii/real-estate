@@ -72,7 +72,22 @@ export const FavoritesList = ({ suggestions }: FavoritesListProps) => {
     return () => controller.abort();
   }, [hydrated, ids, cache, failed]);
 
-  if (!hydrated) return <CatalogSkeleton />;
+  if (!hydrated) {
+    // Without JS the list can't load: the root <noscript> style hides the skeleton and reveals the empty state.
+    return (
+      <>
+        <div className="nojs-hide">
+          <CatalogSkeleton />
+        </div>
+        <div className="nojs-only hidden">
+          <div className="flex flex-col gap-12 sm:gap-16">
+            <FavoritesEmpty />
+            {suggestions}
+          </div>
+        </div>
+      </>
+    );
+  }
   if (ids.length === 0) {
     return (
       <div className="flex flex-col gap-12 sm:gap-16">
