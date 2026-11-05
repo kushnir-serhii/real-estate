@@ -1,4 +1,4 @@
-import { Heart, RefreshCw, Send, Sparkles } from "lucide-react";
+import { Heart, RefreshCw, Send } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { SectionHeading } from "@/components/section-heading";
@@ -13,7 +13,7 @@ const ICONS: Record<(typeof PROPTECH.features)[number]["icon"], LucideIcon> = {
   heart: Heart,
 };
 
-/** Column span per feature at lg: the grid reads as a bento (big assistant card + 3 smaller ones). */
+/** Column span per feature at lg: the grid reads as a bento (big consultant card + 3 smaller ones). */
 const SPANS = ["lg:col-span-1", "lg:col-span-1", "lg:col-span-2"] as const;
 
 const CARD =
@@ -43,9 +43,6 @@ export const ProptechFeatures = () => (
               className="absolute -bottom-32 -left-20 -z-10 size-80 rounded-full bg-dawn/20 blur-3xl"
             />
             <div className="flex flex-col gap-4">
-              <span className="flex size-12 items-center justify-center rounded-xl bg-dawn text-dawn-foreground">
-                <Sparkles className="size-6" aria-hidden="true" />
-              </span>
               <h3 className="text-h3 max-w-md">{PROPTECH.assistant.title}</h3>
               <p className="max-w-md text-ink-muted">{PROPTECH.assistant.text}</p>
             </div>

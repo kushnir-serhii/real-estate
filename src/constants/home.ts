@@ -1,6 +1,6 @@
 // Mock — replace for the real agency.
 export const HERO = {
-  eyebrow: "AI-асистент 24/7 · Київ і область",
+  eyebrow: "Київ і область · з 2014 року",
   lead: "Квартири, будинки, комерційні приміщення та ділянки в Києві й області. Допоможемо з вибором і супроводимо угоду.",
   primaryCta: "Підібрати об'єкт",
   facts: [
@@ -17,12 +17,12 @@ export const FEATURED = {
   action: "Усі об'єкти",
 } as const;
 
-// Mock — replace for the real agency. `value` is the final number (animated up from 0 when `animate`; «24/7» is not a count); `suffix` follows it.
+// Mock — replace for the real agency. `value` is the final number (animated up from 0 when `animate`); `suffix` follows it.
 export const TRUST_STATS = [
   { value: 12, decimals: 0, animate: true, suffix: "", label: "років на ринку" },
   { value: 1400, decimals: 0, animate: true, suffix: "+", label: "успішних угод" },
   { value: 4.9, decimals: 1, animate: true, suffix: "", label: "рейтинг клієнтів" },
-  { value: 24, decimals: 0, animate: false, suffix: "/7", label: "AI-асистент онлайн" },
+  { value: 300, decimals: 0, animate: true, suffix: "+", label: "об'єктів у базі" },
 ] as const;
 
 // Mock — replace for the real agency.
@@ -39,13 +39,13 @@ export const HOW_WE_WORK = {
 
 // Mock — replace for the real agency.
 export const PROPTECH = {
-  eyebrow: "Технології",
-  title: "Технології, що працюють на вас",
+  eyebrow: "Сервіс",
+  title: "Зручно на кожному кроці",
   description: "Менше очікування і ручної рутини, більше часу на вибір житла.",
   assistant: {
-    title: "AI-асистент 24/7",
-    text: "Підбирає об'єкти за вашим описом, відповідає на питання про агентство і передає заявку менеджеру. У будь-який час доби.",
-    cta: "Запитати асистента",
+    title: "Віртуальний консультант",
+    text: "Підкаже об'єкти за вашим описом, відповість на питання про агентство і передасть заявку менеджеру. У будь-який час доби.",
+    cta: "Розпочати чат",
     preview: "Шукаю 2-кімнатну біля метро до 90 000 $",
   },
   features: [
