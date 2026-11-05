@@ -22,6 +22,7 @@ Stage 1 (≈7–9 weeks): base site + admin + AI assistant — see [reference/st
 | 012 | [Premium redesign: Midnight Sky](specs/012-premium-redesign.md) | done | 011 |
 | 013 | [Public pages render without JavaScript](specs/013-no-js-rendering.md) | done | 012 |
 | 014 | [Styled selects and the team on «Про нас»](specs/014-selects-and-team.md) | done | 013 |
+| 015 | [Blog](specs/015-blog.md) | ready | 014 |
 
 Statuses: `draft` → `ready` → `in-progress` → `done` (meaning in [process.md](process.md#statuses)). The status here and in the spec's header must match.
 
@@ -41,10 +42,11 @@ Read top to bottom; the next spec is the first one that isn't `done`. Specs in o
 | 8 | 012 |
 | 9 | 013 |
 | 10 | 014 |
+| 11 | 015 |
 
 - To change the order, edit this table.
 - To make a spec buildable, review it and set it to `ready` here and in the spec.
 - New spec: copy [specs/_template.md](specs/_template.md), take the next number, add a row to **Status** and put it in a wave.
 
 ## Later (stage 2+, not specced)
-Blog, reviews; client login (Telegram / Google), saved searches + Telegram alerts, price-drop alerts, XML feed to LUN, simple lead pipeline in the admin. See [reference/stack.md](reference/stack.md) → «Можливий функціонал».
+Reviews; client login (Telegram / Google), saved searches + Telegram alerts, price-drop alerts, XML feed to LUN, simple lead pipeline in the admin. See [reference/stack.md](reference/stack.md) → «Можливий функціонал».
