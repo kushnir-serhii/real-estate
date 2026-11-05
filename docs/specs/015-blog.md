@@ -54,15 +54,15 @@ The agency can publish useful articles (buying, selling, renting, the market) th
   - [x] JSON-LD valid shape (unit test); canonical drops `page=1`
   - [x] home block shows 3 latest, hidden when none / on error
 
-### [ ] 4. Admin: posts list and editor
+### [x] 4. Admin: posts list and editor
 - **Build:** `/admin/blog` list (status chips, category, date, search, pagination, empty state), `/admin/blog/new` and `/admin/blog/[id]`: title, slug (auto from title, locked once published), category, tags, excerpt, TipTap editor (headings, bold / italic, lists, quote, link) saving Markdown, author (agent), SEO fields with the existing SERP preview / length hints, draft / publish, delete with confirm. Server actions with zod, `requireAdmin()`, `revalidateTag`. «Блог» in the admin nav.
 - **Files:** `src/app/admin/(panel)/blog/**`, `src/features/admin/blog/*`, `src/features/admin/admin-nav.ts`, `package.json` (TipTap)
 - **Agent:** designer (+ backend for actions) · **Model:** sonnet
 - **Accept:**
-  - [ ] create → draft not public; publish → appears on `/blog`, home and sitemap; unpublish / delete → gone
-  - [ ] editor works with keyboard, toolbar buttons have labels, 44px targets, 375 and 1280
-  - [ ] Markdown round-trip: what the editor saves renders the same on the site (unit test on sample content)
-  - [ ] TipTap only in admin chunks
+  - [x] create → draft not public; publish → appears on `/blog`, home and sitemap; unpublish / delete → gone
+  - [x] editor works with keyboard, toolbar buttons have labels, 44px targets, 375 and 1280
+  - [x] Markdown round-trip: what the editor saves renders the same on the site (unit test on sample content)
+  - [x] TipTap only in admin chunks
 
 ### [ ] 5. Admin: cover and related properties
 - **Build:** cover upload / replace / remove with alt text (existing photo pipeline, WebP sizes; demo in memory), related properties picker (search published properties, up to 3, order).
@@ -74,7 +74,7 @@ The agency can publish useful articles (buying, selling, renting, the market) th
 
 ## External needs
 - Migration `*_blog.sql` to apply to Supabase (user).
-- New dependencies: TipTap packages (admin only).
+- New dependencies (admin only): `@tiptap/react`, `@tiptap/pm`, `@tiptap/starter-kit`, `@tiptap/markdown` `^3.32.3`.
 
 ## Open questions
 - **Decided (2026-11-05):**
@@ -88,6 +88,7 @@ The agency can publish useful articles (buying, selling, renting, the market) th
   - Slug generated from the title (transliterated), editable while draft, locked once published. TipTap is a new dependency, admin only.
   - Publishing (not saving a draft) requires a non-empty excerpt and body; checked in the slice 4 action.
 - **Decided (slice 2):** no route-level `loading.tsx` for the blog (same reason as 013: with JS off the streamed fallback never swaps; `NavProgress` covers client navigation). The post CTA links to `/contacts#zv-yazok` with phone + messengers (no form JS on articles). Unknown category → all posts with canonical `/blog`; a page past the last → empty state (same as the catalog). Covers render in a fixed 16:9 box; add `srcSet` if slice 5 stores WebP sizes.
+- **Note (slice 4):** field errors stay visible until the next submit (same as the other admin forms). Editor typography (`POST_EDITOR_PROSE`) mirrors `src/features/pages/markdown.tsx` by hand, and the client `LIMITS` mirror `POST_LIMITS` (zod stays out of the client); keep them in sync. Once seen: the home page stayed stale right after a delete (an ISR regeneration in flight), not reproduced; worst case up to `revalidate` (5 min).
 - **Note (slice 1):** `database.types.ts` was hand-edited (no local Supabase running) — regenerate with `pnpm db:types` when a local DB is up. The slug locks once `published_at` is set (unpublishing does not unlock it). On Supabase `setPostProperties` is delete + insert (not one transaction). Slice 4 actions must `revalidateTag(postTag(slug))` besides `posts`.
 
 ## Log
@@ -96,3 +97,4 @@ The agency can publish useful articles (buying, selling, renting, the market) th
 | 2026-11-05 | 1 | done: migration `20261105120000_blog.sql` (`posts` with category / status checks, `set_updated_at` trigger, listing indexes; `post_properties` position 0..2; RLS: public selects published posts and their links only, no write policies); `database.types.ts` hand-edited; `src/constants/blog.ts`; public facade `posts.ts` (+ `post-query.ts`), admin facade `admin-posts.ts` (discriminated results, slug lock, first-publish `published_at`, ≤3 related, cover returns the old key), `post-schemas.ts`, `post-slug.ts` (reuses `slugifyBase`); both drivers; related properties via `fetchPropertiesByIds`, published only; seed 8 published + 1 draft (covers `placeholders/*.webp`, one without), `seed.sql` regenerated; contract + seed tests: 676 passed / 56 skipped (Supabase run skipped, no local DB) | `supabase/migrations/20261105120000_blog.sql`, `src/lib/supabase/database.types.ts`, `src/constants/blog.ts`, `src/lib/db/{posts,admin-posts,post-query,post-schemas,post-slug,driver-types,cache-tags}.ts`, `src/lib/db/{supabase,../demo/db}/{posts,admin-posts}.ts`, `src/lib/demo/{store.ts,seed/*}`, `supabase/seed.sql`, `docs/setup.md` |
 | 2026-11-05 | 2 | done: `/blog` (cards, category chips as links with `aria-current`, `?page=` pagination reusing catalog `pageItems`, empty / none-in-category / out-of-range states, load error alert + retry), `/blog/[slug]` (breadcrumbs, category chip, date + reading time, cover `fetchPriority=high` in a 16:9 box, Markdown body ~68ch, tag chips, author card, CTA, related property cards), `error.tsx`, `not-found.tsx`; «Блог» in `NAV_LINKS` (header, mobile menu, footer), `NavLink` prefix match; Markdown renderer gained `ol` / `blockquote` / `em` styles (also on about / privacy). `e2e/no-js.spec.ts` 33/33 on `next start`; post page ships fewer chunks than a property page (+~1.9 KB gz blog-only chunks); screenshots reviewed (list 1280 dark, post 375 light) | `src/app/(site)/blog/**`, `src/features/blog/*`, `src/constants/blog.ts`, `src/components/layout/{nav-config,nav-link}.ts(x)`, `src/features/pages/markdown.tsx`, `src/features/catalog/catalog-pagination.tsx`, `e2e/no-js.spec.ts` |
 | 2026-11-05 | 3 | done: `generateMetadata` for `/blog` (category title, canonical keeps `category`, drops `page=1`, invalid category → `/blog`) and posts (`seo_title` / `seo_description || excerpt` trimmed to 155, canonical, OG `article` with times + absolute cover / default image, `noindex` → robots); `blogPostingSchema` + `BLOG_CRUMB` JSON-LD; sitemap adds `/blog`, 5 category URLs and published non-noindex posts (`lastModified = updated_at`; both drivers filter `noindex`), falls back to `[]` on error; `HomeBlog` (3 latest, after agents, hidden when none / on error). Tests 684 passed; no-JS e2e 34/34 | `src/features/seo/{schemas,sitemap-entries}.ts` (+ tests), `src/app/sitemap.ts`, `src/features/blog/{blog-seo,blog-post-view}.ts(x)`, `src/app/(site)/blog/**`, `src/features/home/home-blog.tsx`, `src/app/(site)/page.tsx`, `src/constants/home.ts`, `e2e/no-js.spec.ts` |
+| 2026-11-05 | 4 | done: `/admin/blog` (search, status, category in the URL, pagination, empty / filtered states, skeleton, error), `/admin/blog/new`, `/admin/blog/[id]` (title, slug auto while new, editable until first publish then read-only, category, author incl. «Без автора», tags, excerpt, TipTap → Markdown in a hidden input via `next/dynamic` `ssr:false`, toolbar 10 buttons with `aria-label` / `aria-pressed` 44px, inline link bar `http(s)` / `/` / `mailto` / `tel`, SEO + SERP preview, noindex, publish / draft, delete with dialog); actions with zod + `requireAdmin()`, publish needs excerpt + body; `revalidate-post.ts`; «Блог» in the admin nav. Review fix: `requireAdmin()` in `PostsResults` before the service-role list. Round-trip test identical Markdown + same site HTML; no `tiptap` / `prosemirror` in scripts of `/`, `/blog`, a post, `/catalog`. Playwright on demo: draft hidden; publish → `/blog`, home, sitemap; unpublish / delete → gone. Tests 700 passed | `src/app/admin/(panel)/blog/**`, `src/features/admin/blog/*`, `src/features/admin/admin-nav.ts`, `src/lib/db/revalidate-post.ts`, `package.json`, `pnpm-lock.yaml` |
