@@ -19,6 +19,7 @@ Stage 1 (≈7–9 weeks): base site + admin + AI assistant — see [reference/st
 | 009 | [SEO](specs/009-seo.md) | done | 005, 007 |
 | 010 | [AI assistant](specs/010-ai-assistant.md) | done | 005, 006 |
 | 011 | [Demo mode: a local-first template](specs/011-demo-template.md) | in-progress | 010 |
+| 012 | [Premium redesign: Midnight Sky](specs/012-premium-redesign.md) | ready | 011 |
 
 Statuses: `draft` → `ready` → `in-progress` → `done` (meaning in [process.md](process.md#statuses)). The status here and in the spec's header must match.
 
@@ -35,6 +36,7 @@ Read top to bottom; the next spec is the first one that isn't `done`. Specs in o
 | 5 | 008, 009 |
 | 6 | 010 |
 | 7 | 011 |
+| 8 | 012 |
 
 - To change the order, edit this table.
 - To make a spec buildable, review it and set it to `ready` here and in the spec.
