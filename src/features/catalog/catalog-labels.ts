@@ -2,7 +2,7 @@ import type { Deal, Sort } from "./catalog-params";
 
 /** Native `<select>` styled like `Input` (matches the home quick search). */
 export const SELECT_CLASS =
-  "h-11 w-full min-w-0 rounded-lg border border-control bg-background px-3 text-base text-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30";
+  "h-11 w-full min-w-0 rounded-xl border border-control bg-background px-3 text-base text-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30";
 
 export const DEAL_OPTIONS = [
   { value: "sell", label: "Купити" },

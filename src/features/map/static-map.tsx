@@ -28,7 +28,7 @@ export const StaticMap = ({ lat, lng, address, approximate = false, className }:
 
   return (
     <figure className={cn("flex flex-col gap-2", className)}>
-      <div className="aspect-4/3 w-full overflow-hidden rounded-xl bg-muted ring-1 ring-foreground/10 sm:aspect-video">
+      <div className="aspect-4/3 w-full overflow-hidden rounded-2xl bg-muted ring-1 ring-foreground/10 sm:aspect-video">
         <svg
           role="img"
           aria-label={label}

@@ -19,7 +19,7 @@ const PHOTO_SIZES = "(min-width: 1152px) 46rem, (min-width: 1024px) 60vw, 100vw"
 export const SoldPropertyPhoto = ({ photo, status }: SoldPropertyPhotoProps) => {
   const srcSet = photo ? photoSrcSet(photo.sizes) : undefined;
   return (
-    <div className="relative -mx-4 aspect-4/3 overflow-hidden bg-muted sm:mx-0 sm:aspect-3/2 sm:rounded-xl">
+    <div className="relative -mx-4 aspect-4/3 overflow-hidden bg-muted sm:mx-0 sm:aspect-3/2 sm:rounded-2xl">
       {photo ? (
         // eslint-disable-next-line @next/next/no-img-element -- photos come from R2/public; Workers has no image optimizer
         <img
@@ -41,7 +41,7 @@ export const SoldPropertyPhoto = ({ photo, status }: SoldPropertyPhotoProps) => 
       )}
       <span
         aria-hidden="true"
-        className="absolute top-3 left-3 rounded-md bg-background/90 px-3 py-1.5 text-sm font-semibold text-foreground"
+        className="absolute top-3 left-3 rounded-full bg-background/90 px-3 py-1.5 text-sm font-semibold text-foreground"
       >
         {status}
       </span>

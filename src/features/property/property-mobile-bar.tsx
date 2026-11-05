@@ -22,7 +22,7 @@ export const PropertyMobileBar = ({ phone }: PropertyMobileBarProps) => (
         <Phone aria-hidden="true" />
         Подзвонити
       </a>
-      <a href={`#${REQUEST_ANCHOR}`} className={cn(buttonVariants({ size: "lg" }), "w-full")}>
+      <a href={`#${REQUEST_ANCHOR}`} className={cn(buttonVariants({ variant: "dawn", size: "lg" }), "w-full")}>
         Залишити заявку
       </a>
     </div>

@@ -38,9 +38,9 @@ export const SoldContactBlock = ({ propertyId, deal, className }: SoldContactBlo
   <section
     id={CONTACT_ANCHOR}
     aria-labelledby={`${CONTACT_ANCHOR}-title`}
-    className={cn("scroll-mt-24 rounded-xl bg-card p-5 text-card-foreground ring-1 ring-foreground/10", className)}
+    className={cn("scroll-mt-24 rounded-2xl bg-card p-6 text-card-foreground ring-1 ring-foreground/10", className)}
   >
-    <h2 id={`${CONTACT_ANCHOR}-title`} className="text-lg font-bold">
+    <h2 id={`${CONTACT_ANCHOR}-title`} className="text-h3">
       Підберемо схожий
     </h2>
     <p className="mt-2 text-muted-foreground">

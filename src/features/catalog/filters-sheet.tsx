@@ -22,13 +22,13 @@ export const FiltersSheet = ({ activeCount, children }: FiltersSheetProps) => (
   <Sheet>
     <SheetTrigger asChild>
       <Button variant="outline">
-        <SlidersHorizontal aria-hidden="true" />
+        <SlidersHorizontal className="text-dawn-text" aria-hidden="true" />
         {activeCount > 0 ? `Фільтри (${activeCount})` : "Фільтри"}
       </Button>
     </SheetTrigger>
     <SheetContent side="right" className="overflow-y-auto data-[side=right]:w-full">
       <SheetHeader className="pb-0">
-        <SheetTitle className="text-lg font-bold">Фільтри</SheetTitle>
+        <SheetTitle className="font-heading text-lg font-semibold tracking-tight">Фільтри</SheetTitle>
         <SheetDescription className="sr-only">
           Оберіть параметри і натисніть «Показати»
         </SheetDescription>

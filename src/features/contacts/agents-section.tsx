@@ -1,5 +1,7 @@
 import "server-only";
 
+import { SectionHeading } from "@/components/section-heading";
+import { CONTACTS_PAGE } from "@/constants/inner-pages";
 import { RetryButton } from "@/features/home/retry-button";
 import { getActiveAgents } from "@/lib/db/agents";
 import type { Agent } from "@/lib/db/agents";
@@ -27,9 +29,7 @@ export const AgentsSection = async () => {
     case "ready":
       return (
         <section aria-labelledby="agents-title" className="flex flex-col gap-6">
-          <h2 id="agents-title" className="text-2xl font-bold">
-            Наші ріелтори
-          </h2>
+          <SectionHeading id="agents-title" eyebrow={CONTACTS_PAGE.agentsEyebrow} title={CONTACTS_PAGE.agentsTitle} />
           <ul className="grid gap-4 sm:grid-cols-2">
             {state.items.map((agent) => (
               <AgentCard key={agent.id} agent={agent} />
@@ -40,12 +40,10 @@ export const AgentsSection = async () => {
     case "error":
       return (
         <section aria-labelledby="agents-title" className="flex flex-col gap-6">
-          <h2 id="agents-title" className="text-2xl font-bold">
-            Наші ріелтори
-          </h2>
+          <SectionHeading id="agents-title" eyebrow={CONTACTS_PAGE.agentsEyebrow} title={CONTACTS_PAGE.agentsTitle} />
           <div
             role="alert"
-            className="flex flex-col items-start gap-4 rounded-xl border border-destructive/40 p-6"
+            className="flex flex-col items-start gap-4 rounded-2xl border border-destructive/40 bg-card p-6"
           >
             <p className="font-medium text-destructive">Не вдалося завантажити ріелторів</p>
             <RetryButton />

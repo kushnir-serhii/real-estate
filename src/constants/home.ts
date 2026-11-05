@@ -17,12 +17,12 @@ export const FEATURED = {
   action: "Усі об'єкти",
 } as const;
 
-// Mock — replace for the real agency. `value` is the final number (animated up from 0); `suffix` follows it.
+// Mock — replace for the real agency. `value` is the final number (animated up from 0 when `animate`; «24/7» is not a count); `suffix` follows it.
 export const TRUST_STATS = [
-  { value: 12, decimals: 0, suffix: "", label: "років на ринку" },
-  { value: 1400, decimals: 0, suffix: "+", label: "успішних угод" },
-  { value: 4.9, decimals: 1, suffix: "", label: "рейтинг клієнтів" },
-  { value: 24, decimals: 0, suffix: "/7", label: "AI-асистент онлайн" },
+  { value: 12, decimals: 0, animate: true, suffix: "", label: "років на ринку" },
+  { value: 1400, decimals: 0, animate: true, suffix: "+", label: "успішних угод" },
+  { value: 4.9, decimals: 1, animate: true, suffix: "", label: "рейтинг клієнтів" },
+  { value: 24, decimals: 0, animate: false, suffix: "/7", label: "AI-асистент онлайн" },
 ] as const;
 
 // Mock — replace for the real agency.
@@ -126,6 +126,8 @@ export const AGENTS = {
   description: "Живі люди, які відповідають на дзвінки й супроводжують угоди.",
   role: "Агент з нерухомості",
   max: 4,
+  cta: "Зв'язатися з менеджером",
+  ctaHref: "/contacts#zayavka",
 } as const;
 
 // Mock — replace for the real agency (real, consented reviews only).

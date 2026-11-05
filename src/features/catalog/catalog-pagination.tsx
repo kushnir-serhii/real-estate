@@ -25,7 +25,7 @@ const pageItems = (current: number, count: number): Item[] => {
   return items;
 };
 
-const ARROW_CLASS = buttonVariants({ variant: "outline", size: "icon" });
+const ARROW_CLASS = cn(buttonVariants({ variant: "outline", size: "icon" }), "rounded-full");
 
 export const CatalogPagination = ({ state, pageCount }: CatalogPaginationProps) => {
   if (pageCount <= 1) return null;
@@ -34,7 +34,7 @@ export const CatalogPagination = ({ state, pageCount }: CatalogPaginationProps) 
   const next = current < pageCount ? catalogHref(state, { page: current + 1 }) : null;
 
   return (
-    <nav aria-label="Сторінки" className="flex items-center justify-center gap-2">
+    <nav aria-label="Сторінки" className="flex items-center justify-center gap-2 pt-2">
       {prev ? (
         <Link href={prev} rel="prev" aria-label="Попередня сторінка" className={ARROW_CLASS}>
           <ChevronLeft />
@@ -63,7 +63,7 @@ export const CatalogPagination = ({ state, pageCount }: CatalogPaginationProps) 
                 aria-label={`Сторінка ${item.page}`}
                 className={cn(
                   buttonVariants({ variant: item.page === current ? "default" : "ghost", size: "icon" }),
-                  "tabular-nums",
+                  "rounded-full font-semibold tabular-nums",
                 )}
               >
                 {item.page}

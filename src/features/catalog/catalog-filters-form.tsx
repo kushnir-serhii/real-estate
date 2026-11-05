@@ -22,9 +22,9 @@ type CatalogFiltersFormProps = {
 };
 
 const CHIP_CLASS =
-  "inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-lg border border-control bg-background px-3 text-sm font-medium transition-colors select-none hover:bg-muted has-checked:border-primary has-checked:bg-primary has-checked:text-primary-foreground has-focus-visible:ring-3 has-focus-visible:ring-ring/50 dark:bg-input/30";
+  "inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-xl border border-control bg-background px-3 text-sm font-medium transition-colors select-none hover:bg-muted has-checked:border-primary has-checked:bg-primary has-checked:font-semibold has-checked:text-primary-foreground has-focus-visible:ring-3 has-focus-visible:ring-ring/50 dark:bg-input/30";
 
-const LEGEND_CLASS = "mb-2 text-sm leading-none font-medium";
+const LEGEND_CLASS = "mb-2 text-sm leading-none font-medium text-foreground";
 
 type FieldProps = { label: string; htmlFor: string; children: React.ReactNode };
 
@@ -94,7 +94,7 @@ export const CatalogFiltersForm = ({
     state.district && !districts.includes(state.district) ? [state.district, ...districts] : districts;
 
   return (
-    <Form action="/catalog" aria-label="Фільтри" className="flex flex-col gap-5">
+    <Form action="/catalog" aria-label="Фільтри" className="flex flex-col gap-6">
       <Field label="Що потрібно" htmlFor={`${idPrefix}-deal`}>
         <select id={`${idPrefix}-deal`} name="deal" defaultValue={state.deal ?? ""} className={SELECT_CLASS}>
           <option value="">Усі варіанти</option>
@@ -219,7 +219,7 @@ export const CatalogFiltersForm = ({
         <Link href={resetHref(state)} className={buttonVariants({ variant: "outline", size: "lg" })}>
           Скинути
         </Link>
-        <Button type="submit" size="lg">
+        <Button type="submit" variant="dawn" size="lg">
           Показати
         </Button>
       </div>

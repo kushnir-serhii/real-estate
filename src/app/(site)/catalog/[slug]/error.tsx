@@ -5,7 +5,9 @@ import { RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 
+import { PageHeader } from "@/components/page-header";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { PROPERTY_ERROR } from "@/constants/inner-pages";
 
 type PropertyErrorProps = { error: Error & { digest?: string }; reset: () => void };
 
@@ -21,24 +23,22 @@ const PropertyError = ({ reset }: PropertyErrorProps) => {
     });
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col items-start gap-4 px-4 py-16">
-      <div role="alert" className="flex flex-col items-start gap-4">
-        <h1 className="text-3xl font-bold">Не вдалося відкрити об&apos;єкт</h1>
-        <p className="text-muted-foreground">
-          Щось пішло не так під час завантаження сторінки. Спробуйте ще раз або перегляньте інші
-          пропозиції в каталозі.
-        </p>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        <Button type="button" onClick={retry} disabled={pending}>
-          <RefreshCw className={pending ? "animate-spin" : undefined} aria-hidden="true" />
-          Спробувати ще раз
-        </Button>
-        <Link href="/catalog" className={buttonVariants({ variant: "outline" })}>
-          До каталогу
-        </Link>
-      </div>
-    </div>
+    <PageHeader
+      width="narrow"
+      alert
+      eyebrow={PROPERTY_ERROR.eyebrow}
+      title={PROPERTY_ERROR.title}
+      lead={PROPERTY_ERROR.lead}
+      className="pt-16 pb-24"
+    >
+      <Button type="button" variant="dawn" size="lg" onClick={retry} disabled={pending}>
+        <RefreshCw className={pending ? "animate-spin" : undefined} aria-hidden="true" />
+        {PROPERTY_ERROR.retry}
+      </Button>
+      <Link href="/catalog" className={buttonVariants({ variant: "outline", size: "lg" })}>
+        {PROPERTY_ERROR.catalog}
+      </Link>
+    </PageHeader>
   );
 };
 

@@ -90,7 +90,7 @@ export const PropertyGallery = ({ photos, title }: PropertyGalleryProps) => {
 
   if (count === 0) {
     return (
-      <div className="-mx-4 flex aspect-4/3 flex-col items-center justify-center gap-2 bg-muted text-muted-foreground sm:mx-0 sm:aspect-3/2 sm:rounded-xl">
+      <div className="-mx-4 flex aspect-4/3 flex-col items-center justify-center gap-2 bg-muted text-muted-foreground sm:mx-0 sm:aspect-3/2 sm:rounded-2xl">
         <Building2 className="size-10" aria-hidden="true" />
         <p className="text-base">Фото незабаром</p>
       </div>
@@ -128,13 +128,13 @@ export const PropertyGallery = ({ photos, title }: PropertyGalleryProps) => {
       aria-label={`Фото: ${title}`}
       tabIndex={0}
       onKeyDown={onKeyDown}
-      className="group/gallery relative -mx-4 outline-none focus-visible:ring-3 focus-visible:ring-ring sm:mx-0 sm:rounded-xl"
+      className="group/gallery relative -mx-4 outline-none focus-visible:ring-3 focus-visible:ring-ring sm:mx-0 sm:rounded-2xl"
     >
       <ul
         ref={stripRef}
         onScroll={onScroll}
         onTouchStart={onTouchStart}
-        className="flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain bg-muted scrollbar-none sm:rounded-xl"
+        className="flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain bg-muted scrollbar-none sm:rounded-2xl"
       >
         {photos.map((photo, i) => (
           <li
@@ -192,7 +192,7 @@ export const PropertyGallery = ({ photos, title }: PropertyGalleryProps) => {
           <p
             aria-live="polite"
             aria-atomic="true"
-            className="absolute bottom-3 left-3 rounded-md bg-scrim px-2 py-1 text-sm font-medium text-on-scrim tabular-nums"
+            className="absolute bottom-3 left-3 rounded-full bg-scrim px-3 py-1 text-sm font-medium text-on-scrim tabular-nums"
           >
             <span className="sr-only">Фото </span>
             {index + 1} / {count}

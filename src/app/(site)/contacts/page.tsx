@@ -1,10 +1,13 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 
+import { PageHeader } from "@/components/page-header";
+import { SectionHeading } from "@/components/section-heading";
+import { CONTACTS } from "@/constants/contacts";
+import { CONTACTS_PAGE } from "@/constants/inner-pages";
 import { AgentsSection } from "@/features/contacts/agents-section";
 import { AgentsSkeleton } from "@/features/contacts/agents-skeleton";
 import { ContactBlock } from "@/features/contacts/contact-block";
-import { CONTACTS } from "@/constants/contacts";
 import { StaticMap } from "@/features/map/static-map";
 import { GeneralRequestForm } from "@/features/leads/general-request-form";
 import { Markdown } from "@/features/pages/markdown";
@@ -27,32 +30,30 @@ const ContactsPage = async () => {
   const page = await getPageContent("contacts");
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-8 sm:gap-12 sm:py-12">
-      <div className="flex max-w-3xl flex-col gap-6">
-        <h1 className="text-3xl font-bold text-balance break-words sm:text-4xl">{page.title}</h1>
-        <Markdown>{page.body}</Markdown>
-      </div>
-      <div className="grid gap-6 lg:grid-cols-2 lg:items-start lg:gap-8">
-        <ContactBlock />
-        <section
-          id="zayavka"
-          className="scroll-mt-24 rounded-xl bg-card p-5 text-card-foreground ring-1 ring-foreground/10 sm:p-8"
-        >
-          <GeneralRequestForm
-            title="Залишити заявку"
-            description="Напишіть, що шукаєте: купити чи орендувати, який тип, побажання. Підберемо варіанти й зателефонуємо."
-          />
+    <div className="pb-16 sm:pb-24">
+      <PageHeader eyebrow={CONTACTS_PAGE.eyebrow} title={page.title} />
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-14 px-4 sm:gap-20">
+        <Markdown className="max-w-prose">{page.body}</Markdown>
+        <div className="grid gap-6 lg:grid-cols-2 lg:items-start lg:gap-8">
+          <ContactBlock />
+          <section
+            id="zayavka"
+            className="scroll-mt-24 rounded-2xl bg-card p-6 text-card-foreground ring-1 ring-foreground/10 sm:p-8"
+          >
+            <GeneralRequestForm
+              title={CONTACTS_PAGE.formTitle}
+              description={CONTACTS_PAGE.formDescription}
+            />
+          </section>
+        </div>
+        <Suspense fallback={<AgentsSkeleton />}>
+          <AgentsSection />
+        </Suspense>
+        <section aria-labelledby="map-title" className="flex flex-col gap-6">
+          <SectionHeading id="map-title" eyebrow={CONTACTS_PAGE.mapEyebrow} title={CONTACTS_PAGE.mapTitle} />
+          <StaticMap lat={CONTACTS.coordinates.lat} lng={CONTACTS.coordinates.lng} address={CONTACTS.address} />
         </section>
       </div>
-      <Suspense fallback={<AgentsSkeleton />}>
-        <AgentsSection />
-      </Suspense>
-      <section aria-labelledby="map-title" className="flex flex-col gap-4">
-        <h2 id="map-title" className="text-2xl font-bold">
-          Як нас знайти
-        </h2>
-        <StaticMap lat={CONTACTS.coordinates.lat} lng={CONTACTS.coordinates.lng} address={CONTACTS.address} />
-      </section>
     </div>
   );
 };

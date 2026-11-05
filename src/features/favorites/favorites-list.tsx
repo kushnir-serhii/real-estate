@@ -72,14 +72,14 @@ export const FavoritesList = () => {
 
   if (failed && ids.some((id) => !(id in cache))) {
     return (
-      <div role="alert" className="flex flex-col items-start gap-4 rounded-xl border border-dashed border-border p-6">
+      <div role="alert" className="flex flex-col items-start gap-5 rounded-2xl border border-dashed border-control bg-card p-6 sm:p-10">
         <div className="flex flex-col gap-2">
-          <h2 className="text-lg font-bold">Не вдалося завантажити обране</h2>
+          <h2 className="text-h3">Не вдалося завантажити обране</h2>
           <p className="max-w-prose text-muted-foreground">
             Ваш список збережено. Перевірте з&apos;єднання й спробуйте ще раз.
           </p>
         </div>
-        <Button type="button" onClick={() => setFailed(false)}>
+        <Button type="button" variant="dawn" onClick={() => setFailed(false)}>
           <RefreshCw aria-hidden="true" />
           Спробувати ще раз
         </Button>
@@ -98,7 +98,7 @@ export const FavoritesList = () => {
           return (
             <li key={id} className="min-w-0">
               {entry === undefined ? (
-                <Skeleton className="aspect-4/3 w-full" />
+                <Skeleton className="aspect-4/3 w-full rounded-2xl" />
               ) : entry === null ? (
                 <FavoritesUnavailable propertyId={id} />
               ) : (

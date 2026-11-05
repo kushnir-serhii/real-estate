@@ -1,5 +1,6 @@
 import { MapPin } from "lucide-react";
 
+import { PROPERTY_PAGE } from "@/constants/inner-pages";
 import { StaticMap } from "@/features/map/static-map";
 
 type PropertyLocationProps = {
@@ -13,11 +14,11 @@ export const PropertyLocation = ({ text, coordinates }: PropertyLocationProps) =
   if (!text && !coordinates) return null;
   return (
     <section aria-labelledby="property-location-title">
-      <h2 id="property-location-title" className="text-xl font-bold">
-        Розташування
+      <h2 id="property-location-title" className="text-h3">
+        {PROPERTY_PAGE.locationTitle}
       </h2>
       {text && (
-        <p className="mt-3 flex items-start gap-2">
+        <p className="mt-4 flex items-start gap-2">
           <MapPin className="mt-1 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
           <span className="break-words">{text}</span>
         </p>

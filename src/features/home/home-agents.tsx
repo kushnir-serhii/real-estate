@@ -1,6 +1,8 @@
-import { Mail, Phone } from "lucide-react";
+import { ArrowRight, Mail, Phone } from "lucide-react";
+import Link from "next/link";
 
 import { SectionHeading } from "@/components/section-heading";
+import { buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AGENTS } from "@/constants/home";
 import { getActiveAgents } from "@/lib/db/agents";
@@ -13,7 +15,7 @@ const LINK =
   "inline-flex min-h-11 items-center gap-2 rounded-md break-all text-foreground outline-none hover:text-dawn-text focus-visible:ring-3 focus-visible:ring-ring/50";
 
 const LIST =
-  "-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-4 lg:gap-6";
+  "-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:gap-6";
 const ITEM = "w-64 shrink-0 snap-start sm:w-auto";
 
 const initials = (name: string) =>
@@ -70,14 +72,18 @@ const AgentTile = ({ agent }: { agent: Agent }) => {
 
 const Frame = ({ children }: { children: React.ReactNode }) => (
   <HomeSection labelledBy="agents-title">
-    <div className="flex flex-col gap-10">
-      <div className="reveal">
+    <div className="flex flex-col gap-10 lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-center lg:gap-16">
+      <div className="reveal flex flex-col items-start gap-6">
         <SectionHeading
           id="agents-title"
           eyebrow={AGENTS.eyebrow}
           title={AGENTS.title}
           description={AGENTS.description}
         />
+        <Link href={AGENTS.ctaHref} className={buttonVariants({ variant: "dawn", size: "lg" })}>
+          {AGENTS.cta}
+          <ArrowRight data-icon="inline-end" aria-hidden="true" />
+        </Link>
       </div>
       {children}
     </div>
@@ -108,7 +114,7 @@ export const HomeAgents = async () => {
   );
 };
 
-const SKELETON_KEYS = ["a", "b", "c", "d"] as const;
+const SKELETON_KEYS = ["a", "b"] as const;
 
 export const HomeAgentsSkeleton = () => (
   <Frame>

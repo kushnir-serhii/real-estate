@@ -24,7 +24,7 @@ export const SoldPropertyView = ({ property }: SoldPropertyViewProps) => {
   const location = locationText(property);
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 pt-2 pb-12 sm:pt-4 lg:pb-16">
+    <div className="mx-auto w-full max-w-6xl px-4 pt-2 pb-16 sm:pt-4 lg:pb-24">
       <Link
         href={`/catalog?deal=${property.deal}`}
         className="inline-flex min-h-11 items-center gap-2 rounded-md text-sm font-medium text-muted-foreground outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
@@ -35,10 +35,10 @@ export const SoldPropertyView = ({ property }: SoldPropertyViewProps) => {
 
       <div className="mt-2 lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-10">
         <div className="flex min-w-0 flex-col gap-6">
-          <div className="flex items-start gap-3 rounded-xl bg-secondary p-4 text-secondary-foreground">
-            <CircleCheck className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
+          <div className="flex items-start gap-3 rounded-2xl bg-secondary p-5 text-secondary-foreground ring-1 ring-foreground/10">
+            <CircleCheck className="mt-0.5 size-5 shrink-0 text-dawn-text" aria-hidden="true" />
             <div>
-              <p className="font-bold">{status}</p>
+              <p className="font-heading font-semibold">{status}</p>
               <p className="mt-1 text-sm">
                 Цей об&apos;єкт більше не доступний. Подивіться схожі або залиште запит, і ми підберемо
                 варіант.
@@ -49,13 +49,13 @@ export const SoldPropertyView = ({ property }: SoldPropertyViewProps) => {
           <SoldPropertyPhoto photo={property.property_photos[0]} status={status} />
 
           <header className="flex flex-col gap-2">
-            <p className="text-sm font-medium text-muted-foreground">
+            <p className="eyebrow text-dawn-text">
               {DEAL_LABELS[property.deal]} · {PROPERTY_TYPE_LABELS[property.property_type]}
             </p>
-            <h1 className="text-2xl font-bold break-words text-balance sm:text-3xl">{property.title}</h1>
+            <h1 className="text-h2 break-words">{property.title}</h1>
             {location && <p className="break-words text-muted-foreground">{location}</p>}
             <p className="mt-2 text-muted-foreground">
-              Остання ціна: <span className="font-semibold break-words tabular-nums">{priceText(property)}</span>
+              Остання ціна: <span className="font-heading font-semibold break-words tabular-nums">{priceText(property)}</span>
             </p>
             {facts.length > 0 && <p>{facts.join(" · ")}</p>}
           </header>
@@ -67,7 +67,7 @@ export const SoldPropertyView = ({ property }: SoldPropertyViewProps) => {
       </div>
 
       <Suspense fallback={null}>
-        <SimilarProperties property={property} className="mt-12" />
+        <SimilarProperties property={property} className="mt-16 sm:mt-20" />
       </Suspense>
 
       <Link href="/catalog" className={cn(buttonVariants({ variant: "outline", size: "lg" }), "mt-8")}>
