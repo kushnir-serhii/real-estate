@@ -3,6 +3,8 @@
  * understanding (who the agency is, what a listing is, where the page sits), not for rich snippets.
  */
 import { BRAND, OG_DEFAULT_IMAGE } from "@/constants/brand";
+import { blogCategoryLabel } from "@/constants/blog";
+import type { BlogCategory } from "@/constants/blog";
 import { CONTACTS } from "@/constants/contacts";
 import { districtText } from "@/features/property/property-details";
 import type { PublishedProperty } from "@/lib/db/properties";
@@ -89,6 +91,7 @@ export const breadcrumbSchema = (siteUrl: string, items: BreadcrumbItem[]): Json
 
 export const HOME_CRUMB: BreadcrumbItem = { name: "Головна", path: "/" };
 export const CATALOG_CRUMB: BreadcrumbItem = { name: "Каталог", path: "/catalog" };
+export const BLOG_CRUMB: BreadcrumbItem = { name: "Блог", path: "/blog" };
 
 export type SchemaProperty = Pick<
   PublishedProperty,
@@ -193,5 +196,48 @@ export const propertySchema = (siteUrl: string, p: SchemaProperty, imageUrls: st
     ...(images.length ? { image: images } : {}),
     mainEntity,
     ...(offer ? { offers: offer } : {}),
+  };
+};
+
+export type SchemaPost = {
+  slug: string;
+  title: string;
+  excerpt: string;
+  seo_description: string | null;
+  category: BlogCategory;
+  tags: string[];
+  published_at: string | null;
+  updated_at: string;
+  author: { name: string } | null;
+};
+
+/** `BlogPosting`: author is the agent (Person) or, without one, the agency; `imageUrl` may be site-relative. */
+export const blogPostingSchema = (siteUrl: string, post: SchemaPost, imageUrl: string | null): JsonLdObject => {
+  const url = toAbsolute(siteUrl, `/blog/${post.slug}`);
+  const logo = toAbsolute(siteUrl, OG_DEFAULT_IMAGE.url);
+  const description = post.seo_description?.trim() || post.excerpt.trim();
+  return {
+    "@context": SCHEMA_CONTEXT,
+    "@type": "BlogPosting",
+    "@id": `${url}#article`,
+    headline: post.title,
+    ...(description ? { description } : {}),
+    datePublished: post.published_at ?? post.updated_at,
+    dateModified: post.updated_at,
+    image: [imageUrl ? toAbsolute(siteUrl, imageUrl) : logo],
+    author: post.author
+      ? { "@type": "Person", name: post.author.name }
+      : { "@type": "Organization", name: BRAND.name, url: siteUrl },
+    publisher: {
+      "@type": "Organization",
+      "@id": `${siteUrl}/#organization`,
+      name: BRAND.name,
+      url: siteUrl,
+      logo: { "@type": "ImageObject", url: logo },
+    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    articleSection: blogCategoryLabel(post.category),
+    ...(post.tags.length ? { keywords: post.tags.join(", ") } : {}),
+    inLanguage: "uk-UA",
   };
 };

@@ -95,3 +95,11 @@ test('blog unknown category shows all posts, draft slug is 404', async ({ page }
   const draft = await page.goto('/blog/5-pomylok-pry-oformlenni-orendy-chernetka')
   expect(draft?.status()).toBe(404)
 })
+
+// Spec 015: the «Останні статті» block on home is server-rendered
+test('no-js home shows the latest blog posts', async ({ page }) => {
+  await page.goto('/')
+  const block = page.getByRole('region', { name: 'Останні статті' })
+  await expect(block.locator('article')).toHaveCount(3)
+  await expect(block.getByRole('link', { name: 'Усі статті' })).toBeVisible()
+})

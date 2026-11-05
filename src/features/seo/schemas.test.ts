@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { BRAND } from "@/constants/brand";
 import { CONTACTS } from "@/constants/contacts";
-import { breadcrumbSchema, organizationSchema, parseAddress, propertySchema } from "./schemas";
-import type { SchemaProperty } from "./schemas";
+import { blogPostingSchema, breadcrumbSchema, organizationSchema, parseAddress, propertySchema } from "./schemas";
+import type { SchemaPost, SchemaProperty } from "./schemas";
 
 const SITE = "https://example.test";
 
@@ -99,5 +99,44 @@ describe("propertySchema", () => {
     const plot = propertySchema(SITE, { ...flat, property_type: "plot", room_count: null, area_total: null, area_lot: 12 }, []);
     expect(plot?.mainEntity).toMatchObject({ "@type": "Place" });
     expect(plot?.mainEntity).not.toHaveProperty("floorSize");
+  });
+});
+
+describe("blogPostingSchema", () => {
+  const post: SchemaPost = {
+    slug: "yak-kupyty",
+    title: "Як купити квартиру",
+    excerpt: "Короткий опис",
+    seo_description: null,
+    category: "buyers",
+    tags: ["квартира", "угода"],
+    published_at: "2026-10-01T10:00:00.000Z",
+    updated_at: "2026-10-05T10:00:00.000Z",
+    author: { name: "Олена Коваль" },
+  };
+
+  it("has the BlogPosting shape with absolute URLs", () => {
+    expect(blogPostingSchema(SITE, post, "/r2-local/c.webp")).toMatchObject({
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      headline: "Як купити квартиру",
+      description: "Короткий опис",
+      datePublished: post.published_at,
+      dateModified: post.updated_at,
+      image: [`${SITE}/r2-local/c.webp`],
+      author: { "@type": "Person", name: "Олена Коваль" },
+      publisher: { "@type": "Organization", name: BRAND.name, logo: { url: `${SITE}/og-default.png` } },
+      mainEntityOfPage: { "@id": `${SITE}/blog/yak-kupyty` },
+      articleSection: "Покупцям",
+      keywords: "квартира, угода",
+    });
+  });
+
+  it("falls back to the agency as author and the default image, prefers the SEO description", () => {
+    const schema = blogPostingSchema(SITE, { ...post, author: null, tags: [], seo_description: "SEO" }, null);
+    expect(schema.author).toMatchObject({ "@type": "Organization", name: BRAND.name });
+    expect(schema.image).toEqual([`${SITE}/og-default.png`]);
+    expect(schema.description).toBe("SEO");
+    expect(schema).not.toHaveProperty("keywords");
   });
 });

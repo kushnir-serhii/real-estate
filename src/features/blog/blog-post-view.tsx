@@ -1,8 +1,12 @@
 import Link from "next/link";
 
+import { JsonLd } from "@/components/seo/json-ld";
 import { blogCategoryLabel, BLOG_POST_PAGE } from "@/constants/blog";
 import { Markdown } from "@/features/pages/markdown";
+import { BLOG_CRUMB, blogPostingSchema, breadcrumbSchema, HOME_CRUMB } from "@/features/seo/schemas";
 import type { PostDetail } from "@/lib/db/posts";
+import { photoUrl } from "@/lib/photos/photo-url";
+import { getSiteUrl } from "@/lib/site-url";
 import { BlogAuthorCard } from "./blog-author-card";
 import { BlogBreadcrumbs } from "./blog-breadcrumbs";
 import { BlogCover } from "./blog-cover";
@@ -15,8 +19,11 @@ const COVER_SIZES = "(min-width: 768px) 48rem, 100vw";
 /** The article page: header, cover, Markdown body, tags, author, CTA, related properties. */
 export const BlogPostView = ({ post }: { post: PostDetail }) => {
   const date = formatPostDate(post.published_at);
+  const siteUrl = getSiteUrl();
   return (
     <div className="pb-16 sm:pb-24">
+      <JsonLd data={breadcrumbSchema(siteUrl, [HOME_CRUMB, BLOG_CRUMB, { name: post.title, path: `/blog/${post.slug}` }])} />
+      <JsonLd data={blogPostingSchema(siteUrl, post, post.cover_key ? photoUrl(post.cover_key) : null)} />
       <div className="mx-auto w-full max-w-3xl px-4 pt-2 sm:pt-4">
         <BlogBreadcrumbs title={post.title} />
 
