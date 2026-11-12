@@ -14,6 +14,8 @@ type RetryDeliveryProps = {
   channel: RetryChannel;
   /** The channel is `failed` now. After a successful retry the page re-renders with `false`. */
   canRetry: boolean;
+  /** «Повторити» for a failed channel, «Надіслати» for a skipped one that is on now. */
+  action: "retry" | "send";
 };
 
 const SERVICE: Record<RetryChannel, string> = { plektan: "Plektan", telegram: "Telegram" };
@@ -48,7 +50,7 @@ const TONES = { success: "text-success", error: "text-destructive", info: "text-
  * «Повторити» for one failed channel + the announced result. Stays mounted after a successful retry
  * (when the button is gone), so «Надіслано» is still shown and gets the focus the button had.
  */
-export const RetryDelivery = ({ leadId, channel, canRetry }: RetryDeliveryProps) => {
+export const RetryDelivery = ({ leadId, channel, canRetry, action }: RetryDeliveryProps) => {
   const [state, formAction, pending] = useActionState(retryLeadDelivery, INITIAL_RETRY_LEAD_STATE);
   const statusRef = useRef<HTMLParagraphElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -78,8 +80,10 @@ export const RetryDelivery = ({ leadId, channel, canRetry }: RetryDeliveryProps)
             ) : (
               <RefreshCw aria-hidden="true" />
             )}
-            {pending ? "Надсилаємо…" : "Повторити"}
-            <span className="sr-only"> надсилання в {SERVICE[channel]}</span>
+            {pending ? "Надсилаємо…" : action === "send" ? "Надіслати" : "Повторити"}
+            <span className="sr-only">
+              {action === "send" ? ` в ${SERVICE[channel]}` : ` надсилання в ${SERVICE[channel]}`}
+            </span>
           </Button>
         </form>
       )}

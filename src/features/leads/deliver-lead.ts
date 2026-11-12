@@ -65,11 +65,11 @@ type ChannelRun = {
 };
 
 /**
- * `force` (manual retry): runs when the channel is `failed`, however many attempts it used; any
- * other status is left alone. Without it only the cron/first-delivery rule (`isDue`) applies.
+ * `force` (manual retry): runs when the channel is `failed`, however many attempts it used, or
+ * `skipped` (it then stays `skipped` if the channel is still off); any other status is left alone. Without it only the cron/first-delivery rule (`isDue`) applies.
  */
 const shouldRun = (status: LeadForDelivery["plektan_status"], attempts: number, force: boolean): boolean =>
-  force ? status === "failed" : isDue(status, attempts);
+  force ? status === "failed" || status === "skipped" : isDue(status, attempts);
 
 const runPlektan = async (lead: LeadForDelivery, deps: DeliverLeadDeps, force = false): Promise<ChannelRun> => {
   if (!shouldRun(lead.plektan_status, lead.plektan_attempts, force)) return { outcome: "not_due", update: null };
@@ -134,7 +134,7 @@ const saveRuns = async (deps: DeliverLeadDeps, id: string, runs: ChannelRun[]): 
 
 /**
  * Manual retry from the admin: ONE attempt of ONE channel, now, only when that channel is `failed`
- * (also past `MAX_DELIVERY_ATTEMPTS`). On failure the backoff is set only while attempts remain,
+ * (also past `MAX_DELIVERY_ATTEMPTS`) or `skipped` (sent only if the channel is on now). On failure the backoff is set only while attempts remain,
  * so it never extends the cron schedule. Throws only if the database itself fails.
  */
 export const retryLeadChannelWith = async (

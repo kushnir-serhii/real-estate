@@ -837,7 +837,7 @@ sequenceDiagram
 
 ## 8. Lead delivery
 
-A lead from the site form or from a confirmed AI assistant card. The order is fixed: checks, then the lead is saved, then the visitor gets the answer, and only after that Plektan and Telegram are called, in the background, each channel on its own. The save goes through the facade to Postgres or to the demo store. Each channel has its own mode: Plektan is `live` with a key, a fixture with `PLEKTAN_LEADS_FIXTURE`, or `off`; Telegram is `live` with a token and a chat id, a fixture with `TELEGRAM_FIXTURE`, or `off`. An `off` channel is marked `skipped` and nothing is called, so the site and the lead work with Plektan switched off. A failed call is written on the lead with a retry time and is picked up by the cron of [diagram 9](#9-lead-retry-cron).
+A lead from the site form or from a confirmed AI assistant card. The order is fixed: checks, then the lead is saved, then the visitor gets the answer, and only after that Plektan and Telegram are called, in the background, each channel on its own. The save goes through the facade to Postgres or to the demo store. Each channel has its own mode: Plektan is `live` with a key, a fixture with `PLEKTAN_LEADS_FIXTURE`, or `off`; Telegram is `live` with a token and a chat id, a fixture with `TELEGRAM_FIXTURE`, or `off`. An `off` channel is marked `skipped` and nothing is called, so the site and the lead work with Plektan switched off. Later, when the channel is on, the cron requeues a recent `skipped` channel ([diagram 9](#9-lead-retry-cron)), and in the admin «Надіслати» sends it once by hand, at any age. A failed call is written on the lead with a retry time and is picked up by the cron of [diagram 9](#9-lead-retry-cron).
 
 ```mermaid
 sequenceDiagram
@@ -909,6 +909,7 @@ sequenceDiagram
         deliver->>facade: telegram_status sent, failed with a retry time, or skipped
     end
     Note over deliver,facade: A failed call never loses the lead, it is stored with its status and attempts, and the cron retries
+    Note over deliver,facade: A skipped channel is sent later by the cron, or by the admin button «Надіслати» once the channel is on
 ```
 
 | Block | Data | What it is | Code |
@@ -927,7 +928,7 @@ sequenceDiagram
 
 ## 9. Lead retry cron
 
-What picks up a lead whose Plektan or Telegram call failed, or whose background delivery was lost. The scheduled workflow calls the route every 30 minutes by day with the shared secret. A lead is due when a channel is `failed`, has attempts left (5 in total, waits of 5 minutes, 15 minutes, 1 hour and 3 hours) and its retry time has come, or when a channel is still `pending` 10 minutes after the lead was saved. `deliverLead` is the same code as in [diagram 8](#8-lead-delivery), so the two channels again run on their own and the mode of each decides what is called. A lead that ran out of Plektan attempts also sends one Telegram alert, so the manager can call the visitor. Nothing here needs Plektan: with Plektan off the channel is `skipped` and never due. The leads stay in the admin whatever happens.
+What picks up a lead whose Plektan or Telegram call failed, or whose background delivery was lost. The scheduled workflow calls the route every 30 minutes by day with the shared secret. A lead is due when a channel is `failed`, has attempts left (5 in total, waits of 5 minutes, 15 minutes, 1 hour and 3 hours) and its retry time has come, or when a channel is still `pending` 10 minutes after the lead was saved. `deliverLead` is the same code as in [diagram 8](#8-lead-delivery), so the two channels again run on their own and the mode of each decides what is called. Before that query the run moves a channel that is now on from `skipped` back to `pending`, for leads younger than 7 days (`SKIPPED_REQUEUE_DAYS`); the stale-pending rule then delivers them in the same run. A channel still off is never touched, and a `sent` channel never goes again. A lead that ran out of Plektan attempts also sends one Telegram alert, so the manager can call the visitor. Nothing here needs Plektan: with Plektan off the channel is `skipped` and is not due until it is switched on. The leads stay in the admin whatever happens.
 
 ```mermaid
 sequenceDiagram
@@ -945,6 +946,8 @@ sequenceDiagram
         app-->>cron: 401 unauthorized
     else secret matches
         app->>retry: retryLeads()
+        retry->>facade: requeueSkippedLeads(channel, created after now minus 7 days) for each channel that is on
+        Note over retry,facade: Only skipped becomes pending, attempts stay, a channel that is off is not touched
         retry->>facade: getDueLeadIds(now, stale before, max 5, limit 50)
         Note over retry,facade: Failed with attempts left and retry time reached, or pending for over 10 minutes
         facade-->>retry: lead ids, oldest first
@@ -977,7 +980,7 @@ sequenceDiagram
 | --- | --- | --- | --- |
 | `cron` | real | A scheduled GitHub Actions workflow that runs the Plektan sync and calls the lead retry and cleanup routes. | `.github/workflows/sync.yml`, `CRON_SECRET`, `src/app/api/cron/*` |
 | `app` | seam | The one Next.js app on Cloudflare Workers that serves the site, the admin and the API, and picks each backend by env. | `src/app/api/cron/leads/route.ts`, `src/lib/cron/check-cron-secret.ts` |
-| `retry` | seam | One cron run: delivers every due lead one by one, then sends one Telegram alert per lead that Plektan never accepted. | `src/features/leads/retry-leads.ts`, `src/features/leads/retry-schedule.ts` |
+| `retry` | seam | One cron run: requeues recent skipped channels that are on, delivers due leads one by one, then alerts on leads Plektan never took. | `src/features/leads/retry-leads.ts`, `src/features/leads/retry-schedule.ts` |
 | `facade` | seam | The only data entry point for pages and actions: it adds caching and picks the Supabase or the demo driver. | `src/lib/db/leads.ts`, `DATA_DRIVER` in `src/lib/data-driver.ts` |
 | `deliver` | seam | Sends a saved lead to Plektan and Telegram, each channel on its own, and writes the result back on the lead. | `src/features/leads/deliver-lead.ts` |
 | `telegram` | real | The Telegram bot that sends each new lead to the managers' chat. | `src/lib/telegram/client.ts`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_MANAGER_CHAT_ID` |

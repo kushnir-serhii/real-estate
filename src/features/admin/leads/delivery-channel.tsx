@@ -1,4 +1,4 @@
-import { MAX_DELIVERY_ATTEMPTS } from "@/features/leads/retry-schedule";
+import { MAX_DELIVERY_ATTEMPTS, SKIPPED_REQUEUE_DAYS } from "@/features/leads/retry-schedule";
 import { DeliveryBadge } from "./delivery-badge";
 import type { DeliveryStatus } from "./delivery-badge";
 import { describeDeliveryError } from "./describe-delivery-error";
@@ -15,6 +15,8 @@ type DeliveryChannelProps = {
   attempts: number;
   error: string | null;
   nextAttemptAt: string | null;
+  /** The channel is configured now (keys set or a fixture mode); decides what a `skipped` row offers. */
+  channelOn: boolean;
   /** Plektan only. */
   itemId?: string | null;
   /** Plektan only: when the manager was told in Telegram that Plektan gave up. */
@@ -38,6 +40,8 @@ const SUMMARY: Record<Exclude<DeliveryStatus, "failed">, Record<RetryChannel, st
   },
 };
 
+const SKIPPED_ON_SUMMARY = `Заявка прийшла, коли канал ще не був підключений. Сайт надішле її сам, якщо їй менше ${SKIPPED_REQUEUE_DAYS} днів, або натисніть «Надіслати».`;
+
 const attemptsText = (attempts: number): string =>
   attempts > MAX_DELIVERY_ATTEMPTS
     ? `${attempts} (більше за ліміт ${MAX_DELIVERY_ATTEMPTS} — через повтори вручну)`
@@ -51,6 +55,7 @@ export const DeliveryChannel = ({
   attempts,
   error,
   nextAttemptAt,
+  channelOn,
   itemId,
   alertedAt,
 }: DeliveryChannelProps) => {
@@ -84,7 +89,9 @@ export const DeliveryChannel = ({
           </p>
         </div>
       ) : (
-        <p className="text-sm text-muted-foreground">{SUMMARY[status][channel]}</p>
+        <p className="text-sm text-muted-foreground">
+          {status === "skipped" && channelOn ? SKIPPED_ON_SUMMARY : SUMMARY[status][channel]}
+        </p>
       )}
 
       <LeadFacts facts={facts} />
@@ -95,7 +102,12 @@ export const DeliveryChannel = ({
         </p>
       )}
 
-      <RetryDelivery leadId={leadId} channel={channel} canRetry={failed} />
+      <RetryDelivery
+        leadId={leadId}
+        channel={channel}
+        canRetry={failed || (status === "skipped" && channelOn)}
+        action={failed ? "retry" : "send"}
+      />
     </div>
   );
 };

@@ -87,6 +87,21 @@ const fetchDueLeadIds: LeadsDriver["fetchDueLeadIds"] = async (params) => {
   return data.map((row) => row.id);
 };
 
+const requeueSkippedLeads: LeadsDriver["requeueSkippedLeads"] = async ({ channel, createdAfter }) => {
+  const patch =
+    channel === "plektan"
+      ? { plektan_status: "pending" as const, plektan_error: null, plektan_next_attempt_at: null }
+      : { telegram_status: "pending" as const, telegram_error: null, telegram_next_attempt_at: null };
+  const { data, error } = await createAdminClient()
+    .from("leads")
+    .update(patch)
+    .eq(channel === "plektan" ? "plektan_status" : "telegram_status", "skipped")
+    .gte("created_at", createdAfter.toISOString())
+    .select("id");
+  if (error) throw new Error(`requeueSkippedLeads failed: ${error.message}`);
+  return data.length;
+};
+
 const fetchLeadsToAlert = async (params: { maxAttempts: number; limit: number }): Promise<LeadToAlert[]> => {
   const { data, error } = await createAdminClient()
     .from("leads")
@@ -134,6 +149,7 @@ export const supabaseLeadsDriver: LeadsDriver = {
   fetchLeadForDelivery,
   updateLeadDelivery,
   fetchDueLeadIds,
+  requeueSkippedLeads,
   fetchLeadsToAlert,
   markPlektanAlerted,
   isPropertyPublished,

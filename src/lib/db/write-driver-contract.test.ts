@@ -143,6 +143,28 @@ const runWriteContract = (name: string, getDrivers: () => Drivers | Promise<Driv
         expect(await due(d, new Date(), new Date(Date.now() + DAY))).not.toContain(id);
       });
 
+      it("requeues recent skipped channels only: old, sent and the other channel stay", async () => {
+        const skip = (id: string, channel: "plektan" | "telegram") =>
+          d.leads.updateLeadDelivery(id, { channel, status: "skipped", error: null, attempts: 0, nextAttemptAt: null });
+        const recent = (await newLead(d)).id;
+        await skip(recent, "telegram");
+        const sent = (await newLead(d)).id;
+        await d.leads.updateLeadDelivery(sent, { channel: "telegram", status: "sent", error: null, attempts: 1, nextAttemptAt: null });
+        const other = (await newLead(d)).id;
+        await skip(other, "plektan");
+
+        const changed = await d.leads.requeueSkippedLeads({ channel: "telegram", createdAfter: new Date(Date.now() - 7 * DAY) });
+        expect(changed).toBeGreaterThanOrEqual(1);
+        expect(await d.leads.fetchLeadForDelivery(recent)).toMatchObject({ telegram_status: "pending", telegram_attempts: 0 });
+        expect(await d.leads.fetchLeadForDelivery(sent)).toMatchObject({ telegram_status: "sent", telegram_attempts: 1 });
+        expect(await d.leads.fetchLeadForDelivery(other)).toMatchObject({ plektan_status: "skipped", telegram_status: "pending" });
+
+        // A cut-off after every lead's creation leaves skipped channels as they are.
+        await skip(recent, "telegram");
+        await d.leads.requeueSkippedLeads({ channel: "telegram", createdAfter: new Date(Date.now() + DAY) });
+        expect(await d.leads.fetchLeadForDelivery(recent)).toMatchObject({ telegram_status: "skipped" });
+      });
+
       it("lists leads whose Plektan delivery ran out of attempts once, until alerted", async () => {
         const { id } = await newLead(d);
         await d.leads.updateLeadDelivery(id, failedPlektan(5, null));

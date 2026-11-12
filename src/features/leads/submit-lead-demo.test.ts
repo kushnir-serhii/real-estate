@@ -130,7 +130,9 @@ describe("site forms on the demo driver", () => {
     if (!lead) throw new Error("no lead");
     expect(lead).toMatchObject({ plektan_status: "failed", telegram_status: "sent" });
 
-    expect(await retryLeads()).toEqual({ processed: 0, sent: 0, failed: 0, alerts: 0 }); // not due yet
+    // The seed has a lead skipped on both channels; with the channels on now, cron requeues and sends it.
+    await retryLeads();
+    expect(lead).toMatchObject({ plektan_status: "failed", plektan_attempts: 1 }); // not due yet
     lead.plektan_next_attempt_at = new Date(Date.now() - 1000).toISOString();
     vi.stubEnv("PLEKTAN_LEADS_FIXTURE", "ok");
     expect(await retryLeads()).toMatchObject({ processed: 1, sent: 1 });

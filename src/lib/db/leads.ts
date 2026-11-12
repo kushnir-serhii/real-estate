@@ -118,6 +118,16 @@ export const getDueLeadIds = async (params: {
   limit: number;
 }): Promise<string[]> => (await loadDriver()).fetchDueLeadIds(params);
 
+/**
+ * Moves one channel's `skipped` leads created at or after `createdAfter` back to `pending` (attempts
+ * unchanged, no schedule, no error), so cron delivers them once the channel is on. `sent`, `failed`
+ * and the other channel are never touched. Returns how many leads changed.
+ */
+export const requeueSkippedLeads = async (params: {
+  channel: "plektan" | "telegram";
+  createdAfter: Date;
+}): Promise<number> => (await loadDriver()).requeueSkippedLeads(params);
+
 /** A lead whose Plektan delivery ran out of attempts and hasn't been reported to the manager yet. */
 export type LeadToAlert = Pick<LeadForDelivery, "id" | "name" | "phone">;
 

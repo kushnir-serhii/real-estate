@@ -125,6 +125,25 @@ const fetchDueLeadIds: LeadsDriver["fetchDueLeadIds"] = async ({ now, staleBefor
     .slice(0, limit)
     .map((lead) => lead.id);
 
+const requeueSkippedLeads: LeadsDriver["requeueSkippedLeads"] = async ({ channel, createdAfter }) => {
+  let changed = 0;
+  for (const lead of getDemoStore().leads) {
+    if (Date.parse(lead.created_at) < createdAfter.getTime()) continue;
+    if (channel === "plektan" && lead.plektan_status === "skipped") {
+      lead.plektan_status = "pending";
+      lead.plektan_error = null;
+      lead.plektan_next_attempt_at = null;
+    } else if (channel === "telegram" && lead.telegram_status === "skipped") {
+      lead.telegram_status = "pending";
+      lead.telegram_error = null;
+      lead.telegram_next_attempt_at = null;
+    } else continue;
+    lead.updated_at = new Date().toISOString();
+    changed += 1;
+  }
+  return changed;
+};
+
 const fetchLeadsToAlert: LeadsDriver["fetchLeadsToAlert"] = async ({ maxAttempts, limit }) =>
   getDemoStore()
     .leads.filter(
@@ -155,6 +174,7 @@ export const demoLeadsDriver: LeadsDriver = {
   fetchLeadForDelivery,
   updateLeadDelivery,
   fetchDueLeadIds,
+  requeueSkippedLeads,
   fetchLeadsToAlert,
   markPlektanAlerted,
   isPropertyPublished,

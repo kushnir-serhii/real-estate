@@ -88,6 +88,8 @@ export type LeadsDriver = {
   fetchLeadForDelivery: (id: string) => Promise<LeadForDelivery | null>;
   updateLeadDelivery: (id: string, update: LeadDeliveryUpdate) => Promise<void>;
   fetchDueLeadIds: (params: { now: Date; staleBefore: Date; maxAttempts: number; limit: number }) => Promise<string[]>;
+  /** `skipped` -> `pending` for one channel, only for leads created at or after `createdAfter`. Returns how many changed. */
+  requeueSkippedLeads: (params: { channel: "plektan" | "telegram"; createdAfter: Date }) => Promise<number>;
   fetchLeadsToAlert: (params: { maxAttempts: number; limit: number }) => Promise<LeadToAlert[]>;
   markPlektanAlerted: (id: string, at: Date) => Promise<void>;
   /** True only for a `published` property. */

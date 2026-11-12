@@ -119,6 +119,9 @@ A lead is always saved in Supabase first. Then, after the response, it goes to P
 3. Get the chat id: send any message in the group, open `https://api.telegram.org/bot<token>/getUpdates` in a browser and read `message.chat.id` (a negative number for groups, for example `-1001234567890`).
 4. Set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_MANAGER_CHAT_ID` as **runtime secrets** in Cloudflare (and in `.dev.vars` / `.env.local` to try it locally). Both must be set, otherwise the channel is `skipped`.
 
+### Leads that arrived before a channel was connected
+A lead saved while a channel was off keeps that channel `skipped`. Once the keys are set, the retry cron (every 30 minutes) moves `skipped` back to `pending` for leads younger than 7 days and sends them in the same run; nothing is sent twice, and the two channels are independent. Older leads stay `skipped`: open the lead in the admin and press «Надіслати» for that channel (one attempt, any age). While a channel is still off nothing changes and no attempt is counted.
+
 ### Turnstile
 1. Cloudflare dashboard → Turnstile → Add site → the production domain (add `localhost` only if you want to test the real widget locally).
 2. `NEXT_PUBLIC_TURNSTILE_SITE_KEY`: Cloudflare **build and runtime** (`NEXT_PUBLIC_*` is inlined at build time). Empty = the forms show no widget.
