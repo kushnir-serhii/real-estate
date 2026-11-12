@@ -1,6 +1,6 @@
 # 016 — UML diagrams: Supabase, Plektan and where the mock data is
 
-**Status:** ready · **Depends on:** 015 · **Route(s):** — (docs only: `docs/diagrams.md`, `docs/diagrams.html`)
+**Status:** in-progress · **Depends on:** 015 · **Route(s):** — (docs only: `docs/diagrams.md`, `docs/diagrams.html`)
 
 ## Goal
 A developer who opens the repo (or takes the template for a real agency) can see in a few diagrams how the project is built around **Supabase** and **Plektan**, which parts run on **mock data** today and which are the real path that is wired but not connected, and can hover any block to read a short description of what it is. It matters because the code now has two parallel worlds (the `supabase` driver + live service clients, and the `demo` driver + fixtures), and nothing shows the seam between them in one place.
@@ -39,18 +39,18 @@ No tables, migrations or data functions change. What the diagrams must show (rea
 
 ## Slices
 
-### [ ] 1. Format, legend, system context, and the viewer end to end
+### [x] 1. Format, legend, system context, and the viewer end to end
 - **Build:** Rewrite the head of `docs/diagrams.md`: what the file is, «as of spec 015», the legend of the three markers, the «Blocks» table format, how to regenerate the viewer. Draw **diagram 1, system context** (flowchart): visitor, manager, admin; the Next.js app on Cloudflare Workers; Supabase Postgres, Supabase Auth, R2; Plektan, Telegram, LLM, Turnstile, geocoder; the cron triggers; and next to every `real` block its `mock` twin (demo store, demo session, in-memory photos, each fixture) with the env that picks it. `scripts/gen-diagrams.ts` + `pnpm diagrams`: reads `docs/diagrams.md`, renders each Mermaid block to SVG (Mermaid in headless Chromium through Playwright), attaches the short description from the «Blocks» row to the matching block as a plain tooltip (plus an SVG `<title>`), and writes `docs/diagrams.html` with inline SVG, CSS and a few lines of JS: nothing external. The generator fails when a block in a diagram has no row or a row matches no block. The viewer shows the legend, a table of contents, the three markers as text tags, a light and a dark theme (`prefers-color-scheme`), and the «Blocks» table under each diagram.
 - **Files:** `docs/diagrams.md`, `scripts/gen-diagrams.ts`, `docs/diagrams.html`, `package.json`
 - **Model:** sonnet
 - **Accept:**
-  - [ ] `pnpm diagrams` runs offline on a fresh clone (after `pnpm install`, no `.env.local`) and writes `docs/diagrams.html`; opening the file makes no request to any host
-  - [ ] in the viewer every block of diagram 1 shows a plain tooltip (marker + short description) on hover **and** on keyboard focus (Tab reaches each block, Esc closes), and has the same text as an accessible name
-  - [ ] every tooltip text is one sentence of at most 140 characters; the generator fails on a longer one
-  - [ ] every block of diagram 1 has a `real` / `mock` / `seam` marker visible as text, and the legend explains the three
-  - [ ] a block without a «Blocks» row, or a row without a block, fails `pnpm diagrams` with the diagram and block name
-  - [ ] `docs/diagrams.md` renders on GitHub's Markdown preview rules (plain Mermaid, no HTML that GitHub strips); «Sofiacity» is gone from the file
-  - [ ] the viewer has no horizontal page scroll at 375px (a wide diagram scrolls inside its own frame) and reads well at 1280px in both themes
+  - [x] `pnpm diagrams` runs offline on a fresh clone (after `pnpm install`, no `.env.local`) and writes `docs/diagrams.html`; opening the file makes no request to any host
+  - [x] in the viewer every block of diagram 1 shows a plain tooltip (marker + short description) on hover **and** on keyboard focus (Tab reaches each block, Esc closes), and has the same text as an accessible name
+  - [x] every tooltip text is one sentence of at most 140 characters; the generator fails on a longer one
+  - [x] every block of diagram 1 has a `real` / `mock` / `seam` marker visible as text, and the legend explains the three
+  - [x] a block without a «Blocks» row, or a row without a block, fails `pnpm diagrams` with the diagram and block name
+  - [x] `docs/diagrams.md` renders on GitHub's Markdown preview rules (plain Mermaid, no HTML that GitHub strips); «Sofiacity» is gone from the file
+  - [x] the viewer has no horizontal page scroll at 375px (a wide diagram scrolls inside its own frame) and reads well at 1280px in both themes
 
 ### [ ] 2. Supabase: mock-data map, driver seam, domain model, public read
 - **Build:** **Diagram 2, mock-data map** (flowchart): every place mock data lives (`src/constants/*`, `src/lib/demo/seed/*`, the Plektan / LLM / geocoder / Telegram fixtures, in-memory uploads, `supabase/seed.sql`), what reads it, and the one arrow `seed → pnpm seed:sql → supabase/seed.sql`. **Diagram 3, data-driver seam** (class diagram): `data-driver.ts`, a facade, its two drivers, the store and the seed, the three Supabase clients, `admin-session.ts` with Supabase Auth versus the demo cookie, `photo-url.ts` with R2 versus `/api/demo/photos`. **Diagram 4, domain model** (class diagram): all 12 tables with their key columns, enums and relations; Plektan-owned columns tagged; a note per table with its RLS rule (public read / admin only / service role only). **Diagram 5, public read on each driver** (sequence): a catalog request through the facade and `unstable_cache`, once to Supabase under RLS and once to the demo store that mirrors RLS in code.
@@ -97,3 +97,4 @@ No tables, migrations or data functions change. What the diagrams must show (rea
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
+| 2026-11-12 | 1 | done: head, legend, «Blocks» format and diagram 1 (system context, 28 blocks) in `docs/diagrams.md`; `pnpm diagrams` renders with Mermaid 12.3.0 (pinned) in the Playwright Chromium, offline (http/https blocked), each diagram twice (light / dark), checks blocks against rows, marker in the label against «Data», and the 140-character limit; output byte-identical on two runs, source SHA-256 in a `<meta>`. Viewer checked with Playwright at 375 / 1280, light / dark: 1 request (the file), no page scroll, tooltip on hover and focus, Esc closes. Block matching proven on a fixture with all four diagram types. Found in the code: the schedule is GitHub Actions (`.github/workflows/sync.yml`), not Cloudflare cron; Telegram without a token is `off`; the geocoder switch is `GEOCODER_CONTACT_EMAIL`. Not checked on github.com itself (plain Mermaid, no HTML). Note: Mermaid measures text with the machine's fonts, so the HTML can differ byte-wise on another OS; the drift test (slice 4) compares the source hash only | `docs/diagrams.md`, `docs/diagrams.html`, `scripts/gen-diagrams.ts`, `scripts/diagrams/{parse,markdown,viewer,page-script}.ts`, `package.json`, `pnpm-lock.yaml` |

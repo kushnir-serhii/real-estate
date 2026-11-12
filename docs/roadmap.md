@@ -23,7 +23,7 @@ Stage 1 (≈7–9 weeks): base site + admin + AI assistant — see [reference/st
 | 013 | [Public pages render without JavaScript](specs/013-no-js-rendering.md) | done | 012 |
 | 014 | [Styled selects and the team on «Про нас»](specs/014-selects-and-team.md) | done | 013 |
 | 015 | [Blog](specs/015-blog.md) | done | 014 |
-| 016 | [UML diagrams: Supabase, Plektan and where the mock data is](specs/016-uml-diagrams.md) | ready | 015 |
+| 016 | [UML diagrams: Supabase, Plektan and where the mock data is](specs/016-uml-diagrams.md) | in-progress | 015 |
 
 Statuses: `draft` → `ready` → `in-progress` → `done` (meaning in [process.md](process.md#statuses)). The status here and in the spec's header must match.
 
