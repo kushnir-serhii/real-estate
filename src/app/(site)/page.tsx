@@ -6,6 +6,7 @@ import { FeaturedProperties } from "@/features/home/featured-properties";
 import { Districts } from "@/features/home/districts";
 import { Hero } from "@/features/home/hero";
 import { HomeAgents } from "@/features/home/home-agents";
+import { HomeBlog } from "@/features/home/home-blog";
 import { Testimonials } from "@/features/home/testimonials";
 import { HomeSection } from "@/features/home/home-section";
 import { HomeAbout } from "@/features/home/home-about";
@@ -59,6 +60,7 @@ const HomePage = async () => {
       <ProptechFeatures />
       <HomeAbout body={page.body} />
       <HomeAgents />
+      <HomeBlog />
       <Testimonials />
       <HomeCta />
     </>

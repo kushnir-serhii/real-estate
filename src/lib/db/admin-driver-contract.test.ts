@@ -9,6 +9,9 @@ import { DEMO_UPLOAD_PREFIX } from "@/lib/photos/photo-keys";
 import { photoUrl } from "@/lib/photos/photo-url";
 import { getAdminLead, getAdminLeads, parseAdminLeadFilters } from "./admin-leads";
 import { getAdminPage, listAdminPages, resetAdminPage, saveAdminPage } from "./admin-pages";
+import { createPost, deletePost, getAdminPost, listAdminPosts, setPostCover, setPostProperties, updatePost } from "./admin-posts";
+import { demoPostsDriver } from "@/lib/demo/db/posts";
+import type { PostInputRaw } from "./post-schemas";
 import { parseAdminPropertyFilters } from "./admin-property-filters";
 import {
   createAdminProperty,
@@ -279,6 +282,133 @@ describe("demo admin drivers", () => {
       expect((await getAdminPage("about")).content.title).toBe("Ще раз");
       await resetAdminPage("about");
       expect((await getAdminPage("about")).state).toBe("default");
+    });
+  });
+
+  describe("blog", () => {
+    const input = (overrides: Partial<PostInputRaw> = {}): PostInputRaw => ({
+      title: "Нова стаття",
+      slug: "nova-stattia",
+      excerpt: "Коротко.",
+      body: "## Заголовок\n\nТекст.",
+      category: "tips",
+      tags: ["тест"],
+      status: "draft",
+      ...overrides,
+    });
+
+    const make = async (overrides: Partial<PostInputRaw> = {}) => {
+      const result = await createPost(input(overrides));
+      if (!result.ok) throw new Error(`create failed: ${result.reason}`);
+      return result;
+    };
+
+    it("lists every status with filters and pagination", async () => {
+      const all = await listAdminPosts({ page: 1 });
+      expect(all.total).toBe(getDemoStore().posts.length);
+      expect(all.items.some((post) => post.status === "draft")).toBe(true);
+      expect((await listAdminPosts({ status: "draft", page: 1 })).items.every((post) => post.status === "draft")).toBe(true);
+      expect((await listAdminPosts({ category: "rent", page: 1 })).items.every((post) => post.category === "rent")).toBe(true);
+      expect((await listAdminPosts({ q: "немає-такого", page: 1 })).total).toBe(0);
+      expect((await listAdminPosts({ q: "іпотека", page: 1 })).total).toBe(1);
+      expect((await listAdminPosts({ page: 9 })).items).toEqual([]);
+    });
+
+    it("creates a draft that stays out of the public reads, then publishes it", async () => {
+      const { id } = await make();
+      expect((await getAdminPost(id))?.published_at).toBeNull();
+      expect(await demoPostsDriver.fetchPostBySlug("nova-stattia")).toBeNull();
+
+      const before = Date.now();
+      const saved = await updatePost(id, input({ status: "published" }));
+      expect(saved).toEqual({ ok: true, slug: "nova-stattia" });
+      const published = await getAdminPost(id);
+      expect(Date.parse(published?.published_at ?? "")).toBeGreaterThanOrEqual(before);
+      expect((await demoPostsDriver.fetchPostBySlug("nova-stattia"))?.title).toBe("Нова стаття");
+    });
+
+    it("keeps published_at on later saves and when unpublished; locks the slug after the first publish", async () => {
+      const { id } = await make({ status: "published" });
+      const first = (await getAdminPost(id))?.published_at;
+      expect(first).not.toBeNull();
+
+      await updatePost(id, input({ status: "published", title: "Інша назва" }));
+      expect((await getAdminPost(id))?.published_at).toBe(first);
+      await updatePost(id, input({ status: "draft" }));
+      expect((await getAdminPost(id))?.published_at).toBe(first);
+      expect(await demoPostsDriver.fetchPostBySlug("nova-stattia")).toBeNull();
+
+      expect(await updatePost(id, input({ slug: "inshyi-slah" }))).toEqual({ ok: false, reason: "slug_locked" });
+      expect((await getAdminPost(id))?.slug).toBe("nova-stattia");
+    });
+
+    it("allows a slug change while the post was never published; refuses a taken slug", async () => {
+      const { id } = await make();
+      expect(await updatePost(id, input({ slug: "inshyi-slah" }))).toEqual({ ok: true, slug: "inshyi-slah" });
+      expect(await createPost(input({ slug: "inshyi-slah" }))).toEqual({ ok: false, reason: "slug_taken" });
+      const seeded = getDemoStore().posts[0];
+      expect(await updatePost(id, input({ slug: seeded.slug }))).toEqual({ ok: false, reason: "slug_taken" });
+    });
+
+    it("validates input and reports unknown posts and authors", async () => {
+      expect(await createPost(input({ slug: "Bad Slug" }))).toMatchObject({ ok: false, reason: "invalid" });
+      expect(await createPost(input({ title: "  " }))).toMatchObject({ ok: false, reason: "invalid" });
+      const manyTags = Array.from({ length: 11 }, (_, i) => `t${i}`);
+      expect(await createPost(input({ tags: manyTags }))).toMatchObject({ ok: false, reason: "invalid" });
+      expect(await createPost(input({ author_agent_id: crypto.randomUUID() }))).toEqual({ ok: false, reason: "author_not_found" });
+      expect(await updatePost(crypto.randomUUID(), input())).toEqual({ ok: false, reason: "not_found" });
+      expect(await getAdminPost("not-a-uuid")).toBeNull();
+    });
+
+    it("sets up to 3 related properties in order and refuses a fourth", async () => {
+      const { id } = await make({ status: "published" });
+      const ids = getDemoStore().properties.filter((p) => p.status === "published").map((p) => p.id);
+      expect(await setPostProperties(id, [ids[2], ids[0], ids[1]])).toEqual({ ok: true, slug: "nova-stattia" });
+      expect((await getAdminPost(id))?.property_ids).toEqual([ids[2], ids[0], ids[1]]);
+      expect((await demoPostsDriver.fetchPostBySlug("nova-stattia"))?.related.map((p) => p.id)).toEqual([ids[2], ids[0], ids[1]]);
+
+      expect(await setPostProperties(id, ids.slice(0, 4))).toEqual({ ok: false, reason: "too_many" });
+      expect(await setPostProperties(id, [ids[0], ids[0]])).toEqual({ ok: true, slug: "nova-stattia" });
+      expect((await getAdminPost(id))?.property_ids).toEqual([ids[0]]);
+      expect(await setPostProperties(id, [crypto.randomUUID()])).toEqual({ ok: false, reason: "property_not_found" });
+      expect(await setPostProperties(crypto.randomUUID(), [])).toEqual({ ok: false, reason: "not_found" });
+      expect(await setPostProperties(id, [])).toEqual({ ok: true, slug: "nova-stattia" });
+      expect((await getAdminPost(id))?.property_ids).toEqual([]);
+    });
+
+    it("sets, replaces and removes the cover, returning the old key", async () => {
+      const { id } = await make();
+      expect(await setPostCover(id, { key: "demo-uploads/a.webp", alt: "Фото" })).toEqual({
+        ok: true,
+        slug: "nova-stattia",
+        previous_key: null,
+      });
+      expect(await getAdminPost(id)).toMatchObject({ cover_key: "demo-uploads/a.webp", cover_alt: "Фото" });
+      expect(await setPostCover(id, { key: "demo-uploads/b.webp" })).toMatchObject({ ok: true, previous_key: "demo-uploads/a.webp" });
+      expect(await setPostCover(id, null)).toMatchObject({ ok: true, previous_key: "demo-uploads/b.webp" });
+      expect(await getAdminPost(id)).toMatchObject({ cover_key: null, cover_alt: null });
+      expect(await setPostCover(crypto.randomUUID(), null)).toEqual({ ok: false, reason: "not_found" });
+    });
+
+    it("deletes a post with its links and returns the cover key; the admin copy is not the store row", async () => {
+      const { id } = await make();
+      await setPostProperties(id, [getDemoStore().properties[0].id]);
+      await setPostCover(id, { key: "demo-uploads/c.webp" });
+      const copy = await getAdminPost(id);
+      copy?.property_ids.push("changed");
+      expect((await getAdminPost(id))?.property_ids).toHaveLength(1);
+
+      expect(await deletePost(id)).toEqual({ ok: true, slug: "nova-stattia", cover_key: "demo-uploads/c.webp" });
+      expect(await getAdminPost(id)).toBeNull();
+      expect(getDemoStore().post_properties.some((link) => link.post_id === id)).toBe(false);
+      expect(await deletePost(id)).toEqual({ ok: false, reason: "not_found" });
+    });
+
+    it("reset restores the seed posts", async () => {
+      const before = getDemoStore().posts.length;
+      await make();
+      resetDemoData();
+      expect(getDemoStore().posts).toHaveLength(before);
     });
   });
 

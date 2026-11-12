@@ -12,6 +12,8 @@ export type DemoData = {
   property_photos: Tables["property_photos"]["Row"][];
   agents: Tables["agents"]["Row"][];
   pages: Tables["pages"]["Row"][];
+  posts: Tables["posts"]["Row"][];
+  post_properties: Tables["post_properties"]["Row"][];
   settings: Tables["settings"]["Row"];
   leads: Tables["leads"]["Row"][];
   ai_conversations: Tables["ai_conversations"]["Row"][];

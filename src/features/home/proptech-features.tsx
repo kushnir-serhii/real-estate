@@ -17,7 +17,7 @@ const ICONS: Record<(typeof PROPTECH.features)[number]["icon"], LucideIcon> = {
 const SPANS = ["lg:col-span-1", "lg:col-span-1", "lg:col-span-2"] as const;
 
 const CARD =
-  "group/card flex flex-col gap-4 rounded-3xl bg-card p-6 text-card-foreground ring-1 ring-foreground/10 transition-[transform,box-shadow] duration-(--duration-base) ease-(--ease-out-soft) hover:-translate-y-1 hover:shadow-float motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:p-8";
+  "flex flex-col gap-4 rounded-3xl bg-card p-6 text-card-foreground ring-1 ring-foreground/10 transition-[transform,box-shadow] duration-(--duration-base) ease-(--ease-out-soft) group-hover/card:-translate-y-1 group-hover/card:shadow-float motion-reduce:transition-none motion-reduce:group-hover/card:translate-y-0 sm:p-8";
 
 export const ProptechFeatures = () => (
   <HomeSection labelledBy="proptech-title">
@@ -62,7 +62,8 @@ export const ProptechFeatures = () => (
         {PROPTECH.features.map((feature, index) => {
           const Icon = ICONS[feature.icon];
           return (
-            <li key={feature.title} className={cn(SPANS[index])}>
+            // The `li` (which does not move) is the hover target, so the lifted card never jumps under a cursor on its edge.
+            <li key={feature.title} className={cn("group/card", SPANS[index])}>
               <article className={cn(CARD, "h-full")}>
                 <span className="flex size-12 items-center justify-center rounded-xl bg-muted text-dawn-text transition-colors duration-(--duration-base) group-hover/card:bg-dawn group-hover/card:text-dawn-foreground">
                   <Icon className="size-6" aria-hidden="true" />

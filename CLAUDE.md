@@ -23,6 +23,7 @@ pnpm build        # next build (the demo build needs no env)
 pnpm test         # vitest: unit + driver contract tests (the Supabase run is skipped when no local DB)
 pnpm perf         # speed baseline on a local production build (LCP, CLS, JS), see docs/conventions.md
 pnpm seed:sql     # regenerate supabase/seed.sql from src/lib/demo/seed (a test fails on drift)
+pnpm diagrams     # regenerate docs/diagrams.html from docs/diagrams.md (a test fails on drift)
 pnpm preview      # build for Cloudflare (OpenNext) and run in workerd locally
 pnpm ui-check     # Playwright UI check, see docs/process.md → step 8
 ```
@@ -46,6 +47,7 @@ All process documents live in `docs/`:
 - `docs/roadmap.md`: status of every spec and the build plan (waves, order). The single source of truth for what's next.
 - `docs/process.md`: statuses, what a slice is, models and delegation, the loop, Definition of Done.
 - `docs/conventions.md`: the rules every slice is checked against.
+- `docs/diagrams.md`: UML diagrams of the Supabase / Plektan architecture with the mock data marked (`real` / `mock` / `seam`); viewer with tooltips: `docs/diagrams.html` (generated, `pnpm diagrams`).
 - `docs/specs/`: one spec per task, split into slices (`_template.md` for new ones).
 
 `/run-implement` (short: `/run-impl`) runs one step of the loop in `docs/process.md`. Key rules: before any code the agent reads the main docs, pins down the spec's purpose and aims, and asks all questions for the whole spec once, up front (a `draft` spec is moved to `ready` in that same round, after the user approves); then its slices run one after another without stopping (each verified and committed on the spec's branch, which is created from the previous spec's branch, not from `main`) and are reported once at the end; Opus orchestrates, Sonnet implements (`designer` for UI, `backend` for data/sync/integrations), Haiku takes mechanical work; the user merges branches into `main` (PRs).

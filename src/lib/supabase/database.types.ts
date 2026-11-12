@@ -341,6 +341,107 @@ export type Database = {
         }
         Relationships: []
       }
+      post_properties: {
+        Row: {
+          position: number
+          post_id: string
+          property_id: string
+        }
+        Insert: {
+          position: number
+          post_id: string
+          property_id: string
+        }
+        Update: {
+          position?: number
+          post_id?: string
+          property_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_properties_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_properties_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          author_agent_id: string | null
+          body: string
+          category: string
+          cover_alt: string | null
+          cover_key: string | null
+          created_at: string
+          excerpt: string
+          id: string
+          noindex: boolean
+          published_at: string | null
+          seo_description: string | null
+          seo_title: string | null
+          slug: string
+          status: string
+          tags: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_agent_id?: string | null
+          body?: string
+          category: string
+          cover_alt?: string | null
+          cover_key?: string | null
+          created_at?: string
+          excerpt?: string
+          id?: string
+          noindex?: boolean
+          published_at?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          slug: string
+          status?: string
+          tags?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_agent_id?: string | null
+          body?: string
+          category?: string
+          cover_alt?: string | null
+          cover_key?: string | null
+          created_at?: string
+          excerpt?: string
+          id?: string
+          noindex?: boolean
+          published_at?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          slug?: string
+          status?: string
+          tags?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_author_agent_id_fkey"
+            columns: ["author_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       properties: {
         Row: {
           agent_id: string | null

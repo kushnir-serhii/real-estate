@@ -82,6 +82,7 @@ Migrations to apply (in order; add new ones here when a spec adds them):
 | `20261029140000_pages_is_draft.sql` | 009 | [ ] |
 | `20261029150000_ai_assistant.sql` | 010 | [ ] |
 | `20261104120000_ai_limits.sql` | 010 | [ ] |
+| `20261105120000_blog.sql` | 015 | [ ] |
 
 ### 4. Check
 - Dashboard → Advisors → Security: no "RLS disabled" warnings.

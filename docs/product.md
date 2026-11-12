@@ -29,6 +29,7 @@ Background, costs and stages: [reference/stack.md](reference/stack.md).
 | Photo | Stored in R2 as WebP in 2–3 sizes, ordered. | [003](specs/003-plektan-sync.md), [008](specs/008-admin-properties.md) |
 | Lead | A request from a visitor: contact, what they want, the property it's about, consent, delivery status to Plektan and Telegram. | [006](specs/006-leads.md) |
 | Page | Static content (home, about, contacts) with SEO fields. | [004](specs/004-site-shell.md), [009](specs/009-seo.md) |
+| Post | Blog article: Markdown body (written in a visual editor), one category from a fixed list, tags, cover, optional agent as author, up to 3 related properties, SEO fields. Status: draft / published. | [015](specs/015-blog.md) |
 
 ## Screens
 
@@ -42,6 +43,8 @@ Background, costs and stages: [reference/stack.md](reference/stack.md).
 | Admin: sign in, leads | `/admin`, `/admin/leads` | [007](specs/007-admin-leads.md) |
 | Admin: properties, photos | `/admin/properties` | [008](specs/008-admin-properties.md) |
 | Admin: SEO + pages | `/admin/pages` | [009](specs/009-seo.md) |
+| Blog — list with category filter, article with related properties; «Останні статті» on home | `/blog`, `/blog/[slug]` | [015](specs/015-blog.md) |
+| Admin: blog (TipTap editor, cover, related properties) | `/admin/blog` | [015](specs/015-blog.md) |
 | AI assistant — chat widget on every page | — | [010](specs/010-ai-assistant.md) |
 
 The Plektan partner button ("Ми працюємо з Plektan") is in the footer of every page **only when the Plektan integration is on** (`PLEKTAN_API_KEY` set); the demo doesn't show it.

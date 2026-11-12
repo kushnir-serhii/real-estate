@@ -161,3 +161,10 @@ export const HOME_CTA = {
   title: "Не знайшли потрібне?",
   lead: "Розкажіть, що шукаєте, і ми підберемо варіанти. Залиште заявку або зателефонуйте чи напишіть.",
 } as const;
+
+export const HOME_BLOG = {
+  eyebrow: "Блог",
+  title: "Останні статті",
+  action: "Усі статті",
+  count: 3,
+} as const;

@@ -21,7 +21,8 @@ export const NavLink = ({
   children,
 }: NavLinkProps) => {
   const pathname = usePathname();
-  const active = activePath !== null && pathname === activePath;
+  // A section is active on its own page and on pages below it (`/blog` on `/blog/<slug>`).
+  const active = activePath !== null && (pathname === activePath || pathname.startsWith(`${activePath}/`));
 
   return (
     <Link

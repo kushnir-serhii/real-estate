@@ -32,6 +32,17 @@ import type {
   PropertyBrief,
 } from "./leads";
 import type { Page } from "./pages";
+import type { PostInput } from "./post-schemas";
+import type {
+  AdminPost,
+  AdminPostFilters,
+  AdminPostPage,
+  PostDetail,
+  PostFilters,
+  PostListItem,
+  PostPage,
+  SitemapPost,
+} from "./post-query";
 import type {
   FavoriteProperty,
   PropertyBySlug,
@@ -167,4 +178,40 @@ export type PublishFields = {
   property_type: AdminProperty["property_type"];
   locality: string | null;
   published_at: string | null;
+};
+
+/** Public blog reads (spec 015): published posts only, as RLS returns them. */
+export type PostsDriver = {
+  fetchPublishedPosts: (filters: PostFilters) => Promise<PostPage>;
+  fetchPostBySlug: (slug: string) => Promise<PostDetail | null>;
+  fetchLatestPosts: (count: number) => Promise<PostListItem[]>;
+  fetchSitemapPosts: () => Promise<SitemapPost[]>;
+};
+
+/** What the admin writes to `posts`: the validated input plus the `published_at` the facade decided. */
+export type PostWriteColumns = PostInput & { published_at: string | null };
+
+/** Admin blog storage (spec 015). Service-role access only; the slug lock and `published_at` rules live in the facade. */
+export type AdminPostsDriver = {
+  fetchAdminPosts: (filters: AdminPostFilters) => Promise<AdminPostPage>;
+  /** `id` is a valid uuid. */
+  fetchAdminPost: (id: string) => Promise<AdminPost | null>;
+  insertPost: (
+    columns: PostWriteColumns,
+  ) => Promise<{ ok: true; id: string } | { ok: false; reason: "slug_taken" | "author_not_found" }>;
+  updatePost: (
+    id: string,
+    columns: PostWriteColumns,
+  ) => Promise<{ ok: true } | { ok: false; reason: "slug_taken" | "author_not_found" | "not_found" }>;
+  /** Returns the cover key so the caller can delete the object. */
+  deletePost: (id: string) => Promise<{ ok: true; cover_key: string | null } | { ok: false; reason: "not_found" }>;
+  /** Replaces the links: `propertyIds` are distinct, at most 3, position = index. */
+  replacePostProperties: (
+    id: string,
+    propertyIds: readonly string[],
+  ) => Promise<{ ok: true } | { ok: false; reason: "not_found" | "property_not_found" }>;
+  setPostCover: (
+    id: string,
+    cover: { key: string; alt: string | null } | null,
+  ) => Promise<{ ok: true; previous_key: string | null } | { ok: false; reason: "not_found" }>;
 };
