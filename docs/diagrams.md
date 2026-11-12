@@ -132,7 +132,7 @@ flowchart LR
 | `facade` | seam | The only data entry point for pages and actions: it adds caching and picks the Supabase or the demo driver. | `src/lib/db/*`, `DATA_DRIVER` in `src/lib/data-driver.ts` |
 | `pg` | real | Supabase Postgres with row-level security: the production store of properties, photos, leads, pages, posts and AI chats. | `src/lib/db/supabase/*`, `supabase/migrations/` |
 | `auth` | real | Supabase Auth with email and password; an admin is a user listed in the admins table. | `src/lib/supabase/{server,client,admin}.ts` |
-| `store` | mock | The typed seed loaded into memory per process, with the same read and write rules that RLS applies in Postgres. | `src/lib/demo/store.ts`, `src/lib/demo/seed/*`, `src/lib/demo/db/*` |
+| `store` | mock | The in-memory store that holds the typed seed for each process, with the same read and write rules that RLS applies in Postgres. | `src/lib/demo/store.ts`, `src/lib/demo/seed/*`, `src/lib/demo/db/*` |
 | `seedsql` | mock | The SQL file generated from the demo seed so a local Supabase can start with the same listings. | `supabase/seed.sql`, `pnpm seed:sql` |
 | `adminsession` | seam | Answers who is calling the admin: a Supabase Auth user checked against admins, or the signed demo cookie. | `src/lib/auth/admin-session.ts` |
 | `session` | mock | A signed httpOnly cookie behind the one-click demo sign-in, with no account or network call. | `src/lib/demo/session.ts`, `DEMO_SESSION_SECRET` |
@@ -174,7 +174,7 @@ flowchart LR
     end
 
     subgraph runtime["Created while the app runs"]
-        demodrivers["Demo drivers<br/>src/lib/demo/db<br/>[mock]"]
+        demodrivers["Demo driver<br/>src/lib/demo/db<br/>[mock]"]
         store["Demo store and seed<br/>in memory<br/>[mock]"]
         session["Demo session cookie<br/>[mock]"]
         photos["In-memory photo uploads<br/>[mock]"]
@@ -236,11 +236,11 @@ flowchart LR
 | `clients` | seam | One small client per external service; each picks the live API or its fixture from env on every call. | `src/lib/{plektan,telegram,llm,turnstile,geocode}/` |
 | `sync` | seam | The Plektan import: reads listings through the Plektan client, writes properties and photos, and stops at once in demo mode. | `src/lib/sync/run-sync.ts`, `scripts/sync.ts` |
 | `consts` | mock | The demo agency's name, contacts, texts and navigation, kept as constants until a real agency's data replaces them. | `src/constants/*` |
-| `seed` | mock | The typed demo listings, agents, pages, posts and leads, written as TypeScript rows that match the generated database types. | `src/lib/demo/seed/*` |
+| `seed` | mock | Builds the typed demo rows (listings, agents, pages, posts and leads) that match the database types; also rendered to supabase seed.sql. | `src/lib/demo/seed/*` |
 | `seedsql` | mock | The SQL file generated from the demo seed so a local Supabase can start with the same listings. | `supabase/seed.sql`, `pnpm seed:sql` |
 | `placeholders` | mock | Stock photos that the seed's photo keys point to, committed so the demo shows pictures without any storage. | `public/placeholders/*` |
 | `demodrivers` | mock | One demo driver per data domain: it reads and writes the in-memory store and applies the RLS rules in code. | `src/lib/demo/db/*`, `DATA_DRIVER=demo` |
-| `store` | mock | The typed seed loaded into memory per process, with the same read and write rules that RLS applies in Postgres. | `src/lib/demo/store.ts`, `src/lib/demo/seed/*`, `src/lib/demo/db/*` |
+| `store` | mock | The in-memory store that holds the typed seed for each process, with the same read and write rules that RLS applies in Postgres. | `src/lib/demo/store.ts`, `src/lib/demo/seed/*`, `src/lib/demo/db/*` |
 | `session` | mock | A signed httpOnly cookie behind the one-click demo sign-in, with no account or network call. | `src/lib/demo/session.ts`, `DEMO_SESSION_SECRET` |
 | `photos` | mock | Photos uploaded in the demo admin, kept in memory and served by a demo route; the limit is set by an env variable. | `src/lib/demo/photos.ts`, `DEMO_UPLOAD_MAX_MB` |
 | `r2local` | mock | Files the R2 client writes to a local folder when there is no bucket binding or key, so sync and uploads work offline. | `src/lib/r2/client.ts`, `public/r2-local` |
@@ -368,8 +368,8 @@ classDiagram
 | `Contract` | seam | The TypeScript interfaces that both drivers implement, so the two worlds return the same shapes. | `src/lib/db/driver-types.ts`, `src/lib/db/driver-contract.test.ts` |
 | `SupabaseDriver` | real | The driver that runs the queries on Supabase Postgres; row-level security decides what each caller sees. | `src/lib/db/supabase/*`, `DATA_DRIVER=supabase` |
 | `DemoDriver` | mock | One demo driver per data domain: it reads and writes the in-memory store and applies the RLS rules in code. | `src/lib/demo/db/*`, `DATA_DRIVER=demo` |
-| `DemoStore` | mock | The typed seed loaded into memory per process, with the same read and write rules that RLS applies in Postgres. | `src/lib/demo/store.ts`, `src/lib/demo/seed/*`, `src/lib/demo/db/*` |
-| `DemoSeed` | mock | The function that builds every demo row from the typed seed; the same rows are rendered to supabase seed.sql. | `src/lib/demo/seed/index.ts`, `pnpm seed:sql` |
+| `DemoStore` | mock | The in-memory store that holds the typed seed for each process, with the same read and write rules that RLS applies in Postgres. | `src/lib/demo/store.ts`, `src/lib/demo/seed/*`, `src/lib/demo/db/*` |
+| `DemoSeed` | mock | Builds the typed demo rows (listings, agents, pages, posts and leads) that match the database types; also rendered to supabase seed.sql. | `src/lib/demo/seed/index.ts`, `pnpm seed:sql` |
 | `PublicClient` | real | A cookie-less Supabase client with the anon key for public reads, so pages can be cached; RLS limits it to public rows. | `src/lib/supabase/public.ts` |
 | `ServerClient` | real | A Supabase client with the anon key that carries the visitor's session cookies; used for sign-in and admin reads. | `src/lib/supabase/server.ts` |
 | `BrowserClient` | real | A Supabase client with the anon key for use in the browser; nothing in the code imports it yet. | `src/lib/supabase/client.ts` |
@@ -645,7 +645,7 @@ sequenceDiagram
 | `publicclient` | real | A cookie-less Supabase client with the anon key for public reads, so pages can be cached; RLS limits it to public rows. | `src/lib/supabase/public.ts` |
 | `pg` | real | Supabase Postgres with row-level security: the production store of properties, photos, leads, pages, posts and AI chats. | `src/lib/db/supabase/*`, `supabase/migrations/` |
 | `demodriver` | mock | One demo driver per data domain: it reads and writes the in-memory store and applies the RLS rules in code. | `src/lib/demo/db/properties.ts`, `DATA_DRIVER=demo` |
-| `store` | mock | The typed seed loaded into memory per process, with the same read and write rules that RLS applies in Postgres. | `src/lib/demo/store.ts`, `src/lib/demo/seed/*`, `src/lib/demo/db/*` |
+| `store` | mock | The in-memory store that holds the typed seed for each process, with the same read and write rules that RLS applies in Postgres. | `src/lib/demo/store.ts`, `src/lib/demo/seed/*`, `src/lib/demo/db/*` |
 
 ## 6. Plektan API and our model
 
@@ -918,7 +918,7 @@ sequenceDiagram
 | `turnstile` | real | Cloudflare Turnstile checks that a lead form was filled in by a person. | `src/lib/turnstile/verify.ts`, `TURNSTILE_SECRET_KEY` |
 | `facade` | seam | The only data entry point for pages and actions: it adds caching and picks the Supabase or the demo driver. | `src/lib/db/leads.ts`, `DATA_DRIVER` in `src/lib/data-driver.ts` |
 | `pg` | real | Supabase Postgres with row-level security: the production store of properties, photos, leads, pages, posts and AI chats. | `src/lib/db/supabase/leads.ts`, `supabase/migrations/` |
-| `store` | mock | The typed seed loaded into memory per process, with the same read and write rules that RLS applies in Postgres. | `src/lib/demo/db/leads.ts`, `src/lib/demo/store.ts` |
+| `store` | mock | The in-memory store that holds the typed seed for each process, with the same read and write rules that RLS applies in Postgres. | `src/lib/demo/db/leads.ts`, `src/lib/demo/store.ts` |
 | `deliver` | seam | Sends a saved lead to Plektan and Telegram, each channel on its own, and writes the result back on the lead. | `src/features/leads/deliver-lead.ts` |
 | `plektan` | real | The Plektan CRM API: the source of synced properties and agents, and the target of the leads that we send back. | `src/lib/plektan/client.ts`, `PLEKTAN_API_KEY` |
 | `plektanfx` | mock | Canned Plektan answers and canned lead results, so sync and lead delivery run locally without a key. | `src/lib/plektan/fixtures/leads.ts`, `PLEKTAN_LEADS_FIXTURE` |
@@ -1108,3 +1108,116 @@ sequenceDiagram
 | `llmfx` | mock | A scripted assistant that answers without any model, used when there is no API key. | `src/lib/llm/fixtures/*` |
 | `tools` | seam | The two tools the model may call: one searches the published catalog through the facade, the other stores a request card to confirm. | `src/features/assistant/assistant-tools.ts`, `search-properties-tool.ts`, `propose-lead-tool.ts` |
 | `deliver` | seam | Sends a saved lead to Plektan and Telegram, each channel on its own, and writes the result back on the lead. | `src/features/leads/deliver-lead.ts` |
+
+## 12. Admin sign-in and photo upload
+
+The admin has two worlds behind the same code. On the `supabase` driver an admin is a Supabase Auth user whose id is listed in the `admins` table, and photos go to R2. On the `demo` driver one click sets a signed cookie, and uploaded photos stay in memory and are served by a demo route. The route guard, the sign-in form, `getAdminSession()` and the upload route are the same on both; each picks its side by `isDemoMode()`. The upload route checks the caller, the properties mode and the file bytes before anything is stored, and removes the stored objects when the database row fails.
+
+```mermaid
+sequenceDiagram
+    actor admin as Admin
+    participant app as Next.js app [seam]
+    participant guard as Admin route guard [seam]
+    participant adminsession as admin-session.ts [seam]
+    participant auth as Supabase Auth [real]
+    participant session as Demo session cookie [mock]
+    participant facade as Data facades [seam]
+    participant pg as Postgres with RLS [real]
+    participant store as Demo store and seed [mock]
+    participant r2 as Cloudflare R2 [real]
+    participant photos as In-memory photo uploads [mock]
+    participant photourl as photo-url.ts [seam]
+
+    admin->>app: GET /admin/leads
+    app->>guard: proxy runs on every /admin path
+    alt DATA_DRIVER=supabase
+        guard->>auth: getClaims(), refreshes the cookies
+        auth-->>guard: claims or none
+    else DATA_DRIVER=demo
+        guard->>session: verifyDemoSession(cookie)
+        session-->>guard: valid session or none
+    end
+    opt not signed in
+        guard-->>admin: redirect to /admin/sign-in with next
+    end
+
+    alt DATA_DRIVER=supabase
+        admin->>app: signIn(email, password)
+        app->>auth: signInWithPassword
+        auth-->>app: session cookies, or an error shown on the form
+    else DATA_DRIVER=demo
+        admin->>app: signInDemo, one click and no password
+        app->>session: signDemoSession(), HMAC, valid 7 days
+        session-->>app: signed token
+        app-->>admin: httpOnly cookie demo_admin_session
+    end
+    app-->>admin: redirect to next, only /admin paths accepted
+
+    admin->>app: GET /admin page
+    app->>adminsession: getAdminSession(), once per request
+    alt DATA_DRIVER=supabase
+        adminsession->>auth: getClaims()
+        adminsession->>pg: rpc is_admin(), reads the admins table
+        pg-->>adminsession: true, or false for a user who is not an admin
+    else DATA_DRIVER=demo
+        adminsession->>session: verifyDemoSession(cookie)
+        session-->>adminsession: the demo admin
+    end
+    adminsession-->>app: admin, anonymous, forbidden or unconfigured
+    app-->>admin: the page, or the no-access page for forbidden
+
+    admin->>app: POST /api/admin/photos with 1 to 3 resized files
+    app->>adminsession: requireAdmin(), 401 or 403 when not an admin
+    app->>facade: getAdminProperty, getSettings, countPhotos
+    Note over app,facade: canEditProperty(mode, source).photos must be true, else 403. At most 40 photos, else 409
+    app->>app: check content type, size and the real image bytes
+    alt DATA_DRIVER=supabase
+        app->>r2: putObject for each size under properties/id/token-width
+        r2-->>app: stored
+        Note over app,r2: Without R2 env the local fixture writes files under public/r2-local
+    else DATA_DRIVER=demo
+        app->>photos: checkDemoUploadCaps, then putDemoObject under demo-uploads/
+        photos-->>app: stored, or 413 over the DEMO_UPLOAD_MAX_MB limit
+    end
+    app->>facade: appendPhoto(propertyId, key, sizes, width, height)
+    alt DATA_DRIVER=supabase
+        facade->>pg: insert into property_photos at the next position
+        pg-->>facade: the photo row
+    else DATA_DRIVER=demo
+        facade->>store: append the photo row to the in-memory store
+        store-->>facade: the photo row
+    end
+    Note over app,facade: When the row fails, the stored objects are removed
+    facade-->>app: the photo row
+    app->>app: revalidateProperty, expires the cache tags
+    app-->>admin: ok with the photo
+
+    admin->>app: GET a property page with the photo
+    app->>photourl: photoUrl(key)
+    alt DATA_DRIVER=supabase
+        photourl-->>app: NEXT_PUBLIC_R2_PUBLIC_URL and the key
+        admin->>r2: GET the photo
+        r2-->>admin: image bytes
+    else DATA_DRIVER=demo
+        photourl-->>app: /api/demo/photos/ and the key
+        admin->>app: GET /api/demo/photos/key
+        app->>photos: getDemoObject(key)
+        photos-->>app: bytes, or 404 for an unknown key
+        app-->>admin: image bytes, cached for a year, the key never changes
+    end
+```
+
+| Block | Data | What it is | Code |
+| --- | --- | --- | --- |
+| `admin` | — | An agency admin who manages properties, photos, leads, pages, posts and settings. | `src/app/admin` |
+| `app` | seam | The one Next.js app on Cloudflare Workers that serves the site, the admin and the API, and picks each backend by env. | `src/features/admin/auth-actions.ts`, `src/app/api/admin/photos/route.ts`, `src/app/api/demo/photos/[...key]/route.ts` |
+| `guard` | seam | The proxy that runs on every admin path: it sends anonymous visitors to the sign-in page and keeps admin pages out of search results. | `src/proxy.ts`, `src/lib/supabase/proxy.ts` |
+| `adminsession` | seam | Answers who is calling the admin: a Supabase Auth user checked against admins, or the signed demo cookie. | `src/lib/auth/admin-session.ts` |
+| `auth` | real | Supabase Auth with email and password; an admin is a user listed in the admins table. | `src/lib/supabase/{server,client,admin}.ts` |
+| `session` | mock | A signed httpOnly cookie behind the one-click demo sign-in, with no account or network call. | `src/lib/demo/session.ts`, `DEMO_SESSION_SECRET` |
+| `facade` | seam | The only data entry point for pages and actions: it adds caching and picks the Supabase or the demo driver. | `src/lib/db/admin-property-photos.ts`, `src/lib/db/property-permissions.ts`, `DATA_DRIVER` in `src/lib/data-driver.ts` |
+| `pg` | real | Supabase Postgres with row-level security: the production store of properties, photos, leads, pages, posts and AI chats. | `src/lib/db/supabase/admin-property-photos.ts`, `supabase/migrations/` |
+| `store` | mock | The in-memory store that holds the typed seed for each process, with the same read and write rules that RLS applies in Postgres. | `src/lib/demo/db/admin-property-photos.ts`, `src/lib/demo/store.ts` |
+| `r2` | real | Cloudflare R2 holds property, agent and post photos in two or three sizes; the Worker binding or the S3 API writes them. | `src/lib/r2/client.ts`, `R2_*`, `PHOTOS_BUCKET` |
+| `photos` | mock | Photos uploaded in the demo admin, kept in memory and served by a demo route; the limit is set by an env variable. | `src/lib/demo/photos.ts`, `DEMO_UPLOAD_MAX_MB` |
+| `photourl` | seam | Turns a stored photo key into a URL: R2, an in-memory demo upload, or a local placeholder file. | `src/lib/photos/photo-url.ts`, `NEXT_PUBLIC_R2_PUBLIC_URL` |

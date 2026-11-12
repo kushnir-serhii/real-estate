@@ -3,7 +3,7 @@
 Every slice is checked against these rules. If a rule gets in the way, raise it in the spec's open questions instead of breaking it quietly.
 
 ## Stack (don't add libraries without asking)
-Next.js (App Router) · React · TypeScript (strict) · Tailwind 4 · shadcn/ui (Radix) · lucide-react · zod · `@supabase/supabase-js` + `@supabase/ssr` · `@opennextjs/cloudflare` (+ wrangler) · `@aws-sdk/client-s3` for R2 (or the R2 binding) · Playwright (UI check only). Versions are fixed in spec 001.
+Next.js (App Router) · React · TypeScript (strict) · Tailwind 4 · shadcn/ui (Radix) · lucide-react · zod · `@supabase/supabase-js` + `@supabase/ssr` · `@opennextjs/cloudflare` (+ wrangler) · `@aws-sdk/client-s3` for R2 (or the R2 binding) · Playwright (UI check only) · `mermaid` (dev-only, renders `pnpm diagrams`). Versions are fixed in spec 001.
 
 ## Files and folders
 **Every file and folder name is `kebab-case`.** Next.js reserved files keep their names (`page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx`, `not-found.tsx`, `route.ts`, `sitemap.ts`, `robots.ts`).
@@ -70,6 +70,11 @@ Next.js (App Router) · React · TypeScript (strict) · Tailwind 4 · shadcn/ui 
 - Leads are written to Supabase before any external call. Each external delivery (Plektan, Telegram) has its own status column + error + attempts; failed ones are retried by the cron.
 - Cron endpoints check `CRON_SECRET`.
 - Never log secrets or full personal data.
+
+## Diagrams
+- A slice that changes a table, a data driver, a service client or one of the flows drawn in `docs/diagrams.md` updates that diagram and its «Blocks» row, runs `pnpm diagrams` and commits both `docs/diagrams.md` and `docs/diagrams.html`.
+- Every block has a `real` / `mock` / `seam` marker and a one-sentence «What it is» of at most 140 characters (it is the tooltip); the same block keeps the same name and sentence in every diagram.
+- A test fails when `docs/diagrams.html` is out of step with `docs/diagrams.md`.
 
 ## Styling
 - Only Tailwind utilities from the tokens in `src/app/globals.css`. No raw colors, px values or inline styles. New tokens go there first.
