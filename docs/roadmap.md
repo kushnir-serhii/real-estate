@@ -24,7 +24,7 @@ Stage 1 (≈7–9 weeks): base site + admin + AI assistant — see [reference/st
 | 014 | [Styled selects and the team on «Про нас»](specs/014-selects-and-team.md) | done | 013 |
 | 015 | [Blog](specs/015-blog.md) | done | 014 |
 | 016 | [UML diagrams: Supabase, Plektan and where the mock data is](specs/016-uml-diagrams.md) | done | 015 |
-| 017 | [Launch hardening: leads that wait for keys, sync guard, cleanup](specs/017-launch-hardening.md) | ready | 016 |
+| 017 | [Launch hardening: leads that wait for keys, sync guard, cleanup](specs/017-launch-hardening.md) | in-progress | 016 |
 
 Statuses: `draft` → `ready` → `in-progress` → `done` (meaning in [process.md](process.md#statuses)). The status here and in the spec's header must match.
 

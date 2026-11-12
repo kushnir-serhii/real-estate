@@ -1,6 +1,6 @@
 # 017 — Launch hardening: leads that wait for keys, sync guard, cleanup
 
-**Status:** ready · **Depends on:** 016 · **Route(s):** `/admin/leads`, `/admin/leads/[id]`
+**Status:** in-progress · **Depends on:** 016 · **Route(s):** `/admin/leads`, `/admin/leads/[id]`
 
 ## Goal
 When the real accounts are connected one by one, no lead stays undelivered silently and no demo data reaches the real database: leads saved before a channel had its keys are sent once the keys exist, the manager learns about leads that never reached Telegram, and `pnpm sync` refuses to write Plektan fixtures into a real Supabase. It also removes the stale and unused code found in spec 016.
@@ -27,16 +27,16 @@ When the real accounts are connected one by one, no lead stays undelivered silen
 
 ## Slices
 
-### [ ] 1. `pnpm sync` never writes fixtures into a real database
+### [x] 1. `pnpm sync` never writes fixtures into a real database
 - **Build:** today the Plektan client falls back to fixtures when `PLEKTAN_API_KEY` is empty, and only the GitHub workflow checks the key; a local `pnpm sync` with real Supabase keys in `.env.local` would insert the fixture listings. `scripts/sync.ts` stops with exit code 1 and a clear message when the driver is `supabase` and the key is empty, unless `--fixtures` is passed (for a local Supabase). `scripts/check-sync.ts` keeps working (it calls `runSync` directly against the local stack).
 - **Files:** `scripts/sync.ts`, `docs/setup.md`, `docs/diagrams.md` (diagram 7, if the guard changes a block or its sentence), `docs/diagrams.html`
 - **Agent:** backend
 - **Accept:**
-  - [ ] `DATA_DRIVER=supabase` + empty `PLEKTAN_API_KEY`: `pnpm sync` prints why it stopped and how to run with fixtures on purpose, exits 1, writes nothing
-  - [ ] the same with `--fixtures` runs the fixture sync as today; with a key set the flag is rejected (exit 2), so it can't be left in a real command by mistake
-  - [ ] demo driver: unchanged (notice, exit 0); the GitHub workflow is unchanged and still skips without the key
-  - [ ] `docs/setup.md` describes the guard and the flag next to the «Run it by hand» text
-  - [ ] typecheck, lint, test, build green
+  - [x] `DATA_DRIVER=supabase` + empty `PLEKTAN_API_KEY`: `pnpm sync` prints why it stopped and how to run with fixtures on purpose, exits 1, writes nothing
+  - [x] the same with `--fixtures` runs the fixture sync as today; with a key set the flag is rejected (exit 2), so it can't be left in a real command by mistake
+  - [x] demo driver: unchanged (notice, exit 0); the GitHub workflow is unchanged and still skips without the key
+  - [x] `docs/setup.md` describes the guard and the flag next to the «Run it by hand» text
+  - [x] typecheck, lint, test, build green
 
 ### [ ] 2. Leads saved before the keys are sent once the keys exist
 - **Build:** a channel that is `off` when a lead arrives is marked `skipped`, and nothing ever picks it up again (the cron takes only `pending` / `failed`; the admin shows the retry button only for `failed`). Change:
@@ -90,3 +90,4 @@ When the real accounts are connected one by one, no lead stays undelivered silen
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
+| 2026-11-12 | 1 | done: `pnpm sync` stops (exit 1) on supabase without `PLEKTAN_API_KEY`; `--fixtures` runs fixtures on purpose, rejected (exit 2) with a key; diagram 7 unchanged (the workflow skip is the same) | `scripts/sync.ts`, `src/lib/sync/sync-guard.ts` + test, `docs/setup.md` |

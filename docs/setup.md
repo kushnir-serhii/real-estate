@@ -169,6 +169,8 @@ GitHub → repo → Settings → Secrets and variables → Actions → New repos
 ### Run it by hand
 Actions → "Plektan sync" → Run workflow (tick **full** for a full sync). The same works locally: `pnpm sync`, `pnpm sync --full`, with flags `--no-revalidate` and `--force-hide` (hide vanished properties even when the safety guard refuses: it refuses if the result is empty or fewer than half of the published Plektan properties would remain).
 
+Guard: with the `supabase` driver and an empty `PLEKTAN_API_KEY`, `pnpm sync` stops with exit code 1 and writes nothing, because the Plektan client would fall back to fixtures and insert fake listings. To sync fixtures on purpose into a local Supabase, run `pnpm sync --fixtures`. With a key set the flag is rejected (exit code 2), so it can't linger in a real command. The demo driver is unaffected (it prints a notice and exits 0).
+
 ### First real run
 1. Check `PLEKTAN_COUNTRY_ID` / `PLEKTAN_REGION_ID` / `PLEKTAN_LOCALITY_ID` against the Plektan account.
 2. Make sure `settings.properties_source` is `plektan` and the migration above is applied.
