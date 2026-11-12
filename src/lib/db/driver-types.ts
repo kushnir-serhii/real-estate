@@ -24,10 +24,11 @@ import type {
   StoredProposalJson,
 } from "./assistant";
 import type {
+  AlertChannel,
   CreateLeadResult,
+  LeadAlertRow,
   LeadDeliveryUpdate,
   LeadForDelivery,
-  LeadToAlert,
   ParsedLead,
   PropertyBrief,
 } from "./leads";
@@ -88,8 +89,15 @@ export type LeadsDriver = {
   fetchLeadForDelivery: (id: string) => Promise<LeadForDelivery | null>;
   updateLeadDelivery: (id: string, update: LeadDeliveryUpdate) => Promise<void>;
   fetchDueLeadIds: (params: { now: Date; staleBefore: Date; maxAttempts: number; limit: number }) => Promise<string[]>;
-  fetchLeadsToAlert: (params: { maxAttempts: number; limit: number }) => Promise<LeadToAlert[]>;
-  markPlektanAlerted: (id: string, at: Date) => Promise<void>;
+  /** `skipped` -> `pending` for one channel, only for leads created at or after `createdAfter`. Returns how many changed. */
+  requeueSkippedLeads: (params: { channel: "plektan" | "telegram"; createdAfter: Date }) => Promise<number>;
+  /**
+   * Oldest first: leads with a channel `failed`, `attempts >= maxAttempts` and no `*_alerted_at` yet (either channel).
+   * Raw columns; the facade decides which channels need the alert.
+   */
+  fetchLeadsToAlert: (params: { maxAttempts: number; limit: number }) => Promise<LeadAlertRow[]>;
+  /** Sets `<channel>_alerted_at` for each listed channel. */
+  markAlerted: (id: string, channels: AlertChannel[], at: Date) => Promise<void>;
   /** True only for a `published` property. */
   isPropertyPublished: (id: string) => Promise<boolean>;
   /** Any property by id (published or not), for the «similar to» wish. */

@@ -8,6 +8,9 @@ const BACKOFF_MS = [5 * MINUTE, 15 * MINUTE, 60 * MINUTE, 180 * MINUTE] as const
 /** A pending channel older than this lost its `after()` delivery (worker killed) and is picked up by cron. */
 export const PENDING_STALE_MS = 10 * MINUTE;
 
+/** A lead that arrived while a channel was off is sent by the cron once the channel is on, if it is younger than this. */
+export const SKIPPED_REQUEUE_DAYS = 7;
+
 /** When the next attempt is due after the failed attempt number `failedAttempts`; null = no more attempts. */
 export const nextAttemptAt = (failedAttempts: number, now: Date): Date | null => {
   if (failedAttempts < 1 || failedAttempts >= MAX_DELIVERY_ATTEMPTS) return null;

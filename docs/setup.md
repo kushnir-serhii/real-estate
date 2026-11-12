@@ -83,6 +83,7 @@ Migrations to apply (in order; add new ones here when a spec adds them):
 | `20261029150000_ai_assistant.sql` | 010 | [ ] |
 | `20261104120000_ai_limits.sql` | 010 | [ ] |
 | `20261105120000_blog.sql` | 015 | [ ] |
+| `20261112120000_leads_telegram_alerted_at.sql` | 017 | [ ] |
 
 ### 4. Check
 - Dashboard → Advisors → Security: no "RLS disabled" warnings.
@@ -119,6 +120,9 @@ A lead is always saved in Supabase first. Then, after the response, it goes to P
 3. Get the chat id: send any message in the group, open `https://api.telegram.org/bot<token>/getUpdates` in a browser and read `message.chat.id` (a negative number for groups, for example `-1001234567890`).
 4. Set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_MANAGER_CHAT_ID` as **runtime secrets** in Cloudflare (and in `.dev.vars` / `.env.local` to try it locally). Both must be set, otherwise the channel is `skipped`.
 
+### Leads that arrived before a channel was connected
+A lead saved while a channel was off keeps that channel `skipped`. Once the keys are set, the retry cron (every 30 minutes) moves `skipped` back to `pending` for leads younger than 7 days and sends them in the same run; nothing is sent twice, and the two channels are independent. Older leads stay `skipped`: open the lead in the admin and press «Надіслати» for that channel (one attempt, any age). While a channel is still off nothing changes and no attempt is counted.
+
 ### Turnstile
 1. Cloudflare dashboard → Turnstile → Add site → the production domain (add `localhost` only if you want to test the real widget locally).
 2. `NEXT_PUBLIC_TURNSTILE_SITE_KEY`: Cloudflare **build and runtime** (`NEXT_PUBLIC_*` is inlined at build time). Empty = the forms show no widget.
@@ -151,7 +155,7 @@ The admin uploads photos through `POST /api/admin/photos`, which writes to R2 us
 
 `.github/workflows/sync.yml` runs `pnpm sync` (spec 003): incremental every 30 minutes 07:00-22:00 Kyiv time, a full sync nightly, and on demand. It writes to Supabase directly and then calls `/api/cron/revalidate` on the site to refresh the cache. Without `PLEKTAN_API_KEY` the job exits early with a notice (fixtures are never synced into production).
 
-The same workflow has a separate `leads` job that runs on every schedule: it calls `/api/cron/leads` to retry failed lead deliveries to Plektan and Telegram (up to 5 attempts, after 5 min, 15 min, 1 h, 3 h) and to pick up leads whose first delivery was lost. After the 5th failed Plektan attempt the manager gets one Telegram alert with the name and phone. It needs `CRON_SECRET` and `NEXT_PUBLIC_SITE_URL` (below) and runs even when `PLEKTAN_API_KEY` is empty; without those two it is skipped with a notice.
+The same workflow has a separate `leads` job that runs on every schedule: it calls `/api/cron/leads` to retry failed lead deliveries to Plektan and Telegram (up to 5 attempts, after 5 min, 15 min, 1 h, 3 h) and to pick up leads whose first delivery was lost. After the 5th failed Plektan attempt, or the 5th failed Telegram attempt, the manager gets one Telegram alert with the name and phone and a link to the lead in the admin (one message when both channels gave up; a Telegram alert goes out once Telegram works again, and is repeated by the next run if sending it fails). The alert is sent only while Telegram is on. It needs `CRON_SECRET` and `NEXT_PUBLIC_SITE_URL` (below) and runs even when `PLEKTAN_API_KEY` is empty; without those two it is skipped with a notice.
 
 ### Repo secrets
 GitHub → repo → Settings → Secrets and variables → Actions → New repository secret:
@@ -168,6 +172,8 @@ GitHub → repo → Settings → Secrets and variables → Actions → New repos
 
 ### Run it by hand
 Actions → "Plektan sync" → Run workflow (tick **full** for a full sync). The same works locally: `pnpm sync`, `pnpm sync --full`, with flags `--no-revalidate` and `--force-hide` (hide vanished properties even when the safety guard refuses: it refuses if the result is empty or fewer than half of the published Plektan properties would remain).
+
+Guard: with the `supabase` driver and an empty `PLEKTAN_API_KEY`, `pnpm sync` stops with exit code 1 and writes nothing, because the Plektan client would fall back to fixtures and insert fake listings. To sync fixtures on purpose into a local Supabase, run `pnpm sync --fixtures`. With a key set the flag is rejected (exit code 2), so it can't linger in a real command. The demo driver is unaffected (it prints a notice and exits 0).
 
 ### First real run
 1. Check `PLEKTAN_COUNTRY_ID` / `PLEKTAN_REGION_ID` / `PLEKTAN_LOCALITY_ID` against the Plektan account.

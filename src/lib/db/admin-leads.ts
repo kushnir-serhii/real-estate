@@ -56,6 +56,7 @@ export type AdminLeadDetail = Pick<
   | "plektan_next_attempt_at"
   | "plektan_item_id"
   | "plektan_alerted_at"
+  | "telegram_alerted_at"
   | "telegram_status"
   | "telegram_error"
   | "telegram_attempts"

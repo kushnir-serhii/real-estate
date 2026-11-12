@@ -1,21 +1,32 @@
 import "server-only";
 
-import { getDueLeadIds, getLeadsToAlert, markPlektanAlerted, type LeadToAlert } from "@/lib/db/leads";
+import {
+  getDueLeadIds,
+  getLeadsToAlert,
+  markLeadAlerted,
+  requeueSkippedLeads,
+  type AlertChannel,
+  type LeadToAlert,
+} from "@/lib/db/leads";
+import { resolvePlektanLeadsMode, type PlektanLeadsMode } from "@/lib/plektan";
 import { getTelegramMode, sendTelegramMessage, type TelegramMode } from "@/lib/telegram";
 import { deliverLead, type DeliveryResult } from "./deliver-lead";
-import { buildPlektanAlertText } from "./lead-delivery-content";
-import { MAX_DELIVERY_ATTEMPTS, PENDING_STALE_MS } from "./retry-schedule";
+import { buildDeliveryAlertText } from "./lead-delivery-content";
+import { MAX_DELIVERY_ATTEMPTS, PENDING_STALE_MS, SKIPPED_REQUEUE_DAYS } from "./retry-schedule";
 
 const RUN_LIMIT = 50;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 export type RetryCounts = { processed: number; sent: number; failed: number; alerts: number };
 
 export type RetryLeadsDeps = {
   now: () => Date;
   getDueIds: (params: { now: Date; staleBefore: Date; maxAttempts: number; limit: number }) => Promise<string[]>;
+  plektanMode: () => PlektanLeadsMode;
+  requeueSkipped: (params: { channel: "plektan" | "telegram"; createdAfter: Date }) => Promise<number>;
   deliver: (id: string) => Promise<DeliveryResult>;
   getToAlert: (params: { maxAttempts: number; limit: number }) => Promise<LeadToAlert[]>;
-  markAlerted: (id: string, at: Date) => Promise<void>;
+  markAlerted: (id: string, channels: AlertChannel[], at: Date) => Promise<void>;
   telegramMode: () => TelegramMode;
   sendAlert: (text: string) => Promise<void>;
 };
@@ -23,19 +34,28 @@ export type RetryLeadsDeps = {
 const defaultDeps: RetryLeadsDeps = {
   now: () => new Date(),
   getDueIds: getDueLeadIds,
+  plektanMode: resolvePlektanLeadsMode,
+  requeueSkipped: requeueSkippedLeads,
   deliver: deliverLead,
   getToAlert: getLeadsToAlert,
-  markAlerted: markPlektanAlerted,
+  markAlerted: markLeadAlerted,
   telegramMode: getTelegramMode,
   sendAlert: (text) => sendTelegramMessage({ text }),
 };
 
 /**
- * One cron run: delivers due leads one by one (a bad lead never stops the run), then sends one
- * Telegram alert per lead whose Plektan delivery ran out of attempts. Returns counts only.
+ * One cron run: requeues recent `skipped` channels that are on now, delivers due leads one by one (a bad lead never stops the run), then sends one
+ * Telegram alert per lead whose Plektan or Telegram delivery ran out of attempts (one message if both did). Returns counts only.
  */
 export const retryLeadsWith = async (deps: RetryLeadsDeps): Promise<RetryCounts> => {
   const now = deps.now();
+
+  // Leads that arrived while a channel was off: once it is on, recent ones go back to `pending`
+  // (the stale-pending rule below picks them up). A channel that is still off is never touched.
+  const createdAfter = new Date(now.getTime() - SKIPPED_REQUEUE_DAYS * DAY_MS);
+  if (deps.plektanMode() !== "off") await deps.requeueSkipped({ channel: "plektan", createdAfter });
+  if (deps.telegramMode() !== "off") await deps.requeueSkipped({ channel: "telegram", createdAfter });
+
   const ids = await deps.getDueIds({
     now,
     staleBefore: new Date(now.getTime() - PENDING_STALE_MS),
@@ -63,8 +83,8 @@ export const retryLeadsWith = async (deps: RetryLeadsDeps): Promise<RetryCounts>
     const toAlert = await deps.getToAlert({ maxAttempts: MAX_DELIVERY_ATTEMPTS, limit: RUN_LIMIT });
     for (const lead of toAlert) {
       try {
-        await deps.sendAlert(buildPlektanAlertText(lead, process.env.NEXT_PUBLIC_SITE_URL));
-        await deps.markAlerted(lead.id, deps.now());
+        await deps.sendAlert(buildDeliveryAlertText(lead, lead.channels, process.env.NEXT_PUBLIC_SITE_URL));
+        await deps.markAlerted(lead.id, lead.channels, deps.now());
         counts.alerts += 1;
       } catch {
         // Not marked, so the next run sends the alert again.

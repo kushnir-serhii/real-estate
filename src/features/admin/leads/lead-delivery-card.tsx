@@ -1,3 +1,5 @@
+import { resolvePlektanLeadsMode } from "@/lib/plektan";
+import { getTelegramMode } from "@/lib/telegram";
 import type { AdminLeadDetail } from "@/lib/db/admin-leads";
 import { DeliveryChannel } from "./delivery-channel";
 import { LeadSection } from "./lead-section";
@@ -18,6 +20,7 @@ export const LeadDeliveryCard = ({ lead, className }: LeadDeliveryCardProps) => 
         attempts={lead.plektan_attempts}
         error={lead.plektan_error}
         nextAttemptAt={lead.plektan_next_attempt_at}
+        channelOn={resolvePlektanLeadsMode() !== "off"}
         itemId={lead.plektan_item_id}
         alertedAt={lead.plektan_alerted_at}
       />
@@ -28,6 +31,8 @@ export const LeadDeliveryCard = ({ lead, className }: LeadDeliveryCardProps) => 
         attempts={lead.telegram_attempts}
         error={lead.telegram_error}
         nextAttemptAt={lead.telegram_next_attempt_at}
+        channelOn={getTelegramMode() !== "off"}
+        alertedAt={lead.telegram_alerted_at}
       />
     </div>
   </LeadSection>

@@ -118,14 +118,49 @@ export const getDueLeadIds = async (params: {
   limit: number;
 }): Promise<string[]> => (await loadDriver()).fetchDueLeadIds(params);
 
-/** A lead whose Plektan delivery ran out of attempts and hasn't been reported to the manager yet. */
-export type LeadToAlert = Pick<LeadForDelivery, "id" | "name" | "phone">;
+/**
+ * Moves one channel's `skipped` leads created at or after `createdAfter` back to `pending` (attempts
+ * unchanged, no schedule, no error), so cron delivers them once the channel is on. `sent`, `failed`
+ * and the other channel are never touched. Returns how many leads changed.
+ */
+export const requeueSkippedLeads = async (params: {
+  channel: "plektan" | "telegram";
+  createdAfter: Date;
+}): Promise<number> => (await loadDriver()).requeueSkippedLeads(params);
 
-export const getLeadsToAlert = async (params: { maxAttempts: number; limit: number }): Promise<LeadToAlert[]> =>
-  (await loadDriver()).fetchLeadsToAlert(params);
+export type AlertChannel = "plektan" | "telegram";
 
-export const markPlektanAlerted = async (id: string, at: Date): Promise<void> =>
-  (await loadDriver()).markPlektanAlerted(id, at);
+/** Raw columns a driver returns for the alert; the rules below live here, not in a driver. */
+export type LeadAlertRow = Pick<
+  LeadForDelivery,
+  "id" | "name" | "phone" | "plektan_status" | "plektan_attempts" | "telegram_status" | "telegram_attempts"
+> & { plektan_alerted_at: string | null; telegram_alerted_at: string | null };
+
+/** A lead with channels that ran out of attempts and haven't been reported to the manager yet. */
+export type LeadToAlert = Pick<LeadForDelivery, "id" | "name" | "phone"> & { channels: AlertChannel[] };
+
+/** Channels of one lead that are exhausted (`failed`, attempts >= max) and not alerted yet. */
+export const channelsToAlert = (row: LeadAlertRow, maxAttempts: number): AlertChannel[] => {
+  const channels: AlertChannel[] = [];
+  if (row.plektan_status === "failed" && row.plektan_attempts >= maxAttempts && row.plektan_alerted_at === null) {
+    channels.push("plektan");
+  }
+  if (row.telegram_status === "failed" && row.telegram_attempts >= maxAttempts && row.telegram_alerted_at === null) {
+    channels.push("telegram");
+  }
+  return channels;
+};
+
+export const getLeadsToAlert = async (params: { maxAttempts: number; limit: number }): Promise<LeadToAlert[]> => {
+  const rows = await (await loadDriver()).fetchLeadsToAlert(params);
+  return rows.flatMap((row) => {
+    const channels = channelsToAlert(row, params.maxAttempts);
+    return channels.length > 0 ? [{ id: row.id, name: row.name, phone: row.phone, channels }] : [];
+  });
+};
+
+export const markLeadAlerted = async (id: string, channels: AlertChannel[], at: Date): Promise<void> =>
+  (await loadDriver()).markAlerted(id, channels, at);
 
 /** True only for a published property: a lead's `property_id` from the client is never taken on trust. */
 export const isPropertyPublished = async (id: string): Promise<boolean> =>

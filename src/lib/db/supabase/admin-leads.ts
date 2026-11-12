@@ -54,7 +54,7 @@ const fetchAdminLeads = async (filters: AdminLeadFilters): Promise<AdminLeadPage
 };
 
 const DETAIL_SELECT =
-  "id,kind,name,phone,email,message,payload,utm,page_url,consent_at,created_at,property_id,plektan_status,plektan_error,plektan_attempts,plektan_next_attempt_at,plektan_item_id,plektan_alerted_at,telegram_status,telegram_error,telegram_attempts,telegram_next_attempt_at,property:properties(slug,title,external_id,source,status)";
+  "id,kind,name,phone,email,message,payload,utm,page_url,consent_at,created_at,property_id,plektan_status,plektan_error,plektan_attempts,plektan_next_attempt_at,plektan_item_id,plektan_alerted_at,telegram_alerted_at,telegram_status,telegram_error,telegram_attempts,telegram_next_attempt_at,property:properties(slug,title,external_id,source,status)";
 
 const fetchAdminLead = async (id: string): Promise<AdminLeadDetail | null> => {
   const supabase = await createClient();

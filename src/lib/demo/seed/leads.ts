@@ -52,6 +52,7 @@ export const buildSeedLeads = (now: number, propertyIdBySlug: ReadonlyMap<string
     | "plektan_item_id"
     | "plektan_next_attempt_at"
     | "plektan_alerted_at"
+    | "telegram_alerted_at"
     | "telegram_error"
     | "telegram_next_attempt_at"
     | "utm"
@@ -70,6 +71,7 @@ export const buildSeedLeads = (now: number, propertyIdBySlug: ReadonlyMap<string
     plektan_item_id: null,
     plektan_next_attempt_at: null,
     plektan_alerted_at: null,
+    telegram_alerted_at: null,
     telegram_error: null,
     telegram_next_attempt_at: null,
     utm: null,

@@ -85,10 +85,23 @@ export const buildTelegramText = (lead: LeadForDelivery, siteUrl?: string): stri
   return lines.join("\n");
 };
 
-/** Alert after the last failed Plektan attempt (slice 3). Name + phone so the lead is not lost. */
-export const buildPlektanAlertText = (lead: Pick<LeadForDelivery, "id" | "name" | "phone">, siteUrl?: string): string =>
+const ALERT_HEADINGS = {
+  plektan: "Заявка не дійшла до Plektan",
+  telegram: "Раніше повідомлення про заявку не дійшло в Telegram",
+  both: "Заявка не дійшла ні до Plektan, ні в Telegram",
+} as const;
+
+/**
+ * Alert after the last failed attempt on a channel (one message when both channels ran out). Name + phone
+ * so the lead is not lost; nothing else.
+ */
+export const buildDeliveryAlertText = (
+  lead: Pick<LeadForDelivery, "id" | "name" | "phone">,
+  channels: ("plektan" | "telegram")[],
+  siteUrl?: string,
+): string =>
   [
-    "<b>Заявка не дійшла до Plektan</b>",
+    `<b>${channels.length > 1 ? ALERT_HEADINGS.both : ALERT_HEADINGS[channels[0] ?? "plektan"]}</b>`,
     `Ім'я: ${escapeHtml(lead.name)}`,
     `Телефон: ${escapeHtml(lead.phone)}`,
     `Відкрити в адмінці: ${escapeHtml(adminLeadUrl(lead.id, siteUrl))}`,

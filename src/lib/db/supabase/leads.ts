@@ -2,7 +2,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Database } from "@/lib/supabase/database.types";
 import type { LeadsDriver } from "../driver-types";
-import type { CreateLeadResult, LeadForDelivery, LeadToAlert, ParsedLead } from "../leads";
+import type { CreateLeadResult, LeadForDelivery, ParsedLead } from "../leads";
 
 type LeadInsert = Database["public"]["Tables"]["leads"]["Insert"];
 
@@ -87,25 +87,47 @@ const fetchDueLeadIds: LeadsDriver["fetchDueLeadIds"] = async (params) => {
   return data.map((row) => row.id);
 };
 
-const fetchLeadsToAlert = async (params: { maxAttempts: number; limit: number }): Promise<LeadToAlert[]> => {
+const requeueSkippedLeads: LeadsDriver["requeueSkippedLeads"] = async ({ channel, createdAfter }) => {
+  const patch =
+    channel === "plektan"
+      ? { plektan_status: "pending" as const, plektan_error: null, plektan_next_attempt_at: null }
+      : { telegram_status: "pending" as const, telegram_error: null, telegram_next_attempt_at: null };
   const { data, error } = await createAdminClient()
     .from("leads")
-    .select("id,name,phone")
-    .eq("plektan_status", "failed")
-    .gte("plektan_attempts", params.maxAttempts)
-    .is("plektan_alerted_at", null)
+    .update(patch)
+    .eq(channel === "plektan" ? "plektan_status" : "telegram_status", "skipped")
+    .gte("created_at", createdAfter.toISOString())
+    .select("id");
+  if (error) throw new Error(`requeueSkippedLeads failed: ${error.message}`);
+  return data.length;
+};
+
+const fetchLeadsToAlert: LeadsDriver["fetchLeadsToAlert"] = async ({ maxAttempts, limit }) => {
+  const { data, error } = await createAdminClient()
+    .from("leads")
+    .select(
+      "id,name,phone,plektan_status,plektan_attempts,plektan_alerted_at,telegram_status,telegram_attempts,telegram_alerted_at",
+    )
+    .or(
+      `and(plektan_status.eq.failed,plektan_attempts.gte.${maxAttempts},plektan_alerted_at.is.null),` +
+        `and(telegram_status.eq.failed,telegram_attempts.gte.${maxAttempts},telegram_alerted_at.is.null)`,
+    )
     .order("created_at", { ascending: true })
-    .limit(params.limit);
+    .limit(limit);
   if (error) throw new Error(`getLeadsToAlert failed: ${error.message}`);
   return data;
 };
 
-const markPlektanAlerted: LeadsDriver["markPlektanAlerted"] = async (id, at) => {
+const markAlerted: LeadsDriver["markAlerted"] = async (id, channels, at) => {
+  const iso = at.toISOString();
   const { error } = await createAdminClient()
     .from("leads")
-    .update({ plektan_alerted_at: at.toISOString() })
+    .update({
+      ...(channels.includes("plektan") ? { plektan_alerted_at: iso } : {}),
+      ...(channels.includes("telegram") ? { telegram_alerted_at: iso } : {}),
+    })
     .eq("id", id);
-  if (error) throw new Error(`markPlektanAlerted failed: ${error.message}`);
+  if (error) throw new Error(`markAlerted failed: ${error.message}`);
 };
 
 const isPropertyPublished: LeadsDriver["isPropertyPublished"] = async (id) => {
@@ -134,8 +156,9 @@ export const supabaseLeadsDriver: LeadsDriver = {
   fetchLeadForDelivery,
   updateLeadDelivery,
   fetchDueLeadIds,
+  requeueSkippedLeads,
   fetchLeadsToAlert,
-  markPlektanAlerted,
+  markAlerted,
   isPropertyPublished,
   fetchPropertyBrief,
 };

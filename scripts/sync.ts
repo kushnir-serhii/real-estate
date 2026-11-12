@@ -1,14 +1,15 @@
 import { isDemoMode } from "@/lib/data-driver";
 import { runSync } from "@/lib/sync/run-sync";
+import { decideSync } from "@/lib/sync/sync-guard";
 
 const DEMO_NOTICE =
   "demo mode (DATA_DRIVER=demo): nothing to sync. The demo already contains its listings in memory; set DATA_DRIVER=supabase and the Supabase keys (docs/setup.md) to sync from Plektan.";
 
 const args = new Set(process.argv.slice(2));
-const known = new Set(["--full", "--no-revalidate", "--force-hide"]);
+const known = new Set(["--full", "--no-revalidate", "--force-hide", "--fixtures"]);
 const unknown = [...args].filter((arg) => !known.has(arg));
 if (unknown.length > 0) {
-  console.error(`Unknown flag(s): ${unknown.join(" ")} (expected --full, --no-revalidate, --force-hide)`);
+  console.error(`Unknown flag(s): ${unknown.join(" ")} (expected --full, --no-revalidate, --force-hide, --fixtures)`);
   process.exit(2);
 }
 
@@ -39,9 +40,14 @@ const revalidate = async (tags: string[]): Promise<boolean> => {
 };
 
 const main = async (): Promise<number> => {
-  if (isDemoMode()) {
+  const decision = decideSync({ demo: isDemoMode(), apiKey: process.env.PLEKTAN_API_KEY, fixtures: args.has("--fixtures") });
+  if (decision.action === "demo") {
     console.log(DEMO_NOTICE);
     return 0;
+  }
+  if (decision.action === "stop") {
+    console.error(decision.message);
+    return decision.code;
   }
   const result = await runSync({ mode: args.has("--full") ? "full" : "incremental", forceHide: args.has("--force-hide") });
   if (result.status === "skipped") return 0;

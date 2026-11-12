@@ -131,7 +131,7 @@ flowchart LR
 | `consts` | mock | The demo agency's name, contacts, texts and navigation, kept as constants until a real agency's data replaces them. | `src/constants/*` |
 | `facade` | seam | The only data entry point for pages and actions: it adds caching and picks the Supabase or the demo driver. | `src/lib/db/*`, `DATA_DRIVER` in `src/lib/data-driver.ts` |
 | `pg` | real | Supabase Postgres with row-level security: the production store of properties, photos, leads, pages, posts and AI chats. | `src/lib/db/supabase/*`, `supabase/migrations/` |
-| `auth` | real | Supabase Auth with email and password; an admin is a user listed in the admins table. | `src/lib/supabase/{server,client,admin}.ts` |
+| `auth` | real | Supabase Auth with email and password; an admin is a user listed in the admins table. | `src/lib/supabase/{server,admin}.ts` |
 | `store` | mock | The in-memory store that holds the typed seed for each process, with the same read and write rules that RLS applies in Postgres. | `src/lib/demo/store.ts`, `src/lib/demo/seed/*`, `src/lib/demo/db/*` |
 | `seedsql` | mock | The SQL file generated from the demo seed so a local Supabase can start with the same listings. | `supabase/seed.sql`, `pnpm seed:sql` |
 | `adminsession` | seam | Answers who is calling the admin: a Supabase Auth user checked against admins, or the signed demo cookie. | `src/lib/auth/admin-session.ts` |
@@ -253,7 +253,7 @@ flowchart LR
 
 ## 3. Data-driver seam
 
-How one call reaches either world. Pages, actions and route handlers import only the facade; the facade asks `data-driver.ts` which driver is on and loads that driver on demand. The two drivers implement one contract and never import each other. Next to the data seam are the two other seams: who is the admin, and where a photo comes from. The four Supabase clients are listed with what each one is for.
+How one call reaches either world. Pages, actions and route handlers import only the facade; the facade asks `data-driver.ts` which driver is on and loads that driver on demand. The two drivers implement one contract and never import each other. Next to the data seam are the two other seams: who is the admin, and where a photo comes from. The three Supabase clients are listed with what each one is for.
 
 ```mermaid
 classDiagram
@@ -298,9 +298,6 @@ classDiagram
     class ServerClient["Server Supabase client [real]"]:::real {
         anon key, user session cookies
     }
-    class BrowserClient["Browser Supabase client [real]"]:::real {
-        anon key, in the browser
-    }
     class AdminClient["Admin Supabase client [real]"]:::real {
         service role, bypasses RLS
     }
@@ -342,7 +339,6 @@ classDiagram
     AdminSession ..> DataDriver
     AdminSession --> ServerClient : supabase driver
     ServerClient --> SupabaseAuth
-    BrowserClient --> SupabaseAuth
     AdminSession --> DemoSession : demo driver
 
     Callers --> PhotoUrl
@@ -351,7 +347,6 @@ classDiagram
 
     note for Facade "Callers never see a driver. A test keeps both drivers on one contract."
     note for DemoDriver "SupabaseDriver and DemoDriver never import each other."
-    note for BrowserClient "No file imports this client today."
 
     classDef real fill:#dbeafe,stroke:#1d4ed8,color:#0b1f4d
     classDef mock fill:#fef3c7,stroke:#b45309,color:#3b2300,stroke-dasharray:5 4
@@ -372,11 +367,10 @@ classDiagram
 | `DemoSeed` | mock | Builds the typed demo rows (listings, agents, pages, posts and leads) that match the database types; also rendered to supabase seed.sql. | `src/lib/demo/seed/index.ts`, `pnpm seed:sql` |
 | `PublicClient` | real | A cookie-less Supabase client with the anon key for public reads, so pages can be cached; RLS limits it to public rows. | `src/lib/supabase/public.ts` |
 | `ServerClient` | real | A Supabase client with the anon key that carries the visitor's session cookies; used for sign-in and admin reads. | `src/lib/supabase/server.ts` |
-| `BrowserClient` | real | A Supabase client with the anon key for use in the browser; nothing in the code imports it yet. | `src/lib/supabase/client.ts` |
 | `AdminClient` | real | A Supabase client with the service role key that bypasses RLS; server code only, for sync, leads and admin writes. | `src/lib/supabase/admin.ts`, `SUPABASE_SERVICE_ROLE_KEY` |
 | `Postgres` | real | Supabase Postgres with row-level security: the production store of properties, photos, leads, pages, posts and AI chats. | `src/lib/db/supabase/*`, `supabase/migrations/` |
 | `AdminSession` | seam | Answers who is calling the admin: a Supabase Auth user checked against admins, or the signed demo cookie. | `src/lib/auth/admin-session.ts` |
-| `SupabaseAuth` | real | Supabase Auth with email and password; an admin is a user listed in the admins table. | `src/lib/supabase/{server,client,admin}.ts` |
+| `SupabaseAuth` | real | Supabase Auth with email and password; an admin is a user listed in the admins table. | `src/lib/supabase/{server,admin}.ts` |
 | `DemoSession` | mock | A signed httpOnly cookie behind the one-click demo sign-in, with no account or network call. | `src/lib/demo/session.ts`, `DEMO_SESSION_SECRET` |
 | `PhotoUrl` | seam | Turns a stored photo key into a URL: R2, an in-memory demo upload, or a local placeholder file. | `src/lib/photos/photo-url.ts`, `NEXT_PUBLIC_R2_PUBLIC_URL` |
 | `R2` | real | Cloudflare R2 holds property, agent and post photos in two or three sizes; the Worker binding or the S3 API writes them. | `src/lib/r2/client.ts`, `R2_*`, `PHOTOS_BUCKET` |
@@ -837,7 +831,7 @@ sequenceDiagram
 
 ## 8. Lead delivery
 
-A lead from the site form or from a confirmed AI assistant card. The order is fixed: checks, then the lead is saved, then the visitor gets the answer, and only after that Plektan and Telegram are called, in the background, each channel on its own. The save goes through the facade to Postgres or to the demo store. Each channel has its own mode: Plektan is `live` with a key, a fixture with `PLEKTAN_LEADS_FIXTURE`, or `off`; Telegram is `live` with a token and a chat id, a fixture with `TELEGRAM_FIXTURE`, or `off`. An `off` channel is marked `skipped` and nothing is called, so the site and the lead work with Plektan switched off. A failed call is written on the lead with a retry time and is picked up by the cron of [diagram 9](#9-lead-retry-cron).
+A lead from the site form or from a confirmed AI assistant card. The order is fixed: checks, then the lead is saved, then the visitor gets the answer, and only after that Plektan and Telegram are called, in the background, each channel on its own. The save goes through the facade to Postgres or to the demo store. Each channel has its own mode: Plektan is `live` with a key, a fixture with `PLEKTAN_LEADS_FIXTURE`, or `off`; Telegram is `live` with a token and a chat id, a fixture with `TELEGRAM_FIXTURE`, or `off`. An `off` channel is marked `skipped` and nothing is called, so the site and the lead work with Plektan switched off. Later, when the channel is on, the cron requeues a recent `skipped` channel ([diagram 9](#9-lead-retry-cron)), and in the admin «Надіслати» sends it once by hand, at any age. A failed call is written on the lead with a retry time and is picked up by the cron of [diagram 9](#9-lead-retry-cron).
 
 ```mermaid
 sequenceDiagram
@@ -909,6 +903,7 @@ sequenceDiagram
         deliver->>facade: telegram_status sent, failed with a retry time, or skipped
     end
     Note over deliver,facade: A failed call never loses the lead, it is stored with its status and attempts, and the cron retries
+    Note over deliver,facade: A skipped channel is sent later by the cron, or by the admin button «Надіслати» once the channel is on
 ```
 
 | Block | Data | What it is | Code |
@@ -927,7 +922,7 @@ sequenceDiagram
 
 ## 9. Lead retry cron
 
-What picks up a lead whose Plektan or Telegram call failed, or whose background delivery was lost. The scheduled workflow calls the route every 30 minutes by day with the shared secret. A lead is due when a channel is `failed`, has attempts left (5 in total, waits of 5 minutes, 15 minutes, 1 hour and 3 hours) and its retry time has come, or when a channel is still `pending` 10 minutes after the lead was saved. `deliverLead` is the same code as in [diagram 8](#8-lead-delivery), so the two channels again run on their own and the mode of each decides what is called. A lead that ran out of Plektan attempts also sends one Telegram alert, so the manager can call the visitor. Nothing here needs Plektan: with Plektan off the channel is `skipped` and never due. The leads stay in the admin whatever happens.
+What picks up a lead whose Plektan or Telegram call failed, or whose background delivery was lost. The scheduled workflow calls the route every 30 minutes by day with the shared secret. A lead is due when a channel is `failed`, has attempts left (5 in total, waits of 5 minutes, 15 minutes, 1 hour and 3 hours) and its retry time has come, or when a channel is still `pending` 10 minutes after the lead was saved. `deliverLead` is the same code as in [diagram 8](#8-lead-delivery), so the two channels again run on their own and the mode of each decides what is called. Before that query the run moves a channel that is now on from `skipped` back to `pending`, for leads younger than 7 days (`SKIPPED_REQUEUE_DAYS`); the stale-pending rule then delivers them in the same run. A channel still off is never touched, and a `sent` channel never goes again. A lead that ran out of Plektan or Telegram attempts also sends one Telegram alert (one message even when both ran out), so the manager can call the visitor; each channel is alerted once. Nothing here needs Plektan: with Plektan off the channel is `skipped` and is not due until it is switched on. The leads stay in the admin whatever happens.
 
 ```mermaid
 sequenceDiagram
@@ -945,6 +940,8 @@ sequenceDiagram
         app-->>cron: 401 unauthorized
     else secret matches
         app->>retry: retryLeads()
+        retry->>facade: requeueSkippedLeads(channel, created after now minus 7 days) for each channel that is on
+        Note over retry,facade: Only skipped becomes pending, attempts stay, a channel that is off is not touched
         retry->>facade: getDueLeadIds(now, stale before, max 5, limit 50)
         Note over retry,facade: Failed with attempts left and retry time reached, or pending for over 10 minutes
         facade-->>retry: lead ids, oldest first
@@ -955,17 +952,17 @@ sequenceDiagram
             Note over retry: A database error is counted for that lead, the run goes on
         end
         opt Telegram mode is not off
-            retry->>facade: getLeadsToAlert(plektan failed, 5 attempts, not alerted)
-            facade-->>retry: leads that Plektan never took
+            retry->>facade: getLeadsToAlert(a channel failed, 5 attempts, not alerted)
+            facade-->>retry: leads with the channels that never worked
             loop each such lead
                 alt TELEGRAM_FIXTURE set
-                    retry->>telegramfx: alert with name and phone
+                    retry->>telegramfx: one alert with name and phone
                     telegramfx-->>retry: logged (ok) or an error (fail)
                 else bot token and chat id set
-                    retry->>telegram: alert with name and phone
+                    retry->>telegram: one alert with name and phone
                     telegram-->>retry: ok, or an error
                 end
-                retry->>facade: markPlektanAlerted(id) only after a successful send
+                retry->>facade: markLeadAlerted(id, channels) only after a successful send
             end
         end
         app-->>cron: 200 with processed, sent, failed and alerts
@@ -977,7 +974,7 @@ sequenceDiagram
 | --- | --- | --- | --- |
 | `cron` | real | A scheduled GitHub Actions workflow that runs the Plektan sync and calls the lead retry and cleanup routes. | `.github/workflows/sync.yml`, `CRON_SECRET`, `src/app/api/cron/*` |
 | `app` | seam | The one Next.js app on Cloudflare Workers that serves the site, the admin and the API, and picks each backend by env. | `src/app/api/cron/leads/route.ts`, `src/lib/cron/check-cron-secret.ts` |
-| `retry` | seam | One cron run: delivers every due lead one by one, then sends one Telegram alert per lead that Plektan never accepted. | `src/features/leads/retry-leads.ts`, `src/features/leads/retry-schedule.ts` |
+| `retry` | seam | One cron run: requeues skipped channels that are on, delivers due leads, then sends one alert per lead Plektan or Telegram never took. | `src/features/leads/retry-leads.ts`, `src/features/leads/retry-schedule.ts` |
 | `facade` | seam | The only data entry point for pages and actions: it adds caching and picks the Supabase or the demo driver. | `src/lib/db/leads.ts`, `DATA_DRIVER` in `src/lib/data-driver.ts` |
 | `deliver` | seam | Sends a saved lead to Plektan and Telegram, each channel on its own, and writes the result back on the lead. | `src/features/leads/deliver-lead.ts` |
 | `telegram` | real | The Telegram bot that sends each new lead to the managers' chat. | `src/lib/telegram/client.ts`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_MANAGER_CHAT_ID` |
@@ -1213,7 +1210,7 @@ sequenceDiagram
 | `app` | seam | The one Next.js app on Cloudflare Workers that serves the site, the admin and the API, and picks each backend by env. | `src/features/admin/auth-actions.ts`, `src/app/api/admin/photos/route.ts`, `src/app/api/demo/photos/[...key]/route.ts` |
 | `guard` | seam | The proxy that runs on every admin path: it sends anonymous visitors to the sign-in page and keeps admin pages out of search results. | `src/proxy.ts`, `src/lib/supabase/proxy.ts` |
 | `adminsession` | seam | Answers who is calling the admin: a Supabase Auth user checked against admins, or the signed demo cookie. | `src/lib/auth/admin-session.ts` |
-| `auth` | real | Supabase Auth with email and password; an admin is a user listed in the admins table. | `src/lib/supabase/{server,client,admin}.ts` |
+| `auth` | real | Supabase Auth with email and password; an admin is a user listed in the admins table. | `src/lib/supabase/{server,admin}.ts` |
 | `session` | mock | A signed httpOnly cookie behind the one-click demo sign-in, with no account or network call. | `src/lib/demo/session.ts`, `DEMO_SESSION_SECRET` |
 | `facade` | seam | The only data entry point for pages and actions: it adds caching and picks the Supabase or the demo driver. | `src/lib/db/admin-property-photos.ts`, `src/lib/db/property-permissions.ts`, `DATA_DRIVER` in `src/lib/data-driver.ts` |
 | `pg` | real | Supabase Postgres with row-level security: the production store of properties, photos, leads, pages, posts and AI chats. | `src/lib/db/supabase/admin-property-photos.ts`, `supabase/migrations/` |

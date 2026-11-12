@@ -173,11 +173,46 @@ describe("retryLeadChannelWith", () => {
     expect(deps.sendToPlektan).not.toHaveBeenCalled();
   });
 
-  it.each(["sent", "pending", "skipped"] as const)("does nothing for a %s channel", async (status) => {
+  it.each(["sent", "pending"] as const)("does nothing for a %s channel", async (status) => {
     const { deps, saved } = setup({}, { ...baseLead, plektan_status: status });
     expect(await retryLeadChannelWith(deps, "l1", "plektan")).toEqual({ found: true, outcome: "not_due" });
     expect(deps.sendToPlektan).not.toHaveBeenCalled();
     expect(saved).toEqual([]);
+  });
+
+  describe("a skipped channel", () => {
+    const skippedLead: LeadForDelivery = {
+      ...baseLead,
+      plektan_status: "skipped",
+      telegram_status: "sent",
+      telegram_attempts: 1,
+    };
+
+    it("is sent by one manual attempt when the channel is on now (any age)", async () => {
+      const { deps, saved } = setup({}, skippedLead);
+      expect(await retryLeadChannelWith(deps, "l1", "plektan")).toEqual({ found: true, outcome: "sent" });
+      expect(saved).toEqual([
+        { channel: "plektan", status: "sent", error: null, attempts: 1, itemId: "777", nextAttemptAt: null },
+      ]);
+    });
+
+    it("stays skipped and counts no attempt when the channel is still off", async () => {
+      const { deps, saved } = setup({ plektanMode: () => "off" }, skippedLead);
+      expect(await retryLeadChannelWith(deps, "l1", "plektan")).toEqual({ found: true, outcome: "skipped" });
+      expect(deps.sendToPlektan).not.toHaveBeenCalled();
+      expect(saved).toEqual([
+        { channel: "plektan", status: "skipped", error: null, attempts: 0, nextAttemptAt: null },
+      ]);
+    });
+
+    it("never sends a sent channel twice, and the other channel is not touched", async () => {
+      const { deps, saved } = setup({}, skippedLead);
+      expect(await retryLeadChannelWith(deps, "l1", "telegram")).toEqual({ found: true, outcome: "not_due" });
+      expect(deps.sendToTelegram).not.toHaveBeenCalled();
+      await retryLeadChannelWith(deps, "l1", "plektan");
+      expect(deps.sendToTelegram).not.toHaveBeenCalled();
+      expect(saved).toHaveLength(1);
+    });
   });
 
   it("reports a missing lead", async () => {
