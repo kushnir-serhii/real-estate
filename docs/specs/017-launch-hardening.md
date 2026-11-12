@@ -1,6 +1,6 @@
 # 017 — Launch hardening: leads that wait for keys, sync guard, cleanup
 
-**Status:** in-progress · **Depends on:** 016 · **Route(s):** `/admin/leads`, `/admin/leads/[id]`
+**Status:** done · **Depends on:** 016 · **Route(s):** `/admin/leads`, `/admin/leads/[id]`
 
 ## Goal
 When the real accounts are connected one by one, no lead stays undelivered silently and no demo data reaches the real database: leads saved before a channel had its keys are sent once the keys exist, the manager learns about leads that never reached Telegram, and `pnpm sync` refuses to write Plektan fixtures into a real Supabase. It also removes the stale and unused code found in spec 016.
@@ -86,6 +86,7 @@ When the real accounts are connected one by one, no lead stays undelivered silen
 - **Decided (2026-11-12):** the demo seed keeps `properties_source = admin` so the demo admin can create and edit listings; a real database starts in `plektan` (migration default), and `docs/setup.md` already tells the user to switch it to `admin` if the agency won't use Plektan. No code change.
 - **Decided (2026-11-12, user):** the cron sends `skipped` leads automatically for 7 days back (`SKIPPED_REQUEUE_DAYS = 7`); older ones only by hand, so a channel connected weeks later doesn't flood the manager's chat.
 - **Decided (2026-11-12, user):** `getDistricts` in the Plektan client stays (part of the documented API map, diagram 6).
+- **Open:** a `skipped` channel that is on now still shows the badge «Вимкнено» (it is the stored status) next to «Надіслати». Recommended: show «Не надіслано» in that case (header, list and delivery block); small UI follow-up.
 - **Decided (2026-11-12, user):** no «Не доставлено» filter in the admin leads list in this spec; the alert covers the need.
 
 ## Log
@@ -95,3 +96,4 @@ When the real accounts are connected one by one, no lead stays undelivered silen
 | 2026-11-12 | 2 | done: the cron requeues `skipped` → `pending` for channels that are on, leads younger than `SKIPPED_REQUEUE_DAYS` (7); the admin shows «Надіслати» for a `skipped` channel that is on (one attempt, any age); the demo seed's skipped lead is now sent by the cron when fixtures are on (intended); the Supabase `requeueSkippedLeads` update is untested against a local Postgres (none here) | `src/features/leads/{retry-leads,deliver-lead,retry-schedule}.ts` + tests, `src/lib/db/{leads,driver-types}.ts`, both lead drivers, `write-driver-contract.test.ts`, `src/features/admin/leads/{delivery-channel,retry-delivery,lead-delivery-card}.tsx`, `docs/setup.md`, `docs/diagrams.{md,html}` |
 | 2026-11-12 | 3 | done: migration adds `leads.telegram_alerted_at`; the cron sends one alert per lead exhausted on Telegram (once Telegram works), one message when both channels are exhausted; the admin shows when the manager was told for both channels; `database.types.ts` edited by hand (no Docker); diagram 4 unchanged (it doesn't draw the alert columns) | migration, `database.types.ts`, `src/lib/db/{leads,driver-types,admin-leads}.ts` + drivers + contract test, demo seed + `supabase/seed.sql`, `src/features/leads/{retry-leads,lead-delivery-content}.ts` + tests, `src/features/admin/leads/{delivery-channel,lead-delivery-card}.tsx`, `docs/setup.md`, `docs/diagrams.{md,html}` |
 | 2026-11-12 | 4 | done: deleted `/design/diagrams` and `src/lib/supabase/client.ts`; diagram 3 lists three Supabase clients, `auth` rows point at `{server,admin}.ts`; `docs/conventions.md` now names the real three clients (`public.ts`, `server.ts`, `admin.ts`; `public.ts` was missing before) | `src/app/design/diagrams/*` (deleted), `src/lib/supabase/client.ts` (deleted), `docs/conventions.md`, `docs/diagrams.{md,html}` |
+| 2026-11-12 | UI check | `SPEC=017 ROUTES=admin/leads,admin/leads/<lead 2,3,4> pnpm ui-check`: 50/50; with `TELEGRAM_FIXTURE=ok PLEKTAN_LEADS_FIXTURE=ok` on lead 3 (both `skipped`): 38/38. Screenshots reviewed: off → «Вимкнено», no button; on → the 7-day text and «Надіслати» (44px at 375px). fix: `ui-check` signs in with the one-click demo sign-in on admin routes when no `UI_CHECK_EMAIL` is set | `e2e/ui-check.spec.ts` |
