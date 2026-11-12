@@ -54,17 +54,17 @@ When the real accounts are connected one by one, no lead stays undelivered silen
   - [x] `docs/setup.md` says what happens to leads that arrived before a channel was configured
   - [x] typecheck, lint, test, build green
 
-### [ ] 3. Alert when a lead never reached Telegram
+### [x] 3. Alert when a lead never reached Telegram
 - **Build:** after the 5th failed Telegram attempt a lead is only visible in the admin; nobody is told (the existing alert covers Plektan only). The cron, when Telegram is on, sends one alert per lead whose Telegram channel is `failed` with all attempts used and `telegram_alerted_at` empty, then sets `telegram_alerted_at`. Same shape and rules as the Plektan alert: name, phone, link to the lead in the admin; a failed alert isn't marked, so the next run tries again. A lead exhausted on both channels gets one message that names both, not two.
 - **Files:** new migration `supabase/migrations/<ts>_leads_telegram_alerted_at.sql`, `src/lib/supabase/database.types.ts`, `src/lib/db/leads.ts` + both drivers + contract test, `src/lib/demo/seed/` (types / lead rows), `supabase/seed.sql`, `src/features/leads/{retry-leads,lead-delivery-content}.ts` + tests, `docs/setup.md`, `docs/diagrams.md` (diagrams 4 and 9), `docs/diagrams.html`
 - **Agent:** backend
 - **Accept:**
-  - [ ] unit test: an exhausted Telegram lead gets exactly one alert across two cron runs; a failed alert is repeated on the next run
-  - [ ] unit test: exhausted on both channels → one message naming both; both `*_alerted_at` are set
-  - [ ] Telegram off → no alert, nothing marked
-  - [ ] the migration only adds the nullable column; types regenerated; `pnpm seed:sql` leaves no drift; the migration is listed in `docs/setup.md` and under External needs
-  - [ ] the alert text has no data beyond name, phone and the admin link; nothing personal is logged
-  - [ ] typecheck, lint, test, build green
+  - [x] unit test: an exhausted Telegram lead gets exactly one alert across two cron runs; a failed alert is repeated on the next run
+  - [x] unit test: exhausted on both channels → one message naming both; both `*_alerted_at` are set
+  - [x] Telegram off → no alert, nothing marked
+  - [x] the migration only adds the nullable column; types regenerated; `pnpm seed:sql` leaves no drift; the migration is listed in `docs/setup.md` and under External needs
+  - [x] the alert text has no data beyond name, phone and the admin link; nothing personal is logged
+  - [x] typecheck, lint, test, build green
 
 ### [ ] 4. Remove the stale diagrams page and the unused Supabase browser client
 - **Build:** delete `src/app/design/diagrams/` (hand-drawn as of spec 008, replaced by `docs/diagrams.html`) and `src/lib/supabase/client.ts` (no importer). Remove the `BrowserClient` block and its row from diagram 3 and fix the «four clients» wording where it appears.
@@ -77,7 +77,8 @@ When the real accounts are connected one by one, no lead stays undelivered silen
   - [ ] typecheck, lint, test, build green
 
 ## External needs
-- Apply the new migration from slice 3 to the remote Supabase (the user; agents never touch the remote database).
+- Apply the new migration `supabase/migrations/20261112120000_leads_telegram_alerted_at.sql` to the remote Supabase (the user; agents never touch the remote database).
+- On the first local Supabase run: check the two new queries (`requeueSkippedLeads` update, the `.or(and(...),and(...))` alert filter) and regenerate `database.types.ts` with `pnpm db:types` (edited by hand in slice 3, no Docker here); the Supabase contract tests cover both.
 - Nothing else: no new keys or accounts. The slices are built and tested on the demo driver and the fixture modes.
 
 ## Open questions
@@ -92,3 +93,4 @@ When the real accounts are connected one by one, no lead stays undelivered silen
 | --- | --- | --- | --- |
 | 2026-11-12 | 1 | done: `pnpm sync` stops (exit 1) on supabase without `PLEKTAN_API_KEY`; `--fixtures` runs fixtures on purpose, rejected (exit 2) with a key; diagram 7 unchanged (the workflow skip is the same) | `scripts/sync.ts`, `src/lib/sync/sync-guard.ts` + test, `docs/setup.md` |
 | 2026-11-12 | 2 | done: the cron requeues `skipped` → `pending` for channels that are on, leads younger than `SKIPPED_REQUEUE_DAYS` (7); the admin shows «Надіслати» for a `skipped` channel that is on (one attempt, any age); the demo seed's skipped lead is now sent by the cron when fixtures are on (intended); the Supabase `requeueSkippedLeads` update is untested against a local Postgres (none here) | `src/features/leads/{retry-leads,deliver-lead,retry-schedule}.ts` + tests, `src/lib/db/{leads,driver-types}.ts`, both lead drivers, `write-driver-contract.test.ts`, `src/features/admin/leads/{delivery-channel,retry-delivery,lead-delivery-card}.tsx`, `docs/setup.md`, `docs/diagrams.{md,html}` |
+| 2026-11-12 | 3 | done: migration adds `leads.telegram_alerted_at`; the cron sends one alert per lead exhausted on Telegram (once Telegram works), one message when both channels are exhausted; the admin shows when the manager was told for both channels; `database.types.ts` edited by hand (no Docker); diagram 4 unchanged (it doesn't draw the alert columns) | migration, `database.types.ts`, `src/lib/db/{leads,driver-types,admin-leads}.ts` + drivers + contract test, demo seed + `supabase/seed.sql`, `src/features/leads/{retry-leads,lead-delivery-content}.ts` + tests, `src/features/admin/leads/{delivery-channel,lead-delivery-card}.tsx`, `docs/setup.md`, `docs/diagrams.{md,html}` |

@@ -32,6 +32,7 @@ export const LeadDeliveryCard = ({ lead, className }: LeadDeliveryCardProps) => 
         error={lead.telegram_error}
         nextAttemptAt={lead.telegram_next_attempt_at}
         channelOn={getTelegramMode() !== "off"}
+        alertedAt={lead.telegram_alerted_at}
       />
     </div>
   </LeadSection>

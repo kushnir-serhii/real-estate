@@ -19,7 +19,7 @@ type DeliveryChannelProps = {
   channelOn: boolean;
   /** Plektan only. */
   itemId?: string | null;
-  /** Plektan only: when the manager was told in Telegram that Plektan gave up. */
+  /** When the manager was told in Telegram that this channel gave up (Plektan, or Telegram itself once it works again). */
   alertedAt?: string | null;
 };
 

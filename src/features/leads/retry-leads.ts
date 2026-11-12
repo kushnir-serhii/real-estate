@@ -3,14 +3,15 @@ import "server-only";
 import {
   getDueLeadIds,
   getLeadsToAlert,
-  markPlektanAlerted,
+  markLeadAlerted,
   requeueSkippedLeads,
+  type AlertChannel,
   type LeadToAlert,
 } from "@/lib/db/leads";
 import { resolvePlektanLeadsMode, type PlektanLeadsMode } from "@/lib/plektan";
 import { getTelegramMode, sendTelegramMessage, type TelegramMode } from "@/lib/telegram";
 import { deliverLead, type DeliveryResult } from "./deliver-lead";
-import { buildPlektanAlertText } from "./lead-delivery-content";
+import { buildDeliveryAlertText } from "./lead-delivery-content";
 import { MAX_DELIVERY_ATTEMPTS, PENDING_STALE_MS, SKIPPED_REQUEUE_DAYS } from "./retry-schedule";
 
 const RUN_LIMIT = 50;
@@ -25,7 +26,7 @@ export type RetryLeadsDeps = {
   requeueSkipped: (params: { channel: "plektan" | "telegram"; createdAfter: Date }) => Promise<number>;
   deliver: (id: string) => Promise<DeliveryResult>;
   getToAlert: (params: { maxAttempts: number; limit: number }) => Promise<LeadToAlert[]>;
-  markAlerted: (id: string, at: Date) => Promise<void>;
+  markAlerted: (id: string, channels: AlertChannel[], at: Date) => Promise<void>;
   telegramMode: () => TelegramMode;
   sendAlert: (text: string) => Promise<void>;
 };
@@ -37,14 +38,14 @@ const defaultDeps: RetryLeadsDeps = {
   requeueSkipped: requeueSkippedLeads,
   deliver: deliverLead,
   getToAlert: getLeadsToAlert,
-  markAlerted: markPlektanAlerted,
+  markAlerted: markLeadAlerted,
   telegramMode: getTelegramMode,
   sendAlert: (text) => sendTelegramMessage({ text }),
 };
 
 /**
  * One cron run: requeues recent `skipped` channels that are on now, delivers due leads one by one (a bad lead never stops the run), then sends one
- * Telegram alert per lead whose Plektan delivery ran out of attempts. Returns counts only.
+ * Telegram alert per lead whose Plektan or Telegram delivery ran out of attempts (one message if both did). Returns counts only.
  */
 export const retryLeadsWith = async (deps: RetryLeadsDeps): Promise<RetryCounts> => {
   const now = deps.now();
@@ -82,8 +83,8 @@ export const retryLeadsWith = async (deps: RetryLeadsDeps): Promise<RetryCounts>
     const toAlert = await deps.getToAlert({ maxAttempts: MAX_DELIVERY_ATTEMPTS, limit: RUN_LIMIT });
     for (const lead of toAlert) {
       try {
-        await deps.sendAlert(buildPlektanAlertText(lead, process.env.NEXT_PUBLIC_SITE_URL));
-        await deps.markAlerted(lead.id, deps.now());
+        await deps.sendAlert(buildDeliveryAlertText(lead, lead.channels, process.env.NEXT_PUBLIC_SITE_URL));
+        await deps.markAlerted(lead.id, lead.channels, deps.now());
         counts.alerts += 1;
       } catch {
         // Not marked, so the next run sends the alert again.

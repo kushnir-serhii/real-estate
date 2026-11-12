@@ -35,6 +35,7 @@ const insertLead: LeadsDriver["insertLead"] = async (lead) => {
     plektan_item_id: null,
     plektan_next_attempt_at: null,
     plektan_alerted_at: null,
+    telegram_alerted_at: null,
     telegram_status: "pending",
     telegram_error: null,
     telegram_attempts: 0,
@@ -148,16 +149,28 @@ const fetchLeadsToAlert: LeadsDriver["fetchLeadsToAlert"] = async ({ maxAttempts
   getDemoStore()
     .leads.filter(
       (lead) =>
-        lead.plektan_status === "failed" && lead.plektan_attempts >= maxAttempts && lead.plektan_alerted_at === null,
+        (lead.plektan_status === "failed" && lead.plektan_attempts >= maxAttempts && lead.plektan_alerted_at === null) ||
+        (lead.telegram_status === "failed" && lead.telegram_attempts >= maxAttempts && lead.telegram_alerted_at === null),
     )
     .sort(byCreatedAt)
     .slice(0, limit)
-    .map(({ id, name, phone }) => ({ id, name, phone }));
+    .map((lead) => ({
+      id: lead.id,
+      name: lead.name,
+      phone: lead.phone,
+      plektan_status: lead.plektan_status,
+      plektan_attempts: lead.plektan_attempts,
+      plektan_alerted_at: lead.plektan_alerted_at,
+      telegram_status: lead.telegram_status,
+      telegram_attempts: lead.telegram_attempts,
+      telegram_alerted_at: lead.telegram_alerted_at,
+    }));
 
-const markPlektanAlerted: LeadsDriver["markPlektanAlerted"] = async (id, at) => {
+const markAlerted: LeadsDriver["markAlerted"] = async (id, channels, at) => {
   const lead = getDemoStore().leads.find((row) => row.id === id);
   if (!lead) return;
-  lead.plektan_alerted_at = at.toISOString();
+  if (channels.includes("plektan")) lead.plektan_alerted_at = at.toISOString();
+  if (channels.includes("telegram")) lead.telegram_alerted_at = at.toISOString();
   lead.updated_at = new Date().toISOString();
 };
 
@@ -176,7 +189,7 @@ export const demoLeadsDriver: LeadsDriver = {
   fetchDueLeadIds,
   requeueSkippedLeads,
   fetchLeadsToAlert,
-  markPlektanAlerted,
+  markAlerted,
   isPropertyPublished,
   fetchPropertyBrief,
 };

@@ -89,6 +89,7 @@ const fetchAdminLead: AdminLeadsDriver["fetchAdminLead"] = async (id) => {
     plektan_next_attempt_at: lead.plektan_next_attempt_at,
     plektan_item_id: lead.plektan_item_id,
     plektan_alerted_at: lead.plektan_alerted_at,
+    telegram_alerted_at: lead.telegram_alerted_at,
     telegram_status: lead.telegram_status,
     telegram_error: lead.telegram_error,
     telegram_attempts: lead.telegram_attempts,

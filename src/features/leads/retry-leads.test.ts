@@ -15,6 +15,9 @@ type FakeLead = {
   plektan_attempts: number;
   plektan_next_attempt_at: Date | null;
   plektan_alerted_at: Date | null;
+  telegram_status: "pending" | "failed" | "sent";
+  telegram_attempts: number;
+  telegram_alerted_at: Date | null;
 };
 
 /** In-memory stand-in for the DB queries, applying the same rules as the SQL. */
@@ -42,12 +45,17 @@ const fakeDeps = (leads: FakeLead[], overrides: Partial<RetryLeadsDeps> = {}): R
     return sentBoth;
   }),
   getToAlert: async ({ maxAttempts }): Promise<LeadToAlert[]> =>
-    leads
-      .filter((l) => l.plektan_status === "failed" && l.plektan_attempts >= maxAttempts && !l.plektan_alerted_at)
-      .map((l) => ({ id: l.id, name: "Іван", phone: "+380501234567" })),
-  markAlerted: async (id, at) => {
+    leads.flatMap((l) => {
+      const channels: LeadToAlert["channels"] = [];
+      if (l.plektan_status === "failed" && l.plektan_attempts >= maxAttempts && !l.plektan_alerted_at) channels.push("plektan");
+      if (l.telegram_status === "failed" && l.telegram_attempts >= maxAttempts && !l.telegram_alerted_at) channels.push("telegram");
+      return channels.length > 0 ? [{ id: l.id, name: "Іван", phone: "+380501234567", channels }] : [];
+    }),
+  markAlerted: async (id, channels, at) => {
     const found = leads.find((l) => l.id === id);
-    if (found) found.plektan_alerted_at = at;
+    if (!found) return;
+    if (channels.includes("plektan")) found.plektan_alerted_at = at;
+    if (channels.includes("telegram")) found.telegram_alerted_at = at;
   },
   telegramMode: () => "live",
   sendAlert: vi.fn(async () => undefined),
@@ -63,10 +71,15 @@ const lead = (over: Partial<FakeLead>): FakeLead => ({
   plektan_attempts: 1,
   plektan_next_attempt_at: new Date(now.getTime() - 1000),
   plektan_alerted_at: null,
+  telegram_status: "sent",
+  telegram_attempts: 1,
+  telegram_alerted_at: null,
   ...over,
 });
 
 const exhausted = () => lead({ plektan_attempts: MAX_DELIVERY_ATTEMPTS, plektan_next_attempt_at: null });
+
+const exhaustedTelegram = () => lead({ plektan_status: "sent", telegram_status: "failed", telegram_attempts: MAX_DELIVERY_ATTEMPTS });
 
 describe("retryLeadsWith", () => {
   it("delivers a failed lead once it is due", async () => {
@@ -112,6 +125,72 @@ describe("retryLeadsWith", () => {
     expect((await retryLeadsWith(deps)).alerts).toBe(0);
     expect(deps.sendAlert).toHaveBeenCalledTimes(1);
     expect(leads[0]?.plektan_alerted_at).toEqual(now);
+  });
+
+  it("sends one alert for an exhausted Telegram lead across two runs and marks only Telegram", async () => {
+    const leads = [exhaustedTelegram()];
+    const deps = fakeDeps(leads);
+    expect((await retryLeadsWith(deps)).alerts).toBe(1);
+    expect((await retryLeadsWith(deps)).alerts).toBe(0);
+    expect(deps.sendAlert).toHaveBeenCalledTimes(1);
+    expect(deps.sendAlert).toHaveBeenCalledWith(expect.stringContaining("в Telegram"));
+    expect(leads[0]?.telegram_alerted_at).toEqual(now);
+    expect(leads[0]?.plektan_alerted_at).toBeNull();
+  });
+
+  it("repeats a failed Telegram alert on the next run", async () => {
+    const leads = [exhaustedTelegram()];
+    let down = true;
+    const sendAlert = vi.fn(async () => {
+      if (down) throw new Error("telegram down");
+    });
+    const deps = fakeDeps(leads, { sendAlert });
+    expect((await retryLeadsWith(deps)).alerts).toBe(0);
+    expect(leads[0]?.telegram_alerted_at).toBeNull();
+    down = false;
+    expect((await retryLeadsWith(deps)).alerts).toBe(1);
+    expect(sendAlert).toHaveBeenCalledTimes(2);
+    expect(leads[0]?.telegram_alerted_at).toEqual(now);
+  });
+
+  it("sends ONE message naming both channels when both are exhausted, and marks both", async () => {
+    const leads = [
+      lead({
+        plektan_attempts: MAX_DELIVERY_ATTEMPTS,
+        plektan_next_attempt_at: null,
+        telegram_status: "failed",
+        telegram_attempts: MAX_DELIVERY_ATTEMPTS,
+      }),
+    ];
+    const deps = fakeDeps(leads);
+    expect((await retryLeadsWith(deps)).alerts).toBe(1);
+    expect(deps.sendAlert).toHaveBeenCalledTimes(1);
+    expect(deps.sendAlert).toHaveBeenCalledWith(expect.stringContaining("ні до Plektan, ні в Telegram"));
+    expect(leads[0]?.plektan_alerted_at).toEqual(now);
+    expect(leads[0]?.telegram_alerted_at).toEqual(now);
+    expect((await retryLeadsWith(deps)).alerts).toBe(0);
+  });
+
+  it("alerts only the channel not yet alerted", async () => {
+    const leads = [
+      lead({
+        plektan_attempts: MAX_DELIVERY_ATTEMPTS,
+        plektan_alerted_at: now,
+        telegram_status: "failed",
+        telegram_attempts: MAX_DELIVERY_ATTEMPTS,
+      }),
+    ];
+    const deps = fakeDeps(leads);
+    expect((await retryLeadsWith(deps)).alerts).toBe(1);
+    expect(deps.sendAlert).toHaveBeenCalledWith(expect.not.stringContaining("Plektan"));
+  });
+
+  it("leaves a Telegram alert unmarked when Telegram is off", async () => {
+    const leads = [exhaustedTelegram()];
+    const deps = fakeDeps(leads, { telegramMode: () => "off" });
+    expect((await retryLeadsWith(deps)).alerts).toBe(0);
+    expect(deps.sendAlert).not.toHaveBeenCalled();
+    expect(leads[0]?.telegram_alerted_at).toBeNull();
   });
 
   it("leaves the alert for later when Telegram is off", async () => {

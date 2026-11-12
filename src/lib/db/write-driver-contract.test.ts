@@ -170,9 +170,23 @@ const runWriteContract = (name: string, getDrivers: () => Drivers | Promise<Driv
         await d.leads.updateLeadDelivery(id, failedPlektan(5, null));
         const before = await d.leads.fetchLeadsToAlert({ maxAttempts: 5, limit: BIG });
         expect(before.map((lead) => lead.id)).toContain(id);
-        await d.leads.markPlektanAlerted(id, new Date());
+        await d.leads.markAlerted(id, ["plektan"], new Date());
         const after = await d.leads.fetchLeadsToAlert({ maxAttempts: 5, limit: BIG });
         expect(after.map((lead) => lead.id)).not.toContain(id);
+      });
+
+      it("lists leads whose Telegram delivery ran out of attempts, each channel alerted on its own", async () => {
+        const { id } = await newLead(d);
+        await d.leads.updateLeadDelivery(id, { channel: "telegram", status: "failed", error: "x", attempts: 5, nextAttemptAt: null });
+        await d.leads.updateLeadDelivery(id, failedPlektan(5, null));
+        const listed = async () => (await d.leads.fetchLeadsToAlert({ maxAttempts: 5, limit: BIG })).find((lead) => lead.id === id);
+        expect(await listed()).toMatchObject({ plektan_alerted_at: null, telegram_alerted_at: null });
+
+        await d.leads.markAlerted(id, ["telegram"], new Date());
+        expect(await listed()).toMatchObject({ plektan_alerted_at: null, telegram_alerted_at: expect.any(String) });
+
+        await d.leads.markAlerted(id, ["plektan"], new Date());
+        expect(await listed()).toBeUndefined();
       });
     });
 

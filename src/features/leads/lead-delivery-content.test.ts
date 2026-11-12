@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { LeadForDelivery } from "@/lib/db/leads";
 import { PROP_KINDS_BY_PROPERTY } from "@/lib/db/property-values";
-import { buildAdvertInfo, buildPlektanAlertText, buildPlektanRequest, buildTelegramText, escapeHtml } from "./lead-delivery-content";
+import { buildAdvertInfo, buildDeliveryAlertText, buildPlektanRequest, buildTelegramText, escapeHtml } from "./lead-delivery-content";
 
 const SITE = "https://7sky.example/";
 
@@ -179,11 +179,27 @@ describe("buildTelegramText", () => {
   });
 });
 
-describe("buildPlektanAlertText", () => {
-  it("has name, phone and the admin link", () => {
-    const text = buildPlektanAlertText({ id: "abc-1", name: "Іван", phone: "+380501234567" }, SITE);
-    expect(text).toContain("Заявка не дійшла до Plektan");
-    expect(text.split("\n").at(-1)).toBe("Відкрити в адмінці: https://7sky.example/admin/leads/abc-1");
+describe("buildDeliveryAlertText", () => {
+  const alertLead = { id: "abc-1", name: "Іван", phone: "+380501234567" };
+
+  it("has only name, phone and the admin link below the heading", () => {
+    const text = buildDeliveryAlertText(alertLead, ["plektan"], SITE);
+    expect(text.split("\n")).toEqual([
+      "<b>Заявка не дійшла до Plektan</b>",
+      "Ім'я: Іван",
+      "Телефон: +380501234567",
+      "Відкрити в адмінці: https://7sky.example/admin/leads/abc-1",
+    ]);
+  });
+
+  it("names Telegram for a Telegram-only alert", () => {
+    expect(buildDeliveryAlertText(alertLead, ["telegram"], SITE)).toContain("не дійшло в Telegram");
+  });
+
+  it("names both channels in one heading, with the same body", () => {
+    const lines = buildDeliveryAlertText(alertLead, ["plektan", "telegram"], SITE).split("\n");
+    expect(lines[0]).toBe("<b>Заявка не дійшла ні до Plektan, ні в Telegram</b>");
+    expect(lines).toHaveLength(4);
   });
 });
 

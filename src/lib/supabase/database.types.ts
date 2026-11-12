@@ -236,6 +236,7 @@ export type Database = {
           plektan_next_attempt_at: string | null
           plektan_status: Database["public"]["Enums"]["delivery_status"]
           property_id: string | null
+          telegram_alerted_at: string | null
           telegram_attempts: number
           telegram_error: string | null
           telegram_next_attempt_at: string | null
@@ -262,6 +263,7 @@ export type Database = {
           plektan_next_attempt_at?: string | null
           plektan_status?: Database["public"]["Enums"]["delivery_status"]
           property_id?: string | null
+          telegram_alerted_at?: string | null
           telegram_attempts?: number
           telegram_error?: string | null
           telegram_next_attempt_at?: string | null
@@ -288,6 +290,7 @@ export type Database = {
           plektan_next_attempt_at?: string | null
           plektan_status?: Database["public"]["Enums"]["delivery_status"]
           property_id?: string | null
+          telegram_alerted_at?: string | null
           telegram_attempts?: number
           telegram_error?: string | null
           telegram_next_attempt_at?: string | null
