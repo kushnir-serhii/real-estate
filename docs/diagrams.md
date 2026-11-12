@@ -131,7 +131,7 @@ flowchart LR
 | `consts` | mock | The demo agency's name, contacts, texts and navigation, kept as constants until a real agency's data replaces them. | `src/constants/*` |
 | `facade` | seam | The only data entry point for pages and actions: it adds caching and picks the Supabase or the demo driver. | `src/lib/db/*`, `DATA_DRIVER` in `src/lib/data-driver.ts` |
 | `pg` | real | Supabase Postgres with row-level security: the production store of properties, photos, leads, pages, posts and AI chats. | `src/lib/db/supabase/*`, `supabase/migrations/` |
-| `auth` | real | Supabase Auth with email and password; an admin is a user listed in the admins table. | `src/lib/supabase/{server,client,admin}.ts` |
+| `auth` | real | Supabase Auth with email and password; an admin is a user listed in the admins table. | `src/lib/supabase/{server,admin}.ts` |
 | `store` | mock | The in-memory store that holds the typed seed for each process, with the same read and write rules that RLS applies in Postgres. | `src/lib/demo/store.ts`, `src/lib/demo/seed/*`, `src/lib/demo/db/*` |
 | `seedsql` | mock | The SQL file generated from the demo seed so a local Supabase can start with the same listings. | `supabase/seed.sql`, `pnpm seed:sql` |
 | `adminsession` | seam | Answers who is calling the admin: a Supabase Auth user checked against admins, or the signed demo cookie. | `src/lib/auth/admin-session.ts` |
@@ -253,7 +253,7 @@ flowchart LR
 
 ## 3. Data-driver seam
 
-How one call reaches either world. Pages, actions and route handlers import only the facade; the facade asks `data-driver.ts` which driver is on and loads that driver on demand. The two drivers implement one contract and never import each other. Next to the data seam are the two other seams: who is the admin, and where a photo comes from. The four Supabase clients are listed with what each one is for.
+How one call reaches either world. Pages, actions and route handlers import only the facade; the facade asks `data-driver.ts` which driver is on and loads that driver on demand. The two drivers implement one contract and never import each other. Next to the data seam are the two other seams: who is the admin, and where a photo comes from. The three Supabase clients are listed with what each one is for.
 
 ```mermaid
 classDiagram
@@ -298,9 +298,6 @@ classDiagram
     class ServerClient["Server Supabase client [real]"]:::real {
         anon key, user session cookies
     }
-    class BrowserClient["Browser Supabase client [real]"]:::real {
-        anon key, in the browser
-    }
     class AdminClient["Admin Supabase client [real]"]:::real {
         service role, bypasses RLS
     }
@@ -342,7 +339,6 @@ classDiagram
     AdminSession ..> DataDriver
     AdminSession --> ServerClient : supabase driver
     ServerClient --> SupabaseAuth
-    BrowserClient --> SupabaseAuth
     AdminSession --> DemoSession : demo driver
 
     Callers --> PhotoUrl
@@ -351,7 +347,6 @@ classDiagram
 
     note for Facade "Callers never see a driver. A test keeps both drivers on one contract."
     note for DemoDriver "SupabaseDriver and DemoDriver never import each other."
-    note for BrowserClient "No file imports this client today."
 
     classDef real fill:#dbeafe,stroke:#1d4ed8,color:#0b1f4d
     classDef mock fill:#fef3c7,stroke:#b45309,color:#3b2300,stroke-dasharray:5 4
@@ -372,11 +367,10 @@ classDiagram
 | `DemoSeed` | mock | Builds the typed demo rows (listings, agents, pages, posts and leads) that match the database types; also rendered to supabase seed.sql. | `src/lib/demo/seed/index.ts`, `pnpm seed:sql` |
 | `PublicClient` | real | A cookie-less Supabase client with the anon key for public reads, so pages can be cached; RLS limits it to public rows. | `src/lib/supabase/public.ts` |
 | `ServerClient` | real | A Supabase client with the anon key that carries the visitor's session cookies; used for sign-in and admin reads. | `src/lib/supabase/server.ts` |
-| `BrowserClient` | real | A Supabase client with the anon key for use in the browser; nothing in the code imports it yet. | `src/lib/supabase/client.ts` |
 | `AdminClient` | real | A Supabase client with the service role key that bypasses RLS; server code only, for sync, leads and admin writes. | `src/lib/supabase/admin.ts`, `SUPABASE_SERVICE_ROLE_KEY` |
 | `Postgres` | real | Supabase Postgres with row-level security: the production store of properties, photos, leads, pages, posts and AI chats. | `src/lib/db/supabase/*`, `supabase/migrations/` |
 | `AdminSession` | seam | Answers who is calling the admin: a Supabase Auth user checked against admins, or the signed demo cookie. | `src/lib/auth/admin-session.ts` |
-| `SupabaseAuth` | real | Supabase Auth with email and password; an admin is a user listed in the admins table. | `src/lib/supabase/{server,client,admin}.ts` |
+| `SupabaseAuth` | real | Supabase Auth with email and password; an admin is a user listed in the admins table. | `src/lib/supabase/{server,admin}.ts` |
 | `DemoSession` | mock | A signed httpOnly cookie behind the one-click demo sign-in, with no account or network call. | `src/lib/demo/session.ts`, `DEMO_SESSION_SECRET` |
 | `PhotoUrl` | seam | Turns a stored photo key into a URL: R2, an in-memory demo upload, or a local placeholder file. | `src/lib/photos/photo-url.ts`, `NEXT_PUBLIC_R2_PUBLIC_URL` |
 | `R2` | real | Cloudflare R2 holds property, agent and post photos in two or three sizes; the Worker binding or the S3 API writes them. | `src/lib/r2/client.ts`, `R2_*`, `PHOTOS_BUCKET` |
@@ -1216,7 +1210,7 @@ sequenceDiagram
 | `app` | seam | The one Next.js app on Cloudflare Workers that serves the site, the admin and the API, and picks each backend by env. | `src/features/admin/auth-actions.ts`, `src/app/api/admin/photos/route.ts`, `src/app/api/demo/photos/[...key]/route.ts` |
 | `guard` | seam | The proxy that runs on every admin path: it sends anonymous visitors to the sign-in page and keeps admin pages out of search results. | `src/proxy.ts`, `src/lib/supabase/proxy.ts` |
 | `adminsession` | seam | Answers who is calling the admin: a Supabase Auth user checked against admins, or the signed demo cookie. | `src/lib/auth/admin-session.ts` |
-| `auth` | real | Supabase Auth with email and password; an admin is a user listed in the admins table. | `src/lib/supabase/{server,client,admin}.ts` |
+| `auth` | real | Supabase Auth with email and password; an admin is a user listed in the admins table. | `src/lib/supabase/{server,admin}.ts` |
 | `session` | mock | A signed httpOnly cookie behind the one-click demo sign-in, with no account or network call. | `src/lib/demo/session.ts`, `DEMO_SESSION_SECRET` |
 | `facade` | seam | The only data entry point for pages and actions: it adds caching and picks the Supabase or the demo driver. | `src/lib/db/admin-property-photos.ts`, `src/lib/db/property-permissions.ts`, `DATA_DRIVER` in `src/lib/data-driver.ts` |
 | `pg` | real | Supabase Postgres with row-level security: the production store of properties, photos, leads, pages, posts and AI chats. | `src/lib/db/supabase/admin-property-photos.ts`, `supabase/migrations/` |

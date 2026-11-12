@@ -66,15 +66,15 @@ When the real accounts are connected one by one, no lead stays undelivered silen
   - [x] the alert text has no data beyond name, phone and the admin link; nothing personal is logged
   - [x] typecheck, lint, test, build green
 
-### [ ] 4. Remove the stale diagrams page and the unused Supabase browser client
+### [x] 4. Remove the stale diagrams page and the unused Supabase browser client
 - **Build:** delete `src/app/design/diagrams/` (hand-drawn as of spec 008, replaced by `docs/diagrams.html`) and `src/lib/supabase/client.ts` (no importer). Remove the `BrowserClient` block and its row from diagram 3 and fix the «four clients» wording where it appears.
 - **Files:** `src/app/design/diagrams/*` (deleted), `src/lib/supabase/client.ts` (deleted), `docs/diagrams.md`, `docs/diagrams.html`, `docs/conventions.md` (Supabase clients: two, not three), any doc that mentions either
 - **Model:** haiku
 - **Accept:**
-  - [ ] `/design/diagrams` answers 404 in dev; `/design` still renders
-  - [ ] no reference to `design/diagrams` or `supabase/client` is left in `src/`, `docs/` (except spec logs), `e2e/`
-  - [ ] `pnpm diagrams` passes and the drift test is green
-  - [ ] typecheck, lint, test, build green
+  - [x] `/design/diagrams` answers 404 in dev; `/design` still renders
+  - [x] no reference to `design/diagrams` or `supabase/client` is left in `src/`, `docs/` (except spec logs), `e2e/`
+  - [x] `pnpm diagrams` passes and the drift test is green
+  - [x] typecheck, lint, test, build green
 
 ## External needs
 - Apply the new migration `supabase/migrations/20261112120000_leads_telegram_alerted_at.sql` to the remote Supabase (the user; agents never touch the remote database).
@@ -94,3 +94,4 @@ When the real accounts are connected one by one, no lead stays undelivered silen
 | 2026-11-12 | 1 | done: `pnpm sync` stops (exit 1) on supabase without `PLEKTAN_API_KEY`; `--fixtures` runs fixtures on purpose, rejected (exit 2) with a key; diagram 7 unchanged (the workflow skip is the same) | `scripts/sync.ts`, `src/lib/sync/sync-guard.ts` + test, `docs/setup.md` |
 | 2026-11-12 | 2 | done: the cron requeues `skipped` → `pending` for channels that are on, leads younger than `SKIPPED_REQUEUE_DAYS` (7); the admin shows «Надіслати» for a `skipped` channel that is on (one attempt, any age); the demo seed's skipped lead is now sent by the cron when fixtures are on (intended); the Supabase `requeueSkippedLeads` update is untested against a local Postgres (none here) | `src/features/leads/{retry-leads,deliver-lead,retry-schedule}.ts` + tests, `src/lib/db/{leads,driver-types}.ts`, both lead drivers, `write-driver-contract.test.ts`, `src/features/admin/leads/{delivery-channel,retry-delivery,lead-delivery-card}.tsx`, `docs/setup.md`, `docs/diagrams.{md,html}` |
 | 2026-11-12 | 3 | done: migration adds `leads.telegram_alerted_at`; the cron sends one alert per lead exhausted on Telegram (once Telegram works), one message when both channels are exhausted; the admin shows when the manager was told for both channels; `database.types.ts` edited by hand (no Docker); diagram 4 unchanged (it doesn't draw the alert columns) | migration, `database.types.ts`, `src/lib/db/{leads,driver-types,admin-leads}.ts` + drivers + contract test, demo seed + `supabase/seed.sql`, `src/features/leads/{retry-leads,lead-delivery-content}.ts` + tests, `src/features/admin/leads/{delivery-channel,lead-delivery-card}.tsx`, `docs/setup.md`, `docs/diagrams.{md,html}` |
+| 2026-11-12 | 4 | done: deleted `/design/diagrams` and `src/lib/supabase/client.ts`; diagram 3 lists three Supabase clients, `auth` rows point at `{server,admin}.ts`; `docs/conventions.md` now names the real three clients (`public.ts`, `server.ts`, `admin.ts`; `public.ts` was missing before) | `src/app/design/diagrams/*` (deleted), `src/lib/supabase/client.ts` (deleted), `docs/conventions.md`, `docs/diagrams.{md,html}` |

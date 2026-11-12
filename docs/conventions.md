@@ -22,7 +22,7 @@ Next.js (App Router) · React · TypeScript (strict) · Tailwind 4 · shadcn/ui 
 | Data drivers | `src/lib/db/supabase/<domain>.ts`, `src/lib/demo/db/<domain>.ts` | implement the types in `src/lib/db/driver-types.ts`; `DATA_DRIVER` is read in `src/lib/data-driver.ts` only |
 | Demo data | `src/lib/demo/store.ts`, `src/lib/demo/seed/*` | rows typed from `database.types.ts`; the store mirrors RLS |
 | External client | `src/lib/plektan/`, `src/lib/telegram/`, `src/lib/r2/`, `src/lib/turnstile/`, `src/lib/geocode/`, `src/lib/llm/` | |
-| Supabase clients | `src/lib/supabase/server.ts`, `client.ts`, `admin.ts` | |
+| Supabase clients | `src/lib/supabase/public.ts`, `server.ts`, `admin.ts` | |
 | DB types | `src/lib/supabase/database.types.ts` | generated, never hand-edited |
 | Migrations | `supabase/migrations/<timestamp>_<name>.sql` | |
 
@@ -49,7 +49,7 @@ Next.js (App Router) · React · TypeScript (strict) · Tailwind 4 · shadcn/ui 
 - Runtime is Cloudflare Workers (OpenNext): no Node-only APIs (`fs`, `sharp`, native modules) in request code. Check new dependencies for Workers compatibility.
 
 ## Data (Supabase)
-- Three clients: `server.ts` (anon key + user session, for pages and actions), `client.ts` (browser, anon key), `admin.ts` (service role — server only, sync and admin actions; `import 'server-only'`).
+- Three clients: `public.ts` (anon key, no cookies, for public cached reads), `server.ts` (anon key + user session, for pages and actions), `admin.ts` (service role — server only, sync and admin actions; `import 'server-only'`).
 - Every table has RLS in the migration that creates it. Public read only of published properties and their photos; leads have no public read; writes from the site only via server code.
 - Prices: integer amount + `currency` (`UAH` | `USD` | `EUR`). Format only through `formatPrice` (locale `uk-UA`). Keep the Plektan raw text in `raw` for debugging.
 - Keep Plektan's original payload (`raw jsonb`) and ids (`external_id` = `adid`) on synced rows; our own `id` is a uuid.
