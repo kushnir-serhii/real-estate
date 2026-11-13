@@ -97,14 +97,14 @@ A condensed heading face needs bigger sizes than Unbounded: re-tune the type sca
   - [x] favourites and theme saved under the old keys survive a reload after the rename (unit test)
   - [x] favicon and OG image show the shield; `pnpm test` (incl. seed.sql drift) green
 
-### [ ] 5. Header: phone as the first nav item
+### [x] 5. Header: phone as the first nav item
 - **Build:** `NEXT_PUBLIC_AGENCY_PHONE` → `CONTACTS.phone` (`display` formatted for Ukraine, `href` = `tel:`), mock in `.env.example`, documented in `docs/setup.md`. Desktop header: phone icon and the `2xl` number removed from the right; the number is the first item in the nav (`tel:` link with `aria-label` «Подзвонити: …»). Below `lg` the phone icon button stays. The full desktop header starts at `xl` (decided): below `xl` it is the tablet header (logo, phone icon, favorites, menu); nav, theme and CTA appear from `xl`.
 - **Files:** `src/constants/contacts.ts` (+ a small formatter with a test), `src/components/layout/{site-header,nav-config,mobile-menu}.tsx`, `.env.example`, `docs/setup.md`
 - **Agent:** designer · **Model:** sonnet
 - **Accept:**
-  - [ ] the number shown and dialed everywhere (header, footer, contacts, JSON-LD, mobile menu) comes from the env value, or the mock when it is empty
-  - [ ] desktop header: no phone icon; the number sits before «Купити»; readable over the hero and after scroll (AA, both themes); no CLS
-  - [ ] below `xl` (375px and 1024px): phone icon button still there, 44px; the mobile menu works at 1024px
+  - [x] the number shown and dialed everywhere (header, footer, contacts, JSON-LD, mobile menu) comes from the env value, or the mock when it is empty
+  - [x] desktop header: no phone icon; the number sits before «Купити»; readable over the hero and after scroll (AA, both themes); no CLS
+  - [x] below `xl` (375px and 1024px): phone icon button still there, 44px; the mobile menu works at 1024px
 
 ### [ ] 6. Home for a new agency
 - **Build:** remove experience claims and blocks from home: hero eyebrow «з 2014 року» (keep a neutral one like «Київ і область» or none), hero facts row (12 років, 1 400+ угод, Перевірені документи), `TrustStats` band (and `count-up.tsx` if nothing else uses it), `ABOUT.chip`, `HomeAgents` from home (the team stays on `/about`). `Testimonials` and `TESTIMONIALS` are deleted (component + constants). `QuickSearch` stays where it is (overlapping the hero edge); with the trust band gone, check the spacing below it. Sweep the rest of the public copy for experience claims (`BRAND`, about page, footer, page SEO, assistant prompt / FAQ): nothing says years, deal counts or ratings. Delete components and constants that become unused.
@@ -163,6 +163,8 @@ A condensed heading face needs bigger sizes than Unbounded: re-tune the type sca
 - **Decided (2026-11-13, user, defaults accepted):** container `--container-site: 88rem`; Cormorant SC weight 600; card slider loops, at most 8 photos, photo 4:3; mock domain `diplomathall.example`, mock Telegram `t.me/diplomathall_demo`; the district picker goes right after «Нові пропозиції».
 - **Decided (2026-11-13, user):** spec moved to `ready`; the rest of the redesign the user is still planning goes into a later spec.
 
+- **Open (small):** JSON-LD `telephone` still uses the display format; `CONTACTS.phone.e164` is available. An invalid `NEXT_PUBLIC_AGENCY_PHONE` falls back to the mock silently (a build warning would be a follow-up).
+
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
@@ -170,3 +172,4 @@ A condensed heading face needs bigger sizes than Unbounded: re-tune the type sca
 | 2026-11-13 | 2 | done: `--radius-control` (9999px) → `rounded-control` on buttons, inputs, selects (Radix + native), tabs, chips, badges, pagination, chat input; textarea `rounded-control-multiline` (min(control, 3xl)); dropdowns `rounded-2xl`. Exceptions: favorites counter dot, decorative circles, text links, cards / panels / dialogs, admin loading skeletons (slice 9). Fix found in review: Sofia Sans' Cyrillic defaults to Bulgarian letterforms; both Cyrillic woff2 files remapped to the `.loclRUS` (standard) glyphs, 29 codepoints each | `globals.css`, `components/ui/*`, `form-select.tsx`, 30+ feature components, `src/app/fonts/sofia-sans*-cyrillic-*.woff2` |
 | 2026-11-13 | 3 | done: `--container-site: 88rem` + `site-container` (gutters 16/24/32px) in 24 files, no `max-w-6xl` left; 1440px → 1344px content, 48px gutters (serhant range); 1280 → 1216/32; home sections `py-12 sm:py-16 lg:py-20`; edge-to-edge strips and sticky bars follow the 24px gutter (`sm:-mx-6 sm:px-6`); narrow reading columns `px-4 sm:px-6` so they line up with the header | `globals.css`, site / admin layouts, page header, home, property, blog, catalog, contacts, favorites, admin forms |
 | 2026-11-13 | 4 | done: `ShieldMark` (clipPath id from `useId`) + `Logo` (`full`/`mark`, tones, sizes sm 36 / md 40–44 / lg 56px, mark only ≤360px), Cormorant SC preloaded; 7 SKY → Diplomat Hall in constants, seed + seed.sql, assets (icon.svg, favicon, OG; OG wordmark in a system serif, sharp can't load woff2), assistant, e2e, docs (product.md «Design status» rewritten); storage keys `diplomat-hall-*` with migration from both old prefixes, incl. the inline theme script (tests); grep for the old name empty | `src/components/layout/{logo,shield-mark}.tsx`, `legacy-storage.ts` + test, `brand.ts`, `contacts.ts`, seed, `scripts/generate-brand-assets.mjs`, assets, docs |
+| 2026-11-13 | 5 | done: `NEXT_PUBLIC_AGENCY_PHONE` → `resolveUaPhone` (`src/lib/format/format-phone.ts` + test) → `CONTACTS.phone` (+ `e164`; Viber URL built from it); checked with a build on `+380 67 123-45-67` (pages, JSON-LD, Viber). Header breakpoints `lg` → `xl`; from `xl` the number is the first nav item (thin rule after it), no phone icon; below `xl` phone icon + favorites + menu (sheet 384px at 1024). Header 80px in both states, no CLS | `contacts.ts`, `format-phone.ts`, `site-header.tsx`, `nav-config.ts`, `nav-link.tsx`, `.env.example`, `docs/setup.md` |

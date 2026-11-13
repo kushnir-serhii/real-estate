@@ -10,6 +10,7 @@ import { NavLink } from "@/components/layout/nav-link";
 import {
   CTA_LINK,
   HEADER_ICON_CLASS,
+  NAV_ITEM_CLASS,
   NAV_LINKS,
 } from "@/components/layout/nav-config";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -18,11 +19,22 @@ import { cn } from "@/lib/utils";
 
 export const SiteHeader = () => (
   <HeaderShell>
-    <div className="site-container flex h-full items-center justify-between gap-2 lg:grid lg:grid-cols-[1fr_auto_1fr]">
+    {/* the full desktop header starts at xl: below it the centred nav does not fit next to the logo and the CTA */}
+    <div className="site-container flex h-full items-center justify-between gap-2 xl:grid xl:grid-cols-[1fr_auto_1fr]">
       <Logo tone="header" className="justify-self-start" />
 
-      <nav aria-label="Основна навігація" className="hidden lg:block">
+      <nav aria-label="Основна навігація" className="hidden xl:block">
         <ul className="flex items-center gap-1">
+          {/* the phone is the first nav item, a thin rule separates it from the sections */}
+          <li className="flex items-center after:ml-1 after:h-4 after:w-px after:bg-current after:opacity-30">
+            <a
+              href={CONTACTS.phone.href}
+              aria-label={`Подзвонити: ${CONTACTS.phone.display}`}
+              className={cn(NAV_ITEM_CLASS, "whitespace-nowrap tabular-nums")}
+            >
+              {CONTACTS.phone.display}
+            </a>
+          </li>
           {NAV_LINKS.map((link) => (
             <li key={link.href}>
               <NavLink href={link.href} activePath={link.activePath}>
@@ -33,21 +45,12 @@ export const SiteHeader = () => (
         </ul>
       </nav>
 
-      <div className="flex items-center gap-1 lg:justify-self-end">
-        {/* number from 2xl (it does not fit next to a centred nav before), icon-only with a label below */}
-        <a
-          href={CONTACTS.phone.href}
-          aria-label={`Подзвонити: ${CONTACTS.phone.display}`}
-          className="hidden min-h-11 items-center gap-2 rounded-md px-2 text-sm font-semibold whitespace-nowrap outline-none focus-visible:ring-3 focus-visible:ring-ring/50 2xl:inline-flex"
-        >
-          <Phone className="size-4" aria-hidden="true" />
-          <span className="tabular-nums">{CONTACTS.phone.display}</span>
-        </a>
+      <div className="flex items-center gap-1 xl:justify-self-end">
         <Button
           asChild
           variant="ghost"
           size="icon"
-          className={cn("2xl:hidden", HEADER_ICON_CLASS)}
+          className={cn("xl:hidden", HEADER_ICON_CLASS)}
         >
           <a
             href={CONTACTS.phone.href}
@@ -57,14 +60,14 @@ export const SiteHeader = () => (
           </a>
         </Button>
         <FavoritesLink className={HEADER_ICON_CLASS} />
-        <ThemeToggle className={cn("hidden lg:inline-flex", HEADER_ICON_CLASS)} />
-        <Button asChild variant="dawn" className="ml-2 hidden lg:inline-flex">
+        <ThemeToggle className={cn("hidden xl:inline-flex", HEADER_ICON_CLASS)} />
+        <Button asChild variant="dawn" className="ml-2 hidden xl:inline-flex">
           <Link href={CTA_LINK.href}>
             {CTA_LINK.label}
             <ArrowRight data-icon="inline-end" aria-hidden="true" />
           </Link>
         </Button>
-        <div className="lg:hidden">
+        <div className="xl:hidden">
           <MobileMenu />
         </div>
       </div>
