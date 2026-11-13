@@ -15,7 +15,7 @@ type PageHeaderProps = {
   className?: string;
 };
 
-/** One page header for every inner route: eyebrow, Unbounded h1, lead. Sits right under the solid site header. */
+/** One page header for every inner route: eyebrow, heading-font h1, lead. Sits right under the solid site header. */
 export const PageHeader = ({
   eyebrow,
   title,

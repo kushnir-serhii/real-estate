@@ -1,11 +1,11 @@
 import localFont from "next/font/local";
 
-// Unbounded variable (SIL OFL, see OFL.txt), self-hosted like Manrope: no request to Google Fonts.
+// Sofia Sans Extra Condensed variable (SIL OFL, see OFL.txt), self-hosted like Sofia Sans: no request to Google Fonts.
 // Headings, hero, prices and big numbers. Latin and Cyrillic files are split by unicode-range.
-export const unboundedLatin = localFont({
-  src: "./unbounded-latin-wght-normal.woff2",
-  weight: "200 900",
-  variable: "--font-unbounded",
+export const sofiaSansExtraCondensedLatin = localFont({
+  src: "./sofia-sans-extra-condensed-latin-wght-normal.woff2",
+  weight: "1 1000",
+  variable: "--font-sofia-sans-extra-condensed",
   display: "swap",
   declarations: [
     {
@@ -16,10 +16,10 @@ export const unboundedLatin = localFont({
   ],
 });
 
-export const unboundedCyrillic = localFont({
-  src: "./unbounded-cyrillic-wght-normal.woff2",
-  weight: "200 900",
-  variable: "--font-unbounded-cyrillic",
+export const sofiaSansExtraCondensedCyrillic = localFont({
+  src: "./sofia-sans-extra-condensed-cyrillic-wght-normal.woff2",
+  weight: "1 1000",
+  variable: "--font-sofia-sans-extra-condensed-cyrillic",
   display: "swap",
   adjustFontFallback: false,
   declarations: [

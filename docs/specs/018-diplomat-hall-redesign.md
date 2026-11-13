@@ -1,6 +1,6 @@
 # 018 — Redesign: Diplomat Hall brand, new type, wider layout
 
-**Status:** ready · **Depends on:** 017 · **Route(s):** every public route (`/`, `/catalog`, property pages, `/about`, `/contacts`, `/favorites`, `/blog`, `/privacy`, 404, `/design`); admin gets the new tokens, logo and name only
+**Status:** in-progress · **Depends on:** 017 · **Route(s):** every public route (`/`, `/catalog`, property pages, `/about`, `/contacts`, `/favorites`, `/blog`, `/privacy`, 404, `/design`); admin gets the new tokens, logo and name only
 
 ## Goal
 The agency gets a new name and identity: **Diplomat Hall** (shield mark + vertical rule + serif small-caps wordmark). It is a **new** agency, so the site stops claiming years on the market, deal counts, ratings and reviews it doesn't have. When this spec is done the public site uses the new logo and fonts everywhere, has pill-shaped controls, a wider layout with smaller side gutters (reference: serhant.com), a header with the phone number as the first nav item, bigger property cards with a photo slider, and a new district picker where hovering a district name changes the background photo.
@@ -59,15 +59,15 @@ A condensed heading face needs bigger sizes than Unbounded: re-tune the type sca
 
 ## Slices
 
-### [ ] 1. Fonts and type scale
+### [x] 1. Fonts and type scale
 - **Build:** self-host Sofia Sans, Sofia Sans Extra Condensed (latin + cyrillic, split by `unicode-range` like `manrope.ts`) and Cormorant SC (latin, one weight) per **Design direction**; `--font-sans`, `--font-heading`, new `--font-logo` in `globals.css`; delete the Unbounded and Manrope files and loaders; update `OFL.txt`. Re-tune the type scale utilities (display / h1 / h2 / h3 / eyebrow) for the condensed face; check hero, section headings, prices, card titles, admin headings. `/design` shows the three fonts and the new scale.
 - **Files:** `src/app/fonts/*`, `src/app/layout.tsx`, `src/app/globals.css`, `src/app/design/page.tsx`
 - **Agent:** designer · **Model:** sonnet
 - **Accept:**
-  - [ ] Cyrillic and Latin headings render in Sofia Sans Extra Condensed (no fallback glyphs: checked on «Нерухомість у Києві», «Ґ, Є, Ї, І»)
-  - [ ] fonts load from local files only; a Latin-only text does not load the Cyrillic file; `package.json` has no fontsource dependency
-  - [ ] `pnpm perf` on `/`: LCP < 2.5 s, CLS < 0.1; font bytes before and after written in the log
-  - [ ] typecheck, lint, build green
+  - [x] Cyrillic and Latin headings render in Sofia Sans Extra Condensed (no fallback glyphs: checked on «Нерухомість у Києві», «Ґ, Є, Ї, І»)
+  - [x] fonts load from local files only; a Latin-only text does not load the Cyrillic file; `package.json` has no fontsource dependency
+  - [x] `pnpm perf` on `/`: LCP < 2.5 s, CLS < 0.1; font bytes before and after written in the log
+  - [x] typecheck, lint, build green
 
 ### [ ] 2. Pill controls
 - **Build:** `--radius-control` token (pill) and its use in `Button` (all sizes incl. `xs`, `sm`, `icon*`), `Input`, `Select` trigger, `form-select` (native), deal tabs / segmented controls, chips and badges, pagination, chat input, filter controls in the catalog sheet; `Textarea` → `rounded-3xl`; popover / select content → `rounded-2xl`. Horizontal padding of pills adjusted so text doesn't hug the curve. Admin checked for regressions (tables, forms, dialogs).
@@ -164,3 +164,4 @@ A condensed heading face needs bigger sizes than Unbounded: re-tune the type sca
 ## Log
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
+| 2026-11-13 | 1 | done: Sofia Sans + Sofia Sans Extra Condensed (latin/cyrillic split) + Cormorant SC 600 (latin, no preload yet); Manrope/Unbounded removed; scale display 48→104, h1 40→72, h2 36→60, h3 24→32 (700/700/700/600), eyebrow 13px; font bytes 121.7 KB → 152.7 KB total (+10 KB on a Cyrillic page); perf `/` LCP 1060 ms, CLS 0, JS 211 KB | `src/app/fonts/*`, `layout.tsx`, `globals.css`, `/design`, OFL.txt |

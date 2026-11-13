@@ -25,7 +25,7 @@ Stage 1 (≈7–9 weeks): base site + admin + AI assistant — see [reference/st
 | 015 | [Blog](specs/015-blog.md) | done | 014 |
 | 016 | [UML diagrams: Supabase, Plektan and where the mock data is](specs/016-uml-diagrams.md) | done | 015 |
 | 017 | [Launch hardening: leads that wait for keys, sync guard, cleanup](specs/017-launch-hardening.md) | done | 016 |
-| 018 | [Redesign: Diplomat Hall brand, new type, wider layout](specs/018-diplomat-hall-redesign.md) | ready | 017 |
+| 018 | [Redesign: Diplomat Hall brand, new type, wider layout](specs/018-diplomat-hall-redesign.md) | in-progress | 017 |
 
 Statuses: `draft` → `ready` → `in-progress` → `done` (meaning in [process.md](process.md#statuses)). The status here and in the spec's header must match.
 

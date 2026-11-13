@@ -11,7 +11,7 @@ type PropertyPriceProps = {
   className?: string;
 };
 
-/** Price in the property's currency (Unbounded), the per-m² line and a short facts line. */
+/** Price in the property's currency (heading font), the per-m² line and a short facts line. */
 export const PropertyPrice = ({ price, perSquareMeter, facts, action, className }: PropertyPriceProps) => (
   <div className={cn("flex flex-col gap-1", className)}>
     <div className="flex items-start justify-between gap-3">

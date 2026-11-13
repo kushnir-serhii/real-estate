@@ -21,7 +21,7 @@ What the demo replaces, and what takes over:
 | Data store: typed mock data in memory (`src/lib/demo/`); resets on restart and with «Скинути демо-дані» | Supabase Postgres with RLS (migrations below) |
 | Admin auth: one-click demo sign-in, a signed `httpOnly` cookie (`DEMO_SESSION_SECRET`) | Supabase Auth, email + password, `admins` table |
 | Photo storage: uploads kept in memory, served by `/api/demo/photos/...`; seed photos are the files in `public/placeholders/` | Cloudflare R2 (binding `PHOTOS_BUCKET`, public URL) |
-| Fonts and maps: local Manrope, a static SVG map; nothing is loaded from third parties | unchanged: they stay local |
+| Fonts and maps: local fonts (Sofia Sans, Sofia Sans Extra Condensed, Cormorant SC), a static SVG map; nothing is loaded from third parties | unchanged: they stay local |
 | Plektan: `pnpm sync` prints a notice and exits 0; the Plektan badge is hidden | sync and badge once `PLEKTAN_API_KEY` is set |
 | Plektan leads, Telegram, Turnstile, LLM, geocoder: fixture modes while their keys are empty | the real services once their keys are set |
 

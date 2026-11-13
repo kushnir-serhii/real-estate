@@ -8,9 +8,13 @@
 
 /* Tokens. Swap the look here only: colors, radius, fonts. */
 @theme inline {
-  --font-sans: var(--font-manrope-cyrillic), var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
-  /* Unbounded: headings, hero, prices, big numbers (weights 500-700). Cyrillic face first, as for sans. */
-  --font-heading: var(--font-unbounded-cyrillic), var(--font-unbounded), var(--font-sans);
+  /* Sofia Sans: body, UI, forms, nav. The Cyrillic face goes first: each face covers only its own unicode-range. */
+  --font-sans: var(--font-sofia-sans-cyrillic), var(--font-sofia-sans), ui-sans-serif, system-ui, sans-serif;
+  /* Sofia Sans Extra Condensed: headings, hero, prices, big numbers (weights 600-800). Cyrillic face first, as for sans. */
+  --font-heading:
+    var(--font-sofia-sans-extra-condensed-cyrillic), var(--font-sofia-sans-extra-condensed), var(--font-sans);
+  /* Cormorant SC: the logo wordmark only (Latin, weight 600). */
+  --font-logo: var(--font-cormorant-sc), ui-serif, Georgia, serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -205,47 +209,48 @@
   }
 }
 
-/* Type scale. Fluid: display is ~36px at 375px and ~68px from 1280px. */
+/* Type scale for the condensed heading face (Sofia Sans Extra Condensed): big sizes, heavy weights, no negative tracking.
+   Fluid between 375px and 1440px: display 48 -> 104px, h1 40 -> 72px, h2 36 -> 60px, h3 24 -> 32px. Sentence case. */
 @utility text-display {
   font-family: var(--font-heading);
-  font-size: clamp(2.125rem, 1.42rem + 3.54vw, 4.25rem);
-  line-height: 1.05;
-  letter-spacing: -0.035em;
-  font-weight: 600;
+  font-size: clamp(3rem, 1.77rem + 5.26vw, 6.5rem);
+  line-height: 0.95;
+  letter-spacing: 0;
+  font-weight: 700;
   text-wrap: balance;
   overflow-wrap: break-word;
 }
 @utility text-h1 {
   font-family: var(--font-heading);
-  font-size: clamp(1.75rem, 1.3rem + 2vw, 2.75rem);
-  line-height: 1.1;
-  letter-spacing: -0.03em;
-  font-weight: 600;
+  font-size: clamp(2.5rem, 1.8rem + 3vw, 4.5rem);
+  line-height: 1;
+  letter-spacing: 0;
+  font-weight: 700;
   text-wrap: balance;
   overflow-wrap: break-word;
 }
 @utility text-h2 {
   font-family: var(--font-heading);
-  font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2.25rem);
-  line-height: 1.15;
-  letter-spacing: -0.025em;
-  font-weight: 600;
+  font-size: clamp(2.25rem, 1.72rem + 2.25vw, 3.75rem);
+  line-height: 1.02;
+  letter-spacing: 0.005em;
+  font-weight: 700;
   text-wrap: balance;
   overflow-wrap: break-word;
 }
 @utility text-h3 {
   font-family: var(--font-heading);
-  font-size: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
-  line-height: 1.25;
-  letter-spacing: -0.02em;
-  font-weight: 500;
+  font-size: clamp(1.5rem, 1.32rem + 0.75vw, 2rem);
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  font-weight: 600;
   text-wrap: balance;
   overflow-wrap: break-word;
 }
-/* small uppercase tracked label above a heading (Manrope) */
+/* small uppercase tracked label above a heading (Sofia Sans); the only uppercase type */
 @utility eyebrow {
   font-family: var(--font-sans);
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   line-height: 1rem;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -374,7 +379,7 @@
   h1,
   h2,
   h3 {
-    @apply font-heading tracking-tight text-balance;
+    @apply font-heading text-balance;
   }
   /* Tailwind 4 dropped the pointer cursor on native controls */
   button:not(:disabled),

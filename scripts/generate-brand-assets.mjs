@@ -45,9 +45,9 @@ const mark = `
 const og = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <rect width="1200" height="630" fill="${BRAND_BG}"/>
   ${mark}
-  <text x="96" y="430" font-family="Manrope, 'Segoe UI', Arial, sans-serif" font-size="120" font-weight="800" fill="${BRAND_FG}">${NAME}</text>
-  <text x="96" y="502" font-family="Manrope, 'Segoe UI', Arial, sans-serif" font-size="42" font-weight="600" fill="${BRAND_FG}">${TAGLINE}</text>
-  <text x="96" y="558" font-family="Manrope, 'Segoe UI', Arial, sans-serif" font-size="30" fill="${BRAND_FG}" fill-opacity="0.9">${SUBLINE}</text>
+  <text x="96" y="430" font-family="'Sofia Sans', 'Segoe UI', Arial, sans-serif" font-size="120" font-weight="800" fill="${BRAND_FG}">${NAME}</text>
+  <text x="96" y="502" font-family="'Sofia Sans', 'Segoe UI', Arial, sans-serif" font-size="42" font-weight="600" fill="${BRAND_FG}">${TAGLINE}</text>
+  <text x="96" y="558" font-family="'Sofia Sans', 'Segoe UI', Arial, sans-serif" font-size="30" fill="${BRAND_FG}" fill-opacity="0.9">${SUBLINE}</text>
 </svg>`;
 await sharp(Buffer.from(og)).png().toFile("public/og-default.png");
 console.log("favicon.ico and og-default.png written");
