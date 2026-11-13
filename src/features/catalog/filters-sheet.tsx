@@ -28,7 +28,7 @@ export const FiltersSheet = ({ activeCount, children }: FiltersSheetProps) => (
     </SheetTrigger>
     <SheetContent side="right" className="overflow-y-auto data-[side=right]:w-full">
       <SheetHeader className="pb-0">
-        <SheetTitle className="font-heading text-lg font-semibold tracking-tight">Фільтри</SheetTitle>
+        <SheetTitle className="font-heading text-2xl leading-tight font-semibold">Фільтри</SheetTitle>
         <SheetDescription className="sr-only">
           Оберіть параметри і натисніть «Показати»
         </SheetDescription>

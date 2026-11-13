@@ -5,10 +5,10 @@ import { useEffect, useState, type ReactNode } from "react";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { CatalogGrid } from "@/features/catalog/catalog-grid";
 import { CatalogSkeleton } from "@/features/catalog/catalog-skeleton";
 import { PropertyCard } from "@/features/properties/property-card";
+import { PropertyCardSkeleton } from "@/features/properties/property-card-skeleton";
 import { soldStatusLabel } from "@/features/property/sold-status-label";
 import type { FavoriteProperty } from "@/lib/db/properties";
 import { FavoritesEmpty } from "./favorites-empty";
@@ -77,7 +77,7 @@ export const FavoritesList = ({ suggestions }: FavoritesListProps) => {
     return (
       <>
         <div className="nojs-hide">
-          <CatalogSkeleton />
+          <CatalogSkeleton layout="full" />
         </div>
         <div className="nojs-only hidden">
           <div className="flex flex-col gap-12 sm:gap-16">
@@ -123,9 +123,9 @@ export const FavoritesList = ({ suggestions }: FavoritesListProps) => {
         {ids.map((id) => {
           const entry = cache[id];
           return (
-            <li key={id} className="min-w-0">
+            <li key={id} className="min-w-0" aria-busy={entry === undefined || undefined}>
               {entry === undefined ? (
-                <Skeleton className="aspect-4/3 w-full rounded-2xl" />
+                <PropertyCardSkeleton />
               ) : entry === null ? (
                 <FavoritesUnavailable propertyId={id} />
               ) : (

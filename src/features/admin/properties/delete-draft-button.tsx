@@ -56,7 +56,7 @@ export const DeleteDraftButton = ({ propertyId, title }: DeleteDraftButtonProps)
         <form action={formAction} className="flex flex-col gap-4">
           <input type="hidden" name="id" value={propertyId} />
           <AlertDialogHeader className="place-items-start text-left">
-            <AlertDialogTitle className="text-lg font-bold">Видалити чернетку?</AlertDialogTitle>
+            <AlertDialogTitle className="text-2xl leading-tight font-semibold">Видалити чернетку?</AlertDialogTitle>
             <AlertDialogDescription className="text-left wrap-anywhere">
               «{title}» і всі її фото зникнуть назавжди. Відновити не вийде.
             </AlertDialogDescription>

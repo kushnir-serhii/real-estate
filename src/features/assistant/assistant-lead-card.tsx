@@ -105,7 +105,7 @@ const LeadCardForm = ({ card, onSubmitted }: LeadCardFormProps) => {
       className="flex w-full min-w-0 flex-col gap-4 rounded-2xl border bg-card p-4 text-card-foreground"
     >
       <div className="flex flex-col gap-2">
-        <h3 id={titleId} className="flex items-center gap-2 text-base font-bold">
+        <h3 id={titleId} className="flex items-center gap-2 font-sans text-base font-bold">
           <ClipboardList className="size-5 shrink-0 text-primary" aria-hidden="true" />
           Заявка менеджеру
         </h3>

@@ -26,7 +26,7 @@ const NotFound = () => (
       <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 pt-8 sm:pt-16">
         <p
           aria-hidden="true"
-          className="font-heading text-[clamp(5rem,3rem+10vw,9rem)] leading-none font-semibold tracking-tighter text-dawn tabular-nums"
+          className="font-heading text-[clamp(5rem,3rem+10vw,9rem)] leading-none font-semibold text-dawn tabular-nums"
         >
           {NOT_FOUND_PAGE.code}
         </p>

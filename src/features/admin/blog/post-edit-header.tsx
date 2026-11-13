@@ -21,7 +21,7 @@ export const PostEditHeader = ({ post }: PostEditHeaderProps) => (
     </Link>
     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
       <div className="flex min-w-0 flex-col gap-2">
-        <h1 className="text-2xl font-bold text-balance wrap-anywhere sm:text-3xl">{post.title || "Без заголовка"}</h1>
+        <h1 className="text-3xl font-bold text-balance wrap-anywhere sm:text-4xl">{post.title || "Без заголовка"}</h1>
         <PostStatusChips status={post.status} noindex={post.noindex} />
         <div className="flex flex-wrap items-center gap-x-4 text-sm text-muted-foreground">
           {post.status === "published" && <ExternalLink href={`/blog/${post.slug}`}>Відкрити на сайті</ExternalLink>}

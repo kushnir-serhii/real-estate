@@ -40,7 +40,7 @@ export const AgentTile = ({ agent }: { agent: Agent }) => {
         </span>
       )}
       <div className="flex min-w-0 flex-col">
-        <h3 className="text-lg font-semibold break-words">{agent.name}</h3>
+        <h3 className="font-sans text-lg font-semibold break-words">{agent.name}</h3>
         <p className="text-sm text-muted-foreground">{ABOUT_PAGE.teamRole}</p>
       </div>
       <div className="mt-auto flex min-w-0 flex-col items-center">

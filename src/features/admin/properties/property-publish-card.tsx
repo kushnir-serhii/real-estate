@@ -91,7 +91,7 @@ export const PropertyPublishCard = ({
       className="flex min-w-0 flex-col gap-4 rounded-xl bg-card p-4 text-card-foreground ring-1 ring-foreground/10 sm:p-6"
     >
       <div className="flex flex-col gap-1">
-        <h2 id="publish-title" className="text-lg font-bold">
+        <h2 id="publish-title" className="text-2xl leading-tight font-semibold">
           Публікація
         </h2>
         <p className="text-sm text-muted-foreground">{STATUS_TEXT[status]}</p>

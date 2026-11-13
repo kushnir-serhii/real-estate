@@ -5,7 +5,7 @@ const CARD_CLASS = "flex flex-col gap-4 rounded-xl bg-card p-4 ring-1 ring-foreg
 const FieldSkeleton = ({ tall = false }: { tall?: boolean }) => (
   <div className="flex flex-col gap-2">
     <Skeleton className="h-3.5 w-32" />
-    <Skeleton className={tall ? "h-64 w-full" : "h-11 w-full"} />
+    <Skeleton className={tall ? "h-64 w-full rounded-xl" : "h-11 w-full rounded-control"} />
     <Skeleton className="h-4 w-48" />
   </div>
 );
@@ -14,9 +14,9 @@ const FieldSkeleton = ({ tall = false }: { tall?: boolean }) => (
 export const PageFormSkeleton = () => (
   <div aria-busy="true" aria-label="Завантаження сторінки" className="flex flex-col gap-6">
     <div className="flex flex-col gap-4">
-      <Skeleton className="h-11 w-48" />
+      <Skeleton className="h-11 rounded-control w-48" />
       <div className="flex flex-col gap-2">
-        <Skeleton className="h-8 w-full max-w-sm sm:h-9" />
+        <Skeleton className="h-9 w-full max-w-sm sm:h-10" />
         <Skeleton className="h-5 w-40" />
         <Skeleton className="h-6 w-64 max-w-full" />
       </div>
@@ -35,7 +35,7 @@ export const PageFormSkeleton = () => (
     </div>
     <div className={CARD_CLASS}>
       <Skeleton className="h-6 w-32" />
-      <Skeleton className="h-11 w-72 max-w-full" />
+      <Skeleton className="h-11 rounded-control w-72 max-w-full" />
       <Skeleton className="h-4 w-full max-w-prose" />
     </div>
   </div>

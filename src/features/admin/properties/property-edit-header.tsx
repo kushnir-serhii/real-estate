@@ -25,7 +25,7 @@ export const PropertyEditHeader = ({ property, status, siteHref }: PropertyEditH
       До списку об&apos;єктів
     </Link>
     <div className="flex flex-col gap-2">
-      <h1 className="text-2xl font-bold text-balance wrap-anywhere sm:text-3xl">{property.title || "Без назви"}</h1>
+      <h1 className="text-3xl font-bold text-balance wrap-anywhere sm:text-4xl">{property.title || "Без назви"}</h1>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
         <ListStatusBadge status={status} />
         <span>

@@ -58,7 +58,7 @@ export const PropertyContactCard = ({ agent, className }: PropertyContactCardPro
           </div>
         )}
         <div className="min-w-0">
-          <p className="font-heading text-lg leading-snug font-semibold tracking-tight break-words">
+          <p className="text-lg leading-snug font-semibold break-words">
             {agent ? agent.name : `Агентство ${BRAND.name}`}
           </p>
           <p className="text-sm text-ink-muted">{agent ? "Агент з нерухомості" : "Відповімо на ваші питання"}</p>

@@ -59,7 +59,7 @@ export const MobileMenu = () => {
                   href={link.href}
                   activePath={link.activePath}
                   onNavigate={close}
-                  className="min-h-14 px-0 font-heading text-2xl font-medium tracking-tight after:inset-x-0 after:bottom-2"
+                  className="min-h-14 px-0 font-heading text-3xl font-semibold after:inset-x-0 after:bottom-2"
                 >
                   {link.label}
                 </NavLink>

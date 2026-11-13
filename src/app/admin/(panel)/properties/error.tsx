@@ -21,7 +21,7 @@ const AdminPropertiesError = ({ reset }: AdminPropertiesErrorProps) => {
 
   return (
     <div className="flex flex-col items-start gap-6">
-      <h1 className="text-2xl font-bold sm:text-3xl">Об&apos;єкти</h1>
+      <h1 className="text-3xl font-bold sm:text-4xl">Об&apos;єкти</h1>
       <div className="flex flex-col items-start gap-4 rounded-xl border border-destructive/40 p-6">
         <div role="alert" className="flex flex-col gap-2">
           <p className="font-medium text-destructive">Не вдалося завантажити об&apos;єкти</p>

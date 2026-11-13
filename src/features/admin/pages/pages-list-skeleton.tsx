@@ -16,7 +16,7 @@ export const PagesListSkeleton = () => (
           <Skeleton className="h-5 w-40" />
           <Skeleton className="h-6 w-full max-w-md" />
         </div>
-        <Skeleton className="h-11 w-full sm:w-36" />
+        <Skeleton className="h-11 rounded-control w-full sm:w-36" />
       </div>
     ))}
   </div>

@@ -33,7 +33,7 @@ const AdminBlogPage = async ({ searchParams }: AdminBlogPageProps) => {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <h1 className="text-2xl font-bold sm:text-3xl">Блог</h1>
+        <h1 className="text-3xl font-bold sm:text-4xl">Блог</h1>
         <Link href={NEW_POST_PATH} className={buttonVariants()}>
           <Plus aria-hidden="true" />
           Нова стаття

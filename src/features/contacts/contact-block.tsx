@@ -31,7 +31,7 @@ export const ContactBlock = () => (
         <IconBadge icon={Phone} />
         <a
           href={CONTACTS.phone.href}
-          className="inline-flex min-h-11 items-center rounded-md font-heading text-xl font-semibold tracking-tight tabular-nums outline-none hover:text-dawn-text focus-visible:ring-3 focus-visible:ring-ring/50 sm:text-2xl"
+          className="inline-flex min-h-11 items-center rounded-md font-heading text-2xl font-semibold tabular-nums outline-none hover:text-dawn-text focus-visible:ring-3 focus-visible:ring-ring/50 sm:text-3xl"
         >
           {CONTACTS.phone.display}
         </a>

@@ -33,7 +33,7 @@ const AdminNewPropertyPage = async () => {
           До списку об&apos;єктів
         </Link>
         <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-bold sm:text-3xl">Новий об&apos;єкт</h1>
+          <h1 className="text-3xl font-bold sm:text-4xl">Новий об&apos;єкт</h1>
           {canCreate && (
             <p className="max-w-prose text-muted-foreground">
               Спершу збережіть чернетку — на сайті її не видно. Потім можна додати фото й опублікувати.

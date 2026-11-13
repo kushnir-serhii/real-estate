@@ -113,7 +113,7 @@ export const PropertyCard = ({
           <FavoriteButton propertyId={property.id} />
         </div>
         <div className="flex flex-1 flex-col gap-2 p-5 sm:p-6">
-          <p className="flex flex-wrap items-baseline gap-x-2 font-heading text-2xl font-semibold tracking-tight tabular-nums sm:text-price">
+          <p className="flex flex-wrap items-baseline gap-x-2 font-heading text-2xl font-semibold tabular-nums sm:text-price">
             <span>{amount}</span>
             {unit && <span className="font-sans text-base font-medium text-muted-foreground">/ {unit}</span>}
           </p>

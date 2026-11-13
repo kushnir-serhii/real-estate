@@ -9,7 +9,7 @@ import { ADMIN_PROPERTIES_PATH, ADMIN_SETTINGS_PATH } from "./properties-params"
 export const PropertyCreateDisabled = () => (
   <div className="flex flex-col items-start gap-4 rounded-xl border border-dashed p-6">
     <div className="flex flex-col gap-2">
-      <h2 className="text-lg font-bold">Зараз об&apos;єкти додаються в Plektan</h2>
+      <h2 className="text-2xl leading-tight font-semibold">Зараз об&apos;єкти додаються в Plektan</h2>
       <p className="max-w-prose text-muted-foreground">
         Каталог веде Plektan: нові об&apos;єкти з&apos;являються на сайті після синхронізації. Щоб додавати їх тут,
         змініть джерело в налаштуваннях.

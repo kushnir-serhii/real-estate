@@ -34,7 +34,7 @@ export const BlogAuthorCard = ({ author }: { author: PropertyAgent | null }) => 
       )}
       <div className="flex min-w-0 flex-col">
         <p className="eyebrow text-dawn-text">{BLOG_POST_PAGE.authorEyebrow}</p>
-        <p className="font-heading text-base font-semibold tracking-tight break-words">
+        <p className="text-lg font-semibold break-words">
           {author ? author.name : BLOG_DEFAULT_AUTHOR}
         </p>
         <p className="text-sm text-muted-foreground">

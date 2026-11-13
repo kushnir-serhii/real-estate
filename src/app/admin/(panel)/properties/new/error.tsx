@@ -30,7 +30,7 @@ const AdminNewPropertyError = ({ reset }: AdminNewPropertyErrorProps) => {
       </Link>
       <div className="flex flex-col items-start gap-4 rounded-xl border border-destructive/40 p-6">
         <div role="alert" className="flex flex-col gap-2">
-          <h1 className="text-xl font-bold text-destructive">Не вдалося відкрити форму</h1>
+          <h1 className="text-2xl font-bold text-destructive">Не вдалося відкрити форму</h1>
           <p className="max-w-prose text-muted-foreground">
             Можливо, зникло з&apos;єднання або база даних тимчасово недоступна. Спробуйте ще раз за хвилину.
           </p>

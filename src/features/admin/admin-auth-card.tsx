@@ -26,7 +26,7 @@ export const AdminAuthCard = ({ title, description, footnote, className, childre
             </span>
           </div>
           <div className="flex flex-col gap-1.5">
-            <h1 id="admin-auth-title" className="text-xl font-bold text-balance">
+            <h1 id="admin-auth-title" className="text-3xl font-bold text-balance">
               {title}
             </h1>
             {description ? <div className="text-sm text-muted-foreground">{description}</div> : null}

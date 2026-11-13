@@ -28,7 +28,7 @@ export const AgentCard = ({ agent }: { agent: Agent }) => (
       </div>
     )}
     <div className="flex min-w-0 flex-col">
-      <h3 className="font-heading text-base font-semibold tracking-tight break-words">{agent.name}</h3>
+      <h3 className="font-sans text-lg font-semibold break-words">{agent.name}</h3>
       {agent.phones.map((phone) => (
         <a key={phone} href={`tel:${toTel(phone)}`} className={`${LINK_CLASS} tabular-nums`}>
           {phone}

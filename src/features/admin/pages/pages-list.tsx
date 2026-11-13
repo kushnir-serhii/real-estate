@@ -24,7 +24,7 @@ export const PagesList = ({ pages }: PagesListProps) => (
           className="flex min-w-0 flex-col gap-3 rounded-xl bg-card p-4 text-card-foreground ring-1 ring-foreground/10 sm:flex-row sm:items-center sm:gap-6 sm:p-6"
         >
           <div className="flex min-w-0 flex-1 flex-col gap-2">
-            <h2 className="text-lg font-bold">
+            <h2 className="text-2xl leading-tight font-semibold">
               <Link
                 href={href}
                 className="inline-flex min-h-11 items-center rounded-sm outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"

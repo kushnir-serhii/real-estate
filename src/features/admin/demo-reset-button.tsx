@@ -65,7 +65,7 @@ export const DemoResetButton = () => {
 
         <AlertDialogContent className="max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] overflow-y-auto data-[size=default]:max-w-md data-[size=default]:sm:max-w-md">
           <AlertDialogHeader className="place-items-start text-left">
-            <AlertDialogTitle className="text-lg font-bold">Скинути демо-дані?</AlertDialogTitle>
+            <AlertDialogTitle className="text-2xl leading-tight font-semibold">Скинути демо-дані?</AlertDialogTitle>
             <AlertDialogDescription className="text-left">
               Усі ваші зміни зникнуть: нові й змінені об’єкти, завантажені фото, сторінки, заявки та розмови з асистентом. Повернуться
               початкові тестові дані.

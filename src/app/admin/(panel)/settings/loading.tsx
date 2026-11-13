@@ -9,7 +9,7 @@ const SectionSkeleton = ({ children }: { children: React.ReactNode }) => (
 
 const AdminSettingsLoading = () => (
   <div aria-busy="true" aria-label="Завантаження налаштувань" className="flex flex-col gap-6">
-    <h1 className="text-2xl font-bold sm:text-3xl">Налаштування</h1>
+    <h1 className="text-3xl font-bold sm:text-4xl">Налаштування</h1>
 
     <SectionSkeleton>
       <Skeleton className="h-6 w-48" />
@@ -29,7 +29,7 @@ const AdminSettingsLoading = () => (
           </div>
         ))}
       </div>
-      <Skeleton className="h-11 w-full sm:w-64" />
+      <Skeleton className="h-11 rounded-control w-full sm:w-64" />
     </SectionSkeleton>
 
     <SectionSkeleton>
@@ -42,11 +42,11 @@ const AdminSettingsLoading = () => (
         {FIELD_KEYS.map((key) => (
           <div key={key} className="flex flex-col gap-2">
             <Skeleton className="h-3.5 w-32" />
-            <Skeleton className="h-11 w-full" />
+            <Skeleton className="h-11 rounded-control w-full" />
           </div>
         ))}
       </div>
-      <Skeleton className="h-11 w-full sm:w-44" />
+      <Skeleton className="h-11 rounded-control w-full sm:w-44" />
     </SectionSkeleton>
   </div>
 );

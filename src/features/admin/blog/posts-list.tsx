@@ -38,7 +38,7 @@ export const PostsList = ({ posts }: PostsListProps) => (
           )}
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-          <h3 className="text-base font-bold">
+          <h3 className="font-sans text-base font-semibold">
             <Link
               href={postEditHref(post.id)}
               prefetch={false}

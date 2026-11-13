@@ -69,7 +69,7 @@ export const LeadRequestCard = ({ lead }: LeadRequestCardProps) => {
       {facts.length > 0 && <LeadFacts facts={facts} />}
       {lead.message ? (
         <div className="flex flex-col gap-1 text-sm">
-          <h3 className="text-muted-foreground">Повідомлення</h3>
+          <h3 className="font-sans text-muted-foreground">Повідомлення</h3>
           <p className="rounded-lg bg-muted/60 px-4 py-3 text-base whitespace-pre-line wrap-anywhere">
             {lead.message}
           </p>

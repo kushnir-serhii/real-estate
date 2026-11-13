@@ -20,7 +20,7 @@ export const PageEditHeader = ({ page }: PageEditHeaderProps) => (
       До списку сторінок
     </Link>
     <div className="flex flex-col gap-2">
-      <h1 className="text-2xl font-bold text-balance wrap-anywhere sm:text-3xl">{PAGE_NAMES[page.slug]}</h1>
+      <h1 className="text-3xl font-bold text-balance wrap-anywhere sm:text-4xl">{PAGE_NAMES[page.slug]}</h1>
       <PageStatusChips page={{ state: page.state, noindex: page.content.noindex, is_draft: page.content.is_draft }} />
       <div className="flex flex-wrap items-center gap-x-4 text-sm text-muted-foreground">
         <ExternalLink href={PAGE_PATHS[page.slug]}>Відкрити на сайті</ExternalLink>

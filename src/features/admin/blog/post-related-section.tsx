@@ -133,7 +133,7 @@ export const PostRelatedSection = ({ postId, initial }: PostRelatedSectionProps)
       description={`Показуються під статтею. До ${RELATED_MAX} об’єктів, у вибраному порядку. Зберігається одразу. На сайті видно лише опубліковані об’єкти.`}
     >
       <div className="flex flex-col gap-2">
-        <h3 className="text-sm font-medium">
+        <h3 className="font-sans text-sm font-medium">
           Вибрано: <span className="tabular-nums">{selected.length}</span> з {RELATED_MAX}
         </h3>
         {selected.length === 0 ? (
