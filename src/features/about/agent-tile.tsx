@@ -1,21 +1,12 @@
-import { ArrowRight, Mail, Phone } from "lucide-react";
-import Link from "next/link";
+import { Mail, Phone } from "lucide-react";
 
-import { SectionHeading } from "@/components/section-heading";
-import { buttonVariants } from "@/components/ui/button";
-import { AGENTS } from "@/constants/home";
-import { getActiveAgents } from "@/lib/db/agents";
+import { ABOUT_PAGE } from "@/constants/inner-pages";
 import type { Agent } from "@/lib/db/agents";
 import { toTel } from "@/lib/format/to-tel";
 import { photoUrl } from "@/lib/photos/photo-url";
-import { HomeSection } from "./home-section";
 
 const LINK =
   "inline-flex min-h-11 items-center gap-2 rounded-md break-all text-foreground outline-none hover:text-dawn-text focus-visible:ring-3 focus-visible:ring-ring/50";
-
-const LIST =
-  "-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:gap-6";
-const ITEM = "w-64 shrink-0 snap-start sm:w-auto";
 
 const initials = (name: string) =>
   name
@@ -25,6 +16,7 @@ const initials = (name: string) =>
     .map((part) => part.charAt(0).toUpperCase())
     .join("");
 
+/** One agent: photo or initials, name, role, phone and email links. */
 export const AgentTile = ({ agent }: { agent: Agent }) => {
   const phone = agent.phones[0];
   return (
@@ -49,7 +41,7 @@ export const AgentTile = ({ agent }: { agent: Agent }) => {
       )}
       <div className="flex min-w-0 flex-col">
         <h3 className="text-lg font-semibold break-words">{agent.name}</h3>
-        <p className="text-sm text-muted-foreground">{AGENTS.role}</p>
+        <p className="text-sm text-muted-foreground">{ABOUT_PAGE.teamRole}</p>
       </div>
       <div className="mt-auto flex min-w-0 flex-col items-center">
         {phone ? (
@@ -66,49 +58,5 @@ export const AgentTile = ({ agent }: { agent: Agent }) => {
         ) : null}
       </div>
     </article>
-  );
-};
-
-const Frame = ({ children }: { children: React.ReactNode }) => (
-  <HomeSection labelledBy="agents-title">
-    <div className="flex flex-col gap-10 lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-center lg:gap-16">
-      <div className="reveal flex flex-col items-start gap-6">
-        <SectionHeading
-          id="agents-title"
-          eyebrow={AGENTS.eyebrow}
-          title={AGENTS.title}
-          description={AGENTS.description}
-        />
-        <Link href={AGENTS.ctaHref} className={buttonVariants({ variant: "dawn", size: "lg" })}>
-          {AGENTS.cta}
-          <ArrowRight data-icon="inline-end" aria-hidden="true" />
-        </Link>
-      </div>
-      {children}
-    </div>
-  </HomeSection>
-);
-
-/** Up to four active agents. Renders nothing when there are none or the load fails (the page must not break). */
-export const HomeAgents = async () => {
-  let agents: Agent[];
-  try {
-    agents = (await getActiveAgents()).slice(0, AGENTS.max);
-  } catch (error) {
-    console.error("Home agents failed to load", error);
-    return null;
-  }
-  if (agents.length === 0) return null;
-
-  return (
-    <Frame>
-      <ul className={LIST}>
-        {agents.map((agent) => (
-          <li key={agent.id} className={ITEM}>
-            <AgentTile agent={agent} />
-          </li>
-        ))}
-      </ul>
-    </Frame>
   );
 };

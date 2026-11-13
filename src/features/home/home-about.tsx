@@ -6,7 +6,7 @@ import { ABOUT } from "@/constants/home";
 import { Markdown } from "@/features/pages/markdown";
 import { HomeSection } from "./home-section";
 
-/** Left: CMS text and a link; right: an overlapping photo collage with a floating stat chip. Stacks on phones. */
+/** Left: CMS text and a link; right: an overlapping photo collage. Stacks on phones. */
 export const HomeAbout = ({ body }: { body: string }) => (
   <HomeSection ariaLabel={ABOUT.eyebrow}>
     <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
@@ -48,10 +48,6 @@ export const HomeAbout = ({ body }: { body: string }) => (
           className="absolute right-4 bottom-4 hidden aspect-4/3 w-1/3 rounded-2xl object-cover shadow-float ring-4 ring-background sm:block"
         />
         {/* eslint-enable @next/next/no-img-element */}
-        <div className="absolute top-4 right-3 flex flex-col rounded-2xl bg-ink px-4 py-3 text-on-ink shadow-float sm:right-6">
-          <span className="font-heading text-xl font-semibold tabular-nums">{ABOUT.chip.value}</span>
-          <span className="text-xs text-ink-muted">{ABOUT.chip.label}</span>
-        </div>
       </div>
     </div>
   </HomeSection>

@@ -5,16 +5,13 @@ import { FEATURED, HERO } from "@/constants/home";
 import { FeaturedProperties } from "@/features/home/featured-properties";
 import { Districts } from "@/features/home/districts";
 import { Hero } from "@/features/home/hero";
-import { HomeAgents } from "@/features/home/home-agents";
 import { HomeBlog } from "@/features/home/home-blog";
-import { Testimonials } from "@/features/home/testimonials";
 import { HomeSection } from "@/features/home/home-section";
 import { HomeAbout } from "@/features/home/home-about";
 import { HomeCta } from "@/features/home/home-cta";
 import { HowWeWork } from "@/features/home/how-we-work";
 import { ProptechFeatures } from "@/features/home/proptech-features";
 import { QuickSearch } from "@/features/home/quick-search";
-import { TrustStats } from "@/features/home/trust-stats";
 import { getPageContent } from "@/features/pages/get-page-content";
 import { pageSeoDescription, pageSeoTitle } from "@/features/pages/page-seo";
 
@@ -41,8 +38,7 @@ const HomePage = async () => {
           <QuickSearch />
         </div>
       </div>
-      <TrustStats />
-      <HomeSection labelledBy="featured-title" className="pt-4 sm:pt-8 lg:pt-8">
+      <HomeSection labelledBy="featured-title">
         <div className="flex flex-col gap-6">
           <div className="reveal">
             <SectionHeading
@@ -59,9 +55,7 @@ const HomePage = async () => {
       <HowWeWork />
       <ProptechFeatures />
       <HomeAbout body={page.body} />
-      <HomeAgents />
       <HomeBlog />
-      <Testimonials />
       <HomeCta />
     </>
   );

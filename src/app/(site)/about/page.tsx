@@ -6,7 +6,6 @@ import { PageHeader } from "@/components/page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { ABOUT_PAGE } from "@/constants/inner-pages";
 import { AboutTeam } from "@/features/about/about-team";
-import { TrustStats } from "@/features/home/trust-stats";
 import { Markdown } from "@/features/pages/markdown";
 import { getPageContent } from "@/features/pages/get-page-content";
 import { pageSeoDescription, pageSeoTitle } from "@/features/pages/page-seo";
@@ -43,9 +42,6 @@ const AboutPage = async () => {
         <Link href="/catalog" className={buttonVariants({ variant: "outline", size: "lg" })}>
           {ABOUT_PAGE.catalogAction}
         </Link>
-      </div>
-      <div className="mt-8 sm:mt-12">
-        <TrustStats />
       </div>
     </div>
   );

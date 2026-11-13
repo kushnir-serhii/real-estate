@@ -1,6 +1,6 @@
 import { SectionHeading } from "@/components/section-heading";
 import { ABOUT_PAGE } from "@/constants/inner-pages";
-import { AgentTile } from "@/features/home/home-agents";
+import { AgentTile } from "@/features/about/agent-tile";
 import { getActiveAgents } from "@/lib/db/agents";
 import type { Agent } from "@/lib/db/agents";
 

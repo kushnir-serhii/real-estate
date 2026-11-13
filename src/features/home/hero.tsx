@@ -1,4 +1,4 @@
-import { ArrowRight, CalendarCheck, Handshake, ShieldCheck } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 import { CTA_LINK } from "@/components/layout/nav-config";
@@ -6,12 +6,6 @@ import { Button } from "@/components/ui/button";
 import { HERO } from "@/constants/home";
 
 type HeroProps = { title: string; lead: string };
-
-const FACT_ICONS = {
-  calendar: CalendarCheck,
-  handshake: Handshake,
-  shield: ShieldCheck,
-} as const;
 
 export const Hero = ({ title, lead }: HeroProps) => (
   <section
@@ -53,17 +47,6 @@ export const Hero = ({ title, lead }: HeroProps) => (
           <Link href={CTA_LINK.href}>{CTA_LINK.label}</Link>
         </Button>
       </div>
-      <ul className="flex flex-wrap gap-x-6 gap-y-2 pt-1 text-sm">
-        {HERO.facts.map((fact) => {
-          const Icon = FACT_ICONS[fact.icon];
-          return (
-            <li key={fact.label} className="flex items-center gap-2">
-              <Icon className="size-4 shrink-0 text-dawn" aria-hidden="true" />
-              {fact.label}
-            </li>
-          );
-        })}
-      </ul>
     </div>
   </section>
 );
