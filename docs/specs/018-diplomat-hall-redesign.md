@@ -69,14 +69,14 @@ A condensed heading face needs bigger sizes than Unbounded: re-tune the type sca
   - [x] `pnpm perf` on `/`: LCP < 2.5 s, CLS < 0.1; font bytes before and after written in the log
   - [x] typecheck, lint, build green
 
-### [ ] 2. Pill controls
+### [x] 2. Pill controls
 - **Build:** `--radius-control` token (pill) and its use in `Button` (all sizes incl. `xs`, `sm`, `icon*`), `Input`, `Select` trigger, `form-select` (native), deal tabs / segmented controls, chips and badges, pagination, chat input, filter controls in the catalog sheet; `Textarea` → `rounded-3xl`; popover / select content → `rounded-2xl`. Horizontal padding of pills adjusted so text doesn't hug the curve. Admin checked for regressions (tables, forms, dialogs).
 - **Files:** `src/app/globals.css`, `src/components/ui/{button,input,select,textarea}.tsx`, `src/components/form-select.tsx`, components with their own control radii (`grep rounded-(lg|xl|md)` on interactive elements)
 - **Agent:** designer · **Model:** sonnet (the grep-and-replace part can go to haiku)
 - **Accept:**
-  - [ ] every button, input and select on public pages and in the admin is a pill (or a documented exception), in both themes
-  - [ ] focus rings follow the pill shape; 44px targets kept at 375px
-  - [ ] switching `--radius-control` back to a small value in `globals.css` restores square-ish controls without touching components
+  - [x] every button, input and select on public pages and in the admin is a pill (or a documented exception), in both themes
+  - [x] focus rings follow the pill shape; 44px targets kept at 375px
+  - [x] switching `--radius-control` back to a small value in `globals.css` restores square-ish controls without touching components
 
 ### [ ] 3. Wider container and tighter spacing
 - **Build:** `--container-site` + one `site-container` utility (max width + responsive gutters) used by header, footer, home sections, page header, catalog, property, blog, contacts, favorites, admin layout where it applies; home section vertical padding reduced on desktop. Grids re-checked at the new width (catalog 3 columns with the filter sidebar at `xl`, home featured 3 columns).
@@ -165,3 +165,4 @@ A condensed heading face needs bigger sizes than Unbounded: re-tune the type sca
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
 | 2026-11-13 | 1 | done: Sofia Sans + Sofia Sans Extra Condensed (latin/cyrillic split) + Cormorant SC 600 (latin, no preload yet); Manrope/Unbounded removed; scale display 48→104, h1 40→72, h2 36→60, h3 24→32 (700/700/700/600), eyebrow 13px; font bytes 121.7 KB → 152.7 KB total (+10 KB on a Cyrillic page); perf `/` LCP 1060 ms, CLS 0, JS 211 KB | `src/app/fonts/*`, `layout.tsx`, `globals.css`, `/design`, OFL.txt |
+| 2026-11-13 | 2 | done: `--radius-control` (9999px) → `rounded-control` on buttons, inputs, selects (Radix + native), tabs, chips, badges, pagination, chat input; textarea `rounded-control-multiline` (min(control, 3xl)); dropdowns `rounded-2xl`. Exceptions: favorites counter dot, decorative circles, text links, cards / panels / dialogs, admin loading skeletons (slice 9). Fix found in review: Sofia Sans' Cyrillic defaults to Bulgarian letterforms; both Cyrillic woff2 files remapped to the `.loclRUS` (standard) glyphs, 29 codepoints each | `globals.css`, `components/ui/*`, `form-select.tsx`, 30+ feature components, `src/app/fonts/sofia-sans*-cyrillic-*.woff2` |

@@ -2,6 +2,9 @@ import localFont from "next/font/local";
 
 // Sofia Sans Extra Condensed variable (SIL OFL, see OFL.txt), self-hosted like Sofia Sans: no request to Google Fonts.
 // Headings, hero, prices and big numbers. Latin and Cyrillic files are split by unicode-range.
+// The Cyrillic woff2 is modified (OFL allows it; no Reserved Font Name): its cmap points at the `.loclRUS` glyphs, so
+// Ukrainian text gets the standard Cyrillic forms (т, д, и, л, п …) instead of the Bulgarian default ones. Redo this
+// after replacing the file (fontTools: remap every codepoint whose glyph has a `.loclRUS` variant).
 export const sofiaSansExtraCondensedLatin = localFont({
   src: "./sofia-sans-extra-condensed-latin-wght-normal.woff2",
   weight: "1 1000",

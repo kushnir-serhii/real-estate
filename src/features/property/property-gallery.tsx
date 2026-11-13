@@ -28,7 +28,7 @@ type PropertyGalleryProps = {
 const STRIP_SIZES = "(min-width: 1152px) 46rem, (min-width: 1024px) 60vw, 100vw";
 
 const ROUND_BUTTON =
-  "inline-flex size-11 items-center justify-center rounded-full outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring disabled:opacity-40";
+  "inline-flex size-11 items-center justify-center rounded-control outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring disabled:opacity-40";
 
 const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -265,7 +265,7 @@ export const PropertyGallery = ({ photos, title }: PropertyGalleryProps) => {
             <p
               aria-live="polite"
               aria-atomic="true"
-              className="absolute bottom-3 left-3 rounded-full bg-scrim px-3 py-1 text-sm font-medium text-on-scrim tabular-nums"
+              className="absolute bottom-3 left-3 rounded-control bg-scrim px-3 py-1 text-sm font-medium text-on-scrim tabular-nums"
             >
               <span className="sr-only">Фото </span>
               {index + 1} / {count}

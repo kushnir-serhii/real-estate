@@ -26,7 +26,7 @@ export const FavoriteButton = ({ propertyId, variant = "card", className }: Favo
         aria-label={saved ? "Прибрати з обраного" : "Додати в обране"}
         onClick={() => setAnnouncement(toggleFavorite(propertyId) ? "Додано в обране" : "Прибрано з обраного")}
         className={cn(
-          "inline-flex size-11 shrink-0 items-center justify-center rounded-full text-foreground outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring",
+          "inline-flex size-11 shrink-0 items-center justify-center rounded-control text-foreground outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring",
           variant === "card"
             ? "absolute top-2 right-2 z-10 bg-background/90 backdrop-blur hover:bg-background"
             : "bg-card ring-1 ring-foreground/15 hover:bg-muted",

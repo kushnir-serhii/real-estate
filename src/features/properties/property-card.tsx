@@ -113,7 +113,7 @@ export const PropertyCard = ({
               className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-linear-to-t from-scrim to-transparent"
             />
           )}
-          <span className="absolute top-3 left-3 max-w-[calc(100%-4.5rem)] truncate rounded-full bg-background/90 px-3 py-1 text-xs font-semibold text-foreground backdrop-blur">
+          <span className="absolute top-3 left-3 max-w-[calc(100%-4.5rem)] truncate rounded-control bg-background/90 px-3 py-1 text-xs font-semibold text-foreground backdrop-blur">
             {soldLabel ?? `${DEAL_LABELS[property.deal]} · ${PROPERTY_TYPE_LABELS[property.property_type]}`}
           </span>
           <FavoriteButton propertyId={property.id} />

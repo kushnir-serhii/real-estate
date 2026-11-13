@@ -30,7 +30,7 @@ export const BlogPostView = ({ post }: { post: PostDetail }) => {
         <header className="mt-4 flex flex-col items-start gap-4 sm:mt-6">
           <Link
             href={`/blog?category=${post.category}`}
-            className="inline-flex min-h-11 items-center rounded-full bg-secondary px-4 text-sm font-semibold text-secondary-foreground outline-none hover:bg-secondary/70 focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="inline-flex min-h-11 items-center rounded-control bg-secondary px-4 text-sm font-semibold text-secondary-foreground outline-none hover:bg-secondary/70 focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             {blogCategoryLabel(post.category)}
           </Link>
@@ -57,7 +57,7 @@ export const BlogPostView = ({ post }: { post: PostDetail }) => {
         {post.tags.length > 0 && (
           <ul aria-label={BLOG_POST_PAGE.tagsLabel} className="mt-8 flex flex-wrap gap-2">
             {post.tags.map((tag) => (
-              <li key={tag} className="rounded-full bg-secondary px-3 py-1 text-sm text-secondary-foreground">
+              <li key={tag} className="rounded-control bg-secondary px-3 py-1 text-sm text-secondary-foreground">
                 {tag}
               </li>
             ))}

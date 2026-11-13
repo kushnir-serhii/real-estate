@@ -52,11 +52,11 @@ export const QuickSearch = () => {
     >
       <fieldset className="min-w-0">
         <legend className="sr-only">Що потрібно</legend>
-        <div className="grid grid-cols-3 gap-1 rounded-2xl bg-muted p-1 sm:max-w-md">
+        <div className="grid grid-cols-3 gap-1 rounded-control bg-muted p-1 sm:max-w-md">
           {DEAL_OPTIONS.map((o) => (
             <label
               key={o.value}
-              className="relative flex h-11 cursor-pointer items-center justify-center rounded-xl px-2 text-sm font-semibold text-muted-foreground transition-colors duration-(--duration-fast) hover:text-foreground has-checked:bg-primary has-checked:text-primary-foreground has-checked:hover:text-primary-foreground has-focus-visible:ring-3 has-focus-visible:ring-ring/50"
+              className="relative flex h-11 cursor-pointer items-center justify-center rounded-control px-3 text-sm font-semibold text-muted-foreground transition-colors duration-(--duration-fast) hover:text-foreground has-checked:bg-primary has-checked:text-primary-foreground has-checked:hover:text-primary-foreground has-focus-visible:ring-3 has-focus-visible:ring-ring/50"
             >
               <input
                 type="radio"

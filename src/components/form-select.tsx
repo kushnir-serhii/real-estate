@@ -70,7 +70,7 @@ export const FormSelect = ({
           form={form}
           aria-label={ariaLabel}
           aria-describedby={ariaDescribedBy}
-          className="h-11 w-full min-w-0 rounded-xl border border-control bg-background px-3 text-base text-foreground"
+          className="h-11 w-full min-w-0 rounded-control border border-control bg-background px-4 text-base text-foreground"
         >
           {options.map((o) => (
             <option key={o.value} value={o.value}>

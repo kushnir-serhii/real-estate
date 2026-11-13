@@ -15,7 +15,7 @@ export const AdminHeader = ({ email }: AdminHeaderProps) => (
     <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-x-4 px-4 sm:flex-nowrap">
       <div className="flex shrink-0 items-center gap-2">
         <Logo />
-        <span className="rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
+        <span className="rounded-control bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
           адмінка
         </span>
       </div>

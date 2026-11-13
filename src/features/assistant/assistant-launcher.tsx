@@ -47,7 +47,7 @@ export const AssistantLauncher = () => {
           onPointerEnter={preloadPanel}
           onFocus={preloadPanel}
           // `chat-launcher-bottom` also lifts it above the property page's mobile bar (globals.css).
-          className="fixed right-4 z-40 size-chat-button rounded-full shadow-lg chat-launcher-bottom focus-visible:ring-4 [&_svg:not([class*='size-'])]:size-6"
+          className="fixed right-4 z-40 size-chat-button shadow-lg chat-launcher-bottom focus-visible:ring-4 [&_svg:not([class*='size-'])]:size-6"
         >
           <MessageCircle aria-hidden="true" />
         </Button>

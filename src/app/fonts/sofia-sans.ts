@@ -3,6 +3,9 @@ import localFont from "next/font/local";
 // Sofia Sans variable (SIL OFL, see OFL.txt), self-hosted: no request to Google Fonts at build or runtime.
 // Body, UI, forms, nav. Two files split by script: each is used only for its own unicode-range,
 // so a Latin-only page never loads the Cyrillic file. The Cyrillic face goes in front of the Latin one in `--font-sans`.
+// The Cyrillic woff2 is modified (OFL allows it; no Reserved Font Name): its cmap points at the `.loclRUS` glyphs, so
+// Ukrainian text gets the standard Cyrillic forms (т, д, и, л, п …) instead of the Bulgarian default ones. Redo this
+// after replacing the file (fontTools: remap every codepoint whose glyph has a `.loclRUS` variant).
 export const sofiaSansLatin = localFont({
   src: "./sofia-sans-latin-wght-normal.woff2",
   weight: "1 1000",

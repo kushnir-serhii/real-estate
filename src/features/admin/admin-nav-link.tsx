@@ -18,7 +18,7 @@ export const AdminNavLink = ({ href, children }: AdminNavLinkProps) => {
       href={href}
       aria-current={exact ? "page" : inside ? "true" : undefined}
       className={cn(
-        "inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-foreground outline-none transition-colors hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50",
+        "inline-flex min-h-11 items-center rounded-control px-4 text-sm font-medium text-foreground outline-none transition-colors hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50",
         inside && "bg-accent text-accent-foreground hover:bg-accent",
       )}
     >

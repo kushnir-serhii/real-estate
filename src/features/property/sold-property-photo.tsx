@@ -41,7 +41,7 @@ export const SoldPropertyPhoto = ({ photo, status }: SoldPropertyPhotoProps) => 
       )}
       <span
         aria-hidden="true"
-        className="absolute top-3 left-3 rounded-full bg-background/90 px-3 py-1.5 text-sm font-semibold text-foreground"
+        className="absolute top-3 left-3 rounded-control bg-background/90 px-3 py-1.5 text-sm font-semibold text-foreground"
       >
         {status}
       </span>
