@@ -1,6 +1,6 @@
-# 7 SKY: real estate website + admin (demo template)
+# Diplomat Hall: real estate website + admin (demo template)
 
-A complete real estate site for a fictional agency in Kyiv, **7 SKY**: catalog with filters, property pages, lead forms, a scripted AI assistant, and an admin (leads, properties and photos, pages, SEO). It runs on mock data, so you can clone it and use every feature with **no Docker, no accounts, no keys and no network**. The same code connects to the real stack (Supabase, Cloudflare R2, Plektan CRM, Telegram, an LLM) by configuration. UI language: Ukrainian.
+A complete real estate site for a fictional agency in Kyiv, **Diplomat Hall**: catalog with filters, property pages, lead forms, a scripted AI assistant, and an admin (leads, properties and photos, pages, SEO). It runs on mock data, so you can clone it and use every feature with **no Docker, no accounts, no keys and no network**. The same code connects to the real stack (Supabase, Cloudflare R2, Plektan CRM, Telegram, an LLM) by configuration. UI language: Ukrainian.
 
 Stack: Next.js (App Router, TypeScript) · Tailwind 4 · shadcn/ui · deployed to Cloudflare Workers (OpenNext).
 

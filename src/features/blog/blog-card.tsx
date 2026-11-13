@@ -19,7 +19,7 @@ export const BlogCard = ({ post, imageSizes, priority = false }: BlogCardProps) 
         <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
           <p className="eyebrow text-dawn-text">{blogCategoryLabel(post.category)}</p>
           <h3
-            className="line-clamp-3 font-heading text-lg leading-snug font-semibold tracking-tight break-words transition-colors duration-(--duration-fast) group-hover:text-dawn-text"
+            className="line-clamp-3 font-heading text-2xl leading-tight font-semibold break-words transition-colors duration-(--duration-fast) group-hover:text-dawn-text"
             title={post.title}
           >
             <Link href={`/blog/${post.slug}`} className="outline-none after:absolute after:inset-0 after:content-['']">

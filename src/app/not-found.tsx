@@ -17,16 +17,16 @@ const NotFound = () => (
   <div className="flex min-h-dvh flex-col">
     <a
       href="#main"
-      className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-3 focus:text-primary-foreground"
+      className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-control focus:bg-primary focus:px-5 focus:py-3 focus:text-primary-foreground"
     >
       Перейти до змісту
     </a>
     <SiteHeader />
     <main id="main" className="flex-1">
-      <div className="mx-auto w-full max-w-3xl px-4 pt-8 sm:pt-16">
+      <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 pt-8 sm:pt-16">
         <p
           aria-hidden="true"
-          className="font-heading text-[clamp(5rem,3rem+10vw,9rem)] leading-none font-semibold tracking-tighter text-dawn tabular-nums"
+          className="font-heading text-[clamp(5rem,3rem+10vw,9rem)] leading-none font-semibold text-dawn tabular-nums"
         >
           {NOT_FOUND_PAGE.code}
         </p>

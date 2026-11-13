@@ -29,8 +29,8 @@ export const getSiteUrl = (env: Record<string, string | undefined> = process.env
     }
     throw new Error(
       configured
-        ? `NEXT_PUBLIC_SITE_URL is not a valid URL ("${configured}"). Set it to the production domain, e.g. https://7sky.example (or SEO_ALLOW_LOCALHOST=1 for a local build).`
-        : "NEXT_PUBLIC_SITE_URL is empty. Set it to the production domain, e.g. https://7sky.example, before building (or SEO_ALLOW_LOCALHOST=1 for a local build).",
+        ? `NEXT_PUBLIC_SITE_URL is not a valid URL ("${configured}"). Set it to the production domain, e.g. https://diplomathall.example (or SEO_ALLOW_LOCALHOST=1 for a local build).`
+        : "NEXT_PUBLIC_SITE_URL is empty. Set it to the production domain, e.g. https://diplomathall.example, before building (or SEO_ALLOW_LOCALHOST=1 for a local build).",
     );
   }
   return LOCAL_SITE_URL;

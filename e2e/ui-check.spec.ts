@@ -50,7 +50,7 @@ for (const route of ROUTES) {
         await page.emulateMedia({ colorScheme: theme })
         await page.addInitScript((value) => {
           try {
-            localStorage.setItem('7sky-theme', value)
+            localStorage.setItem('diplomat-hall-theme', value)
           } catch {
             // storage blocked: the page falls back to the system theme
           }

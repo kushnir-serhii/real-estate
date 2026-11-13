@@ -55,7 +55,7 @@ export const PostDeleteButton = ({ postId, title, published }: PostDeleteButtonP
         <form action={formAction} className="flex flex-col gap-4">
           <input type="hidden" name="id" value={postId} />
           <AlertDialogHeader className="place-items-start text-left">
-            <AlertDialogTitle className="text-lg font-bold">Видалити статтю?</AlertDialogTitle>
+            <AlertDialogTitle className="text-2xl leading-tight font-semibold">Видалити статтю?</AlertDialogTitle>
             <AlertDialogDescription className="text-left wrap-anywhere">
               «{title || "Без заголовка"}» зникне назавжди
               {published ? ", а посилання на неї перестане відкриватися" : ""}. Відновити не вийде.

@@ -1,6 +1,6 @@
 import { SectionHeading } from "@/components/section-heading";
 import { ABOUT_PAGE } from "@/constants/inner-pages";
-import { AgentTile } from "@/features/home/home-agents";
+import { AgentTile } from "@/features/about/agent-tile";
 import { getActiveAgents } from "@/lib/db/agents";
 import type { Agent } from "@/lib/db/agents";
 
@@ -16,7 +16,7 @@ export const AboutTeam = async () => {
   if (agents.length === 0) return null;
 
   return (
-    <section aria-labelledby="team-title" className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4">
+    <section aria-labelledby="team-title" className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 sm:px-6">
       <SectionHeading
         id="team-title"
         eyebrow={ABOUT_PAGE.teamEyebrow}

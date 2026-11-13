@@ -63,7 +63,7 @@ export const LeadsFilters = ({ filters }: LeadsFiltersProps) => (
 
     <label
       htmlFor="leads-failed"
-      className="flex h-11 min-w-0 items-center gap-2 rounded-lg border border-control px-3 text-sm font-medium whitespace-nowrap transition-colors select-none hover:bg-muted has-checked:border-destructive has-checked:bg-destructive/10 has-checked:text-destructive has-focus-visible:ring-3 has-focus-visible:ring-ring/50 dark:bg-input/30"
+      className="flex h-11 min-w-0 items-center gap-2 rounded-control border border-control px-4 text-sm font-medium whitespace-nowrap transition-colors select-none hover:bg-muted has-checked:border-destructive has-checked:bg-destructive/10 has-checked:text-destructive has-focus-visible:ring-3 has-focus-visible:ring-ring/50 dark:bg-input/30"
     >
       <input
         id="leads-failed"

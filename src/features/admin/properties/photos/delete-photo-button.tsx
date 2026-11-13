@@ -75,7 +75,7 @@ export const DeletePhotoButton = ({ number, onDelete, onDeleted }: DeletePhotoBu
         }}
       >
         <AlertDialogHeader className="place-items-start text-left">
-          <AlertDialogTitle className="text-lg font-bold">Видалити фото {number}?</AlertDialogTitle>
+          <AlertDialogTitle className="text-2xl leading-tight font-semibold">Видалити фото {number}?</AlertDialogTitle>
           <AlertDialogDescription className="text-left">
             Фото зникне з об&apos;єкта і з сайту. Відновити не вийде.
           </AlertDialogDescription>

@@ -25,7 +25,7 @@ export const pageItems = (current: number, count: number): Item[] => {
   return items;
 };
 
-const ARROW_CLASS = cn(buttonVariants({ variant: "outline", size: "icon" }), "rounded-full");
+const ARROW_CLASS = buttonVariants({ variant: "outline", size: "icon" });
 
 export const CatalogPagination = ({ state, pageCount }: CatalogPaginationProps) => {
   if (pageCount <= 1) return null;
@@ -63,7 +63,7 @@ export const CatalogPagination = ({ state, pageCount }: CatalogPaginationProps) 
                 aria-label={`Сторінка ${item.page}`}
                 className={cn(
                   buttonVariants({ variant: item.page === current ? "default" : "ghost", size: "icon" }),
-                  "rounded-full font-semibold tabular-nums",
+                  "font-semibold tabular-nums",
                 )}
               >
                 {item.page}

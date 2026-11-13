@@ -31,7 +31,7 @@ export const DeliveryBadge = ({ status, channel, className }: DeliveryBadgeProps
           <span className="sr-only">:</span>
         </span>
       )}
-      <span className={cn("inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-medium whitespace-nowrap", tone)}>
+      <span className={cn("inline-flex items-center gap-1 rounded-control px-2.5 py-0.5 font-medium whitespace-nowrap", tone)}>
         <Icon className="size-3.5 shrink-0" aria-hidden="true" />
         {label}
       </span>

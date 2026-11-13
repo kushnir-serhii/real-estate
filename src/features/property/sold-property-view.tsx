@@ -23,7 +23,7 @@ export const SoldPropertyView = ({ property }: SoldPropertyViewProps) => {
   const location = locationText(property);
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 pt-2 pb-16 sm:pt-4 lg:pb-24">
+    <div className="site-container pt-2 pb-16 sm:pt-4 lg:pb-24">
       <Link
         href={`/catalog?deal=${property.deal}`}
         className="inline-flex min-h-11 items-center gap-2 rounded-md text-sm font-medium text-muted-foreground outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
@@ -37,7 +37,7 @@ export const SoldPropertyView = ({ property }: SoldPropertyViewProps) => {
           <div className="flex items-start gap-3 rounded-2xl bg-secondary p-5 text-secondary-foreground ring-1 ring-foreground/10">
             <CircleCheck className="mt-0.5 size-5 shrink-0 text-dawn-text" aria-hidden="true" />
             <div>
-              <p className="font-heading font-semibold">{status}</p>
+              <p className="font-semibold">{status}</p>
               <p className="mt-1 text-sm">
                 Цей об&apos;єкт більше не доступний. Подивіться схожі або залиште запит, і ми підберемо
                 варіант.
@@ -54,7 +54,7 @@ export const SoldPropertyView = ({ property }: SoldPropertyViewProps) => {
             <h1 className="text-h2 break-words">{property.title}</h1>
             {location && <p className="break-words text-muted-foreground">{location}</p>}
             <p className="mt-2 text-muted-foreground">
-              Остання ціна: <span className="font-heading font-semibold break-words tabular-nums">{priceText(property)}</span>
+              Остання ціна: <span className="font-semibold break-words tabular-nums">{priceText(property)}</span>
             </p>
             {facts.length > 0 && <p>{facts.join(" · ")}</p>}
           </header>

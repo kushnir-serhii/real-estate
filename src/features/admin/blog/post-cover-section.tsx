@@ -227,7 +227,7 @@ export const PostCoverSection = ({ postId, initialKey, initialAlt }: PostCoverSe
                 </AlertDialogTrigger>
                 <AlertDialogContent className="w-[calc(100%-2rem)] data-[size=default]:max-w-md data-[size=default]:sm:max-w-md">
                   <AlertDialogHeader className="place-items-start text-left">
-                    <AlertDialogTitle className="text-lg font-bold">Прибрати обкладинку?</AlertDialogTitle>
+                    <AlertDialogTitle className="text-2xl leading-tight font-semibold">Прибрати обкладинку?</AlertDialogTitle>
                     <AlertDialogDescription className="text-left">
                       Фото буде видалено. У списку й на сторінці статті з’явиться заглушка.
                     </AlertDialogDescription>

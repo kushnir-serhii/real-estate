@@ -12,10 +12,10 @@ type AdminHeaderProps = { email: string };
  */
 export const AdminHeader = ({ email }: AdminHeaderProps) => (
   <header className="border-b bg-background sm:sticky sm:top-0 sm:z-40">
-    <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-x-4 px-4 sm:flex-nowrap">
-      <div className="flex shrink-0 items-center gap-2">
-        <Logo />
-        <span className="rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
+    <div className="site-container flex flex-wrap items-center gap-x-4 sm:flex-nowrap">
+      <div className="flex shrink-0 items-center gap-2 max-sm:py-3">
+        <Logo size="sm" />
+        <span className="rounded-control bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
           адмінка
         </span>
       </div>

@@ -55,7 +55,7 @@ export const LeadSourceCard = ({ lead }: LeadSourceCardProps) => {
       <LeadFacts facts={facts} />
       {utm.length > 0 && (
         <div className="flex flex-col gap-2 text-sm">
-          <h3 className="font-medium">Рекламна мітка (UTM)</h3>
+          <h3 className="font-sans font-medium">Рекламна мітка (UTM)</h3>
           <LeadFacts
             facts={utm.map(([key, value]) => ({
               label: UTM_LABELS[key] ?? key,

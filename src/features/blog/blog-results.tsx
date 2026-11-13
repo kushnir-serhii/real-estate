@@ -64,7 +64,7 @@ export const BlogResults = async ({ state }: { state: BlogState }) => {
           role="alert"
           className="flex flex-col items-start gap-4 rounded-2xl border border-destructive/40 bg-card p-6 sm:p-8"
         >
-          <p className="flex items-center gap-2 font-heading text-lg font-semibold text-destructive">
+          <p className="flex items-center gap-2 text-lg font-semibold text-destructive">
             <TriangleAlert className="size-5 shrink-0" aria-hidden="true" />
             {BLOG_PAGE.loadError}
           </p>

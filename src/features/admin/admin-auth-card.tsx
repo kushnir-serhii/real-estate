@@ -20,13 +20,13 @@ export const AdminAuthCard = ({ title, description, footnote, className, childre
       >
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2">
-            <Logo />
-            <span className="rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
+            <Logo size="sm" />
+            <span className="rounded-control bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
               адмінка
             </span>
           </div>
           <div className="flex flex-col gap-1.5">
-            <h1 id="admin-auth-title" className="text-xl font-bold text-balance">
+            <h1 id="admin-auth-title" className="text-3xl font-bold text-balance">
               {title}
             </h1>
             {description ? <div className="text-sm text-muted-foreground">{description}</div> : null}

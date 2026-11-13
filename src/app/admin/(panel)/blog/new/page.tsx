@@ -27,7 +27,7 @@ const AdminNewPostPage = async () => {
           До списку статей
         </Link>
         <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-bold sm:text-3xl">Нова стаття</h1>
+          <h1 className="text-3xl font-bold sm:text-4xl">Нова стаття</h1>
           <p className="max-w-prose text-muted-foreground">
             Чернетку на сайті не видно. Коли текст готовий, натисніть «Опублікувати».
           </p>

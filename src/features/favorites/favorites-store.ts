@@ -1,11 +1,11 @@
 import { useSyncExternalStore } from "react";
 
-import { LEGACY_STORAGE_PREFIX } from "@/lib/legacy-storage";
+import { takeLegacyValue } from "@/lib/legacy-storage";
 
 /** localStorage key: JSON array of property ids (uuids), newest first. */
-export const FAVORITES_KEY = "7sky:favorites";
-/** Key used before the rebrand; read once and moved to FAVORITES_KEY. */
-const LEGACY_FAVORITES_KEY = `${LEGACY_STORAGE_PREFIX}:favorites`;
+export const FAVORITES_KEY = "diplomat-hall:favorites";
+/** Suffix of the keys used before the rebrands; read once and moved to FAVORITES_KEY. */
+const LEGACY_FAVORITES_SUFFIX = ":favorites";
 export const MAX_FAVORITES = 100;
 
 // A plain regex instead of zod: this store ships in the header of every page, and zod would add ~100 KB of JS there.
@@ -29,17 +29,19 @@ export const sanitizeIds = (value: unknown): string[] => {
   return [...seen];
 };
 
-/** Moves the pre-rebrand list to the new key once; unreadable data is dropped. Throws only when storage is blocked. */
-const migrateLegacy = (): string[] => {
-  const legacy = window.localStorage.getItem(LEGACY_FAVORITES_KEY);
-  if (legacy === null) return [];
-  let ids: string[] = [];
+const parseIds = (raw: string): string[] => {
   try {
-    ids = sanitizeIds(JSON.parse(legacy));
+    return sanitizeIds(JSON.parse(raw));
   } catch {
-    // Garbage: start empty.
+    return [];
   }
-  window.localStorage.removeItem(LEGACY_FAVORITES_KEY);
+};
+
+/** Moves the newest readable pre-rebrand list to the new key once; garbage is dropped. Throws only when storage is blocked. */
+export const migrateLegacyFavorites = (): string[] => {
+  const legacy = takeLegacyValue(window.localStorage, LEGACY_FAVORITES_SUFFIX, (raw) => parseIds(raw).length > 0);
+  if (legacy === null) return [];
+  const ids = parseIds(legacy);
   if (ids.length > 0) window.localStorage.setItem(FAVORITES_KEY, JSON.stringify(ids));
   return ids;
 };
@@ -49,7 +51,7 @@ const readStorage = (): string[] | null => {
   try {
     const raw = window.localStorage.getItem(FAVORITES_KEY);
     if (raw !== null) return sanitizeIds(JSON.parse(raw));
-    return migrateLegacy();
+    return migrateLegacyFavorites();
   } catch {
     return null;
   }

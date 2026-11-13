@@ -18,7 +18,7 @@ export const LeadSection = ({ id, title, className, children }: LeadSectionProps
       className,
     )}
   >
-    <h2 id={`${id}-title`} className="text-lg font-bold">
+    <h2 id={`${id}-title`} className="text-2xl leading-tight font-semibold">
       {title}
     </h2>
     {children}

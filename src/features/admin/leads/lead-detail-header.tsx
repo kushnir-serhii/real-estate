@@ -27,7 +27,7 @@ export const LeadDetailHeader = ({ lead, backHref }: LeadDetailHeaderProps) => (
         <span aria-hidden="true">·</span>
         <LeadDateTime iso={lead.created_at} layout="inline" />
       </p>
-      <h1 className="text-2xl font-bold text-balance wrap-anywhere sm:text-3xl">{lead.name}</h1>
+      <h1 className="text-3xl font-bold text-balance wrap-anywhere sm:text-4xl">{lead.name}</h1>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
         <DeliveryBadge channel="Plektan" status={lead.plektan_status} />
         <DeliveryBadge channel="Telegram" status={lead.telegram_status} />

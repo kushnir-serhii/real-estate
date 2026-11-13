@@ -23,7 +23,7 @@ export const SiteFooter = () => {
 
   return (
     <footer className="bg-ink text-on-ink">
-      <div className="mx-auto w-full max-w-6xl px-4">
+      <div className="site-container">
         <div className="flex flex-col gap-6 border-b border-ink-border py-12 sm:py-16 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
             <p className="eyebrow mb-3 text-dawn">{FOOTER.cta.eyebrow}</p>
@@ -51,7 +51,7 @@ export const SiteFooter = () => {
 
         <div className="grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1.2fr_1fr]">
           <div className="flex flex-col items-start gap-3">
-            <Logo tone="on-ink" alwaysShowName />
+            <Logo tone="on-ink" size="lg" alwaysShowName className="focus-visible:ring-dawn/60" />
             <p className="max-w-xs text-sm text-pretty text-ink-muted">
               {BRAND.tagline}
             </p>

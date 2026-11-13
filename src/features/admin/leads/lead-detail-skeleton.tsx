@@ -18,10 +18,10 @@ const FactsCardSkeleton = ({ rows }: { rows: number }) => (
 export const LeadDetailSkeleton = () => (
   <div aria-busy="true" aria-label="Завантаження заявки" className="flex flex-col gap-6">
     <div className="flex flex-col gap-4">
-      <Skeleton className="h-11 w-44" />
+      <Skeleton className="h-11 rounded-control w-44" />
       <div className="flex flex-col gap-2">
         <Skeleton className="h-4 w-56" />
-        <Skeleton className="h-8 w-full max-w-md sm:h-9" />
+        <Skeleton className="h-9 w-full max-w-md sm:h-10" />
         <div className="flex gap-4">
           <Skeleton className="h-6 w-36" />
           <Skeleton className="h-6 w-36" />

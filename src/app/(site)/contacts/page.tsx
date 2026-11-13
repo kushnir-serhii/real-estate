@@ -30,7 +30,7 @@ const ContactsPage = async () => {
   return (
     <div className="pb-16 sm:pb-24">
       <PageHeader eyebrow={CONTACTS_PAGE.eyebrow} title={page.title} />
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-14 px-4 sm:gap-20">
+      <div className="site-container flex flex-col gap-14 sm:gap-20">
         <Markdown className="max-w-prose">{page.body}</Markdown>
         <div className="grid gap-6 lg:grid-cols-2 lg:items-start lg:gap-8">
           <ContactBlock />

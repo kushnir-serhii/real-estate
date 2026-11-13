@@ -102,7 +102,7 @@ export const SourceSwitch = ({ target, consequences }: SourceSwitchProps) => {
             <input type="hidden" name="confirm" value="yes" />
 
             <AlertDialogHeader className="place-items-start text-left">
-              <AlertDialogTitle className="text-lg font-bold">{copy.title}</AlertDialogTitle>
+              <AlertDialogTitle className="text-2xl leading-tight font-semibold">{copy.title}</AlertDialogTitle>
               <AlertDialogDescription>
                 Після перемикання:
               </AlertDialogDescription>

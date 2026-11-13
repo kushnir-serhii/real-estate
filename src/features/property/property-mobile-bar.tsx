@@ -15,7 +15,7 @@ type PropertyMobileBarProps = { phone: ContactPhone };
 export const PropertyMobileBar = ({ phone }: PropertyMobileBarProps) => (
   <div
     data-property-mobile-bar=""
-    className="sticky bottom-0 z-30 -mx-4 mt-8 border-t bg-background/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden"
+    className="sticky bottom-0 z-30 -mx-4 mt-8 border-t bg-background/95 px-4 sm:-mx-6 sm:px-6 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden"
   >
     <div className="grid grid-cols-2 gap-2">
       <a href={phone.href} className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full")}>

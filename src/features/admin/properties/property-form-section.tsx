@@ -20,7 +20,7 @@ export const PropertyFormSection = ({ id, title, description, className, childre
     )}
   >
     <div className="flex flex-col gap-1">
-      <h2 id={`${id}-title`} className="text-lg font-bold">
+      <h2 id={`${id}-title`} className="text-2xl leading-tight font-semibold">
         {title}
       </h2>
       {description && <p className="max-w-prose text-sm text-muted-foreground">{description}</p>}

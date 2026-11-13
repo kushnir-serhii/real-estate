@@ -135,7 +135,7 @@ export const LeadForm = ({
     <div className={cn("flex min-w-0 flex-col gap-4", className)}>
       {title && (
         <div className="flex flex-col gap-1">
-          <h2 id={titleId} className="text-lg font-bold text-balance">
+          <h2 id={titleId} className="text-2xl leading-tight font-semibold text-balance">
             {title}
           </h2>
           {description && <p className="text-sm text-muted-foreground">{description}</p>}

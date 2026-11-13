@@ -30,7 +30,7 @@ export const LeadsEmpty = (props: LeadsEmptyProps) => {
     <div className="flex flex-col items-start gap-4 rounded-xl border border-dashed p-6">
       <Icon className="size-8 text-muted-foreground" aria-hidden="true" />
       <div className="flex flex-col gap-2">
-        <h2 className="text-lg font-bold">{text.title}</h2>
+        <h2 className="text-2xl leading-tight font-semibold">{text.title}</h2>
         <p className="max-w-prose text-muted-foreground">{text.body}</p>
       </div>
       {props.kind === "filtered" && (

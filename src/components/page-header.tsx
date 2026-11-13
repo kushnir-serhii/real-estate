@@ -15,7 +15,7 @@ type PageHeaderProps = {
   className?: string;
 };
 
-/** One page header for every inner route: eyebrow, Unbounded h1, lead. Sits right under the solid site header. */
+/** One page header for every inner route: eyebrow, heading-font h1, lead. Sits right under the solid site header. */
 export const PageHeader = ({
   eyebrow,
   title,
@@ -28,8 +28,8 @@ export const PageHeader = ({
 }: PageHeaderProps) => (
   <header
     className={cn(
-      "mx-auto w-full px-4 pt-8 pb-8 sm:pt-12 sm:pb-10",
-      width === "narrow" ? "max-w-3xl" : "max-w-6xl",
+      "pt-8 pb-8 sm:pt-12 sm:pb-10",
+      width === "narrow" ? "mx-auto w-full max-w-3xl px-4 sm:px-6" : "site-container",
       className,
     )}
   >

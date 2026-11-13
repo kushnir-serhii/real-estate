@@ -30,7 +30,7 @@ const ToolbarButton = ({ label, icon: Icon, onClick, pressed, disabled, shortcut
     onMouseDown={(event) => event.preventDefault()}
     onClick={onClick}
     className={cn(
-      "inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-foreground outline-none transition-colors hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-40",
+      "inline-flex size-11 shrink-0 items-center justify-center rounded-control text-foreground outline-none transition-colors hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-40",
       pressed && "bg-secondary text-secondary-foreground",
     )}
   >

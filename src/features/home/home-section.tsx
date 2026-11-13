@@ -15,8 +15,8 @@ export const HomeSection = ({ labelledBy, ariaLabel, tone = "default", className
   <section
     aria-labelledby={labelledBy}
     aria-label={labelledBy ? undefined : ariaLabel}
-    className={cn("py-16 sm:py-24", tone === "ink" && "bg-ink text-on-ink", className)}
+    className={cn("py-12 sm:py-16 lg:py-20", tone === "ink" && "bg-ink text-on-ink", className)}
   >
-    <div className="mx-auto w-full max-w-6xl px-4">{children}</div>
+    <div className="site-container">{children}</div>
   </section>
 );

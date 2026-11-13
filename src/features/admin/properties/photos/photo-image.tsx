@@ -24,14 +24,14 @@ export const PhotoImage = ({ photo, index }: PhotoImageProps) => (
     {index === 0 && (
       <span
         aria-hidden="true"
-        className="absolute top-2 left-2 rounded-md bg-primary px-2 py-0.5 text-xs font-medium text-primary-foreground"
+        className="absolute top-2 left-2 rounded-control bg-primary px-2.5 py-0.5 text-xs font-medium text-primary-foreground"
       >
         Обкладинка
       </span>
     )}
     <span
       aria-hidden="true"
-      className="absolute top-2 right-2 min-w-6 rounded-md bg-scrim px-1.5 py-0.5 text-center text-xs font-medium text-on-scrim tabular-nums"
+      className="absolute top-2 right-2 min-w-6 rounded-control bg-scrim px-2 py-0.5 text-center text-xs font-medium text-on-scrim tabular-nums"
     >
       {index + 1}
     </span>

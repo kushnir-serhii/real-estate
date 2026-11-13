@@ -63,7 +63,7 @@ export const PageResetButton = ({ slug, disabled, onReset }: PageResetButtonProp
         <form action={formAction} className="flex flex-col gap-4">
           <input type="hidden" name="slug" value={slug} />
           <AlertDialogHeader className="place-items-start text-left">
-            <AlertDialogTitle className="text-lg font-bold">Скинути до стандартного?</AlertDialogTitle>
+            <AlertDialogTitle className="text-2xl leading-tight font-semibold">Скинути до стандартного?</AlertDialogTitle>
             <AlertDialogDescription className="text-left">
               Заголовок, текст, SEO-поля й налаштування індексації повернуться до вбудованих. Ваші зміни зникнуть,
               відновити їх не вийде.

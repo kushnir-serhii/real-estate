@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ArrowRight, Search } from "lucide-react";
 
+import { Logo } from "@/components/layout/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
@@ -50,6 +51,17 @@ const RADII = [
   { name: "2xl", className: "rounded-2xl" },
 ];
 
+const FONTS = [
+  { name: "Sofia Sans", role: "font-sans · текст", className: "font-sans text-2xl", sample: "Нерухомість у Києві · Ґ, Є, Ї, І · Real estate" },
+  {
+    name: "Sofia Sans Extra Condensed",
+    role: "font-heading · заголовки",
+    className: "font-heading text-4xl font-bold",
+    sample: "Нерухомість у Києві · Ґ, Є, Ї, І",
+  },
+  { name: "Cormorant SC 600", role: "font-logo · лише логотип", className: "font-logo text-4xl leading-none", sample: "Diplomat Hall" },
+];
+
 const VARIANTS = [
   "default",
   "dawn",
@@ -83,6 +95,23 @@ const DesignPage = () => (
       <ThemeToggle />
     </header>
 
+    <Section title="Логотип">
+      <p className="text-sm text-muted-foreground">
+        Щит + тонка лінія + «DIPLOMAT / HALL» (Cormorant SC). Монохромний: колір тексту. Варіанти full / mark,
+        розміри sm (адмінка) / md (шапка) / lg (футер); нижче 360px шапка показує лише щит.
+      </p>
+      <div className="flex flex-wrap items-center gap-6">
+        <Logo size="sm" alwaysShowName />
+        <Logo alwaysShowName />
+        <Logo size="lg" alwaysShowName />
+        <Logo variant="mark" />
+      </div>
+      <div className="flex flex-wrap items-center gap-6 rounded-2xl bg-ink p-6">
+        <Logo tone="on-ink" size="lg" alwaysShowName />
+        <Logo tone="on-ink" variant="mark" />
+      </div>
+    </Section>
+
     <Section title="Кольори">
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {SWATCHES.map(({ name, className }) => (
@@ -107,28 +136,46 @@ const DesignPage = () => (
       </ul>
     </Section>
 
+    <Section title="Шрифти">
+      <ul className="grid gap-4 md:grid-cols-3">
+        {FONTS.map(({ name, role, className, sample }) => (
+          <li key={name} className="flex flex-col gap-2 rounded-xl border p-4">
+            <span className="eyebrow text-muted-foreground">{role}</span>
+            <p className={className}>{sample}</p>
+            <span className="text-sm text-muted-foreground">{name}</span>
+          </li>
+        ))}
+      </ul>
+      <div className="flex flex-col gap-1 rounded-xl border p-4">
+        <span className="text-sm text-muted-foreground">Заголовний шрифт: вага 600 / 700 / 800</span>
+        <p className="text-h2 font-semibold">Нерухомість у Києві · Ґ, Є, Ї, І</p>
+        <p className="text-h2 font-bold">Real estate in Kyiv · Ґ, Є, Ї, І</p>
+        <p className="text-h2 font-extrabold">Нерухомість у Києві · Real estate</p>
+      </div>
+    </Section>
+
     <Section title="Типографіка">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <span className="eyebrow text-muted-foreground">Unbounded · display</span>
-          <p className="text-display">Знайдіть свій дім</p>
+          <span className="eyebrow text-muted-foreground">Sofia Sans Extra Condensed · display</span>
+          <p className="text-display">Нерухомість у Києві</p>
         </div>
         <div className="flex flex-col gap-1">
-          <span className="eyebrow text-muted-foreground">Unbounded · h1</span>
+          <span className="eyebrow text-muted-foreground">Sofia Sans Extra Condensed · h1</span>
           <p className="text-h1">Квартири в центрі Києва</p>
         </div>
         <div className="flex flex-col gap-1">
-          <span className="eyebrow text-muted-foreground">Unbounded · h2</span>
+          <span className="eyebrow text-muted-foreground">Sofia Sans Extra Condensed · h2</span>
           <p className="text-h2">Район, який вам підходить</p>
         </div>
         <div className="flex flex-col gap-1">
-          <span className="eyebrow text-muted-foreground">Unbounded · h3</span>
-          <p className="text-h3">Підзаголовок розділу</p>
+          <span className="eyebrow text-muted-foreground">Sofia Sans Extra Condensed · h3</span>
+          <p className="text-h3">Підзаголовок розділу: Ґ, Є, Ї, І</p>
         </div>
         <div className="flex flex-col gap-1">
-          <span className="eyebrow text-dawn-text">Eyebrow · Manrope</span>
+          <span className="eyebrow text-dawn-text">Eyebrow · Sofia Sans</span>
           <p className="text-base">
-            Основний текст Manrope: ґанок, їдальня, єдність, Львів, Чернігів.
+            Основний текст Sofia Sans: ґанок, їдальня, єдність, Львів, Чернігів.
           </p>
           <p className="text-sm text-muted-foreground">
             Допоміжний текст: 3 кімнати, 78 м², 5 поверх із 9.
@@ -139,8 +186,8 @@ const DesignPage = () => (
         <span className="text-sm text-muted-foreground">
           Ціна (tabular-nums)
         </span>
-        <p className="font-heading text-3xl font-semibold tabular-nums">85 000 $</p>
-        <p className="font-heading text-2xl font-medium tabular-nums">2 450 000 ₴</p>
+        <p className="font-heading text-4xl font-bold tabular-nums">85 000 $</p>
+        <p className="font-heading text-3xl font-semibold tabular-nums">2 450 000 ₴</p>
         <p className="text-lg tabular-nums">1 111 111 € / 8 888 888 €</p>
       </div>
     </Section>
@@ -196,7 +243,7 @@ const DesignPage = () => (
           </Button>
         </div>
         <div className="border-t border-ink-border pt-3 text-sm text-ink-muted">
-          © 7 SKY · Політика конфіденційності
+          © Diplomat Hall · Політика конфіденційності
         </div>
       </div>
     </Section>

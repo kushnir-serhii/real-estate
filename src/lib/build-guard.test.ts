@@ -29,7 +29,7 @@ describe("assertBuildEnv", () => {
   it("warns about a missing site URL on a demo build only when it matters", () => {
     expect(demoBuildWarnings({})).toHaveLength(1);
     expect(demoBuildWarnings({ NEXT_PUBLIC_SITE_URL: "nope" })).toHaveLength(1);
-    expect(demoBuildWarnings({ NEXT_PUBLIC_SITE_URL: "https://7sky.example" })).toEqual([]);
+    expect(demoBuildWarnings({ NEXT_PUBLIC_SITE_URL: "https://diplomathall.example" })).toEqual([]);
     expect(demoBuildWarnings({ SEO_ALLOW_LOCALHOST: "1" })).toEqual([]);
   });
 });

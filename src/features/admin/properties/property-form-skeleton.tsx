@@ -6,7 +6,7 @@ const CARD_CLASS = "flex flex-col gap-4 rounded-xl bg-card p-4 ring-1 ring-foreg
 const FieldSkeleton = () => (
   <div className="flex flex-col gap-2">
     <Skeleton className="h-3.5 w-28" />
-    <Skeleton className="h-11 w-full" />
+    <Skeleton className="h-11 rounded-control w-full" />
   </div>
 );
 
@@ -27,9 +27,9 @@ type PropertyFormSkeletonProps = { label: string; withPublish: boolean };
 export const PropertyFormSkeleton = ({ label, withPublish }: PropertyFormSkeletonProps) => (
   <div aria-busy="true" aria-label={label} className="flex flex-col gap-6">
     <div className="flex flex-col gap-4">
-      <Skeleton className="h-11 w-48" />
+      <Skeleton className="h-11 rounded-control w-48" />
       <div className="flex flex-col gap-2">
-        <Skeleton className="h-8 w-full max-w-md sm:h-9" />
+        <Skeleton className="h-9 w-full max-w-md sm:h-10" />
         <Skeleton className="h-6 w-64" />
       </div>
     </div>
@@ -38,7 +38,7 @@ export const PropertyFormSkeleton = ({ label, withPublish }: PropertyFormSkeleto
         <div className={cn(CARD_CLASS, "lg:order-last")}>
           <Skeleton className="h-6 w-28" />
           <Skeleton className="h-4 w-48" />
-          <Skeleton className="h-11 w-full" />
+          <Skeleton className="h-11 rounded-control w-full" />
         </div>
       )}
       <div className="flex min-w-0 flex-col gap-6">

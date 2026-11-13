@@ -23,7 +23,7 @@ type CatalogFiltersFormProps = {
 };
 
 const CHIP_CLASS =
-  "inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-xl border border-control bg-background px-3 text-sm font-medium transition-colors select-none hover:bg-muted has-checked:border-primary has-checked:bg-primary has-checked:font-semibold has-checked:text-primary-foreground has-checked:hover:bg-primary dark:has-checked:bg-primary has-focus-visible:ring-3 has-focus-visible:ring-ring/50 dark:bg-input/30";
+  "inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-control border border-control bg-background px-4 text-sm font-medium transition-colors select-none hover:bg-muted has-checked:border-primary has-checked:bg-primary has-checked:font-semibold has-checked:text-primary-foreground has-checked:hover:bg-primary dark:has-checked:bg-primary has-focus-visible:ring-3 has-focus-visible:ring-ring/50 dark:bg-input/30";
 
 const LEGEND_CLASS = "mb-2 text-sm leading-none font-medium text-foreground";
 

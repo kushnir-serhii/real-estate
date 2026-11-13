@@ -8,9 +8,18 @@
 
 /* Tokens. Swap the look here only: colors, radius, fonts. */
 @theme inline {
-  --font-sans: var(--font-manrope-cyrillic), var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
-  /* Unbounded: headings, hero, prices, big numbers (weights 500-700). Cyrillic face first, as for sans. */
-  --font-heading: var(--font-unbounded-cyrillic), var(--font-unbounded), var(--font-sans);
+  /* Sofia Sans: body, UI, forms, nav. Each face covers only its own unicode-range; the Cyrillic and ₴ (U+20B4, missing
+     from the family) faces go before the Latin one, whose metric-adjusted local fallback would otherwise catch them. */
+  --font-sans:
+    var(--font-sofia-sans-cyrillic), var(--font-sofia-sans-hryvnia), var(--font-sofia-sans), ui-sans-serif, system-ui,
+    sans-serif;
+  /* Sofia Sans Extra Condensed: headings, hero, prices, big numbers (weights 600-800).
+     Cyrillic and ₴ faces first, as for sans. */
+  --font-heading:
+    var(--font-sofia-sans-extra-condensed-cyrillic), var(--font-sofia-sans-extra-condensed-hryvnia),
+    var(--font-sofia-sans-extra-condensed), var(--font-sans);
+  /* Cormorant SC: the logo wordmark only (Latin, weight 600). */
+  --font-logo: var(--font-cormorant-sc), ui-serif, Georgia, serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -58,6 +67,16 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  /* Controls (buttons, inputs, selects, chips, badges, tabs, pagination): pills. One switch for the whole site:
+     set e.g. var(--radius-lg) here for square-ish controls → rounded-control */
+  --radius-control: 9999px;
+  /* Multi-line fields (textarea, chat input): the control shape, capped so text in the corners isn't clipped
+     → rounded-control-multiline. Follows --radius-control when that is set lower */
+  --radius-control-multiline: min(var(--radius-control), var(--radius-3xl));
+
+  /* property card price (heading font, from sm; text-2xl below) → text-price */
+  --text-price: 1.75rem;
+  --text-price--line-height: 1.15;
 
   /* AI assistant launcher (round floating button) → size-chat-button */
   --spacing-chat-button: 3.5rem;
@@ -67,6 +86,8 @@
   --spacing-property-bar: 4.625rem;
   /* chat panel width from the sm breakpoint → sm:max-w-(--container-chat-panel) */
   --container-chat-panel: 25rem;
+  /* outer page content width (1408px; reference serhant.com) → site-container */
+  --container-site: 88rem;
 
   --animate-typing-dot: typing-dot 1.2s ease-in-out infinite;
   @keyframes typing-dot {
@@ -177,6 +198,53 @@
   --ink-border: oklch(1 0 0 / 10%);
 }
 
+/* The one outer page container: header, footer, home sections, inner pages, admin.
+   Gutters 16 / 24 / 32px; full-bleed children cancel them with the same steps (-mx-4 sm:-mx-6 lg:-mx-8).
+   Reading pages (about, privacy, blog article) keep their own narrow max-w-3xl column. */
+@utility site-container {
+  @apply mx-auto w-full max-w-(--container-site) px-4 sm:px-6 lg:px-8;
+}
+
+/* Logo lockup (src/components/layout/logo.tsx): shield, 1px rule and the two-line wordmark, all scaled
+   from --logo-height (the shield's height). Sizes: logo-sm (admin), logo-md (site header), logo-lg (footer).
+   Wordmark: Cormorant SC capitals; the two lines of caps span about the shield's height. */
+@utility logo-sm {
+  --logo-height: 2.25rem;
+}
+@utility logo-md {
+  --logo-height: 2.5rem;
+  @media (width >= 40rem) {
+    --logo-height: 2.75rem;
+  }
+}
+@utility logo-lg {
+  --logo-height: 3.5rem;
+}
+@utility logo-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--logo-height, 2.75rem) * 0.24);
+}
+@utility logo-shield {
+  height: var(--logo-height, 2.75rem);
+  width: auto;
+  flex-shrink: 0;
+}
+@utility logo-rule {
+  width: 1px;
+  height: calc(var(--logo-height, 2.75rem) * 0.7);
+  flex-shrink: 0;
+  background-color: currentColor;
+}
+@utility logo-wordmark {
+  font-family: var(--font-logo);
+  font-weight: 600;
+  font-size: calc(var(--logo-height, 2.75rem) * 0.556);
+  line-height: 0.88;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
 /* Scrollable strips (gallery) that draw their own controls */
 @utility scrollbar-none {
   scrollbar-width: none;
@@ -205,47 +273,48 @@
   }
 }
 
-/* Type scale. Fluid: display is ~36px at 375px and ~68px from 1280px. */
+/* Type scale for the condensed heading face (Sofia Sans Extra Condensed): big sizes, heavy weights, no negative tracking.
+   Fluid between 375px and 1440px: display 48 -> 104px, h1 40 -> 72px, h2 36 -> 60px, h3 24 -> 32px. Sentence case. */
 @utility text-display {
   font-family: var(--font-heading);
-  font-size: clamp(2.125rem, 1.42rem + 3.54vw, 4.25rem);
-  line-height: 1.05;
-  letter-spacing: -0.035em;
-  font-weight: 600;
+  font-size: clamp(3rem, 1.77rem + 5.26vw, 6.5rem);
+  line-height: 0.95;
+  letter-spacing: 0;
+  font-weight: 700;
   text-wrap: balance;
   overflow-wrap: break-word;
 }
 @utility text-h1 {
   font-family: var(--font-heading);
-  font-size: clamp(1.75rem, 1.3rem + 2vw, 2.75rem);
-  line-height: 1.1;
-  letter-spacing: -0.03em;
-  font-weight: 600;
+  font-size: clamp(2.5rem, 1.8rem + 3vw, 4.5rem);
+  line-height: 1;
+  letter-spacing: 0;
+  font-weight: 700;
   text-wrap: balance;
   overflow-wrap: break-word;
 }
 @utility text-h2 {
   font-family: var(--font-heading);
-  font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2.25rem);
-  line-height: 1.15;
-  letter-spacing: -0.025em;
-  font-weight: 600;
+  font-size: clamp(2.25rem, 1.72rem + 2.25vw, 3.75rem);
+  line-height: 1.02;
+  letter-spacing: 0.005em;
+  font-weight: 700;
   text-wrap: balance;
   overflow-wrap: break-word;
 }
 @utility text-h3 {
   font-family: var(--font-heading);
-  font-size: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
-  line-height: 1.25;
-  letter-spacing: -0.02em;
-  font-weight: 500;
+  font-size: clamp(1.5rem, 1.32rem + 0.75vw, 2rem);
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  font-weight: 600;
   text-wrap: balance;
   overflow-wrap: break-word;
 }
-/* small uppercase tracked label above a heading (Manrope) */
+/* small uppercase tracked label above a heading (Sofia Sans); the only uppercase type */
 @utility eyebrow {
   font-family: var(--font-sans);
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   line-height: 1rem;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -318,6 +387,19 @@
 @utility tile-veil {
   background-image: linear-gradient(to top, var(--veil-strong) 0%, var(--veil-mid) 40%, var(--veil-soft) 100%);
 }
+/* District picker photo (desktop): fades into the page on the left (where the title sits, fully opaque there) and at
+   the top and bottom edges, in both themes. Text never sits on the photo itself; the district pills are solid. */
+@utility district-photo-fade {
+  background-image:
+    linear-gradient(
+      to right,
+      var(--background) 0%,
+      color-mix(in oklch, var(--background) 75%, transparent) 25%,
+      color-mix(in oklch, var(--background) 20%, transparent) 55%,
+      transparent 75%
+    ),
+    linear-gradient(to bottom, var(--background) 0%, transparent 18%, transparent 82%, var(--background) 100%);
+}
 @keyframes hero-zoom {
   from {
     transform: scale(1.08);
@@ -374,7 +456,7 @@
   h1,
   h2,
   h3 {
-    @apply font-heading tracking-tight text-balance;
+    @apply font-heading text-balance;
   }
   /* Tailwind 4 dropped the pointer cursor on native controls */
   button:not(:disabled),
@@ -392,10 +474,11 @@
    browser arrow pressed against the edge */
 select:not([multiple]):not([size]) {
   appearance: none;
-  padding-right: 2.25rem;
+  padding-right: 2.75rem;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23737373' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 0.75rem center;
+  /* inset past the pill's curve */
+  background-position: right 1.125rem center;
   background-size: 1rem;
 }
 .dark select:not([multiple]):not([size]) {

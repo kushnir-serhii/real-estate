@@ -6,7 +6,7 @@ import { blogHref } from "./blog-params";
 import type { BlogState } from "./blog-params";
 
 const CHIP_CLASS =
-  "inline-flex min-h-11 items-center rounded-full px-4 text-sm font-medium whitespace-nowrap outline-none transition-colors duration-(--duration-base) focus-visible:ring-3 focus-visible:ring-ring/50";
+  "inline-flex min-h-11 items-center rounded-control px-4 text-sm font-medium whitespace-nowrap outline-none transition-colors duration-(--duration-base) focus-visible:ring-3 focus-visible:ring-ring/50";
 
 /** Category filter as plain links (works without JS); scrolls sideways on narrow screens. */
 export const BlogCategoryChips = ({ state }: { state: BlogState }) => {

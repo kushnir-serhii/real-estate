@@ -21,7 +21,7 @@ export const Districts = () => (
           description={DISTRICTS.description}
         />
       </div>
-      <ul className="reveal-stagger -mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-2 lg:mx-0 lg:grid lg:auto-rows-56 lg:grid-cols-4 lg:gap-4 lg:overflow-visible lg:px-0 lg:pb-0">
+      <ul className="reveal-stagger -mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:mx-0 lg:grid lg:auto-rows-56 lg:grid-cols-4 lg:gap-4 lg:overflow-visible lg:px-0 lg:pb-0">
         {DISTRICTS.items.map((district, index) => (
           <li key={district.name} className={cn("w-64 shrink-0 snap-start lg:w-auto", SPANS[index])}>
             <Link

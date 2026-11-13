@@ -18,7 +18,7 @@ export const SettingsSection = ({ id, title, className, children }: SettingsSect
       className,
     )}
   >
-    <h2 id={`${id}-title`} className="text-lg font-bold">
+    <h2 id={`${id}-title`} className="text-2xl leading-tight font-semibold">
       {title}
     </h2>
     {children}

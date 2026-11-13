@@ -27,7 +27,7 @@ const AdminLeadsPage = async ({ searchParams }: AdminLeadsPageProps) => {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-bold sm:text-3xl">Заявки</h1>
+      <h1 className="text-3xl font-bold sm:text-4xl">Заявки</h1>
       <LeadsFilters key={`filters-${query}`} filters={filters} />
       <Suspense key={`results-${query}`} fallback={<LeadsSkeleton />}>
         <LeadsResults filters={filters} />

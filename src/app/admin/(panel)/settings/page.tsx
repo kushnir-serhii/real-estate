@@ -15,7 +15,7 @@ const AdminSettingsPage = async () => {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-bold sm:text-3xl">Налаштування</h1>
+      <h1 className="text-3xl font-bold sm:text-4xl">Налаштування</h1>
       <PropertiesSourceSection summary={summary} />
       <SettingsSection id="rates" title="Курси валют">
         <ExchangeRatesForm rates={rates} />

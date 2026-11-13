@@ -108,7 +108,7 @@ export const getClientIp = (headers: Pick<Headers, "get">): string | undefined =
   return first ? first : undefined;
 };
 
-const DEV_SALT = "7sky-dev-ip-salt";
+const DEV_SALT = "diplomat-hall-dev-ip-salt";
 let warnedAboutSalt = false;
 
 const hex = (bytes: ArrayBuffer): string =>

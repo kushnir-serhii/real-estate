@@ -86,9 +86,9 @@ export const AssistantComposer = ({ busy, onSend, textareaRef, restore = null }:
           enterKeyHint="send"
           aria-invalid={tooLong || undefined}
           aria-describedby={describedBy}
-          className="max-h-32 min-h-11 resize-none rounded-xl"
+          className="max-h-32 min-h-11 resize-none"
         />
-        <Button type="submit" size="icon" disabled={!canSend} aria-label="Надіслати повідомлення" className="rounded-xl">
+        <Button type="submit" size="icon" disabled={!canSend} aria-label="Надіслати повідомлення">
           <SendHorizontal aria-hidden="true" />
         </Button>
       </div>

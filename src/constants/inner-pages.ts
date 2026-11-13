@@ -12,6 +12,7 @@ export const ABOUT_PAGE = {
   teamEyebrow: "Команда",
   teamTitle: "Наша команда",
   teamDescription: "Рієлтори, які ведуть вас від першого перегляду до ключів. Телефонуйте напряму.",
+  teamRole: "Агент з нерухомості",
 } as const;
 
 export const CONTACTS_PAGE = {

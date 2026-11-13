@@ -21,8 +21,8 @@ type ResultsState =
   | { kind: "out-of-range"; total: number }
   | { kind: "error" };
 
-// Cards are narrower next to the sidebar: 1 column, 2 from sm, 3 from xl.
-const CARD_SIZES = "(min-width: 1280px) 22rem, (min-width: 640px) 50vw, 100vw";
+// Cards next to the sidebar: 1 column, 2 from sm (half of what is left beside the 17rem sidebar from lg), 3 from 2xl.
+const CARD_SIZES = "(min-width: 1536px) 22rem, (min-width: 1024px) calc(50vw - 12rem), (min-width: 640px) 50vw, 100vw";
 
 const load = async (filters: PropertyFilters): Promise<ResultsState> => {
   if (!hasPublicData()) return { kind: "empty" };
@@ -87,7 +87,7 @@ export const CatalogResults = async ({ state, filters }: CatalogResultsProps) =>
           role="alert"
           className="flex flex-col items-start gap-4 rounded-2xl border border-destructive/40 bg-card p-6 sm:p-8"
         >
-          <p className="flex items-center gap-2 font-heading text-lg font-semibold text-destructive">
+          <p className="flex items-center gap-2 text-lg font-semibold text-destructive">
             <TriangleAlert className="size-5 shrink-0" aria-hidden="true" />
             Не вдалося завантажити об&apos;єкти
           </p>

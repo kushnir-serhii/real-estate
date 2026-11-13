@@ -27,7 +27,7 @@ const PropertyValue = ({ property }: { property: NonNullable<AdminLeadDetail["pr
       <span className="text-muted-foreground tabular-nums">№ у Plektan {property.external_id}</span>
     )}
     {property.status === "hidden" && (
-      <span className="inline-flex items-center gap-1.5 rounded-md bg-warning/10 px-2 py-0.5 text-warning">
+      <span className="inline-flex items-center gap-1.5 rounded-control bg-warning/10 px-2.5 py-0.5 text-warning">
         <EyeOff className="size-3.5 shrink-0" aria-hidden="true" />
         Об&apos;єкт знято з публікації, на сайті його не видно
       </span>
@@ -69,7 +69,7 @@ export const LeadRequestCard = ({ lead }: LeadRequestCardProps) => {
       {facts.length > 0 && <LeadFacts facts={facts} />}
       {lead.message ? (
         <div className="flex flex-col gap-1 text-sm">
-          <h3 className="text-muted-foreground">Повідомлення</h3>
+          <h3 className="font-sans text-muted-foreground">Повідомлення</h3>
           <p className="rounded-lg bg-muted/60 px-4 py-3 text-base whitespace-pre-line wrap-anywhere">
             {lead.message}
           </p>

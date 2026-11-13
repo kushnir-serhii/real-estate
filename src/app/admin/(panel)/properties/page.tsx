@@ -32,7 +32,7 @@ const AdminPropertiesPage = async ({ searchParams }: AdminPropertiesPageProps) =
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <h1 className="text-2xl font-bold sm:text-3xl">Об&apos;єкти</h1>
+        <h1 className="text-3xl font-bold sm:text-4xl">Об&apos;єкти</h1>
         <AddPropertyAction mode={mode} />
       </div>
       <PropertiesFilters key={`filters-${query}`} filters={filters} />

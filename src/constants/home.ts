@@ -1,13 +1,8 @@
 // Mock — replace for the real agency.
 export const HERO = {
-  eyebrow: "Київ і область · з 2014 року",
+  eyebrow: "Київ і область",
   lead: "Квартири, будинки, комерційні приміщення та ділянки в Києві й області. Допоможемо з вибором і супроводимо угоду.",
   primaryCta: "Підібрати об'єкт",
-  facts: [
-    { icon: "calendar", label: "12 років на ринку" },
-    { icon: "handshake", label: "1 400+ угод" },
-    { icon: "shield", label: "Перевірені документи" },
-  ],
   image: { src: "/placeholders/flat-living-2.webp", width: 1280, height: 853 },
 } as const;
 
@@ -16,14 +11,6 @@ export const FEATURED = {
   title: "Нові пропозиції",
   action: "Усі об'єкти",
 } as const;
-
-// Mock — replace for the real agency. `value` is the final number (animated up from 0 when `animate`); `suffix` follows it.
-export const TRUST_STATS = [
-  { value: 12, decimals: 0, animate: true, suffix: "", label: "років на ринку" },
-  { value: 1400, decimals: 0, animate: true, suffix: "+", label: "успішних угод" },
-  { value: 4.9, decimals: 1, animate: true, suffix: "", label: "рейтинг клієнтів" },
-  { value: 300, decimals: 0, animate: true, suffix: "+", label: "об'єктів у базі" },
-] as const;
 
 // Mock — replace for the real agency.
 export const HOW_WE_WORK = {
@@ -71,12 +58,33 @@ export const PROPTECH = {
 export const ABOUT = {
   eyebrow: "Про агентство",
   action: "Більше про нас",
-  chip: { value: "1 400+", label: "угод за 12 років" },
   images: {
     main: { src: "/placeholders/house-exterior-2.webp", width: 1100, height: 733 },
     secondary: { src: "/placeholders/flat-kitchen-1.webp", width: 1280, height: 767 },
     tertiary: { src: "/placeholders/building-facade-1.webp", width: 1100, height: 733 },
   },
+} as const;
+
+// Mock — replace for the real agency (real district photos: see spec 018 → External needs). Photos are 1000px-wide
+// copies in public/placeholders/districts/ (≤ ~75 KB each, see its README).
+// `name` must match a district in the catalog data (it is the `district` filter value). The first item's photo is the
+// default one, shown while no district is hovered or focused.
+export const DISTRICT_PICKER = {
+  eyebrow: "Райони",
+  title: "Райони Києва",
+  description: "Оберіть район, щоб побачити об'єкти в ньому.",
+  items: [
+    { name: "Голосіївський", image: { src: "/placeholders/districts/house-exterior-1-1000.webp", width: 1000, height: 663 } },
+    { name: "Дарницький", image: { src: "/placeholders/districts/building-facade-1-1000.webp", width: 1000, height: 666 } },
+    { name: "Деснянський", image: { src: "/placeholders/districts/plot-landscape-1-1000.webp", width: 1000, height: 562 } },
+    { name: "Дніпровський", image: { src: "/placeholders/districts/flat-living-2-1000.webp", width: 1000, height: 666 } },
+    { name: "Оболонський", image: { src: "/placeholders/districts/house-exterior-2-1000.webp", width: 1000, height: 666 } },
+    { name: "Печерський", image: { src: "/placeholders/districts/office-interior-1-1000.webp", width: 1000, height: 667 } },
+    { name: "Подільський", image: { src: "/placeholders/districts/flat-living-3-1000.webp", width: 1000, height: 667 } },
+    { name: "Святошинський", image: { src: "/placeholders/districts/flat-kitchen-1-1000.webp", width: 1000, height: 599 } },
+    { name: "Солом'янський", image: { src: "/placeholders/districts/flat-living-1-1000.webp", width: 1000, height: 882 } },
+    { name: "Шевченківський", image: { src: "/placeholders/districts/flat-bedroom-1-1000.webp", width: 1000, height: 667 } },
+  ],
 } as const;
 
 // Mock — replace for the real agency. `name` must match a district in the catalog data (it is the `district` filter value).
@@ -115,43 +123,6 @@ export const DISTRICTS = {
       name: "Дарницький",
       tagline: "Лівий берег, доступні ціни",
       image: { src: "/placeholders/flat-living-3.webp", width: 1280, height: 854 },
-    },
-  ],
-} as const;
-
-// Mock — replace for the real agency.
-export const AGENTS = {
-  eyebrow: "Команда",
-  title: "Наші агенти",
-  description: "Живі люди, які відповідають на дзвінки й супроводжують угоди.",
-  role: "Агент з нерухомості",
-  max: 4,
-  cta: "Зв'язатися з менеджером",
-  ctaHref: "/contacts#zayavka",
-} as const;
-
-// Mock — replace for the real agency (real, consented reviews only).
-export const TESTIMONIALS = {
-  eyebrow: "Відгуки",
-  title: "Що кажуть клієнти",
-  items: [
-    {
-      name: "Олена К.",
-      deal: "Купівля 2-кімн. квартири, Поділ",
-      text: "Підібрали квартиру за два тижні, юрист перевірив усі документи. Жодних сюрпризів на угоді.",
-      rating: 5,
-    },
-    {
-      name: "Андрій М.",
-      deal: "Оренда 1-кімн. квартири, Оболонь",
-      text: "Відповіли в чаті вночі й уже вранці показали три варіанти. Переїхали за тиждень.",
-      rating: 5,
-    },
-    {
-      name: "Ірина та Максим П.",
-      deal: "Продаж будинку, Київська область",
-      text: "Продали швидше, ніж очікували, і за ціною, яку обговорювали. Менеджер тримав на зв'язку весь час.",
-      rating: 5,
     },
   ],
 } as const;

@@ -9,7 +9,7 @@ const AdminPostNotFound = () => (
   <div className="flex flex-col items-start gap-4 rounded-xl border border-dashed p-6">
     <SearchX className="size-8 text-muted-foreground" aria-hidden="true" />
     <div className="flex flex-col gap-2">
-      <h1 className="text-2xl font-bold">Статтю не знайдено</h1>
+      <h1 className="text-3xl font-bold">Статтю не знайдено</h1>
       <p className="max-w-prose text-muted-foreground">
         Можливо, посилання неповне або статтю вже видалили. Знайдіть її у списку за заголовком чи адресою.
       </p>

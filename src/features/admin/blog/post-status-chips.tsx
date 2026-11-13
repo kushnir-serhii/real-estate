@@ -31,7 +31,7 @@ export const PostStatusChips = ({ status, noindex = false, className }: PostStat
     {chipsOf(status, noindex).map(({ key, label, icon: Icon, className: tone }) => (
       <li
         key={key}
-        className={cn("inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium whitespace-nowrap", tone)}
+        className={cn("inline-flex items-center gap-1 rounded-control px-2.5 py-0.5 text-xs font-medium whitespace-nowrap", tone)}
       >
         <Icon className="size-3.5 shrink-0" aria-hidden="true" />
         {label}

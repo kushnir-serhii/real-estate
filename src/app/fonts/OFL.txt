@@ -1,4 +1,12 @@
-Copyright 2019 The Manrope Project Authors (https://github.com/sharanda/manrope)
+=====================================================================
+Sofia Sans, Sofia Sans Extra Condensed
+=====================================================================
+
+Copyright 2019 The Sofia Sans Project Authors (https://github.com/lettersoup/Sofia-Sans)
+
+Modified versions (Diplomat Hall site, 2026): the *-cyrillic-* files map Cyrillic codepoints to the
+fonts' own .loclRUS glyphs (standard instead of Bulgarian letterforms); the *-hryvnia-* files add a
+hryvnia sign (U+20B4) drawn from the fonts' own S and hyphen. Still under the SIL OFL 1.1.
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:
@@ -94,10 +102,10 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
 
 =====================================================================
-Unbounded
+Cormorant SC
 =====================================================================
 
-Copyright 2022 The Unbounded Project Authors (https://github.com/googlefonts/unbounded)
+Copyright 2015 The Cormorant Project Authors (github.com/CatharsisFonts/Cormorant)
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:

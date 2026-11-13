@@ -25,7 +25,7 @@ const PrivacyPage = async () => {
   return (
     <div className="pb-16 sm:pb-24">
       <PageHeader width="narrow" eyebrow={PRIVACY_PAGE.eyebrow} title={page.title} />
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4">
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 sm:px-6">
         {page.is_draft ? (
           <p
             role="note"

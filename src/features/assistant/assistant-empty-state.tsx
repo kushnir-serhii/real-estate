@@ -12,7 +12,7 @@ export const AssistantEmptyState = ({ onPick }: AssistantEmptyStateProps) => (
     <ul className="flex flex-wrap gap-2" aria-label="Швидкі відповіді">
       {ASSISTANT_QUICK_REPLIES.map((reply) => (
         <li key={reply}>
-          <Button variant="outline" className="rounded-full" onClick={() => onPick(reply)}>
+          <Button variant="outline" onClick={() => onPick(reply)}>
             {reply}
           </Button>
         </li>

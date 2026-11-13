@@ -21,8 +21,8 @@ const createConfig = (phase: string): NextConfig => {
   if (phase === PHASE_PRODUCTION_BUILD) {
     const driver = assertBuildEnv();
     // The config is loaded by several build processes: say it once.
-    if (driver === "demo" && process.env.SEVENSKY_BUILD_LOGGED !== "1") {
-      process.env.SEVENSKY_BUILD_LOGGED = "1";
+    if (driver === "demo" && process.env.DIPLOMAT_HALL_BUILD_LOGGED !== "1") {
+      process.env.DIPLOMAT_HALL_BUILD_LOGGED = "1";
       console.log("[demo mode] building on mock data (DATA_DRIVER=demo): no Supabase, Cloudflare or keys needed.");
       for (const warning of demoBuildWarnings()) console.warn(`[demo mode] ${warning}`);
     }
