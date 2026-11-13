@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ArrowRight, Search } from "lucide-react";
 
+import { Logo } from "@/components/layout/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
@@ -93,6 +94,23 @@ const DesignPage = () => (
       </div>
       <ThemeToggle />
     </header>
+
+    <Section title="Логотип">
+      <p className="text-sm text-muted-foreground">
+        Щит + тонка лінія + «DIPLOMAT / HALL» (Cormorant SC). Монохромний: колір тексту. Варіанти full / mark,
+        розміри sm (адмінка) / md (шапка) / lg (футер); нижче 360px шапка показує лише щит.
+      </p>
+      <div className="flex flex-wrap items-center gap-6">
+        <Logo size="sm" alwaysShowName />
+        <Logo alwaysShowName />
+        <Logo size="lg" alwaysShowName />
+        <Logo variant="mark" />
+      </div>
+      <div className="flex flex-wrap items-center gap-6 rounded-2xl bg-ink p-6">
+        <Logo tone="on-ink" size="lg" alwaysShowName />
+        <Logo tone="on-ink" variant="mark" />
+      </div>
+    </Section>
 
     <Section title="Кольори">
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -225,7 +243,7 @@ const DesignPage = () => (
           </Button>
         </div>
         <div className="border-t border-ink-border pt-3 text-sm text-ink-muted">
-          © 7 SKY · Політика конфіденційності
+          © Diplomat Hall · Політика конфіденційності
         </div>
       </div>
     </Section>

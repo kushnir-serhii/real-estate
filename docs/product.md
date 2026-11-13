@@ -1,7 +1,7 @@
 # Product
 
 ## What it is
-The website and admin for **7 SKY**, a fictional real estate agency in Kyiv, Ukraine: the repo is a working demo and a template for a real agency site (see [template.md](template.md)). Until real accounts are connected it runs on mock data. Visitors browse the agency's properties (sale and rent), leave a request or talk to an AI assistant; the manager gets every lead in Telegram and in the admin. Properties come from the agency's CRM (Plektan) or are entered in the admin.
+The website and admin for **Diplomat Hall**, a fictional real estate agency in Kyiv, Ukraine: the repo is a working demo and a template for a real agency site (see [template.md](template.md)). Until real accounts are connected it runs on mock data. Visitors browse the agency's properties (sale and rent), leave a request or talk to an AI assistant; the manager gets every lead in Telegram and in the admin. Properties come from the agency's CRM (Plektan) or are entered in the admin.
 
 **Demo mode (spec 011):** with no keys the whole product works on typed mock data held in memory (`DATA_DRIVER=demo`): catalog, forms and lead pipeline, AI assistant (scripted), the admin behind a one-click demo sign-in, photo uploads. Data resets on restart and with «Скинути демо-дані» in the admin. Leaving it is a config change: [setup.md](setup.md) → «Leaving demo mode».
 
@@ -54,7 +54,7 @@ Build order and status: [roadmap.md](roadmap.md). Later options (client login vi
 ## Design principles
 **Template, mock data:** the site is a template for the real project. All agency data (name, contacts, messengers, texts, coordinates) is mock and lives only as consts in `src/constants/` and the typed seed in `src/lib/demo/seed/`, so the real agency's data replaces it in one place. Components never hardcode agency data. `supabase/seed.sql` is generated from that seed (`pnpm seed:sql`).
 
-**Design status:** the demo brand is 7 SKY (cloud-and-buildings mark, sky-blue accent, placeholder photos); the real brand is not defined. Everything visual goes through tokens in `globals.css` and one `logo.tsx`, so the real design replaces it later without touching pages. Don't ask about branding before it exists.
+**Design status:** the brand is Diplomat Hall: a monochrome shield mark + a Cormorant SC wordmark («DIPLOMAT / HALL»), Sofia Sans / Sofia Sans Extra Condensed type, the Midnight Sky palette, pill controls, placeholder photos. It is still a demo (fictional) agency and the repo is a template. Everything visual goes through tokens in `globals.css`; the logo lives in `src/components/layout/logo.tsx` + `shield-mark.tsx`, so another brand replaces it without touching pages.
 
 1. Photos first; clean, calm, trustworthy. Neutral palette + one accent.
 2. Mobile-first: catalog, property page and forms must be perfect at 375px.

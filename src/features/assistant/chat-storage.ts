@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { LEGACY_STORAGE_PREFIX } from "@/lib/legacy-storage";
+import { takeLegacyValue } from "@/lib/legacy-storage";
 
 import { ASSISTANT_LIMIT_REASONS, assistantPropertyCardSchema } from "./assistant-events";
 import { ASSISTANT_LEAD_FIELDS } from "./assistant-lead-state";
@@ -8,9 +8,9 @@ import { INITIAL_CHAT_STATE, INTERRUPTED_MESSAGE } from "./chat-reducer";
 import type { AssistantReply, ChatMessage, ChatState, ReplyPart } from "./chat-reducer";
 
 /** sessionStorage key: the display copy of the chat, so a reload keeps it. Closing the tab forgets it. */
-export const CHAT_STORAGE_KEY = "7sky:assistant-chat";
-/** Key used before the rebrand; read once and moved to CHAT_STORAGE_KEY. */
-const LEGACY_CHAT_STORAGE_KEY = `${LEGACY_STORAGE_PREFIX}:assistant-chat`;
+export const CHAT_STORAGE_KEY = "diplomat-hall:assistant-chat";
+/** Suffix of the keys used before the rebrands; read once and moved to CHAT_STORAGE_KEY. */
+const LEGACY_CHAT_STORAGE_SUFFIX = ":assistant-chat";
 
 /** Older messages are dropped from the copy; the server keeps the full history anyway. */
 export const MAX_STORED_MESSAGES = 100;
@@ -118,18 +118,16 @@ export const parseStoredChat = (raw: string | null): ChatState => {
 
 export const readStoredChat = (): ChatState => {
   try {
-    let raw = window.sessionStorage.getItem(CHAT_STORAGE_KEY);
-    if (raw === null) {
-      raw = window.sessionStorage.getItem(LEGACY_CHAT_STORAGE_KEY);
-      if (raw !== null) {
-        window.sessionStorage.removeItem(LEGACY_CHAT_STORAGE_KEY);
-        // parseStoredChat ignores garbage; only a valid chat is carried over.
-        const chat = parseStoredChat(raw);
-        if (chat.messages.length > 0 || chat.conversationId !== null) window.sessionStorage.setItem(CHAT_STORAGE_KEY, raw);
-        return chat;
-      }
-    }
-    return parseStoredChat(raw);
+    const raw = window.sessionStorage.getItem(CHAT_STORAGE_KEY);
+    if (raw !== null) return parseStoredChat(raw);
+    // One-time move from the pre-rebrand keys: parseStoredChat ignores garbage, only a valid chat is carried over.
+    const legacy = takeLegacyValue(window.sessionStorage, LEGACY_CHAT_STORAGE_SUFFIX, (value) => {
+      const chat = parseStoredChat(value);
+      return chat.messages.length > 0 || chat.conversationId !== null;
+    });
+    if (legacy === null) return INITIAL_CHAT_STATE;
+    window.sessionStorage.setItem(CHAT_STORAGE_KEY, legacy);
+    return parseStoredChat(legacy);
   } catch {
     return INITIAL_CHAT_STATE;
   }

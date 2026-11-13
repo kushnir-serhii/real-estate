@@ -6,7 +6,7 @@ const PROD_SUPABASE = { NODE_ENV: "production", NEXT_PHASE: "phase-production-bu
 
 describe("getSiteUrl", () => {
   it("returns the configured origin without a path", () => {
-    expect(getSiteUrl({ NEXT_PUBLIC_SITE_URL: "https://7sky.example/" })).toBe("https://7sky.example");
+    expect(getSiteUrl({ NEXT_PUBLIC_SITE_URL: "https://diplomathall.example/" })).toBe("https://diplomathall.example");
   });
 
   it("falls back to localhost outside a production build", () => {

@@ -38,7 +38,7 @@ What the demo replaces, and what takes over:
 
 ## Site URL
 
-Set `NEXT_PUBLIC_SITE_URL` to the production domain (for example `https://7sky.example`, no trailing path) in Cloudflare, for **build and runtime** (`NEXT_PUBLIC_*` are inlined at build time). It sets `metadataBase` and canonical URLs. Empty means `http://localhost:3000` in `pnpm dev`. A production build (`pnpm build`, `pnpm preview`, `pnpm deploy`) on the `demo` driver warns and uses localhost; on the `supabase` driver it fails with a clear error if the value is empty or not a valid URL. For a local `supabase` build without a domain put `SEO_ALLOW_LOCALHOST=1` in `.env.local` (never in Cloudflare).
+Set `NEXT_PUBLIC_SITE_URL` to the production domain (for example `https://diplomathall.example`, no trailing path) in Cloudflare, for **build and runtime** (`NEXT_PUBLIC_*` are inlined at build time). It sets `metadataBase` and canonical URLs. Empty means `http://localhost:3000` in `pnpm dev`. A production build (`pnpm build`, `pnpm preview`, `pnpm deploy`) on the `demo` driver warns and uses localhost; on the `supabase` driver it fails with a clear error if the value is empty or not a valid URL. For a local `supabase` build without a domain put `SEO_ALLOW_LOCALHOST=1` in `.env.local` (never in Cloudflare).
 
 ## Supabase
 
@@ -166,7 +166,7 @@ GitHub → repo → Settings → Secrets and variables → Actions → New repos
 | `PLEKTAN_API_KEY` | from the agency (Plektan account); empty = the job is skipped |
 | `PLEKTAN_COUNTRY_ID`, `PLEKTAN_REGION_ID`, `PLEKTAN_LOCALITY_ID` | Plektan geography ids of the agency's area; `search` needs a geography. Empty ones are left out of the request |
 | `CRON_SECRET` | any long random string (for example `openssl rand -hex 32`); the **same** value must be set as a runtime secret in Cloudflare, where `/api/cron/revalidate` checks it |
-| `NEXT_PUBLIC_SITE_URL` | the production domain, for example `https://7sky.example`; the script posts the cache purge to it |
+| `NEXT_PUBLIC_SITE_URL` | the production domain, for example `https://diplomathall.example`; the script posts the cache purge to it |
 | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `NEXT_PUBLIC_R2_PUBLIC_URL` | Cloudflare R2 (used by the photo step, spec 003 slice 4) |
 | `GEOCODER_CONTACT_EMAIL` | a real, monitored email for Nominatim's User-Agent (usage policy: max 1 request/s, identify yourself); empty = fixture mode with fake coordinates, so never leave it empty in production. Coordinates are rounded to ~100 m. Wherever coordinates or a map are shown (spec 005) the page must carry the attribution "© OpenStreetMap contributors" |
 

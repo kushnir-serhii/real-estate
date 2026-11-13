@@ -9,7 +9,7 @@ export const CONTACTS = {
   hours: "щодня 9:00–19:00",
   coordinates: { lat: 50.4483, lng: 30.5227 },
   messengers: {
-    telegram: { label: "Telegram", url: "https://t.me/sevensky_demo", enabled: true },
+    telegram: { label: "Telegram", url: "https://t.me/diplomathall_demo", enabled: true },
     viber: {
       label: "Viber",
       url: "viber://chat?number=%2B380000000001",

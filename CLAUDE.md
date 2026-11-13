@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-`real-estate` is the website + admin for the real estate agency **7 SKY** (a fictional demo agency in Ukraine; the repo doubles as a template for a real project). One Next.js app at the repo root (no monorepo), deployed to Cloudflare. Product and architecture: `docs/product.md`. Original working notes (Ukrainian): `docs/reference/stack.md`, Plektan CRM API: `docs/reference/plektan-api.md`.
+`real-estate` is the website + admin for the real estate agency **Diplomat Hall** (a fictional demo agency in Ukraine; the repo doubles as a template for a real project). One Next.js app at the repo root (no monorepo), deployed to Cloudflare. Product and architecture: `docs/product.md`. Original working notes (Ukrainian): `docs/reference/stack.md`, Plektan CRM API: `docs/reference/plektan-api.md`.
 
 ## Talking to the user
 

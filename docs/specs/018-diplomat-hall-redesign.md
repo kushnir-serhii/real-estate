@@ -87,15 +87,15 @@ A condensed heading face needs bigger sizes than Unbounded: re-tune the type sca
   - [x] at 1440px the content width and side gutters are close to serhant.com (screenshot side by side in the log); at 375px no horizontal page scroll
   - [x] chosen values written in the log
 
-### [ ] 4. Logo component and the Diplomat Hall rename
+### [x] 4. Logo component and the Diplomat Hall rename
 - **Build:** `ShieldMark` (inline SVG, `currentColor`, same geometry as a new `public/brand/diplomat-hall-shield.svg`) and `Logo` with `variant` (`full` / `mark`) and `tone` per **Design direction**; replaces `logo-mark.tsx` and the 7 SKY mark everywhere (header, mobile menu, footer, admin, sign-in, 404, `/design`). Rename: `BRAND` (name, tagline, title, description), `scripts/generate-brand-assets.mjs` draws the shield → regenerate `icon.svg`, `favicon.ico`, `og-default.png`; privacy page and other seed pages, blog seed, assistant system prompt and limits, SERP preview, example domains / handles (`7sky.example`, `t.me/sevensky_demo` → Diplomat Hall equivalents); storage keys renamed with a one-time migration (extend `legacy-storage.ts` to read both old prefixes); `pnpm seed:sql`; tests that pin the old name; docs (`CLAUDE.md`, `README.md`, `docs/*`) say Diplomat Hall. Specs 001–017 keep their history (they described 7 SKY at the time).
 - **Files:** `src/components/layout/{logo,shield-mark}.tsx` (delete `logo-mark.tsx`), `public/brand/*`, `src/constants/{brand,contacts}.ts`, `scripts/generate-brand-assets.mjs`, `src/app/{icon.svg,favicon.ico}`, `public/og-default.png`, `src/lib/{theme,legacy-storage}.ts`, `src/features/{favorites/favorites-store,assistant/chat-storage,assistant/build-system-prompt,admin/pages/serp-preview}.ts(x)`, `src/lib/demo/seed/*`, `supabase/seed.sql`, tests, docs
 - **Agent:** designer · **Model:** sonnet
 - **Accept:**
-  - [ ] `grep -ri "7 sky\|7sky\|sevensky" src scripts supabase public e2e` is empty except the legacy-key constant (split like today so the grep stays empty)
-  - [ ] logo reads well in the header over the hero, after scroll, on ink (footer) and in the admin, both themes; at 375px it fits next to favorites, phone and menu (mark only below 360px)
-  - [ ] favourites and theme saved under the old keys survive a reload after the rename (unit test)
-  - [ ] favicon and OG image show the shield; `pnpm test` (incl. seed.sql drift) green
+  - [x] `grep -ri "7 sky\|7sky\|sevensky" src scripts supabase public e2e` is empty except the legacy-key constant (split like today so the grep stays empty)
+  - [x] logo reads well in the header over the hero, after scroll, on ink (footer) and in the admin, both themes; at 375px it fits next to favorites, phone and menu (mark only below 360px)
+  - [x] favourites and theme saved under the old keys survive a reload after the rename (unit test)
+  - [x] favicon and OG image show the shield; `pnpm test` (incl. seed.sql drift) green
 
 ### [ ] 5. Header: phone as the first nav item
 - **Build:** `NEXT_PUBLIC_AGENCY_PHONE` → `CONTACTS.phone` (`display` formatted for Ukraine, `href` = `tel:`), mock in `.env.example`, documented in `docs/setup.md`. Desktop header: phone icon and the `2xl` number removed from the right; the number is the first item in the nav (`tel:` link with `aria-label` «Подзвонити: …»). Below `lg` the phone icon button stays. The full desktop header starts at `xl` (decided): below `xl` it is the tablet header (logo, phone icon, favorites, menu); nav, theme and CTA appear from `xl`.
@@ -146,6 +146,8 @@ A condensed heading face needs bigger sizes than Unbounded: re-tune the type sca
 - Real district photos for the picker (10 Kyiv districts, licensed, landscape, ≥ 1600px wide, ≤ ~120 KB as webp). Until then the slice uses `public/placeholders/*` and marks them `// Mock`.
 - The real phone number for `NEXT_PUBLIC_AGENCY_PHONE` and the production domain / Telegram handle for Diplomat Hall (mock values until then).
 - The shield source file (`logo_shield.svg`, given in chat) is copied into `public/brand/` in slice 4; a vector of the full lockup is not needed (it is built from the shield + font).
+- `wrangler.jsonc` still names the worker `sevensky-web`: renaming it makes the next deploy create a new Cloudflare worker, so the user renames it when convenient (with the routes / domain moved over).
+- `supabase/config.toml` `project_id` is now `diplomat-hall`: a running local Supabase stack needs `supabase stop` + `supabase start` under the new id (old local containers stay until removed). Nothing remote.
 - No new keys, accounts or migrations.
 
 ## Open questions
@@ -167,3 +169,4 @@ A condensed heading face needs bigger sizes than Unbounded: re-tune the type sca
 | 2026-11-13 | 1 | done: Sofia Sans + Sofia Sans Extra Condensed (latin/cyrillic split) + Cormorant SC 600 (latin, no preload yet); Manrope/Unbounded removed; scale display 48→104, h1 40→72, h2 36→60, h3 24→32 (700/700/700/600), eyebrow 13px; font bytes 121.7 KB → 152.7 KB total (+10 KB on a Cyrillic page); perf `/` LCP 1060 ms, CLS 0, JS 211 KB | `src/app/fonts/*`, `layout.tsx`, `globals.css`, `/design`, OFL.txt |
 | 2026-11-13 | 2 | done: `--radius-control` (9999px) → `rounded-control` on buttons, inputs, selects (Radix + native), tabs, chips, badges, pagination, chat input; textarea `rounded-control-multiline` (min(control, 3xl)); dropdowns `rounded-2xl`. Exceptions: favorites counter dot, decorative circles, text links, cards / panels / dialogs, admin loading skeletons (slice 9). Fix found in review: Sofia Sans' Cyrillic defaults to Bulgarian letterforms; both Cyrillic woff2 files remapped to the `.loclRUS` (standard) glyphs, 29 codepoints each | `globals.css`, `components/ui/*`, `form-select.tsx`, 30+ feature components, `src/app/fonts/sofia-sans*-cyrillic-*.woff2` |
 | 2026-11-13 | 3 | done: `--container-site: 88rem` + `site-container` (gutters 16/24/32px) in 24 files, no `max-w-6xl` left; 1440px → 1344px content, 48px gutters (serhant range); 1280 → 1216/32; home sections `py-12 sm:py-16 lg:py-20`; edge-to-edge strips and sticky bars follow the 24px gutter (`sm:-mx-6 sm:px-6`); narrow reading columns `px-4 sm:px-6` so they line up with the header | `globals.css`, site / admin layouts, page header, home, property, blog, catalog, contacts, favorites, admin forms |
+| 2026-11-13 | 4 | done: `ShieldMark` (clipPath id from `useId`) + `Logo` (`full`/`mark`, tones, sizes sm 36 / md 40–44 / lg 56px, mark only ≤360px), Cormorant SC preloaded; 7 SKY → Diplomat Hall in constants, seed + seed.sql, assets (icon.svg, favicon, OG; OG wordmark in a system serif, sharp can't load woff2), assistant, e2e, docs (product.md «Design status» rewritten); storage keys `diplomat-hall-*` with migration from both old prefixes, incl. the inline theme script (tests); grep for the old name empty | `src/components/layout/{logo,shield-mark}.tsx`, `legacy-storage.ts` + test, `brand.ts`, `contacts.ts`, seed, `scripts/generate-brand-assets.mjs`, assets, docs |

@@ -1,7 +1,7 @@
 import { EyeOff } from "lucide-react";
 
 type SerpPreviewProps = {
-  /** Site origin, e.g. `https://7sky.example`. */
+  /** Site origin, e.g. `https://diplomathall.example`. */
   siteUrl: string;
   /** Public path of the page (`/`, `/about`). */
   path: string;

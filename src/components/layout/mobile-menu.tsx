@@ -13,6 +13,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { Logo } from "@/components/layout/logo";
 import { MessengerLinks } from "@/components/layout/messenger-links";
 import { NavLink } from "@/components/layout/nav-link";
 import {
@@ -44,7 +45,8 @@ export const MobileMenu = () => {
         className="gap-6 overflow-y-auto data-[side=right]:w-full"
       >
         <SheetHeader>
-          <SheetTitle className="eyebrow text-muted-foreground">Меню</SheetTitle>
+          <Logo alwaysShowName onNavigate={close} className="self-start" />
+          <SheetTitle className="sr-only">Меню</SheetTitle>
           <SheetDescription className="sr-only">
             Навігація по сайту та контакти
           </SheetDescription>

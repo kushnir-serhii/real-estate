@@ -84,7 +84,7 @@ export const SEED_POSTS: SeedPost[] = [
     cover_alt: "Охайна кухня в квартирі, яка продається",
     agent: "a2",
     properties: ["studiia-v-novobudovi-na-pechersku-b27d40"],
-    seo_title: "Як визначити ціну квартири при продажу — 7 SKY",
+    seo_title: "Як визначити ціну квартири при продажу — Diplomat Hall",
     seo_description: "Порівняння з аналогами, оцінка за ціною квадратного метра та пробний період: як продати квартиру вчасно і без втрат.",
     noindex: false,
     body: `## Завищена ціна коштує дорожче, ніж здається
@@ -258,7 +258,7 @@ export const SEED_POSTS: SeedPost[] = [
     cover_alt: null,
     agent: "a5",
     properties: [],
-    seo_title: "Іпотека єОселя: умови та документи — 7 SKY",
+    seo_title: "Іпотека єОселя: умови та документи — Diplomat Hall",
     seo_description: "Що таке єОселя, хто може подати заявку, які документи потрібні і на що звернути увагу перед підписанням кредитного договору.",
     noindex: false,
     body: `## Що таке єОселя
@@ -413,7 +413,7 @@ export const SEED_POSTS: SeedPost[] = [
     cover_alt: "Робочий простір агентства нерухомості",
     agent: null,
     properties: ["2-kimnatna-kvartyra-na-oboloni-3f9a1c"],
-    seo_title: "Ринок нерухомості Києва: огляд на осінь 2026 — 7 SKY",
+    seo_title: "Ринок нерухомості Києва: огляд на осінь 2026 — Diplomat Hall",
     seo_description: "Тенденції цін, попиту й оренди в Києві восени 2026 року: що це означає для покупців, продавців і орендарів.",
     noindex: false,
     body: `## Загальна картина

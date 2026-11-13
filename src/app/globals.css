@@ -196,6 +196,46 @@
   @apply mx-auto w-full max-w-(--container-site) px-4 sm:px-6 lg:px-8;
 }
 
+/* Logo lockup (src/components/layout/logo.tsx): shield, 1px rule and the two-line wordmark, all scaled
+   from --logo-height (the shield's height). Sizes: logo-sm (admin), logo-md (site header), logo-lg (footer).
+   Wordmark: Cormorant SC capitals; the two lines of caps span about the shield's height. */
+@utility logo-sm {
+  --logo-height: 2.25rem;
+}
+@utility logo-md {
+  --logo-height: 2.5rem;
+  @media (width >= 40rem) {
+    --logo-height: 2.75rem;
+  }
+}
+@utility logo-lg {
+  --logo-height: 3.5rem;
+}
+@utility logo-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--logo-height, 2.75rem) * 0.24);
+}
+@utility logo-shield {
+  height: var(--logo-height, 2.75rem);
+  width: auto;
+  flex-shrink: 0;
+}
+@utility logo-rule {
+  width: 1px;
+  height: calc(var(--logo-height, 2.75rem) * 0.7);
+  flex-shrink: 0;
+  background-color: currentColor;
+}
+@utility logo-wordmark {
+  font-family: var(--font-logo);
+  font-weight: 600;
+  font-size: calc(var(--logo-height, 2.75rem) * 0.556);
+  line-height: 0.88;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
 /* Scrollable strips (gallery) that draw their own controls */
 @utility scrollbar-none {
   scrollbar-width: none;

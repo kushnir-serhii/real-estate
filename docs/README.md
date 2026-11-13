@@ -1,4 +1,4 @@
-# 7 SKY real estate (demo template) — docs
+# Diplomat Hall real estate (demo template) — docs
 
 Start with the root [README.md](../README.md) (quickstart) and [template.md](template.md) (turn the demo into a real project).
 

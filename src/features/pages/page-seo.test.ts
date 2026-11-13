@@ -8,7 +8,7 @@ const page = { title: "Про агентство", seo_title: null, seo_descript
 
 describe("pageSeoTitle", () => {
   it("uses a custom SEO title as is", () => {
-    expect(pageSeoTitle({ ...page, seo_title: "  Хто ми — 7 SKY " })).toEqual({ absolute: "Хто ми — 7 SKY" });
+    expect(pageSeoTitle({ ...page, seo_title: "  Хто ми — Diplomat Hall " })).toEqual({ absolute: "Хто ми — Diplomat Hall" });
     expect(pageSeoTitleText({ ...page, seo_title: "Хто ми" })).toBe("Хто ми");
   });
   it("falls back to the page title with the brand (root template)", () => {

@@ -11,7 +11,7 @@ import {
 } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
-const THEME_EVENT = "7sky-theme-change";
+const THEME_EVENT = "diplomat-hall-theme-change";
 
 const subscribe = (onChange: () => void) => {
   const media = window.matchMedia("(prefers-color-scheme: dark)");

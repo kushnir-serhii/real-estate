@@ -1,14 +1,14 @@
 import localFont from "next/font/local";
 
 // Cormorant SC 600 (SIL OFL, see OFL.txt), self-hosted: the logo wordmark only ("DIPLOMAT / HALL"), so Latin only.
-// Not preloaded: no public page uses it yet (the logo arrives in spec 018 slice 4; revisit preload then).
+// Preloaded: the logo is above the fold on every page.
 export const cormorantSc = localFont({
   src: "./cormorant-sc-latin-600-normal.woff2",
   weight: "600",
   style: "normal",
   variable: "--font-cormorant-sc",
   display: "swap",
-  preload: false,
+  preload: true,
   adjustFontFallback: "Times New Roman",
   declarations: [
     {
