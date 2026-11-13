@@ -8,11 +8,16 @@
 
 /* Tokens. Swap the look here only: colors, radius, fonts. */
 @theme inline {
-  /* Sofia Sans: body, UI, forms, nav. The Cyrillic face goes first: each face covers only its own unicode-range. */
-  --font-sans: var(--font-sofia-sans-cyrillic), var(--font-sofia-sans), ui-sans-serif, system-ui, sans-serif;
-  /* Sofia Sans Extra Condensed: headings, hero, prices, big numbers (weights 600-800). Cyrillic face first, as for sans. */
+  /* Sofia Sans: body, UI, forms, nav. Each face covers only its own unicode-range; the Cyrillic and ₴ (U+20B4, missing
+     from the family) faces go before the Latin one, whose metric-adjusted local fallback would otherwise catch them. */
+  --font-sans:
+    var(--font-sofia-sans-cyrillic), var(--font-sofia-sans-hryvnia), var(--font-sofia-sans), ui-sans-serif, system-ui,
+    sans-serif;
+  /* Sofia Sans Extra Condensed: headings, hero, prices, big numbers (weights 600-800).
+     Cyrillic and ₴ faces first, as for sans. */
   --font-heading:
-    var(--font-sofia-sans-extra-condensed-cyrillic), var(--font-sofia-sans-extra-condensed), var(--font-sans);
+    var(--font-sofia-sans-extra-condensed-cyrillic), var(--font-sofia-sans-extra-condensed-hryvnia),
+    var(--font-sofia-sans-extra-condensed), var(--font-sans);
   /* Cormorant SC: the logo wordmark only (Latin, weight 600). */
   --font-logo: var(--font-cormorant-sc), ui-serif, Georgia, serif;
 
@@ -68,6 +73,10 @@
   /* Multi-line fields (textarea, chat input): the control shape, capped so text in the corners isn't clipped
      → rounded-control-multiline. Follows --radius-control when that is set lower */
   --radius-control-multiline: min(var(--radius-control), var(--radius-3xl));
+
+  /* property card price (heading font, from sm; text-2xl below) → text-price */
+  --text-price: 1.75rem;
+  --text-price--line-height: 1.15;
 
   /* AI assistant launcher (round floating button) → size-chat-button */
   --spacing-chat-button: 3.5rem;

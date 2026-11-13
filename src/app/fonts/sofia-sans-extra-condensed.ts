@@ -29,3 +29,15 @@ export const sofiaSansExtraCondensedCyrillic = localFont({
     { prop: "unicode-range", value: "U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116" },
   ],
 });
+
+// The hryvnia sign (U+20B4), missing from the family like in Sofia Sans: one glyph drawn from this font's own S
+// (mirrored) plus two bars, per wght master; see `sofia-sans.ts`. Not preloaded.
+export const sofiaSansExtraCondensedHryvnia = localFont({
+  src: "./sofia-sans-extra-condensed-hryvnia-wght-normal.woff2",
+  weight: "1 1000",
+  variable: "--font-sofia-sans-extra-condensed-hryvnia",
+  display: "swap",
+  preload: false,
+  adjustFontFallback: false,
+  declarations: [{ prop: "unicode-range", value: "U+20B4" }],
+});

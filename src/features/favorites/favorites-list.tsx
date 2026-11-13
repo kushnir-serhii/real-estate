@@ -119,7 +119,7 @@ export const FavoritesList = ({ suggestions }: FavoritesListProps) => {
       <p role="status" className="text-sm text-muted-foreground tabular-nums">
         {objectsCount(ids.length)}
       </p>
-      <CatalogGrid>
+      <CatalogGrid layout="full">
         {ids.map((id) => {
           const entry = cache[id];
           return (

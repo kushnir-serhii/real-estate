@@ -21,8 +21,8 @@ type ResultsState =
   | { kind: "out-of-range"; total: number }
   | { kind: "error" };
 
-// Cards are narrower next to the sidebar: 1 column, 2 from sm, 3 from xl.
-const CARD_SIZES = "(min-width: 1280px) 22rem, (min-width: 640px) 50vw, 100vw";
+// Cards next to the sidebar: 1 column, 2 from sm (half of what is left beside the 17rem sidebar from lg), 3 from 2xl.
+const CARD_SIZES = "(min-width: 1536px) 22rem, (min-width: 1024px) calc(50vw - 12rem), (min-width: 640px) 50vw, 100vw";
 
 const load = async (filters: PropertyFilters): Promise<ResultsState> => {
   if (!hasPublicData()) return { kind: "empty" };

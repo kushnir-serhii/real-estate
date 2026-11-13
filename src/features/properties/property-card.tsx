@@ -6,7 +6,7 @@ import { formatPrice } from "@/lib/format/format-price";
 import { photoSrcSet } from "@/lib/photos/photo-src-set";
 import { photoUrl } from "@/lib/photos/photo-url";
 import { FavoriteButton } from "@/features/favorites/favorite-button";
-import { cn } from "@/lib/utils";
+import { CardPhotoSlider, type CardPhotoSlide } from "./card-photo-slider";
 import { DEAL_LABELS, PROPERTY_TYPE_LABELS } from "./property-labels";
 
 type PropertyCardProps = {
@@ -22,6 +22,9 @@ type PropertyCardProps = {
 // Fallback intrinsic size when a photo has no stored dimensions; the box is a fixed 4:3 anyway.
 const FALLBACK_WIDTH = 640;
 const FALLBACK_HEIGHT = 480;
+
+// Slides per card: enough to get a feel for the place, few enough to keep the card light.
+const MAX_SLIDES = 8;
 
 const DEFAULT_IMAGE_SIZES = "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw";
 
@@ -59,7 +62,8 @@ const buildFacts = (p: PublishedProperty): Fact[] => {
 
 /**
  * Card is an `article` with the title link stretched over it, so the favorites button
- * (top-right of the photo, above the link) can sit inside without nesting interactive elements.
+ * (top-right of the photo) and the photo slider buttons (left / right middle) sit above the link without nesting
+ * interactive elements.
  */
 export const PropertyCard = ({
   property,
@@ -67,14 +71,19 @@ export const PropertyCard = ({
   priority = false,
   soldLabel,
 }: PropertyCardProps) => {
-  const photo = property.property_photos[0];
+  const slides: CardPhotoSlide[] = property.property_photos.slice(0, MAX_SLIDES).map((photo) => ({
+    src: photoUrl(photo.r2_key),
+    srcSet: photoSrcSet(photo.sizes),
+    width: photo.width ?? FALLBACK_WIDTH,
+    height: photo.height ?? FALLBACK_HEIGHT,
+  }));
+  const hasPhoto = slides.length > 0;
   const facts = buildFacts(property);
   // Missing currency on a priced row is a data gap: treat it as price on request.
   const price =
     property.price_amount !== null && property.currency !== null
       ? formatPrice(property.price_amount, property.currency, property.deal)
       : formatPrice(null, "USD");
-  const srcSet = photo ? photoSrcSet(photo.sizes) : undefined;
   // «12 500 000 ₴ / доба»: the amount in the heading font, the unit smaller beside it.
   const [amount, unit] = price.split(" / ");
 
@@ -84,47 +93,32 @@ export const PropertyCard = ({
     <div className="group h-full">
       <article className="relative flex h-full flex-col overflow-hidden rounded-2xl bg-card text-card-foreground ring-1 ring-foreground/5 transition-[transform,box-shadow] duration-(--duration-base) ease-(--ease-out-soft) group-hover:-translate-y-1 group-hover:shadow-float has-focus-visible:ring-3 has-focus-visible:ring-ring motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
         <div className="relative aspect-4/3 w-full overflow-hidden bg-muted">
-          {photo ? (
-            // eslint-disable-next-line @next/next/no-img-element -- photos come from R2/public; Workers has no image optimizer
-            <img
-              src={photoUrl(photo.r2_key)}
-              srcSet={srcSet}
-              sizes={srcSet ? imageSizes : undefined}
-              alt=""
-              width={photo.width ?? FALLBACK_WIDTH}
-              height={photo.height ?? FALLBACK_HEIGHT}
-              loading={priority ? "eager" : "lazy"}
-              fetchPriority={priority ? "high" : undefined}
-              decoding="async"
-              className={cn(
-                "size-full object-cover transition-transform duration-(--duration-slow) ease-(--ease-out-soft) group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100",
-                soldLabel && "opacity-60 grayscale",
-              )}
-            />
+          {hasPhoto ? (
+            <>
+              <CardPhotoSlider slides={slides} sizes={imageSizes} priority={priority} muted={Boolean(soldLabel)} />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-linear-to-t from-scrim to-transparent"
+              />
+            </>
           ) : (
             <div className="flex size-full flex-col items-center justify-center gap-2 bg-linear-to-br from-sky/25 to-muted text-muted-foreground">
               <Building2 className="size-8" aria-hidden="true" />
               <span className="text-sm">Фото незабаром</span>
             </div>
           )}
-          {photo && (
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-linear-to-t from-scrim to-transparent"
-            />
-          )}
           <span className="absolute top-3 left-3 max-w-[calc(100%-4.5rem)] truncate rounded-control bg-background/90 px-3 py-1 text-xs font-semibold text-foreground backdrop-blur">
             {soldLabel ?? `${DEAL_LABELS[property.deal]} · ${PROPERTY_TYPE_LABELS[property.property_type]}`}
           </span>
           <FavoriteButton propertyId={property.id} />
         </div>
-        <div className="flex flex-1 flex-col gap-2 p-4 sm:p-5">
-          <p className="flex flex-wrap items-baseline gap-x-1.5 font-heading text-lg font-semibold tracking-tight tabular-nums sm:text-xl">
+        <div className="flex flex-1 flex-col gap-2 p-5 sm:p-6">
+          <p className="flex flex-wrap items-baseline gap-x-2 font-heading text-2xl font-semibold tracking-tight tabular-nums sm:text-price">
             <span>{amount}</span>
-            {unit && <span className="font-sans text-sm font-medium text-muted-foreground">/ {unit}</span>}
+            {unit && <span className="font-sans text-base font-medium text-muted-foreground">/ {unit}</span>}
           </p>
           <h3
-            className="line-clamp-2 font-sans text-base font-medium tracking-normal break-words transition-colors duration-(--duration-fast) group-hover:text-dawn-text"
+            className="line-clamp-2 font-sans text-lg font-medium tracking-normal break-words transition-colors duration-(--duration-fast) group-hover:text-dawn-text"
             title={property.title}
           >
             <Link
@@ -135,7 +129,7 @@ export const PropertyCard = ({
             </Link>
           </h3>
           {facts.length > 0 && (
-            <ul className="mt-auto flex flex-wrap gap-x-4 gap-y-1.5 pt-2 text-sm text-muted-foreground">
+            <ul className="mt-auto flex flex-wrap gap-x-5 gap-y-2 pt-3 text-base text-muted-foreground">
               {facts.map(({ key, icon: Icon, text }) => (
                 <li key={key} className="inline-flex min-w-0 items-center gap-1.5">
                   <Icon className="size-4 shrink-0" aria-hidden="true" />

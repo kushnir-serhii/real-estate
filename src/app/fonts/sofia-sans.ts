@@ -30,3 +30,17 @@ export const sofiaSansCyrillic = localFont({
     { prop: "unicode-range", value: "U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116" },
   ],
 });
+
+// The hryvnia sign (U+20B4) is not in Sofia Sans at all (no subset has it), so prices in UAH fell back to a system
+// font. This one-glyph file adds it: drawn from the font's own S, mirrored, plus two bars as thick as 80% of its
+// hyphen, per wght master (gvar / HVAR follow the axis). Built with fontTools from the Google Fonts variable TTF and
+// subset to U+20B4 only (~1.4 KB). Not preloaded: it loads only on pages that show ₴.
+export const sofiaSansHryvnia = localFont({
+  src: "./sofia-sans-hryvnia-wght-normal.woff2",
+  weight: "1 1000",
+  variable: "--font-sofia-sans-hryvnia",
+  display: "swap",
+  preload: false,
+  adjustFontFallback: false,
+  declarations: [{ prop: "unicode-range", value: "U+20B4" }],
+});
