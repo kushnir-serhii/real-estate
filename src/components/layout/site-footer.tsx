@@ -23,7 +23,7 @@ export const SiteFooter = () => {
 
   return (
     <footer className="bg-ink text-on-ink">
-      <div className="mx-auto w-full max-w-6xl px-4">
+      <div className="site-container">
         <div className="flex flex-col gap-6 border-b border-ink-border py-12 sm:py-16 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
             <p className="eyebrow mb-3 text-dawn">{FOOTER.cta.eyebrow}</p>

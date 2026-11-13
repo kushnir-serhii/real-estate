@@ -25,7 +25,7 @@ const BlogPage = async ({ searchParams }: BlogPageProps) => {
   return (
     <div className="pb-16 sm:pb-24">
       <PageHeader eyebrow={BLOG_PAGE.eyebrow} title={BLOG_PAGE.title} lead={BLOG_PAGE.lead} />
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4">
+      <div className="site-container flex flex-col gap-6">
         <BlogCategoryChips state={state} />
         <BlogResults state={state} />
       </div>

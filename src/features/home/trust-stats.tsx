@@ -3,7 +3,7 @@ import { CountUp } from "./count-up";
 
 /** Numbers band right under the quick search. Final values are in the HTML; the count-up is progressive. */
 export const TrustStats = () => (
-  <section aria-label="Агентство в цифрах" className="mx-auto w-full max-w-6xl px-4 py-12 sm:py-16">
+  <section aria-label="Агентство в цифрах" className="site-container py-12 sm:py-16">
     <ul className="reveal-stagger grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
       {TRUST_STATS.map((stat) => (
         <li key={stat.label} className="flex flex-col gap-2 border-t border-border pt-5">

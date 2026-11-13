@@ -30,7 +30,7 @@ export const Hero = ({ title, lead }: HeroProps) => (
       className="hero-zoom absolute inset-0 -z-20 size-full object-cover"
     />
     <div className="hero-veil absolute inset-0 -z-10" aria-hidden="true" />
-    <div className="hero-stagger mx-auto flex w-full max-w-6xl flex-col items-start gap-5 px-4 pt-34 pb-28 text-on-scrim sm:gap-6 sm:pb-32">
+    <div className="hero-stagger site-container flex flex-col items-start gap-5 pt-34 pb-28 text-on-scrim sm:gap-6 sm:pb-32">
       <p className="inline-flex max-w-full items-center gap-2 rounded-control bg-on-scrim/10 px-3.5 py-1.5 text-sm font-medium ring-1 ring-on-scrim/20 backdrop-blur">
         <span className="size-2 shrink-0 rounded-full bg-dawn" aria-hidden="true" />
         <span className="min-w-0">{HERO.eyebrow}</span>

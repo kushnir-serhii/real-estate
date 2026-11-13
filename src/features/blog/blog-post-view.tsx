@@ -24,7 +24,7 @@ export const BlogPostView = ({ post }: { post: PostDetail }) => {
     <div className="pb-16 sm:pb-24">
       <JsonLd data={breadcrumbSchema(siteUrl, [HOME_CRUMB, BLOG_CRUMB, { name: post.title, path: `/blog/${post.slug}` }])} />
       <JsonLd data={blogPostingSchema(siteUrl, post, post.cover_key ? photoUrl(post.cover_key) : null)} />
-      <div className="mx-auto w-full max-w-3xl px-4 pt-2 sm:pt-4">
+      <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 pt-2 sm:pt-4">
         <BlogBreadcrumbs title={post.title} />
 
         <header className="mt-4 flex flex-col items-start gap-4 sm:mt-6">
@@ -71,7 +71,7 @@ export const BlogPostView = ({ post }: { post: PostDetail }) => {
       </div>
 
       {post.related.length > 0 && (
-        <div className="mx-auto mt-14 w-full max-w-6xl px-4 sm:mt-20">
+        <div className="site-container mt-14 sm:mt-20">
           <BlogRelated items={post.related} />
         </div>
       )}

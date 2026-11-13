@@ -287,7 +287,7 @@ export const PageForm = ({ slug, initialValues, isDefault, siteUrl, path }: Page
         )}
       </PropertyFormSection>
 
-      <div className="sticky bottom-0 z-10 -mx-4 flex flex-col gap-2 border-t bg-background/95 px-4 py-3 backdrop-blur-sm sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 lg:mx-0 lg:px-0">
+      <div className="sticky bottom-0 z-10 -mx-4 sm:-mx-6 flex flex-col gap-2 border-t bg-background/95 px-4 py-3 backdrop-blur-sm sm:px-6 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 lg:mx-0 lg:px-0">
         <Button type="submit" disabled={pending} className="w-full sm:w-auto">
           {pending ? <LoaderCircle className="animate-spin" aria-hidden="true" /> : <Save aria-hidden="true" />}
           {pending ? "Зберігаємо…" : "Зберегти"}

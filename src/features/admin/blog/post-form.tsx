@@ -419,7 +419,7 @@ export const PostForm = ({ postId, initialValues, everPublished, published, agen
         </div>
       </PropertyFormSection>
 
-      <div className="sticky bottom-0 z-10 -mx-4 flex flex-col gap-2 border-t bg-background/95 px-4 py-3 backdrop-blur-sm sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 lg:mx-0 lg:px-0">
+      <div className="sticky bottom-0 z-10 -mx-4 sm:-mx-6 flex flex-col gap-2 border-t bg-background/95 px-4 py-3 backdrop-blur-sm sm:px-6 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 lg:mx-0 lg:px-0">
         {intentButtons.map(({ intent, label, busy, icon: Icon, primary }) => (
           <Button
             key={intent}

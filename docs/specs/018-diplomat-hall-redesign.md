@@ -78,14 +78,14 @@ A condensed heading face needs bigger sizes than Unbounded: re-tune the type sca
   - [x] focus rings follow the pill shape; 44px targets kept at 375px
   - [x] switching `--radius-control` back to a small value in `globals.css` restores square-ish controls without touching components
 
-### [ ] 3. Wider container and tighter spacing
+### [x] 3. Wider container and tighter spacing
 - **Build:** `--container-site` + one `site-container` utility (max width + responsive gutters) used by header, footer, home sections, page header, catalog, property, blog, contacts, favorites, admin layout where it applies; home section vertical padding reduced on desktop. Grids re-checked at the new width (catalog 3 columns with the filter sidebar at `xl`, home featured 3 columns).
 - **Files:** `src/app/globals.css`, the 18 files with `max-w-6xl`, `src/features/home/home-section.tsx`
 - **Agent:** designer · **Model:** sonnet
 - **Accept:**
-  - [ ] no `max-w-6xl px-4` left in `src` (one utility instead)
-  - [ ] at 1440px the content width and side gutters are close to serhant.com (screenshot side by side in the log); at 375px no horizontal page scroll
-  - [ ] chosen values written in the log
+  - [x] no `max-w-6xl px-4` left in `src` (one utility instead)
+  - [x] at 1440px the content width and side gutters are close to serhant.com (screenshot side by side in the log); at 375px no horizontal page scroll
+  - [x] chosen values written in the log
 
 ### [ ] 4. Logo component and the Diplomat Hall rename
 - **Build:** `ShieldMark` (inline SVG, `currentColor`, same geometry as a new `public/brand/diplomat-hall-shield.svg`) and `Logo` with `variant` (`full` / `mark`) and `tone` per **Design direction**; replaces `logo-mark.tsx` and the 7 SKY mark everywhere (header, mobile menu, footer, admin, sign-in, 404, `/design`). Rename: `BRAND` (name, tagline, title, description), `scripts/generate-brand-assets.mjs` draws the shield → regenerate `icon.svg`, `favicon.ico`, `og-default.png`; privacy page and other seed pages, blog seed, assistant system prompt and limits, SERP preview, example domains / handles (`7sky.example`, `t.me/sevensky_demo` → Diplomat Hall equivalents); storage keys renamed with a one-time migration (extend `legacy-storage.ts` to read both old prefixes); `pnpm seed:sql`; tests that pin the old name; docs (`CLAUDE.md`, `README.md`, `docs/*`) say Diplomat Hall. Specs 001–017 keep their history (they described 7 SKY at the time).
@@ -166,3 +166,4 @@ A condensed heading face needs bigger sizes than Unbounded: re-tune the type sca
 | --- | --- | --- | --- |
 | 2026-11-13 | 1 | done: Sofia Sans + Sofia Sans Extra Condensed (latin/cyrillic split) + Cormorant SC 600 (latin, no preload yet); Manrope/Unbounded removed; scale display 48→104, h1 40→72, h2 36→60, h3 24→32 (700/700/700/600), eyebrow 13px; font bytes 121.7 KB → 152.7 KB total (+10 KB on a Cyrillic page); perf `/` LCP 1060 ms, CLS 0, JS 211 KB | `src/app/fonts/*`, `layout.tsx`, `globals.css`, `/design`, OFL.txt |
 | 2026-11-13 | 2 | done: `--radius-control` (9999px) → `rounded-control` on buttons, inputs, selects (Radix + native), tabs, chips, badges, pagination, chat input; textarea `rounded-control-multiline` (min(control, 3xl)); dropdowns `rounded-2xl`. Exceptions: favorites counter dot, decorative circles, text links, cards / panels / dialogs, admin loading skeletons (slice 9). Fix found in review: Sofia Sans' Cyrillic defaults to Bulgarian letterforms; both Cyrillic woff2 files remapped to the `.loclRUS` (standard) glyphs, 29 codepoints each | `globals.css`, `components/ui/*`, `form-select.tsx`, 30+ feature components, `src/app/fonts/sofia-sans*-cyrillic-*.woff2` |
+| 2026-11-13 | 3 | done: `--container-site: 88rem` + `site-container` (gutters 16/24/32px) in 24 files, no `max-w-6xl` left; 1440px → 1344px content, 48px gutters (serhant range); 1280 → 1216/32; home sections `py-12 sm:py-16 lg:py-20`; edge-to-edge strips and sticky bars follow the 24px gutter (`sm:-mx-6 sm:px-6`); narrow reading columns `px-4 sm:px-6` so they line up with the header | `globals.css`, site / admin layouts, page header, home, property, blog, catalog, contacts, favorites, admin forms |

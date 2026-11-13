@@ -36,13 +36,13 @@ const HomePage = async () => {
   return (
     <>
       <Hero title={page.title} lead={HERO.lead} />
-      <div className="mx-auto w-full max-w-6xl px-4">
+      <div className="site-container">
         <div className="relative -mt-16">
           <QuickSearch />
         </div>
       </div>
       <TrustStats />
-      <HomeSection labelledBy="featured-title" className="pt-4 sm:pt-8">
+      <HomeSection labelledBy="featured-title" className="pt-4 sm:pt-8 lg:pt-8">
         <div className="flex flex-col gap-6">
           <div className="reveal">
             <SectionHeading

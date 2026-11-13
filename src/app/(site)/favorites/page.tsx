@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 const FavoritesPage = () => (
   <div>
     <PageHeader eyebrow={FAVORITES_PAGE.eyebrow} title={FAVORITES_PAGE.title} lead={FAVORITES_PAGE.lead} />
-    <div className="mx-auto w-full max-w-6xl px-4 pb-16 sm:pb-24">
+    <div className="site-container pb-16 sm:pb-24">
       <FavoritesList suggestions={<FavoritesSuggestions />} />
     </div>
   </div>

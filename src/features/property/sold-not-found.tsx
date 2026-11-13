@@ -53,7 +53,7 @@ const NewestSkeleton = () => (
 
 /** 404 of a property URL: sold or removed more than a week ago, or never existed. */
 export const SoldNotFound = () => (
-  <div className="mx-auto w-full max-w-6xl px-4 pb-16 sm:pb-24">
+  <div className="site-container pb-16 sm:pb-24">
     <PageHeader
       eyebrow="Об'єкт"
       title="Цей об'єкт уже продано або знято з продажу"

@@ -29,13 +29,13 @@ const AboutPage = async () => {
   return (
     <div className="pb-16 sm:pb-24">
       <PageHeader width="narrow" eyebrow={ABOUT_PAGE.eyebrow} title={page.title} lead={ABOUT_PAGE.lead} />
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4">
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 sm:px-6">
         <Markdown>{page.body}</Markdown>
       </div>
       <div className="mt-10 sm:mt-14">
         <AboutTeam />
       </div>
-      <div className="mx-auto mt-10 flex w-full max-w-3xl flex-wrap gap-3 px-4">
+      <div className="mx-auto mt-10 flex w-full max-w-3xl flex-wrap gap-3 px-4 sm:px-6">
         <Link href="/contacts" className={buttonVariants({ variant: "dawn", size: "lg" })}>
           {ABOUT_PAGE.contactAction}
           <ArrowRight data-icon="inline-end" aria-hidden="true" />

@@ -60,7 +60,7 @@ const CatalogPage = async ({ searchParams }: CatalogPageProps) => {
       />
       <PageHeader eyebrow={CATALOG_PAGE.eyebrow} title={catalogTitle(state)} />
 
-      <div className="mx-auto w-full max-w-6xl px-4 pb-16 sm:pb-24 lg:grid lg:grid-cols-[17rem_minmax(0,1fr)] lg:items-start lg:gap-8">
+      <div className="site-container pb-16 sm:pb-24 lg:grid lg:grid-cols-[17rem_minmax(0,1fr)] lg:items-start lg:gap-8">
         <aside aria-label="Фільтри" className="hidden rounded-2xl bg-card p-5 ring-1 ring-foreground/10 lg:block">
           <p className="mb-5 flex items-center gap-2 font-heading text-base font-semibold tracking-tight">
             <SlidersHorizontal className="size-4 text-dawn-text" aria-hidden="true" />

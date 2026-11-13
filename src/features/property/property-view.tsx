@@ -65,7 +65,7 @@ export const PropertyView = ({ property }: PropertyViewProps) => {
   );
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 pt-2 sm:pt-4 lg:pb-24">
+    <div className="site-container pt-2 sm:pt-4 lg:pb-24">
       <JsonLd
         data={breadcrumbSchema(siteUrl, [
           HOME_CRUMB,

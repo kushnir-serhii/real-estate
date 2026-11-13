@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 
 export const SiteHeader = () => (
   <HeaderShell>
-    <div className="mx-auto flex h-full w-full max-w-6xl items-center justify-between gap-2 px-4 lg:grid lg:grid-cols-[1fr_auto_1fr]">
+    <div className="site-container flex h-full items-center justify-between gap-2 lg:grid lg:grid-cols-[1fr_auto_1fr]">
       <Logo tone="header" className="justify-self-start" />
 
       <nav aria-label="Основна навігація" className="hidden lg:block">

@@ -77,6 +77,8 @@
   --spacing-property-bar: 4.625rem;
   /* chat panel width from the sm breakpoint → sm:max-w-(--container-chat-panel) */
   --container-chat-panel: 25rem;
+  /* outer page content width (1408px; reference serhant.com) → site-container */
+  --container-site: 88rem;
 
   --animate-typing-dot: typing-dot 1.2s ease-in-out infinite;
   @keyframes typing-dot {
@@ -185,6 +187,13 @@
   /* slightly lifted midnight, so ink sections still separate from the page */
   --ink: oklch(0.25 0.045 257);
   --ink-border: oklch(1 0 0 / 10%);
+}
+
+/* The one outer page container: header, footer, home sections, inner pages, admin.
+   Gutters 16 / 24 / 32px; full-bleed children cancel them with the same steps (-mx-4 sm:-mx-6 lg:-mx-8).
+   Reading pages (about, privacy, blog article) keep their own narrow max-w-3xl column. */
+@utility site-container {
+  @apply mx-auto w-full max-w-(--container-site) px-4 sm:px-6 lg:px-8;
 }
 
 /* Scrollable strips (gallery) that draw their own controls */
