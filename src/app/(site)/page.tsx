@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { SectionHeading } from "@/components/section-heading";
 import { FEATURED, HERO } from "@/constants/home";
 import { FeaturedProperties } from "@/features/home/featured-properties";
+import { DistrictPicker } from "@/features/home/district-picker";
 import { Districts } from "@/features/home/districts";
 import { Hero } from "@/features/home/hero";
 import { HomeBlog } from "@/features/home/home-blog";
@@ -51,6 +52,7 @@ const HomePage = async () => {
           <FeaturedProperties />
         </div>
       </HomeSection>
+      <DistrictPicker />
       <Districts />
       <HowWeWork />
       <ProptechFeatures />

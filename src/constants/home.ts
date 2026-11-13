@@ -65,6 +65,28 @@ export const ABOUT = {
   },
 } as const;
 
+// Mock — replace for the real agency (real district photos: see spec 018 → External needs). Photos are 1000px-wide
+// copies in public/placeholders/districts/ (≤ ~75 KB each, see its README).
+// `name` must match a district in the catalog data (it is the `district` filter value). The first item's photo is the
+// default one, shown while no district is hovered or focused.
+export const DISTRICT_PICKER = {
+  eyebrow: "Райони",
+  title: "Райони Києва",
+  description: "Оберіть район, щоб побачити об'єкти в ньому.",
+  items: [
+    { name: "Голосіївський", image: { src: "/placeholders/districts/house-exterior-1-1000.webp", width: 1000, height: 663 } },
+    { name: "Дарницький", image: { src: "/placeholders/districts/building-facade-1-1000.webp", width: 1000, height: 666 } },
+    { name: "Деснянський", image: { src: "/placeholders/districts/plot-landscape-1-1000.webp", width: 1000, height: 562 } },
+    { name: "Дніпровський", image: { src: "/placeholders/districts/flat-living-2-1000.webp", width: 1000, height: 666 } },
+    { name: "Оболонський", image: { src: "/placeholders/districts/house-exterior-2-1000.webp", width: 1000, height: 666 } },
+    { name: "Печерський", image: { src: "/placeholders/districts/office-interior-1-1000.webp", width: 1000, height: 667 } },
+    { name: "Подільський", image: { src: "/placeholders/districts/flat-living-3-1000.webp", width: 1000, height: 667 } },
+    { name: "Святошинський", image: { src: "/placeholders/districts/flat-kitchen-1-1000.webp", width: 1000, height: 599 } },
+    { name: "Солом'янський", image: { src: "/placeholders/districts/flat-living-1-1000.webp", width: 1000, height: 882 } },
+    { name: "Шевченківський", image: { src: "/placeholders/districts/flat-bedroom-1-1000.webp", width: 1000, height: 667 } },
+  ],
+} as const;
+
 // Mock — replace for the real agency. `name` must match a district in the catalog data (it is the `district` filter value).
 export const DISTRICTS = {
   eyebrow: "Райони",

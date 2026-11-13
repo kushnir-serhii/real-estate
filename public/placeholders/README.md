@@ -17,3 +17,7 @@ Licence: [Unsplash License](https://unsplash.com/license) (free to use, no attri
 | `office-interior-1.webp` | open office space | https://images.unsplash.com/photo-1497366216548-37526070297c?w=1280&q=70&fm=webp |
 | `building-facade-1.webp` | business centre towers | https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1100&q=55&fm=webp |
 | `plot-landscape-1.webp` | open field at sunset (land plot) | https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1280&q=70&fm=webp |
+
+## `districts/`
+
+Smaller copies for the home district picker (`DISTRICT_PICKER` in `src/constants/home.ts`), where all ten photos sit stacked and load together on desktop: `<file>-1000.webp` is `<file>.webp` resized to 1000px wide with sharp (WebP quality 60, `flat-bedroom-1` 40), each ≤ ~75 KB, about 390 KB for all ten. Generated once; same licence and sources as above. Mock until real district photos arrive.
