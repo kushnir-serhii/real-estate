@@ -12,7 +12,7 @@ import { FOOTER } from "@/constants/footer";
 import { isDemoMode } from "@/lib/data-driver";
 
 const LINK_CLASS =
-  "inline-flex min-h-11 items-center gap-2 rounded-md text-sm text-ink-muted outline-none transition-colors duration-(--duration-base) hover:text-on-ink focus-visible:ring-3 focus-visible:ring-dawn/60";
+  "inline-flex min-h-11 items-center gap-2 rounded-md text-sm text-ink-muted outline-none transition-colors duration-(--duration-base) hover:text-on-ink focus-visible:ring-3 focus-visible:ring-brand-on-ink/60";
 const ROW_CLASS = "flex min-h-11 items-center gap-2 text-sm text-ink-muted";
 const HEADING_CLASS = "eyebrow mb-2 text-on-ink";
 
@@ -24,16 +24,16 @@ export const SiteFooter = () => {
   return (
     <footer className="bg-ink text-on-ink">
       <div className="site-container">
-        <div className="flex flex-col gap-6 border-b border-ink-border py-12 sm:py-16 lg:flex-row lg:items-end lg:justify-between">
+        <div data-footer-cta className="flex flex-col gap-6 border-b border-ink-border py-12 sm:py-16 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
-            <p className="eyebrow mb-3 text-dawn">{FOOTER.cta.eyebrow}</p>
+            <p className="eyebrow mb-3 text-brand-on-ink">{FOOTER.cta.eyebrow}</p>
             <h2 className="text-h1 text-on-ink">{FOOTER.cta.title}</h2>
             <p className="mt-3 max-w-xl text-base text-pretty text-ink-muted">
               {FOOTER.cta.lead}
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
-            <Button asChild variant="dawn" size="lg">
+            <Button asChild variant="inverse" size="lg">
               <Link href={CTA_LINK.href}>
                 {CTA_LINK.label}
                 <ArrowRight data-icon="inline-end" aria-hidden="true" />
@@ -41,7 +41,7 @@ export const SiteFooter = () => {
             </Button>
             <a
               href={CONTACTS.phone.href}
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-ink-border px-5 text-base font-medium text-on-ink outline-none transition-colors duration-(--duration-base) hover:bg-on-ink/10 focus-visible:ring-3 focus-visible:ring-dawn/60"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-control border border-ink-border px-5 text-base font-medium text-on-ink outline-none transition-colors duration-(--duration-base) hover:bg-on-ink/10 focus-visible:ring-3 focus-visible:ring-brand-on-ink/60"
             >
               <Phone className="size-4" aria-hidden="true" />
               <span className="tabular-nums">{CONTACTS.phone.display}</span>
@@ -51,7 +51,7 @@ export const SiteFooter = () => {
 
         <div className="grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1.2fr_1fr]">
           <div className="flex flex-col items-start gap-3">
-            <Logo tone="on-ink" size="lg" alwaysShowName className="focus-visible:ring-dawn/60" />
+            <Logo tone="on-ink" size="lg" alwaysShowName className="focus-visible:ring-brand-on-ink/60" />
             <p className="max-w-xs text-sm text-pretty text-ink-muted">
               {BRAND.tagline}
             </p>

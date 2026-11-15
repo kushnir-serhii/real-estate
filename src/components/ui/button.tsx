@@ -10,8 +10,8 @@ const buttonVariantsBase = cva(
       variant: {
         default:
           "bg-primary text-primary-foreground hover:-translate-y-px hover:bg-[color-mix(in_oklch,var(--primary),var(--primary-foreground)_14%)] hover:shadow-md hover:shadow-foreground/15 motion-reduce:hover:translate-y-0",
-        dawn:
-          "bg-dawn text-dawn-foreground hover:-translate-y-px hover:bg-[color-mix(in_oklch,var(--dawn),var(--dawn-foreground)_10%)] hover:shadow-md hover:shadow-dawn/40 motion-reduce:hover:translate-y-0",
+        inverse:
+          "bg-on-ink text-ink hover:-translate-y-px hover:bg-[color-mix(in_oklch,var(--on-ink),var(--ink)_12%)] hover:shadow-md hover:shadow-ink/30 motion-reduce:hover:translate-y-0",
         outline:
           "border-control bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:bg-input/30 dark:hover:bg-input/50",
         secondary:

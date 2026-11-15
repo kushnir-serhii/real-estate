@@ -28,9 +28,9 @@ const SWATCHES = [
   { name: "primary", className: "bg-primary" },
   { name: "primary-foreground", className: "bg-primary-foreground" },
   { name: "secondary", className: "bg-secondary" },
-  { name: "dawn (акцент)", className: "bg-dawn" },
-  { name: "dawn-text", className: "bg-dawn-text" },
-  { name: "sky", className: "bg-sky" },
+  { name: "brand (акцент)", className: "bg-brand" },
+  { name: "brand-text", className: "bg-brand-text" },
+  { name: "brand-on-ink", className: "bg-brand-on-ink" },
   { name: "ink", className: "bg-ink" },
   { name: "on-ink", className: "bg-on-ink" },
   { name: "ink-muted", className: "bg-ink-muted" },
@@ -43,20 +43,37 @@ const SWATCHES = [
   { name: "ring", className: "bg-ring" },
 ];
 
+/** Text and UI pairs with their WCAG contrast (light / dark theme). Body text needs 4.5, large text and UI 3. Computed from the tokens in globals.css; recompute when they change. */
+const CONTRAST = [
+  { pair: "foreground на background", light: "14.8", dark: "15.9", need: "4.5" },
+  { pair: "foreground на card", light: "16.1", dark: "14.1", need: "4.5" },
+  { pair: "muted-foreground на background", light: "6.6", dark: "7.6", need: "4.5" },
+  { pair: "muted-foreground на card", light: "7.1", dark: "6.8", need: "4.5" },
+  { pair: "primary-foreground на primary (кнопка)", light: "15.2", dark: "15.7", need: "4.5" },
+  { pair: "brand-text на background", light: "5.8", dark: "8.7", need: "4.5" },
+  { pair: "brand-text на card", light: "6.3", dark: "7.7", need: "4.5" },
+  { pair: "brand-foreground на brand", light: "5.8", dark: "8.6", need: "4.5" },
+  { pair: "brand на background (лінії, іконки)", light: "5.3", dark: "8.7", need: "3" },
+  { pair: "control на background (рамка поля)", light: "3.6", dark: "4.1", need: "3" },
+  { pair: "on-ink на ink", light: "14.8", dark: "13.5", need: "4.5" },
+  { pair: "ink-muted на ink", light: "8.6", dark: "7.8", need: "4.5" },
+  { pair: "brand-on-ink на ink", light: "8.0", dark: "7.3", need: "4.5" },
+  { pair: "on-scrim на veil-mid (70%+) над білим фото", light: "7.9", dark: "7.9", need: "4.5" },
+  { pair: "on-scrim/90 (лід) на veil-mid над білим фото", light: "6.8", dark: "6.8", need: "4.5" },
+] as const;
+
 const RADII = [
-  { name: "sm", className: "rounded-sm" },
-  { name: "md", className: "rounded-md" },
-  { name: "lg", className: "rounded-lg" },
-  { name: "xl", className: "rounded-xl" },
-  { name: "2xl", className: "rounded-2xl" },
+  { name: "картки, плитки, панелі: 0 (rounded-2xl…3xl)", className: "rounded-2xl" },
+  { name: "контроли, іконки-кнопки, чіпи, лічильники: 2px (rounded-control)", className: "rounded-control" },
+  { name: "лише крапки, аватари, спінери: rounded-full", className: "rounded-full" },
 ];
 
 const FONTS = [
   { name: "Sofia Sans", role: "font-sans · текст", className: "font-sans text-2xl", sample: "Нерухомість у Києві · Ґ, Є, Ї, І · Real estate" },
   {
-    name: "Sofia Sans Extra Condensed",
-    role: "font-heading · заголовки",
-    className: "font-heading text-4xl font-bold",
+    name: "Playfair Display",
+    role: "font-display · H1, H2, hero",
+    className: "font-display text-4xl font-medium",
     sample: "Нерухомість у Києві · Ґ, Є, Ї, І",
   },
   { name: "Cormorant SC 600", role: "font-logo · лише логотип", className: "font-logo text-4xl leading-none", sample: "Diplomat Hall" },
@@ -64,7 +81,6 @@ const FONTS = [
 
 const VARIANTS = [
   "default",
-  "dawn",
   "secondary",
   "outline",
   "ghost",
@@ -90,7 +106,7 @@ const DesignPage = () => (
     <header className="flex flex-wrap items-center justify-between gap-4">
       <div className="min-w-0">
         <h1 className="text-h1">{BRAND.name}</h1>
-        <p className="text-muted-foreground">Дизайн-система · Midnight Sky</p>
+        <p className="text-muted-foreground">Дизайн-система · Midnight + Blue</p>
       </div>
       <ThemeToggle />
     </header>
@@ -123,12 +139,39 @@ const DesignPage = () => (
           </li>
         ))}
       </ul>
+      <p className="text-sm text-muted-foreground">
+        Основа: midnight і слонова кістка; синій (brand) лише для деталей: eyebrow, тонкі лінії, цифри, іконки, фокус,
+        активні стани (до 5% екрана). Основна кнопка: midnight (у темній темі кремова).
+      </p>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-120 text-left text-sm tabular-nums">
+          <caption className="sr-only">Контраст текстових пар у світлій і темній темі</caption>
+          <thead>
+            <tr className="border-b text-muted-foreground">
+              <th scope="col" className="py-2 pr-3 font-medium">Пара</th>
+              <th scope="col" className="px-3 py-2 font-medium">Світла</th>
+              <th scope="col" className="px-3 py-2 font-medium">Темна</th>
+              <th scope="col" className="py-2 pl-3 font-medium">Мін.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {CONTRAST.map(({ pair, light, dark, need }) => (
+              <tr key={pair} className="border-b">
+                <th scope="row" className="py-2 pr-3 font-normal">{pair}</th>
+                <td className="px-3 py-2">{light}:1</td>
+                <td className="px-3 py-2">{dark}:1</td>
+                <td className="py-2 pl-3 text-muted-foreground">{need}:1</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </Section>
 
-    <Section title="Радіуси">
-      <ul className="flex flex-wrap gap-3">
+    <Section title="Форми">
+      <ul className="flex flex-wrap gap-6">
         {RADII.map(({ name, className }) => (
-          <li key={name} className="flex flex-col items-center gap-1.5">
+          <li key={name} className="flex max-w-48 flex-col items-center gap-1.5 text-center">
             <div className={`size-14 border bg-muted ${className}`} />
             <span className="text-sm text-muted-foreground">{name}</span>
           </li>
@@ -147,33 +190,33 @@ const DesignPage = () => (
         ))}
       </ul>
       <div className="flex flex-col gap-1 rounded-xl border p-4">
-        <span className="text-sm text-muted-foreground">Заголовний шрифт: вага 600 / 700 / 800</span>
-        <p className="text-h2 font-semibold">Нерухомість у Києві · Ґ, Є, Ї, І</p>
-        <p className="text-h2 font-bold">Real estate in Kyiv · Ґ, Є, Ї, І</p>
-        <p className="text-h2 font-extrabold">Нерухомість у Києві · Real estate</p>
+        <span className="text-sm text-muted-foreground">Playfair Display: вага 500 / 600 / 700 (у заголовках 500–600)</span>
+        <p className="text-h2 font-medium">Нерухомість у Києві · Ґ, Є, Ї, І</p>
+        <p className="text-h2 font-semibold">Real estate in Kyiv · Ґ, Є, Ї, І</p>
+        <p className="text-h2 font-bold">Нерухомість у Києві · Real estate</p>
       </div>
     </Section>
 
     <Section title="Типографіка">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <span className="eyebrow text-muted-foreground">Sofia Sans Extra Condensed · display</span>
+          <span className="eyebrow text-muted-foreground">Playfair Display · display · 40 → 80px · 500 · 1.1</span>
           <p className="text-display">Нерухомість у Києві</p>
         </div>
         <div className="flex flex-col gap-1">
-          <span className="eyebrow text-muted-foreground">Sofia Sans Extra Condensed · h1</span>
+          <span className="eyebrow text-muted-foreground">Playfair Display · h1 · 34 → 56px · 500 · 1.1</span>
           <p className="text-h1">Квартири в центрі Києва</p>
         </div>
         <div className="flex flex-col gap-1">
-          <span className="eyebrow text-muted-foreground">Sofia Sans Extra Condensed · h2</span>
+          <span className="eyebrow text-muted-foreground">Playfair Display · h2 · 30 → 48px · 500 · 1.15</span>
           <p className="text-h2">Район, який вам підходить</p>
         </div>
         <div className="flex flex-col gap-1">
-          <span className="eyebrow text-muted-foreground">Sofia Sans Extra Condensed · h3</span>
+          <span className="eyebrow text-muted-foreground">Sofia Sans · h3 · 22 → 26px · 600 · 1.2</span>
           <p className="text-h3">Підзаголовок розділу: Ґ, Є, Ї, І</p>
         </div>
         <div className="flex flex-col gap-1">
-          <span className="eyebrow text-dawn-text">Eyebrow · Sofia Sans</span>
+          <span className="eyebrow text-brand-text">Eyebrow · Sofia Sans</span>
           <p className="text-base">
             Основний текст Sofia Sans: ґанок, їдальня, єдність, Львів, Чернігів.
           </p>
@@ -186,8 +229,8 @@ const DesignPage = () => (
         <span className="text-sm text-muted-foreground">
           Ціна (tabular-nums)
         </span>
-        <p className="font-heading text-4xl font-bold tabular-nums">85 000 $</p>
-        <p className="font-heading text-3xl font-semibold tabular-nums">2 450 000 ₴</p>
+        <p className="text-3xl font-semibold tabular-nums">85 000 $</p>
+        <p className="text-2xl font-semibold tabular-nums">2 450 000 ₴</p>
         <p className="text-lg tabular-nums">1 111 111 € / 8 888 888 €</p>
       </div>
     </Section>
@@ -201,7 +244,7 @@ const DesignPage = () => (
         ))}
       </div>
       <div className="flex flex-wrap items-center gap-3">
-        <Button size="lg" variant="dawn">
+        <Button size="lg">
           Підібрати об’єкт
           <ArrowRight data-icon="inline-end" />
         </Button>
@@ -228,13 +271,13 @@ const DesignPage = () => (
 
     <Section title="Темна поверхня (ink)">
       <div className="flex flex-col gap-4 rounded-2xl bg-ink p-6 text-on-ink">
-        <span className="eyebrow text-dawn">Підберемо за 24 години</span>
+        <span className="eyebrow text-brand-on-ink">Підберемо за 24 години</span>
         <p className="text-h2">Розкажіть, що шукаєте</p>
         <p className="text-ink-muted">
           Допоміжний текст на темній поверхні: 3 кімнати, Печерський район.
         </p>
         <div className="flex flex-wrap gap-3">
-          <Button variant="dawn">Залишити заявку</Button>
+          <Button variant="inverse">Залишити заявку</Button>
           <Button
             variant="outline"
             className="border-ink-border bg-transparent text-on-ink hover:bg-on-ink/10 hover:text-on-ink dark:bg-transparent"
@@ -290,7 +333,7 @@ const DesignPage = () => (
           <CardDescription>78 м², 5 поверх із 9</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="font-heading text-2xl font-semibold tabular-nums">85 000 $</p>
+          <p className="text-xl font-semibold tabular-nums">85 000 $</p>
         </CardContent>
         <CardFooter>
           <Button className="w-full">Показати телефон</Button>

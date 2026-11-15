@@ -9,6 +9,7 @@ import { buildDemoSeed } from "@/lib/demo/seed";
 import type { Database } from "@/lib/supabase/database.types";
 import type { AgentsDriver, PagesDriver, PostsDriver, PropertiesDriver, SettingsDriver } from "./driver-types";
 import { BLOG_PAGE_SIZE, BLOG_RELATED_MAX } from "@/constants/blog";
+import { buildPriceHistogram } from "./property-histogram";
 import { PAGE_SIZE, propertyFiltersSchema } from "./property-query";
 import type { PropertyFiltersInput } from "./property-query";
 
@@ -236,6 +237,44 @@ const runContract = (name: string, getDrivers: () => Drivers | Promise<Drivers>,
       });
     });
 
+    describe("price histogram", () => {
+      const prices = (input: PropertyFiltersInput) => d.properties.fetchPublishedPrices(filters(input));
+      const expectedPrices = (predicate: (row: PropertyRow) => boolean) =>
+        published.filter(predicate).flatMap((r) => (r.price_usd === null ? [] : [r.price_usd])).sort((a, b) => a - b);
+
+      it.each(["sell", "rent_long", "rent_day"] as const)("%s: the price list of the deal, published rows only", async (deal) => {
+        const list = (await prices({ deal })).sort((a, b) => a - b);
+        expect(list.length).toBeGreaterThan(0);
+        expect(list).toEqual(expectedPrices((r) => r.deal === deal));
+        const h = buildPriceHistogram(list);
+        expect(h.bins.reduce((n, b) => n + b.count, 0)).toBe(h.total);
+        expect(h.total).toBe(list.length);
+      });
+
+      it("follows the other filters, and an empty context has no prices", async () => {
+        const list = (await prices({ deal: "sell", property_type: "flat", rooms: ["2"] })).sort((a, b) => a - b);
+        expect(list).toEqual(expectedPrices((r) => r.deal === "sell" && r.property_type === "flat" && r.room_count === 2));
+        expect(await prices({ deal: "sell", price_usd_to: 1 })).toEqual([]);
+        expect(buildPriceHistogram([])).toMatchObject({ bins: [], total: 0 });
+      });
+
+      it("bars inside a range aligned to bin edges add up to the catalog's count for that range", async () => {
+        const base = { deal: "sell", property_type: "flat" } as const;
+        const h = buildPriceHistogram(await prices(base));
+        expect(h.bins.length).toBeGreaterThan(2);
+        const lo = h.bins[1]!;
+        const hi = h.bins[Math.min(4, h.bins.length - 2)]!;
+        const inRange = h.bins.filter((b) => b.from_usd >= lo.from_usd && b.to_usd !== null && b.to_usd <= hi.to_usd!);
+        const page = await d.properties.fetchPublishedProperties(
+          filters({ ...base, price_usd_from: lo.from_usd, price_usd_to: hi.to_usd! - 1 }),
+        );
+        expect(inRange.reduce((n, b) => n + b.count, 0)).toBe(page.total);
+        // The whole chart equals the unfiltered catalog count for the context (rows without a price aside).
+        const all = await d.properties.fetchPublishedProperties(filters(base));
+        expect(h.total).toBe(all.total - published.filter((r) => r.deal === "sell" && r.property_type === "flat" && r.price_usd === null).length);
+      });
+    });
+
     describe("budget currency", () => {
       it("price_usd is the amount in USD, or the amount divided by the rate", async () => {
         const { items } = await allPages(d.properties, {});
@@ -284,6 +323,24 @@ const runContract = (name: string, getDrivers: () => Drivers | Promise<Drivers>,
           expect(item.price_usd as number).toBeGreaterThanOrEqual(Math.floor((target.price_usd as number) * 0.7));
           expect(item.price_usd as number).toBeLessThanOrEqual(Math.ceil((target.price_usd as number) * 1.3));
         }
+      });
+    });
+
+    describe("exclusive collection", () => {
+      it("seed: flagged properties first, published only, topped up with the most expensive sale ones", async () => {
+        const result = await d.properties.fetchExclusiveProperties(6);
+        const flagged = published.filter((r) => r.is_exclusive);
+        expect(flagged.length).toBeGreaterThanOrEqual(4);
+        expect(result).toHaveLength(6);
+        expect(result.every((p) => p.status === "published")).toBe(true);
+        const head = result.slice(0, Math.min(flagged.length, 6));
+        expect(head.every((p) => p.is_exclusive)).toBe(true);
+        expect(new Set(result.map((p) => p.id)).size).toBe(result.length);
+        for (const item of result) expect(item).not.toHaveProperty("raw");
+      });
+
+      it("respects the limit", async () => {
+        expect(await d.properties.fetchExclusiveProperties(2)).toHaveLength(2);
       });
     });
 
@@ -400,6 +457,32 @@ runContract(
 describe("demo store (RLS mirror)", () => {
   beforeAll(() => {
     resetDemoStore();
+  });
+
+  it("exclusive collection: 0 flagged gives the most expensive sale properties, 2 flagged come first", async () => {
+    const store = getDemoStore();
+    const saleByPrice = () =>
+      store.properties
+        .filter((r) => r.status === "published" && r.deal === "sell" && r.price_usd !== null)
+        .sort((a, b) => (b.price_usd as number) - (a.price_usd as number) || (a.id < b.id ? -1 : 1));
+    try {
+      for (const row of store.properties) row.is_exclusive = false;
+      const none = await demoPropertiesDriver.fetchExclusiveProperties(6);
+      expect(none.map((p) => p.id)).toEqual(saleByPrice().slice(0, 6).map((r) => r.id));
+
+      // Two cheap sale properties, plus a flagged draft and a flagged rental that must not matter for «published sale».
+      const cheap = saleByPrice().slice(-2);
+      for (const row of cheap) row.is_exclusive = true;
+      const draft = store.properties.find((r) => r.status !== "published");
+      if (draft) draft.is_exclusive = true;
+      const two = await demoPropertiesDriver.fetchExclusiveProperties(6);
+      expect(two).toHaveLength(6);
+      expect(new Set(two.slice(0, 2).map((p) => p.id))).toEqual(new Set(cheap.map((r) => r.id)));
+      expect(two.slice(2).map((p) => p.id)).toEqual(saleByPrice().filter((r) => !r.is_exclusive).slice(0, 4).map((r) => r.id));
+      expect(two.some((p) => p.id === draft?.id)).toBe(false);
+    } finally {
+      resetDemoStore();
+    }
   });
 
   it("a property hidden longer ago than the sold window is gone", async () => {

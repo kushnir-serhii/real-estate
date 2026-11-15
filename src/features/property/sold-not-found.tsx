@@ -60,7 +60,7 @@ export const SoldNotFound = () => (
       lead="Але в нас є інші варіанти. Перегляньте каталог або зверніться до нас, і ми підберемо житло під ваш запит."
       className="px-0"
     >
-      <Link href="/catalog" className={buttonVariants({ variant: "dawn", size: "lg" })}>
+      <Link href="/catalog" className={buttonVariants({ variant: "default", size: "lg" })}>
         До каталогу
         <ArrowRight data-icon="inline-end" aria-hidden="true" />
       </Link>

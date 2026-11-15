@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import type { AdminPropertyListItem } from "@/lib/db/admin-properties";
 import { cn } from "@/lib/utils";
+import { ExclusiveBadge } from "./exclusive-badge";
 import { ListStatusBadge } from "./list-status-badge";
 import { propertyHref } from "./properties-params";
 import { propertyAddress, propertyPrice } from "./property-row-text";
@@ -72,7 +73,10 @@ export const PropertiesTable = ({ properties, className }: PropertiesTableProps)
                 </span>
               </td>
               <td className={TD_CLASS}>
-                <ListStatusBadge status={property.listStatus} />
+                <div className="flex flex-col items-start gap-1.5">
+                  <ListStatusBadge status={property.listStatus} />
+                  {property.is_exclusive && <ExclusiveBadge />}
+                </div>
               </td>
               <td className={TD_CLASS}>
                 <PropertySourceLabel property={property} className="block truncate" />

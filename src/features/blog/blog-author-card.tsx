@@ -7,7 +7,7 @@ import { toTel } from "@/lib/format/to-tel";
 import { photoUrl } from "@/lib/photos/photo-url";
 
 const PHONE_CLASS =
-  "inline-flex min-h-11 items-center gap-2 rounded-md font-medium text-foreground tabular-nums outline-none hover:text-dawn-text focus-visible:ring-3 focus-visible:ring-ring/50";
+  "inline-flex min-h-11 items-center gap-2 rounded-md font-medium text-foreground tabular-nums outline-none hover:text-brand-text focus-visible:ring-3 focus-visible:ring-ring/50";
 
 /** Author of the post: the agent with a phone, or the agency when there is none. */
 export const BlogAuthorCard = ({ author }: { author: PropertyAgent | null }) => {
@@ -22,18 +22,18 @@ export const BlogAuthorCard = ({ author }: { author: PropertyAgent | null }) => 
           width={64}
           height={64}
           loading="lazy"
-          className="size-16 shrink-0 rounded-full bg-muted object-cover ring-2 ring-dawn"
+          className="size-16 shrink-0 rounded-full bg-muted object-cover ring-2 ring-brand"
         />
       ) : (
         <div
           aria-hidden="true"
-          className="flex size-16 shrink-0 items-center justify-center rounded-full bg-secondary text-dawn-text ring-2 ring-dawn"
+          className="flex size-16 shrink-0 items-center justify-center rounded-full bg-secondary text-brand-text ring-2 ring-brand"
         >
           {author ? <User className="size-7" /> : <Building2 className="size-7" />}
         </div>
       )}
       <div className="flex min-w-0 flex-col">
-        <p className="eyebrow text-dawn-text">{BLOG_POST_PAGE.authorEyebrow}</p>
+        <p className="eyebrow text-brand-text">{BLOG_POST_PAGE.authorEyebrow}</p>
         <p className="text-lg font-semibold break-words">
           {author ? author.name : BLOG_DEFAULT_AUTHOR}
         </p>

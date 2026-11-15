@@ -59,7 +59,7 @@ export const MobileMenu = () => {
                   href={link.href}
                   activePath={link.activePath}
                   onNavigate={close}
-                  className="min-h-14 px-0 font-heading text-3xl font-semibold after:inset-x-0 after:bottom-2"
+                  className="min-h-14 px-0 text-2xl font-semibold after:inset-x-0 after:bottom-2"
                 >
                   {link.label}
                 </NavLink>
@@ -68,7 +68,7 @@ export const MobileMenu = () => {
           </ul>
         </nav>
         <div className="flex flex-col gap-4 px-4">
-          <Button asChild variant="dawn" size="lg">
+          <Button asChild variant="default" size="lg">
             <Link href={CTA_LINK.href} onClick={close}>
               {CTA_LINK.label}
               <ArrowRight data-icon="inline-end" aria-hidden="true" />

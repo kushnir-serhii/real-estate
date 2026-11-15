@@ -28,6 +28,7 @@ Stage 1 (≈7–9 weeks): base site + admin + AI assistant — see [reference/st
 | 018 | [Redesign: Diplomat Hall brand, new type, wider layout](specs/018-diplomat-hall-redesign.md) | done | 017 |
 | 019 | [Visitor accounts with Google: saved properties on every device](specs/019-user-accounts.md) | draft | 018 |
 | 020 | [Email + password accounts (optional, needs a mail service)](specs/020-email-accounts.md) | draft | 019 |
+| 021 | [Premium home: blue palette, Playfair headings, sharp shapes, price histogram, motion](specs/021-premium-home.md) | done | 018 |
 
 Statuses: `draft` → `ready` → `in-progress` → `done` (meaning in [process.md](process.md#statuses)). The status here and in the spec's header must match.
 
@@ -51,7 +52,8 @@ Read top to bottom; the next spec is the first one that isn't `done`. Specs in o
 | 12 | 016 |
 | 13 | 017 |
 | 14 | 018 |
-| 15 | 019 |
+| 15 | 021 |
+| 16 | 019 |
 
 - 020 is optional and not in a wave: add it when visitors without Google need accounts.
 - To change the order, edit this table.

@@ -31,7 +31,7 @@ const PrivacyPage = async () => {
             role="note"
             className="flex items-start gap-3 rounded-2xl border border-border bg-muted p-4 text-sm font-medium text-foreground"
           >
-            <TriangleAlert className="mt-0.5 size-4 shrink-0 text-dawn-text" aria-hidden="true" />
+            <TriangleAlert className="mt-0.5 size-4 shrink-0 text-brand-text" aria-hidden="true" />
             {PRIVACY_PAGE.draftNote}
           </p>
         ) : null}

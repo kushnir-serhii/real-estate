@@ -112,6 +112,11 @@ const fetchPublishedProperties = async (filters: PropertyFilters): Promise<Prope
   };
 };
 
+const fetchPublishedPrices = async (filters: PropertyFilters): Promise<number[]> =>
+  getDemoStore().properties.flatMap((row) =>
+    isPublished(row) && matchesFilters(row, filters) && row.price_usd !== null ? [row.price_usd] : [],
+  );
+
 const classify = (row: PropertyRow, data: DemoData): PropertyBySlug | null => {
   if (isPublished(row)) return { kind: "published", property: toPublic(row, data) };
   if (isSoldVisible(row)) return { kind: "sold", property: toPublic(row, data) };
@@ -154,6 +159,18 @@ const fetchSimilarProperties = async (target: SimilarTo): Promise<PublishedPrope
     .map((row) => toPublic(row, data));
 };
 
+const fetchExclusiveProperties = async (limit: number): Promise<PublishedProperty[]> => {
+  const data = getDemoStore();
+  const published = data.properties.filter(isPublished);
+  const flagged = published.filter((row) => row.is_exclusive).sort(comparator("newest")).slice(0, limit);
+  // Top-up: the most expensive published sale properties that are not flagged (a null price never ranks).
+  const topUp = published
+    .filter((row) => !row.is_exclusive && row.deal === "sell" && row.price_usd !== null)
+    .sort(comparator("price_desc"))
+    .slice(0, Math.max(0, limit - flagged.length));
+  return [...flagged, ...topUp].map((row) => toPublic(row, data));
+};
+
 const ukCollator = new Intl.Collator("uk");
 
 const fetchPublishedDistricts = async (): Promise<string[]> => {
@@ -175,9 +192,11 @@ const fetchSitemapProperties = async (): Promise<SitemapProperty[]> =>
 
 export const demoPropertiesDriver: PropertiesDriver = {
   fetchPublishedProperties,
+  fetchPublishedPrices,
   fetchPropertyBySlug,
   fetchPropertiesByIds,
   fetchSimilarProperties,
+  fetchExclusiveProperties,
   fetchPublishedDistricts,
   fetchSitemapProperties,
 };

@@ -13,7 +13,7 @@ export const NAV_LINKS = [
  */
 export const NAV_ITEM_CLASS = [
   "relative inline-flex min-h-11 items-center rounded-control px-3 text-sm font-medium text-foreground outline-none transition-colors duration-(--duration-base) on-hero:text-on-scrim focus-visible:ring-3 focus-visible:ring-ring/50",
-  "after:absolute after:inset-x-3 after:bottom-2 after:h-0.5 after:origin-center after:scale-x-0 after:rounded-full after:bg-current after:transition-transform after:duration-(--duration-base) after:ease-out-soft hover:after:scale-x-100 focus-visible:after:scale-x-100 motion-reduce:after:transition-none",
+  "after:absolute after:inset-x-3 after:bottom-2 after:h-0.5 after:origin-center after:scale-x-0 after:rounded-control after:bg-current after:transition-transform after:duration-(--duration-base) after:ease-out-soft hover:after:scale-x-100 focus-visible:after:scale-x-100 motion-reduce:after:transition-none",
 ].join(" ");
 
 /** Extra classes for ghost icon buttons in the header: light text and a light hover while it is transparent over the hero. */

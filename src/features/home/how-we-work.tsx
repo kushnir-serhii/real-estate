@@ -21,7 +21,7 @@ export const HowWeWork = () => (
             )}
             <span
               aria-hidden="true"
-              className="relative z-10 flex size-12 shrink-0 items-center justify-center rounded-full border border-dawn/60 bg-ink font-heading text-lg font-semibold text-dawn tabular-nums"
+              className="relative z-10 flex size-12 shrink-0 items-center justify-center rounded-control border border-brand-on-ink/60 bg-ink text-base font-semibold text-brand-on-ink tabular-nums"
             >
               {index + 1}
             </span>

@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: BLOG_NOT_FOUND.title };
 const BlogPostNotFound = () => (
   <div className="pb-16 sm:pb-24">
     <PageHeader width="narrow" eyebrow={BLOG_NOT_FOUND.eyebrow} title={BLOG_NOT_FOUND.title} lead={BLOG_NOT_FOUND.lead}>
-      <Link href="/blog" className={buttonVariants({ variant: "dawn", size: "lg" })}>
+      <Link href="/blog" className={buttonVariants({ variant: "default", size: "lg" })}>
         {BLOG_NOT_FOUND.action}
         <ArrowRight data-icon="inline-end" aria-hidden="true" />
       </Link>

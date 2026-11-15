@@ -16,6 +16,7 @@ import type {
 /** `raw` and `house` are not granted to the public (migration hide_private_property_columns): never select them here. */
 const PROPERTY_COLUMNS = [
   "id", "source", "external_id", "status", "deal", "property_type", "prop_kind", "price_amount",
+  "is_exclusive",
   "currency", "price_usd", "price_per_m2", "area_total", "area_life", "area_kitchen", "area_lot",
   "room_count", "storey", "storeys", "repair", "wall_material", "housing_class", "is_newbuilding",
   "locality", "district", "street", "lat", "lng", "title", "description", "slug",
@@ -33,14 +34,18 @@ const SORT_ORDER = {
   newest: { column: "published_at", ascending: false },
 } as const satisfies Record<(typeof SORTS)[number], { column: string; ascending: boolean }>;
 
-const fetchPublishedProperties = async (filters: PropertyFilters): Promise<PropertyPage> => {
-  const supabase = createPublicClient();
-  const from = (filters.page - 1) * PAGE_SIZE;
+/** The structural slice of a PostgREST filter builder the catalog filters need (keeps the helper independent of the select string). */
+type Filterable<Q> = {
+  eq: (column: string, value: string) => Q;
+  in: (column: string, values: readonly string[]) => Q;
+  gte: (column: string, value: number) => Q;
+  lte: (column: string, value: number) => Q;
+  or: (filters: string) => Q;
+};
 
-  let query = supabase
-    .from("properties")
-    .select(SELECT, { count: "exact" })
-    .eq("status", "published");
+/** The catalog filters as SQL clauses: shared by the catalog page query and the price histogram, so they never drift. */
+const applyFilters = <Q extends Filterable<Q>>(base: Q, filters: PropertyFilters): Q => {
+  let query = base;
   if (filters.deal) query = query.eq("deal", filters.deal);
   if (filters.property_type) query = query.eq("property_type", filters.property_type);
   if (filters.prop_kind?.length) query = query.in("prop_kind", filters.prop_kind);
@@ -57,6 +62,17 @@ const fetchPublishedProperties = async (filters: PropertyFilters): Promise<Prope
     ];
     query = query.or(clauses.join(","));
   }
+  return query;
+};
+
+const fetchPublishedProperties = async (filters: PropertyFilters): Promise<PropertyPage> => {
+  const supabase = createPublicClient();
+  const from = (filters.page - 1) * PAGE_SIZE;
+
+  const query = applyFilters(
+    supabase.from("properties").select(SELECT, { count: "exact" }).eq("status", "published"),
+    filters,
+  );
 
   const order = SORT_ORDER[filters.sort];
   const { data, error, count } = await query
@@ -79,6 +95,29 @@ const fetchPublishedProperties = async (filters: PropertyFilters): Promise<Prope
     page: filters.page,
     pageCount: Math.max(1, Math.ceil(total / PAGE_SIZE)),
   };
+};
+
+const PRICES_BATCH = 1000;
+
+/**
+ * `price_usd` of the published rows that match `filters` and have a price (what the price histogram bins).
+ * Only that column is read; PostgREST caps a response at 1000 rows, so read in pages of that size.
+ */
+const fetchPublishedPrices = async (filters: PropertyFilters): Promise<number[]> => {
+  const supabase = createPublicClient();
+  const result: number[] = [];
+  for (let from = 0; ; from += PRICES_BATCH) {
+    const { data, error } = await applyFilters(
+      supabase.from("properties").select("price_usd").eq("status", "published").not("price_usd", "is", null),
+      filters,
+    )
+      .order("id")
+      .range(from, from + PRICES_BATCH - 1);
+    if (error) throw new Error(`getPriceHistogram failed: ${error.message}`);
+    for (const row of data) if (row.price_usd !== null) result.push(row.price_usd);
+    if (data.length < PRICES_BATCH) break;
+  }
+  return result;
 };
 
 const fetchPropertyBySlug = async (slug: string): Promise<PropertyBySlug | null> => {
@@ -151,6 +190,39 @@ const fetchSimilarProperties = async (target: SimilarTo): Promise<PublishedPrope
   return data;
 };
 
+const fetchExclusiveProperties = async (limit: number): Promise<PublishedProperty[]> => {
+  const supabase = createPublicClient();
+  const flagged = await supabase
+    .from("properties")
+    .select(SELECT)
+    .eq("status", "published")
+    .eq("is_exclusive", true)
+    .order("published_at", { ascending: false, nullsFirst: false })
+    .order("id")
+    .order("position", { referencedTable: "property_photos" })
+    .limit(limit)
+    .overrideTypes<PublishedProperty[], { merge: false }>();
+  if (flagged.error) throw new Error(`getExclusiveProperties failed: ${flagged.error.message}`);
+  const rest = limit - flagged.data.length;
+  if (rest <= 0) return flagged.data;
+
+  // Top up with the most expensive published sale properties that are not flagged (the flagged ones are already in).
+  const topUp = await supabase
+    .from("properties")
+    .select(SELECT)
+    .eq("status", "published")
+    .eq("deal", "sell")
+    .eq("is_exclusive", false)
+    .not("price_usd", "is", null)
+    .order("price_usd", { ascending: false })
+    .order("id")
+    .order("position", { referencedTable: "property_photos" })
+    .limit(rest)
+    .overrideTypes<PublishedProperty[], { merge: false }>();
+  if (topUp.error) throw new Error(`getExclusiveProperties failed: ${topUp.error.message}`);
+  return [...flagged.data, ...topUp.data];
+};
+
 const ukCollator = new Intl.Collator("uk");
 
 const fetchPublishedDistricts = async (): Promise<string[]> => {
@@ -192,9 +264,11 @@ const fetchSitemapProperties = async (): Promise<SitemapProperty[]> => {
 
 export const supabasePropertiesDriver: PropertiesDriver = {
   fetchPublishedProperties,
+  fetchPublishedPrices,
   fetchPropertyBySlug,
   fetchPropertiesByIds,
   fetchSimilarProperties,
+  fetchExclusiveProperties,
   fetchPublishedDistricts,
   fetchSitemapProperties,
 };

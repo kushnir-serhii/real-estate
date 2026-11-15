@@ -30,7 +30,7 @@ export const CatalogEmpty = (props: CatalogEmptyProps) => {
     <div className="flex flex-col items-start gap-5 rounded-2xl border border-dashed border-control bg-card p-6 sm:p-10">
       <span
         aria-hidden="true"
-        className="flex size-14 items-center justify-center rounded-full bg-dawn text-dawn-foreground"
+        className="flex size-14 items-center justify-center rounded-control bg-primary text-primary-foreground"
       >
         <SearchX className="size-6" />
       </span>
@@ -40,18 +40,18 @@ export const CatalogEmpty = (props: CatalogEmptyProps) => {
       </div>
       <div className="flex flex-wrap gap-2">
         {props.kind === "filtered" && (
-          <Link href={props.resetHref} className={buttonVariants({ variant: "dawn" })}>
+          <Link href={props.resetHref} className={buttonVariants({ variant: "default" })}>
             Скинути фільтри
           </Link>
         )}
         {props.kind === "out-of-range" && (
-          <Link href={props.firstPageHref} className={buttonVariants({ variant: "dawn" })}>
+          <Link href={props.firstPageHref} className={buttonVariants({ variant: "default" })}>
             На першу сторінку
           </Link>
         )}
         <a
           href={CONTACTS.phone.href}
-          className={buttonVariants({ variant: props.kind === "nothing" ? "dawn" : "outline" })}
+          className={buttonVariants({ variant: props.kind === "nothing" ? "default" : "outline" })}
         >
           <span className="tabular-nums">{CONTACTS.phone.display}</span>
         </a>

@@ -89,6 +89,19 @@ export const breadcrumbSchema = (siteUrl: string, items: BreadcrumbItem[]): Json
   })),
 });
 
+export type FaqItem = { readonly question: string; readonly answer: string };
+
+/** `FAQPage` from the same list that renders the visible questions. */
+export const faqSchema = (items: readonly FaqItem[]): JsonLdObject => ({
+  "@context": SCHEMA_CONTEXT,
+  "@type": "FAQPage",
+  mainEntity: items.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: { "@type": "Answer", text: item.answer },
+  })),
+});
+
 export const HOME_CRUMB: BreadcrumbItem = { name: "Головна", path: "/" };
 export const CATALOG_CRUMB: BreadcrumbItem = { name: "Каталог", path: "/catalog" };
 export const BLOG_CRUMB: BreadcrumbItem = { name: "Блог", path: "/blog" };

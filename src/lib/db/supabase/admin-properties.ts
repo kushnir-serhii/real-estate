@@ -30,7 +30,7 @@ type ListRow = Omit<AdminPropertyListItem, "listStatus" | "cover"> & {
 
 /** `raw` and `house` are not granted to authenticated: never select them. */
 const LIST_SELECT =
-  "id,slug,title,status,source,external_id,deal,property_type,price_amount,currency,locality,district,street,published_at,hidden_at,updated_at,property_photos(r2_key,sizes,width,height)";
+  "id,slug,title,status,source,external_id,deal,property_type,price_amount,currency,locality,district,street,published_at,hidden_at,updated_at,is_exclusive,property_photos(r2_key,sizes,width,height)";
 
 const fetchAdminProperties = async (filters: AdminPropertyFilters): Promise<AdminPropertyPage> => {
   const supabase = await createClient();
@@ -113,7 +113,7 @@ const saveExchangeRates = async (rates: ExchangeRates): Promise<{ recomputed: nu
 };
 
 const PROPERTY_COLUMNS =
-  "id,source,external_id,status,deal,property_type,prop_kind,price_amount,currency,price_usd,price_per_m2,area_total,area_life,area_kitchen,area_lot,room_count,storey,storeys,repair,wall_material,housing_class,is_newbuilding,locality,district,street,house,lat,lng,title,description,slug,seo_title,seo_description,agent_id,source_updated_at,synced_at,published_at,hidden_at,created_at,updated_at";
+  "id,source,external_id,status,deal,property_type,prop_kind,price_amount,currency,price_usd,price_per_m2,area_total,area_life,area_kitchen,area_lot,room_count,storey,storeys,repair,wall_material,housing_class,is_newbuilding,is_exclusive,locality,district,street,house,lat,lng,title,description,slug,seo_title,seo_description,agent_id,source_updated_at,synced_at,published_at,hidden_at,created_at,updated_at";
 
 const ONE_SELECT = `${PROPERTY_COLUMNS},property_photos(id,position,r2_key,sizes,width,height),agents(id,name,is_active)`;
 
@@ -180,7 +180,7 @@ const updateProperty: AdminPropertiesDriver["updateProperty"] = async (id, colum
 const updatePropertySeo = async (id: string, seo: PropertySeoValues): Promise<PropertySlugResult> => {
   const { data, error } = await createAdminClient()
     .from("properties")
-    .update({ seo_title: seo.seo_title, seo_description: seo.seo_description })
+    .update({ seo_title: seo.seo_title, seo_description: seo.seo_description, is_exclusive: seo.is_exclusive })
     .eq("id", id)
     .select("slug")
     .maybeSingle();

@@ -17,7 +17,7 @@ export const BlogEmpty = (props: BlogEmptyProps) => {
     <div className="flex flex-col items-start gap-5 rounded-2xl border border-dashed border-control bg-card p-6 sm:p-10">
       <span
         aria-hidden="true"
-        className="flex size-14 items-center justify-center rounded-full bg-dawn text-dawn-foreground"
+        className="flex size-14 items-center justify-center rounded-control bg-primary text-primary-foreground"
       >
         <Newspaper className="size-6" />
       </span>
@@ -27,17 +27,17 @@ export const BlogEmpty = (props: BlogEmptyProps) => {
       </div>
       <div className="flex flex-wrap gap-2">
         {props.kind === "nothing" && (
-          <Link href="/catalog" className={buttonVariants({ variant: "dawn" })}>
+          <Link href="/catalog" className={buttonVariants({ variant: "default" })}>
             {BLOG_PAGE.toCatalog}
           </Link>
         )}
         {props.kind === "category" && (
-          <Link href="/blog" className={buttonVariants({ variant: "dawn" })}>
+          <Link href="/blog" className={buttonVariants({ variant: "default" })}>
             {BLOG_PAGE.allArticles}
           </Link>
         )}
         {props.kind === "out-of-range" && (
-          <Link href={props.firstPageHref} className={buttonVariants({ variant: "dawn" })}>
+          <Link href={props.firstPageHref} className={buttonVariants({ variant: "default" })}>
             {BLOG_PAGE.toFirstPage}
           </Link>
         )}

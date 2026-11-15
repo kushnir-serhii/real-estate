@@ -35,7 +35,7 @@ export const BlogCover = ({ coverKey, alt, sizes, priority = false, className }:
         className="size-full object-cover"
       />
     ) : (
-      <div className="flex size-full flex-col items-center justify-center gap-2 bg-linear-to-br from-sky/25 to-muted text-muted-foreground">
+      <div className="flex size-full flex-col items-center justify-center gap-2 bg-linear-to-br from-brand/15 to-muted text-muted-foreground">
         <ImageOff className="size-8" aria-hidden="true" />
         <span className="text-sm">{BLOG_POST_PAGE.coverMissing}</span>
       </div>

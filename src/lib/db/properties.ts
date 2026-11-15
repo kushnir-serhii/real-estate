@@ -3,6 +3,10 @@ import { unstable_cache } from "next/cache";
 import { getCacheScope, isDemoMode } from "@/lib/data-driver";
 import { CACHE_TAGS, propertyTag } from "./cache-tags";
 import type { PropertiesDriver } from "./driver-types";
+import { buildPriceHistogram } from "./property-histogram";
+import { HISTOGRAM_DEFAULT_DEAL } from "./property-histogram-values";
+import type { PriceHistogram } from "./property-histogram-values";
+import { EXCLUSIVE_LIMIT } from "./property-query";
 import type {
   FavoriteProperty,
   PropertyBySlug,
@@ -31,6 +35,28 @@ export const getPublishedProperties = (filters: PropertyFilters): Promise<Proper
     ["published-properties", getCacheScope(), JSON.stringify(filters)],
     { tags: [CACHE_TAGS.properties] },
   )(filters);
+
+/**
+ * Price histogram of the published properties matching `filters`, in USD. One deal only (`HISTOGRAM_DEFAULT_DEAL`
+ * when none is given: sale, rent and daily prices are never mixed); the price bounds, sort and page are ignored,
+ * so the chart shows the whole range around the visitor's selection. The drivers return the price list and the
+ * binning is shared pure code. Cached under the `properties` tag.
+ */
+export const getPriceHistogram = (filters: PropertyFilters): Promise<PriceHistogram> => {
+  const context: PropertyFilters = {
+    ...filters,
+    deal: filters.deal ?? HISTOGRAM_DEFAULT_DEAL,
+    price_usd_from: undefined,
+    price_usd_to: undefined,
+    sort: "newest",
+    page: 1,
+  };
+  return unstable_cache(
+    async (f: PropertyFilters) => buildPriceHistogram(await (await loadDriver()).fetchPublishedPrices(f)),
+    ["price-histogram", getCacheScope(), JSON.stringify(context)],
+    { tags: [CACHE_TAGS.properties] },
+  )(context);
+};
 
 /**
  * One property by slug: published, recently hidden («sold»), or null (unknown / hidden longer ago).
@@ -67,6 +93,17 @@ export const getSimilarProperties = (property: SimilarTo): Promise<PublishedProp
     { tags: [CACHE_TAGS.properties] },
   )(target);
 };
+
+/**
+ * The home «exclusive» collection: published properties flagged `is_exclusive` first (newest first), topped up
+ * with the most expensive published sale properties (`price_usd` desc) up to `limit`. Cached under `properties`.
+ */
+export const getExclusiveProperties = (limit: number = EXCLUSIVE_LIMIT): Promise<PublishedProperty[]> =>
+  unstable_cache(
+    async (n: number) => (await loadDriver()).fetchExclusiveProperties(n),
+    ["exclusive-properties", getCacheScope(), String(limit)],
+    { tags: [CACHE_TAGS.properties] },
+  )(limit);
 
 /** Distinct districts of published properties, sorted for Ukrainian. Cached under `properties`. */
 export const getPublishedDistricts = (): Promise<string[]> =>

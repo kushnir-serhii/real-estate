@@ -462,6 +462,7 @@ export type Database = {
           house: string | null
           housing_class: string | null
           id: string
+          is_exclusive: boolean
           is_newbuilding: boolean
           lat: number | null
           lng: number | null
@@ -505,6 +506,7 @@ export type Database = {
           house?: string | null
           housing_class?: string | null
           id?: string
+          is_exclusive?: boolean
           is_newbuilding?: boolean
           lat?: number | null
           lng?: number | null
@@ -548,6 +550,7 @@ export type Database = {
           house?: string | null
           housing_class?: string | null
           id?: string
+          is_exclusive?: boolean
           is_newbuilding?: boolean
           lat?: number | null
           lng?: number | null

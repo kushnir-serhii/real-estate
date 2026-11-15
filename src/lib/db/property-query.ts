@@ -86,6 +86,9 @@ export type SimilarTo = Pick<PublishedProperty, "id" | "deal" | "property_type" 
 
 export type SitemapProperty = Pick<PublishedProperty, "slug" | "updated_at">;
 
+/** How many properties the home «exclusive» collection shows. */
+export const EXCLUSIVE_LIMIT = 6;
+
 export const SIMILAR_LIMIT = 4;
 export const SIMILAR_PRICE_RANGE = 0.3;
 

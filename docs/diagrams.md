@@ -453,6 +453,7 @@ classDiagram
         +timestamptz synced_at
         +timestamptz published_at
         +timestamptz hidden_at
+        +boolean is_exclusive
     }
     class property_photos["property_photos [real]"]:::real {
         +uuid id PK
@@ -571,7 +572,7 @@ classDiagram
 | `lead_kind` | real | The enum for where a lead came from: a property request, the general form or the AI assistant. | `supabase/migrations/20261028130000_leads_pages_settings.sql` |
 | `delivery_status` | real | The enum for the state of sending a lead to Plektan or Telegram: pending, sent, failed or skipped. | `supabase/migrations/20261028130000_leads_pages_settings.sql` |
 | `agents` | real | The people shown as contacts on a property; Plektan agents are synced, others are added in the admin. | `supabase/migrations/20261028120000_properties.sql` |
-| `properties` | real | The listings: one row per property with its price, area, address, status and, for Plektan ones, the raw payload. | `supabase/migrations/20261028120000_properties.sql`, `20261028150000_property_hidden_at.sql` |
+| `properties` | real | The listings: one row per property with its price, area, address, status and, for Plektan ones, the raw payload. | `supabase/migrations/20261028120000_properties.sql`, `20261028150000_property_hidden_at.sql`, `20261115120000_property_exclusive.sql` |
 | `property_photos` | real | The ordered photos of a property, each pointing to an R2 key with its sizes. | `supabase/migrations/20261028120000_properties.sql` |
 | `leads` | real | Every request a visitor sends, saved before any delivery, with the delivery state and retry data for Plektan and Telegram. | `supabase/migrations/20261028130000_leads_pages_settings.sql`, `20261028160000_lead_retry.sql` |
 | `pages` | real | Static pages such as the privacy policy, written in Markdown in the admin, with their SEO and draft flags. | `supabase/migrations/20261028130000_leads_pages_settings.sql` |
@@ -724,7 +725,7 @@ classDiagram
 | `LeadsMode` | seam | How lead delivery to Plektan runs now: a fixture flag wins, then a key means live, and with neither the channel is skipped. | `src/lib/plektan/client.ts`, `PLEKTAN_LEADS_FIXTURE`, `PLEKTAN_API_KEY` |
 | `PlektanApi` | real | The Plektan CRM API: the source of synced properties and agents, and the target of the leads that we send back. | `src/lib/plektan/client.ts`, `PLEKTAN_API_KEY` |
 | `Fixtures` | mock | Canned Plektan answers and canned lead results, so sync and lead delivery run locally without a key. | `src/lib/plektan/fixtures/*`, `PLEKTAN_FIXTURE_SET`, `PLEKTAN_LEADS_FIXTURE` |
-| `properties` | real | The listings: one row per property with its price, area, address, status and, for Plektan ones, the raw payload. | `supabase/migrations/20261028120000_properties.sql`, `20261028150000_property_hidden_at.sql` |
+| `properties` | real | The listings: one row per property with its price, area, address, status and, for Plektan ones, the raw payload. | `supabase/migrations/20261028120000_properties.sql`, `20261028150000_property_hidden_at.sql`, `20261115120000_property_exclusive.sql` |
 | `property_photos` | real | The ordered photos of a property, each pointing to an R2 key with its sizes. | `supabase/migrations/20261028120000_properties.sql` |
 | `agents` | real | The people shown as contacts on a property; Plektan agents are synced, others are added in the admin. | `supabase/migrations/20261028120000_properties.sql` |
 | `leads` | real | Every request a visitor sends, saved before any delivery, with the delivery state and retry data for Plektan and Telegram. | `supabase/migrations/20261028130000_leads_pages_settings.sql`, `20261028160000_lead_retry.sql` |

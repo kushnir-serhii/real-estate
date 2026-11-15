@@ -2,7 +2,7 @@
 
 import { Building2, ChevronLeft, ChevronRight, Expand, XIcon } from "lucide-react";
 import { Dialog } from "radix-ui";
-import { useEffect, useRef, useState } from "react";
+import { ViewTransition, useEffect, useRef, useState } from "react";
 import type { KeyboardEvent, RefObject, UIEvent } from "react";
 
 import { cn } from "@/lib/utils";
@@ -22,6 +22,8 @@ type PropertyGalleryProps = {
   photos: GalleryPhoto[];
   /** Property title, names the carousel and the fullscreen dialog. */
   title: string;
+  /** Property id: the first photo shares a view transition name with the catalog card photo. */
+  propertyId?: string;
 };
 
 // The main strip is full width on phones and the left column (max ~46rem) on desktop.
@@ -124,7 +126,7 @@ const ThumbStrip = ({ photos, index, onSelect, thumbClassName, className }: Thum
               onClick={() => onSelect(i)}
               className={cn(
                 "block aspect-4/3 w-full overflow-hidden rounded-xl bg-muted outline-none ring-offset-2 ring-offset-background transition-opacity duration-(--duration-fast) ease-(--ease-out-soft) focus-visible:ring-3 focus-visible:ring-ring",
-                active ? "opacity-100 ring-2 ring-dawn" : "opacity-60 hover:opacity-100 focus-visible:opacity-100",
+                active ? "opacity-100 ring-2 ring-brand" : "opacity-60 hover:opacity-100 focus-visible:opacity-100",
               )}
             >
               {/* eslint-disable-next-line @next/next/no-img-element -- photos come from R2/public; Workers has no image optimizer */}
@@ -146,7 +148,16 @@ const ThumbStrip = ({ photos, index, onSelect, thumbClassName, className }: Thum
   );
 };
 
-export const PropertyGallery = ({ photos, title }: PropertyGalleryProps) => {
+const PhotoTransition = ({ name, children }: { name?: string; children: React.ReactNode }) =>
+  name ? (
+    <ViewTransition name={name} share="property-photo" default="none">
+      {children}
+    </ViewTransition>
+  ) : (
+    children
+  );
+
+export const PropertyGallery = ({ photos, title, propertyId }: PropertyGalleryProps) => {
   const regionRef = useRef<HTMLDivElement>(null);
   const openerRef = useRef<HTMLElement | null>(null);
   const viewerIndexRef = useRef(0);
@@ -212,6 +223,7 @@ export const PropertyGallery = ({ photos, title }: PropertyGalleryProps) => {
               className="aspect-4/3 w-full shrink-0 snap-start snap-always sm:aspect-3/2"
             >
               {/* Click/tap opens the viewer; keyboard users have the «На весь екран» button. */}
+              <PhotoTransition name={i === 0 && propertyId ? `property-photo-${propertyId}` : undefined}>
               <button
                 type="button"
                 tabIndex={-1}
@@ -234,6 +246,7 @@ export const PropertyGallery = ({ photos, title }: PropertyGalleryProps) => {
                   className="size-full object-cover"
                 />
               </button>
+              </PhotoTransition>
             </li>
           ))}
         </ul>

@@ -13,11 +13,9 @@
   --font-sans:
     var(--font-sofia-sans-cyrillic), var(--font-sofia-sans-hryvnia), var(--font-sofia-sans), ui-sans-serif, system-ui,
     sans-serif;
-  /* Sofia Sans Extra Condensed: headings, hero, prices, big numbers (weights 600-800).
-     Cyrillic and ₴ faces first, as for sans. */
-  --font-heading:
-    var(--font-sofia-sans-extra-condensed-cyrillic), var(--font-sofia-sans-extra-condensed-hryvnia),
-    var(--font-sofia-sans-extra-condensed), var(--font-sans);
+  /* Playfair Display: H1, H2, hero and section titles only (regular case, weights 500-600). Cyrillic face first, as for sans. */
+  --font-display:
+    var(--font-playfair-display-cyrillic), var(--font-playfair-display), ui-serif, Georgia, serif;
   /* Cormorant SC: the logo wordmark only (Latin, weight 600). */
   --font-logo: var(--font-cormorant-sc), ui-serif, Georgia, serif;
 
@@ -45,10 +43,10 @@
   --color-scrim: var(--scrim);
   --color-on-scrim: var(--on-scrim);
   --color-viewer: var(--viewer);
-  --color-dawn: var(--dawn);
-  --color-dawn-foreground: var(--dawn-foreground);
-  --color-dawn-text: var(--dawn-text);
-  --color-sky: var(--sky);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-brand-text: var(--brand-text);
+  --color-brand-on-ink: var(--brand-on-ink);
   --color-ink: var(--ink);
   --color-on-ink: var(--on-ink);
   --color-ink-muted: var(--ink-muted);
@@ -67,15 +65,14 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
-  /* Controls (buttons, inputs, selects, chips, badges, tabs, pagination): pills. One switch for the whole site:
-     set e.g. var(--radius-lg) here for square-ish controls → rounded-control */
-  --radius-control: 9999px;
-  /* Multi-line fields (textarea, chat input): the control shape, capped so text in the corners isn't clipped
-     → rounded-control-multiline. Follows --radius-control when that is set lower */
-  --radius-control-multiline: min(var(--radius-control), var(--radius-3xl));
+  /* Controls (buttons, inputs, selects, chips, badges, tabs, pagination, icon buttons, counters, the chat launcher):
+     a barely-there 2px. One switch for the whole site: 9999px gives pills → rounded-control */
+  --radius-control: 2px;
+  /* Multi-line fields (textarea, chat input): follow the control shape → rounded-control-multiline */
+  --radius-control-multiline: var(--radius-control);
 
-  /* property card price (heading font, from sm; text-2xl below) → text-price */
-  --text-price: 1.75rem;
+  /* property card price (Sofia Sans, from sm; text-xl below) → text-price */
+  --text-price: 1.5rem;
   --text-price--line-height: 1.15;
 
   /* AI assistant launcher (round floating button) → size-chat-button */
@@ -106,45 +103,46 @@
 
 :root {
   color-scheme: light;
-  --radius: 0.75rem;
+  --radius: 0;
 
-  /* Midnight Sky. Neutrals are tinted (warm in light, blue in dark), never pure grey. */
-  --background: oklch(0.967 0.007 88.6);
-  --foreground: oklch(0.22 0.042 256);
-  --card: oklch(0.995 0.003 88);
-  --card-foreground: oklch(0.22 0.042 256);
-  --popover: oklch(0.995 0.003 88);
-  --popover-foreground: oklch(0.22 0.042 256);
-  /* primary = midnight; the main CTA uses dawn */
-  --primary: oklch(0.22 0.042 256);
-  --primary-foreground: oklch(0.97 0.007 88);
-  --secondary: oklch(0.94 0.01 85);
-  --secondary-foreground: oklch(0.26 0.04 256);
-  --muted: oklch(0.94 0.008 85);
-  --muted-foreground: oklch(0.45 0.03 256);
+  /* Midnight + one blue. Neutrals are cool (a faint blue tint), never pure grey and never yellow. The page is cool ivory,
+     cards are white with a hairline border. The main button is midnight (primary); blue is for details only
+     (brand: eyebrows, thin rules, numbers, icons, focus ring, active states; at most ~5% of a screen). */
+  --background: oklch(0.972 0.004 95);
+  --foreground: oklch(0.25 0.055 262);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.25 0.055 262);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.25 0.055 262);
+  --primary: oklch(0.25 0.055 262);
+  --primary-foreground: oklch(0.98 0.004 95);
+  --secondary: oklch(0.945 0.008 255);
+  --secondary-foreground: oklch(0.28 0.05 262);
+  --muted: oklch(0.945 0.008 255);
+  --muted-foreground: oklch(0.46 0.03 258);
   /* subtle hover / selected tint */
-  --accent: oklch(0.92 0.022 80);
-  --accent-foreground: oklch(0.22 0.042 256);
+  --accent: oklch(0.93 0.015 260);
+  --accent-foreground: oklch(0.25 0.055 262);
   --destructive: oklch(0.5 0.2 27);
   /* status text and icons (delivery badges); AA on the page, cards and their own 10% tint */
   --success: oklch(0.46 0.12 150);
   --warning: oklch(0.48 0.11 65);
-  --border: oklch(0.89 0.01 85);
-  --input: oklch(0.89 0.01 85);
+  --border: oklch(0.9 0.008 258);
+  --input: oklch(0.9 0.008 258);
   /* form control outline, needs 3:1 against the page */
-  --control: oklch(0.6 0.03 256);
-  --ring: oklch(0.55 0.07 256);
+  --control: oklch(0.6 0.03 258);
+  --ring: var(--brand);
 
-  /* the one accent: dawn. Always with dawn-foreground (midnight) on it. As text on a light page use dawn-text. */
-  --dawn: oklch(0.764 0.12 63.5);
-  --dawn-foreground: oklch(0.22 0.042 256);
-  --dawn-text: oklch(0.5 0.11 60);
-  /* secondary decoration: map, gradients, icons (3:1 on the page) */
-  --sky: oklch(0.63 0.069 256.5);
+  /* the accent: royal blue. brand = fills and lines (>= 3:1), brand-text = small text on the page and cards (>= 4.5:1),
+     brand-foreground = text on a brand fill, brand-on-ink = the accent on dark sections and over photo veils */
+  --brand: oklch(0.52 0.19 265);
+  --brand-foreground: oklch(1 0 0);
+  --brand-text: oklch(0.5 0.19 265);
+  --brand-on-ink: oklch(0.78 0.11 265);
   /* dark sections (footer, CTA band, how-we-work); text on them uses on-ink / ink-muted */
-  --ink: oklch(0.22 0.042 256);
-  --on-ink: oklch(0.97 0.007 88);
-  --ink-muted: oklch(0.78 0.03 256);
+  --ink: oklch(0.25 0.055 262);
+  --on-ink: oklch(0.972 0.004 95);
+  --ink-muted: oklch(0.8 0.03 258);
   --ink-border: oklch(1 0 0 / 12%);
 
   /* dark veil over photos, same in both themes; text on it uses on-scrim */
@@ -152,12 +150,14 @@
   --on-scrim: oklch(0.985 0.004 88);
   /* fullscreen photo viewer backdrop, same in both themes; text and controls use on-scrim */
   --viewer: oklch(0.13 0.03 258);
-  /* hero veil stops (midnight at different opacity), same in both themes. Text sits on the strong/mid part (>= 85%),
-     which keeps on-scrim text >= 4.5:1 even over a pure white photo; the soft end lets the photo breathe top-right */
-  --veil-strong: oklch(0.15 0.04 258 / 92%);
-  --veil-mid: oklch(0.15 0.04 258 / 85%);
-  --veil-soft: oklch(0.15 0.04 258 / 38%);
-  --veil-top: oklch(0.15 0.04 258 / 60%);
+  /* photo veil stops (midnight at different opacity), same in both themes. Veils sit only behind text (bottom and left of
+     the hero, bottom of tiles); the rest of the photo stays clear. Behind text the alpha is >= 70%, which keeps on-scrim
+     text >= 4.5:1 even over a pure white photo (lead text at 90% included). soft = same colour at 0%, so no grey fringe */
+  --veil-strong: oklch(0.15 0.04 258 / 80%);
+  --veil-mid: oklch(0.15 0.04 258 / 72%);
+  --veil-soft: oklch(0.15 0.04 258 / 0%);
+  /* a band at the top of the hero: 65% keeps the transparent header's 14px nav links >= 4.5:1 over a white photo */
+  --veil-top: oklch(0.15 0.04 258 / 65%);
 
   /* motion */
   --duration-fast: 150ms;
@@ -168,33 +168,33 @@
 .dark {
   color-scheme: dark;
 
-  --background: oklch(0.191 0.036 259.5);
-  --foreground: oklch(0.96 0.008 88);
-  --card: oklch(0.23 0.043 258.7);
-  --card-foreground: oklch(0.96 0.008 88);
-  --popover: oklch(0.23 0.043 258.7);
-  --popover-foreground: oklch(0.96 0.008 88);
-  /* primary = dawn with midnight text */
-  --primary: oklch(0.764 0.12 63.5);
-  --primary-foreground: oklch(0.22 0.042 256);
-  --secondary: oklch(0.28 0.04 258);
-  --secondary-foreground: oklch(0.96 0.008 88);
-  --muted: oklch(0.27 0.035 258);
-  --muted-foreground: oklch(0.74 0.03 256);
-  --accent: oklch(0.31 0.04 258);
-  --accent-foreground: oklch(0.96 0.008 88);
+  --background: oklch(0.215 0.045 262);
+  --foreground: oklch(0.965 0.006 95);
+  --card: oklch(0.26 0.045 262);
+  --card-foreground: oklch(0.965 0.006 95);
+  --popover: oklch(0.26 0.045 262);
+  --popover-foreground: oklch(0.965 0.006 95);
+  /* primary = ivory with midnight text */
+  --primary: oklch(0.965 0.006 95);
+  --primary-foreground: oklch(0.22 0.05 262);
+  --secondary: oklch(0.3 0.04 262);
+  --secondary-foreground: oklch(0.965 0.006 95);
+  --muted: oklch(0.28 0.04 262);
+  --muted-foreground: oklch(0.74 0.03 258);
+  --accent: oklch(0.32 0.045 262);
+  --accent-foreground: oklch(0.965 0.006 95);
   --destructive: oklch(0.74 0.17 22);
   --success: oklch(0.78 0.14 150);
   --warning: oklch(0.82 0.12 80);
-  --border: oklch(0.8 0.05 256 / 16%);
-  --input: oklch(0.8 0.05 256 / 18%);
-  --control: oklch(0.58 0.05 256);
-  --ring: oklch(0.764 0.12 63.5);
+  --border: oklch(0.8 0.05 262 / 16%);
+  --input: oklch(0.8 0.05 262 / 18%);
+  --control: oklch(0.58 0.05 262);
 
-  --dawn-text: oklch(0.764 0.12 63.5);
-  --sky: oklch(0.74 0.07 256.5);
+  --brand: oklch(0.78 0.11 265);
+  --brand-foreground: oklch(0.22 0.05 262);
+  --brand-text: oklch(0.78 0.11 265);
   /* slightly lifted midnight, so ink sections still separate from the page */
-  --ink: oklch(0.25 0.045 257);
+  --ink: oklch(0.28 0.05 262);
   --ink-border: oklch(1 0 0 / 10%);
 }
 
@@ -273,40 +273,40 @@
   }
 }
 
-/* Type scale for the condensed heading face (Sofia Sans Extra Condensed): big sizes, heavy weights, no negative tracking.
-   Fluid between 375px and 1440px: display 48 -> 104px, h1 40 -> 72px, h2 36 -> 60px, h3 24 -> 32px. Sentence case. */
+/* Type scale. Display, h1, h2: Playfair Display, regular case, medium weight, tight tracking, fluid between 375px and 1440px:
+   display 40 -> 80px, h1 34 -> 56px, h2 30 -> 48px. h3 stays Sofia Sans (22 -> 26px, semibold). */
 @utility text-display {
-  font-family: var(--font-heading);
-  font-size: clamp(3rem, 1.77rem + 5.26vw, 6.5rem);
-  line-height: 0.95;
-  letter-spacing: 0;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 1.62rem + 3.76vw, 5rem);
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  font-weight: 500;
   text-wrap: balance;
   overflow-wrap: break-word;
 }
 @utility text-h1 {
-  font-family: var(--font-heading);
-  font-size: clamp(2.5rem, 1.8rem + 3vw, 4.5rem);
-  line-height: 1;
-  letter-spacing: 0;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: clamp(2.125rem, 1.64rem + 2.07vw, 3.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  font-weight: 500;
   text-wrap: balance;
   overflow-wrap: break-word;
 }
 @utility text-h2 {
-  font-family: var(--font-heading);
-  font-size: clamp(2.25rem, 1.72rem + 2.25vw, 3.75rem);
-  line-height: 1.02;
-  letter-spacing: 0.005em;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: clamp(1.875rem, 1.48rem + 1.69vw, 3rem);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  font-weight: 500;
   text-wrap: balance;
   overflow-wrap: break-word;
 }
 @utility text-h3 {
-  font-family: var(--font-heading);
-  font-size: clamp(1.5rem, 1.32rem + 0.75vw, 2rem);
-  line-height: 1.1;
-  letter-spacing: 0.01em;
+  font-family: var(--font-sans);
+  font-size: clamp(1.375rem, 1.26rem + 0.5vw, 1.625rem);
+  line-height: 1.2;
+  letter-spacing: -0.005em;
   font-weight: 600;
   text-wrap: balance;
   overflow-wrap: break-word;
@@ -379,13 +379,22 @@
   }
 }
 @utility hero-veil {
+  /* phones: the text fills the width, so the veil is vertical (strong at the bottom) */
   background-image:
-    linear-gradient(to bottom, var(--veil-top), transparent 22%),
-    linear-gradient(to top right, var(--veil-strong) 0%, var(--veil-mid) 45%, var(--veil-soft) 100%);
+    linear-gradient(to bottom, var(--veil-top), var(--veil-soft) 16%),
+    linear-gradient(to top, var(--veil-strong) 0%, var(--veil-mid) 60%, var(--veil-top) 100%);
+  /* from sm: a band at the bottom and one on the left, where the text sits; the top right of the photo stays clear */
+  @variant sm {
+    background-image:
+      linear-gradient(to bottom, var(--veil-top), var(--veil-soft) 16%),
+      linear-gradient(to top, var(--veil-strong) 0%, var(--veil-strong) 28%, var(--veil-soft) 62%),
+      linear-gradient(to right, var(--veil-mid) 0%, var(--veil-mid) 52%, var(--veil-soft) 100%);
+  }
 }
-/* Photo tile veil (districts): text sits at the bottom, on >= 85% midnight, so on-scrim stays >= 4.5:1 over any photo */
+/* Photo tile veil (districts): text sits at the bottom third, on >= 70% midnight, so on-scrim stays >= 4.5:1 over any
+   photo; above that the photo is clear */
 @utility tile-veil {
-  background-image: linear-gradient(to top, var(--veil-strong) 0%, var(--veil-mid) 40%, var(--veil-soft) 100%);
+  background-image: linear-gradient(to top, var(--veil-strong) 0%, var(--veil-mid) 34%, var(--veil-soft) 85%);
 }
 /* District picker photo (desktop): fades into the page on the left (where the title sits, fully opaque there) and at
    the top and bottom edges, in both themes. Text never sits on the photo itself; the district pills are solid. */
@@ -400,145 +409,140 @@
     ),
     linear-gradient(to bottom, var(--background) 0%, transparent 18%, transparent 82%, var(--background) 100%);
 }
-@keyframes hero-zoom {
+/* Hero motion (only without reduced motion; `backwards` fill, so the end state is the plain, unclipped element and the
+   text stays in the HTML and visible without JS). The photo opens like a curtain from the top and settles from a slight
+   scale; each H1 word rises from under its own invisible line (clipped, not faded); the rest wipes in after it. */
+@keyframes hero-curtain {
   from {
-    transform: scale(1.08);
+    clip-path: inset(0 0 38% 0);
+    transform: scale(1.1);
+  }
+  to {
+    clip-path: inset(0);
+    transform: none;
+  }
+}
+@keyframes hero-word {
+  from {
+    transform: translateY(105%);
   }
   to {
     transform: none;
   }
 }
-@keyframes hero-rise {
+@keyframes hero-wipe {
   from {
-    opacity: 0;
-    transform: translateY(1rem);
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(0.75rem);
   }
   to {
-    opacity: 1;
+    clip-path: inset(0 0 -1rem 0);
     transform: none;
   }
 }
 @utility hero-zoom {
   @media (prefers-reduced-motion: no-preference) {
-    animation: hero-zoom 1600ms var(--ease-out-soft) both;
+    animation: hero-curtain 1300ms var(--ease-out-soft) backwards;
   }
 }
-@utility hero-stagger {
+/* the mask: one wrapper per word, clipped with a little room for ascenders and descenders */
+@utility hero-word {
+  display: inline-block;
+  vertical-align: top;
+  overflow: clip;
+  padding-block: 0.12em;
+  margin-block: -0.12em;
+}
+@utility hero-word-inner {
+  display: inline-block;
   @media (prefers-reduced-motion: no-preference) {
-    & > * {
-      animation: hero-rise var(--duration-slow) var(--ease-out-soft) both;
-    }
-    & > :nth-child(2) {
-      animation-delay: 80ms;
-    }
-    & > :nth-child(3) {
-      animation-delay: 160ms;
-    }
-    & > :nth-child(4) {
-      animation-delay: 240ms;
-    }
-    & > :nth-child(n + 5) {
-      animation-delay: 320ms;
-    }
+    animation: hero-word 900ms var(--ease-out-soft) backwards;
+    animation-delay: calc(200ms + var(--i, 0) * 70ms);
+  }
+}
+@utility hero-wipe {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: hero-wipe 800ms var(--ease-out-soft) backwards;
+    animation-delay: var(--hero-delay, 0ms);
   }
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground antialiased;
-  }
-  html {
-    @apply font-sans;
-  }
-  h1,
-  h2,
-  h3 {
-    @apply font-heading text-balance;
-  }
-  /* Tailwind 4 dropped the pointer cursor on native controls */
-  button:not(:disabled),
-  [role="button"]:not([aria-disabled="true"]),
-  select,
-  summary,
-  label[for],
-  input[type="checkbox"],
-  input[type="radio"] {
-    cursor: pointer;
-  }
-}
-
-/* Unlayered so it beats px-* utilities. Native selects: one chevron in both themes with room to breathe, instead of the
-   browser arrow pressed against the edge */
-select:not([multiple]):not([size]) {
-  appearance: none;
-  padding-right: 2.75rem;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23737373' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  /* inset past the pill's curve */
-  background-position: right 1.125rem center;
-  background-size: 1rem;
-}
-.dark select:not([multiple]):not([size]) {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23b5b5b5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-}
-/* Chrome paints the open list with the select's own colors; a see-through select
-   background (dark:bg-input/30) turns into a white list with light text. Give options
-   solid theme colors. */
-option,
-optgroup {
-  background-color: var(--popover);
-  color: var(--popover-foreground);
-}
-
-/* Reduced motion: no animation or smooth scrolling anywhere (state changes stay instant) */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  ::before,
-  ::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-/* Reduced transparency: no frosted glass. Every blurred layer already sits on a dense (90–95%)
-   background or the hero scrim, so dropping the blur keeps text readable. */
-@media (prefers-reduced-transparency: reduce) {
-  *,
-  ::before,
-  ::after {
-    backdrop-filter: none !important;
-  }
-}
-
-/* Top bar for client-side navigations (NavProgress): invisible for the first 150 ms, then a sliding stripe. */
-@keyframes nav-progress-in {
-  to {
-    opacity: 1;
-  }
-}
-@keyframes nav-progress-slide {
+/* Scroll reveal for photos: a curtain (clip-path) opening downward with a slight settle. Needs a timeline, else static. */
+@keyframes reveal-curtain {
   from {
-    transform: translateX(-100%);
+    clip-path: inset(0 0 100% 0);
+    transform: scale(1.08);
   }
   to {
-    transform: translateX(300%);
+    clip-path: inset(0);
+    transform: none;
   }
 }
-.nav-progress {
-  opacity: 0;
-  animation: nav-progress-in 150ms linear 150ms forwards;
+@utility reveal-curtain {
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      animation: reveal-curtain 1ms var(--ease-out-soft) backwards;
+      animation-timeline: view();
+      animation-range: entry 0% entry 70%;
+    }
+  }
 }
-.nav-progress-bar {
-  animation: nav-progress-slide 1.1s var(--ease-out-soft) infinite;
+@utility reveal-curtain-stagger {
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      & > * {
+        animation: reveal-curtain 1ms var(--ease-out-soft) backwards;
+        animation-timeline: view();
+        animation-range: entry 0% entry 70%;
+      }
+      & > :nth-child(2) {
+        animation-range: entry 8% entry 78%;
+      }
+      & > :nth-child(3) {
+        animation-range: entry 16% entry 86%;
+      }
+      & > :nth-child(n + 4) {
+        animation-range: entry 24% entry 94%;
+      }
+    }
+  }
+}
+
+/* Section H2: the text rises from under its own line. Scroll-driven, CSS only. */
+@keyframes heading-rise {
+  from {
+    transform: translateY(105%);
+  }
+  to {
+    transform: none;
+  }
+}
+@utility heading-mask {
+  display: block;
+  overflow: clip;
+  padding-block: 0.1em;
+  margin-block: -0.1em;
+}
+@utility heading-mask-inner {
+  display: block;
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      animation: heading-rise 1ms var(--ease-out-soft) backwards;
+      animation-timeline: view();
+      animation-range: entry 10% entry 60%;
+    }
+  }
+}
+
+/* View transitions (card photo -> gallery): the shared photo morphs; with reduced motion nothing animates at all. */
+::view-transition-group(*) {
+  animation-duration: var(--duration-slow);
+  animation-timing-function: var(--ease-out-soft);
 }
 @media (prefers-reduced-motion: reduce) {
-  .nav-progress-bar {
-    width: 100%;
-    animation: none;
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }

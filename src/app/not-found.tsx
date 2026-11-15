@@ -26,13 +26,13 @@ const NotFound = () => (
       <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 pt-8 sm:pt-16">
         <p
           aria-hidden="true"
-          className="font-heading text-[clamp(5rem,3rem+10vw,9rem)] leading-none font-semibold text-dawn tabular-nums"
+          className="font-display text-[clamp(5rem,3rem+10vw,9rem)] leading-none font-medium text-brand-text tabular-nums"
         >
           {NOT_FOUND_PAGE.code}
         </p>
       </div>
       <PageHeader width="narrow" eyebrow={NOT_FOUND_PAGE.eyebrow} title={NOT_FOUND_PAGE.title} lead={NOT_FOUND_PAGE.lead} className="pt-4 pb-16 sm:pt-6 sm:pb-24">
-        <Link href="/" className={buttonVariants({ variant: "dawn", size: "lg" })}>
+        <Link href="/" className={buttonVariants({ variant: "default", size: "lg" })}>
           {NOT_FOUND_PAGE.home}
           <ArrowRight data-icon="inline-end" aria-hidden="true" />
         </Link>

@@ -35,7 +35,7 @@ export const SoldPropertyView = ({ property }: SoldPropertyViewProps) => {
       <div className="mt-2 lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-10">
         <div className="flex min-w-0 flex-col gap-6">
           <div className="flex items-start gap-3 rounded-2xl bg-secondary p-5 text-secondary-foreground ring-1 ring-foreground/10">
-            <CircleCheck className="mt-0.5 size-5 shrink-0 text-dawn-text" aria-hidden="true" />
+            <CircleCheck className="mt-0.5 size-5 shrink-0 text-brand-text" aria-hidden="true" />
             <div>
               <p className="font-semibold">{status}</p>
               <p className="mt-1 text-sm">
@@ -48,7 +48,7 @@ export const SoldPropertyView = ({ property }: SoldPropertyViewProps) => {
           <SoldPropertyPhoto photo={property.property_photos[0]} status={status} />
 
           <header className="flex flex-col gap-2">
-            <p className="eyebrow text-dawn-text">
+            <p className="eyebrow text-brand-text">
               {DEAL_LABELS[property.deal]} · {PROPERTY_TYPE_LABELS[property.property_type]}
             </p>
             <h1 className="text-h2 break-words">{property.title}</h1>

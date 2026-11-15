@@ -31,7 +31,7 @@ const PropertyError = ({ reset }: PropertyErrorProps) => {
       lead={PROPERTY_ERROR.lead}
       className="pt-16 pb-24"
     >
-      <Button type="button" variant="dawn" size="lg" onClick={retry} disabled={pending}>
+      <Button type="button" variant="default" size="lg" onClick={retry} disabled={pending}>
         <RefreshCw className={pending ? "animate-spin" : undefined} aria-hidden="true" />
         {PROPERTY_ERROR.retry}
       </Button>

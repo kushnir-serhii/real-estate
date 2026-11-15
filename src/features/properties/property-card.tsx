@@ -1,5 +1,6 @@
 import { BedDouble, Building2, Layers, MapPin, Ruler, type LucideIcon } from "lucide-react";
 import Link from "next/link";
+import { ViewTransition } from "react";
 
 import type { PublishedProperty } from "@/lib/db/properties";
 import { formatPrice } from "@/lib/format/format-price";
@@ -17,6 +18,8 @@ type PropertyCardProps = {
   priority?: boolean;
   /** Set for a recently hidden property (sold / rented): muted photo and a status badge instead of the deal badge. */
   soldLabel?: string;
+  /** Shared-element transition to the property page: the photo morphs into the gallery. Only where the property appears once on the page. */
+  transitionPhoto?: boolean;
 };
 
 // Fallback intrinsic size when a photo has no stored dimensions; the box is a fixed 4:3 anyway.
@@ -60,6 +63,15 @@ const buildFacts = (p: PublishedProperty): Fact[] => {
   ];
 };
 
+const MaybeViewTransition = ({ name, children }: { name?: string; children: React.ReactNode }) =>
+  name ? (
+    <ViewTransition name={name} share="property-photo" default="none">
+      {children}
+    </ViewTransition>
+  ) : (
+    children
+  );
+
 /**
  * Card is an `article` with the title link stretched over it, so the favorites button
  * (top-right of the photo) and the photo slider buttons (left / right middle) sit above the link without nesting
@@ -70,6 +82,7 @@ export const PropertyCard = ({
   imageSizes = DEFAULT_IMAGE_SIZES,
   priority = false,
   soldLabel,
+  transitionPhoto = false,
 }: PropertyCardProps) => {
   const slides: CardPhotoSlide[] = property.property_photos.slice(0, MAX_SLIDES).map((photo) => ({
     src: photoUrl(photo.r2_key),
@@ -91,8 +104,9 @@ export const PropertyCard = ({
     // The hover target is this wrapper, which does not move: lifting the hovered element itself makes it jump in a loop
     // when the cursor sits on its bottom edge (the card rises from under the cursor, loses hover, drops back).
     <div className="group h-full">
-      <article className="relative flex h-full flex-col overflow-hidden rounded-2xl bg-card text-card-foreground ring-1 ring-foreground/5 transition-[transform,box-shadow] duration-(--duration-base) ease-(--ease-out-soft) group-hover:-translate-y-1 group-hover:shadow-float has-focus-visible:ring-3 has-focus-visible:ring-ring motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
-        <div className="relative aspect-4/3 w-full overflow-hidden bg-muted">
+      <article className="relative flex h-full flex-col overflow-hidden rounded-2xl bg-card text-card-foreground ring-1 ring-foreground/5 transition-shadow duration-(--duration-base) ease-(--ease-out-soft) group-hover:shadow-float has-focus-visible:ring-3 has-focus-visible:ring-ring motion-reduce:transition-none">
+        <MaybeViewTransition name={transitionPhoto ? `property-photo-${property.id}` : undefined}>
+        <div className={"relative aspect-4/3 w-full overflow-hidden bg-muted"}>
           {hasPhoto ? (
             <>
               <CardPhotoSlider slides={slides} sizes={imageSizes} priority={priority} muted={Boolean(soldLabel)} />
@@ -102,7 +116,7 @@ export const PropertyCard = ({
               />
             </>
           ) : (
-            <div className="flex size-full flex-col items-center justify-center gap-2 bg-linear-to-br from-sky/25 to-muted text-muted-foreground">
+            <div className="flex size-full flex-col items-center justify-center gap-2 bg-linear-to-br from-brand/15 to-muted text-muted-foreground">
               <Building2 className="size-8" aria-hidden="true" />
               <span className="text-sm">Фото незабаром</span>
             </div>
@@ -110,15 +124,21 @@ export const PropertyCard = ({
           <span className="absolute top-3 left-3 max-w-[calc(100%-4.5rem)] truncate rounded-control bg-background/90 px-3 py-1 text-xs font-semibold text-foreground backdrop-blur">
             {soldLabel ?? `${DEAL_LABELS[property.deal]} · ${PROPERTY_TYPE_LABELS[property.property_type]}`}
           </span>
+          {property.is_exclusive && !soldLabel && (
+            <span className="absolute bottom-3 left-3 rounded-control bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
+              Ексклюзив
+            </span>
+          )}
           <FavoriteButton propertyId={property.id} />
         </div>
+        </MaybeViewTransition>
         <div className="flex flex-1 flex-col gap-2 p-5 sm:p-6">
-          <p className="flex flex-wrap items-baseline gap-x-2 font-heading text-2xl font-semibold tabular-nums sm:text-price">
+          <p className="flex flex-wrap items-baseline gap-x-2 text-xl font-semibold tabular-nums sm:text-price">
             <span>{amount}</span>
             {unit && <span className="font-sans text-base font-medium text-muted-foreground">/ {unit}</span>}
           </p>
           <h3
-            className="line-clamp-2 font-sans text-lg font-medium tracking-normal break-words transition-colors duration-(--duration-fast) group-hover:text-dawn-text"
+            className="line-clamp-2 font-sans text-lg font-medium tracking-normal break-words transition-colors duration-(--duration-fast) group-hover:text-brand-text"
             title={property.title}
           >
             <Link

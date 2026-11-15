@@ -61,7 +61,7 @@ export const SiteHeader = () => (
         </Button>
         <FavoritesLink className={HEADER_ICON_CLASS} />
         <ThemeToggle className={cn("hidden xl:inline-flex", HEADER_ICON_CLASS)} />
-        <Button asChild variant="dawn" className="ml-2 hidden xl:inline-flex">
+        <Button asChild variant="outline" className="ml-2 hidden xl:inline-flex on-hero:border-on-scrim/50 on-hero:bg-transparent on-hero:text-on-scrim on-hero:hover:bg-on-scrim/15 on-hero:hover:text-on-scrim">
           <Link href={CTA_LINK.href}>
             {CTA_LINK.label}
             <ArrowRight data-icon="inline-end" aria-hidden="true" />

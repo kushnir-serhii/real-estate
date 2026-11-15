@@ -14,12 +14,12 @@ export const BlogCard = ({ post, imageSizes, priority = false }: BlogCardProps) 
     // The hover target is this wrapper, which does not move: lifting the hovered element itself makes it jump in a loop
     // when the cursor sits on its bottom edge (the card rises from under the cursor, loses hover, drops back).
     <div className="group h-full">
-      <article className="relative flex h-full flex-col overflow-hidden rounded-2xl bg-card text-card-foreground ring-1 ring-foreground/5 transition-[transform,box-shadow] duration-(--duration-base) ease-(--ease-out-soft) group-hover:-translate-y-1 group-hover:shadow-float has-focus-visible:ring-3 has-focus-visible:ring-ring motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
+      <article className="relative flex h-full flex-col overflow-hidden rounded-2xl bg-card text-card-foreground ring-1 ring-foreground/5 transition-shadow duration-(--duration-base) ease-(--ease-out-soft) group-hover:shadow-float has-focus-visible:ring-3 has-focus-visible:ring-ring motion-reduce:transition-none">
         <BlogCover coverKey={post.cover_key} alt={null} sizes={imageSizes} priority={priority} />
         <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
-          <p className="eyebrow text-dawn-text">{blogCategoryLabel(post.category)}</p>
+          <p className="eyebrow text-brand-text">{blogCategoryLabel(post.category)}</p>
           <h3
-            className="line-clamp-3 font-heading text-2xl leading-tight font-semibold break-words transition-colors duration-(--duration-fast) group-hover:text-dawn-text"
+            className="line-clamp-3 text-xl leading-tight font-semibold break-words transition-colors duration-(--duration-fast) group-hover:text-brand-text"
             title={post.title}
           >
             <Link href={`/blog/${post.slug}`} className="outline-none after:absolute after:inset-0 after:content-['']">

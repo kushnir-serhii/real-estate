@@ -1,13 +1,22 @@
-import { ArrowRight } from "lucide-react";
-import Link from "next/link";
-
-import { CTA_LINK } from "@/components/layout/nav-config";
-import { Button } from "@/components/ui/button";
 import { HERO } from "@/constants/home";
 
-type HeroProps = { title: string; lead: string };
+/** The title as one heading: every word sits in its own mask so it can rise on load (CSS only, plain text in the HTML). */
+const MaskedWords = ({ text }: { text: string }) =>
+  text.split(/\s+/).filter(Boolean).map((word, i, words) => (
+    <span key={i}>
+      <span className="hero-word">
+        <span className="hero-word-inner" style={{ "--i": i } as React.CSSProperties}>
+          {word}
+        </span>
+      </span>
+      {i < words.length - 1 ? " " : null}
+    </span>
+  ));
 
-export const Hero = ({ title, lead }: HeroProps) => (
+type HeroProps = { title: string; lead: string; children: React.ReactNode };
+
+/** The H1 and the quick search (`children`) are the whole hero: search is the one main action. */
+export const Hero = ({ title, lead, children }: HeroProps) => (
   <section
     data-hero
     className="hero-height relative isolate -mt-header flex flex-col justify-end overflow-hidden bg-ink"
@@ -24,28 +33,19 @@ export const Hero = ({ title, lead }: HeroProps) => (
       className="hero-zoom absolute inset-0 -z-20 size-full object-cover"
     />
     <div className="hero-veil absolute inset-0 -z-10" aria-hidden="true" />
-    <div className="hero-stagger site-container flex flex-col items-start gap-5 pt-34 pb-28 text-on-scrim sm:gap-6 sm:pb-32">
-      <p className="inline-flex max-w-full items-center gap-2 rounded-control bg-on-scrim/10 px-3.5 py-1.5 text-sm font-medium ring-1 ring-on-scrim/20 backdrop-blur">
-        <span className="size-2 shrink-0 rounded-full bg-dawn" aria-hidden="true" />
-        <span className="min-w-0">{HERO.eyebrow}</span>
+    <div className="site-container flex flex-col items-start gap-4 pt-28 pb-8 text-on-scrim sm:gap-5 sm:pt-34 sm:pb-12">
+      <p className="eyebrow hero-wipe text-on-scrim/90">{HERO.eyebrow}</p>
+      <h1 className="text-display max-w-4xl">
+        <MaskedWords text={title} />
+      </h1>
+      <p
+        className="hero-wipe max-w-2xl text-base text-pretty text-on-scrim/90 sm:text-lg"
+        style={{ "--hero-delay": "600ms" } as React.CSSProperties}
+      >
+        {lead}
       </p>
-      <h1 className="text-display max-w-4xl">{title}</h1>
-      <p className="max-w-2xl text-base text-pretty text-on-scrim/90 sm:text-lg">{lead}</p>
-      <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-        <Button asChild variant="dawn" size="lg">
-          <Link href="/catalog">
-            {HERO.primaryCta}
-            <ArrowRight aria-hidden="true" data-icon="inline-end" />
-          </Link>
-        </Button>
-        <Button
-          asChild
-          variant="outline"
-          size="lg"
-          className="border-on-scrim/30 bg-on-scrim/10 text-on-scrim backdrop-blur hover:bg-on-scrim/20 hover:text-on-scrim dark:border-on-scrim/30 dark:bg-on-scrim/10 dark:hover:bg-on-scrim/20"
-        >
-          <Link href={CTA_LINK.href}>{CTA_LINK.label}</Link>
-        </Button>
+      <div className="hero-wipe mt-2 w-full sm:mt-4" style={{ "--hero-delay": "760ms" } as React.CSSProperties}>
+        {children}
       </div>
     </div>
   </section>

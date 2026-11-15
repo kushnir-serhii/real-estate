@@ -35,7 +35,7 @@ export const PageHeader = ({
   >
     {breadcrumb}
     <div role={alert ? "alert" : undefined} className="flex flex-col items-start gap-3">
-      {eyebrow && <p className="eyebrow text-dawn-text">{eyebrow}</p>}
+      {eyebrow && <p className="eyebrow text-brand-text">{eyebrow}</p>}
       <h1 className="text-h1 max-w-3xl">{title}</h1>
       {lead && <p className="max-w-prose text-lg text-muted-foreground">{lead}</p>}
     </div>

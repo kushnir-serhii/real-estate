@@ -13,10 +13,10 @@ const COMPONENTS: Components = {
     <h3 className="mt-8 mb-3 font-sans text-lg leading-snug font-semibold text-foreground sm:text-xl">{children}</h3>
   ),
   p: ({ children }) => <p className="mb-4 leading-7 last:mb-0">{children}</p>,
-  ul: ({ children }) => <ul className="mb-4 list-disc space-y-2 pl-6 marker:text-dawn-text">{children}</ul>,
-  ol: ({ children }) => <ol className="mb-4 list-decimal space-y-2 pl-6 marker:font-semibold marker:text-dawn-text">{children}</ol>,
+  ul: ({ children }) => <ul className="mb-4 list-disc space-y-2 pl-6 marker:text-brand-text">{children}</ul>,
+  ol: ({ children }) => <ol className="mb-4 list-decimal space-y-2 pl-6 marker:font-semibold marker:text-brand-text">{children}</ol>,
   blockquote: ({ children }) => (
-    <blockquote className="my-6 border-l-4 border-dawn pl-4 text-foreground [&>p]:mb-0">{children}</blockquote>
+    <blockquote className="my-6 border-l-4 border-brand pl-4 text-foreground [&>p]:mb-0">{children}</blockquote>
   ),
   em: ({ children }) => <em className="italic">{children}</em>,
   li: ({ children }) => <li className="leading-7">{children}</li>,
@@ -24,7 +24,7 @@ const COMPONENTS: Components = {
   a: ({ href, children }) => (
     <a
       href={href}
-      className="font-medium text-foreground underline decoration-dawn decoration-2 underline-offset-4 outline-none hover:text-dawn-text focus-visible:ring-3 focus-visible:ring-ring/50"
+      className="font-medium text-foreground underline decoration-brand decoration-2 underline-offset-4 outline-none hover:text-brand-text focus-visible:ring-3 focus-visible:ring-ring/50"
     >
       {children}
     </a>

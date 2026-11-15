@@ -459,6 +459,31 @@ export const PropertyForm = ({
                 : "Оновлюється з назви до першої публікації."}
           </p>
         </div>
+
+        <div className="flex flex-col gap-1">
+          <label
+            htmlFor={propertyFieldId("is_exclusive")}
+            className={cn(
+              "flex min-h-11 items-center gap-3 text-sm font-medium",
+              isDisabled("is_exclusive") && "cursor-not-allowed opacity-50",
+            )}
+          >
+            <input
+              id={propertyFieldId("is_exclusive")}
+              type="checkbox"
+              name="is_exclusive"
+              disabled={isDisabled("is_exclusive")}
+              checked={values.is_exclusive === "on"}
+              onChange={(e) => set("is_exclusive", e.target.checked ? "on" : "")}
+              aria-describedby={`${propertyFieldId("is_exclusive")}-hint`}
+              className="size-5 shrink-0 accent-primary"
+            />
+            Ексклюзив (показувати в колекції на головній)
+          </label>
+          <p id={`${propertyFieldId("is_exclusive")}-hint`} className="text-sm text-muted-foreground">
+            Позначені об&apos;єкти йдуть першими в «Ексклюзивних об&apos;єктах» на головній і мають позначку на картці.
+          </p>
+        </div>
       </PropertyFormSection>
 
       <PropertyFormSection id="price" title="Ціна">
