@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { BRAND } from "@/constants/brand";
 import { CONTACTS } from "@/constants/contacts";
-import { blogPostingSchema, breadcrumbSchema, organizationSchema, parseAddress, propertySchema } from "./schemas";
+import { FAQ } from "@/constants/home";
+import { blogPostingSchema, breadcrumbSchema, faqSchema, organizationSchema, parseAddress, propertySchema } from "./schemas";
 import type { SchemaPost, SchemaProperty } from "./schemas";
 
 const SITE = "https://example.test";
@@ -138,5 +139,20 @@ describe("blogPostingSchema", () => {
     expect(schema.image).toEqual([`${SITE}/og-default.png`]);
     expect(schema.description).toBe("SEO");
     expect(schema).not.toHaveProperty("keywords");
+  });
+});
+
+describe("faqSchema", () => {
+  it("builds a FAQPage whose questions and answers match the visible list", () => {
+    const schema = faqSchema(FAQ.items) as {
+      "@type": string;
+      mainEntity: { name: string; acceptedAnswer: { text: string } }[];
+    };
+    expect(schema["@type"]).toBe("FAQPage");
+    expect(schema.mainEntity).toHaveLength(FAQ.items.length);
+    FAQ.items.forEach((item, i) => {
+      expect(schema.mainEntity[i].name).toBe(item.question);
+      expect(schema.mainEntity[i].acceptedAnswer.text).toBe(item.answer);
+    });
   });
 });

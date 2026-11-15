@@ -6,7 +6,6 @@ import type { PublishedProperty } from "@/lib/db/properties";
 import { formatPrice } from "@/lib/format/format-price";
 import { photoSrcSet } from "@/lib/photos/photo-src-set";
 import { photoUrl } from "@/lib/photos/photo-url";
-import { cn } from "@/lib/utils";
 import { FavoriteButton } from "@/features/favorites/favorite-button";
 import { CardPhotoSlider, type CardPhotoSlide } from "./card-photo-slider";
 import { DEAL_LABELS, PROPERTY_TYPE_LABELS } from "./property-labels";
@@ -19,8 +18,6 @@ type PropertyCardProps = {
   priority?: boolean;
   /** Set for a recently hidden property (sold / rented): muted photo and a status badge instead of the deal badge. */
   soldLabel?: string;
-  /** `lg`: editorial size for the home collection (wider photo, more padding, larger title). */
-  size?: "default" | "lg";
   /** Shared-element transition to the property page: the photo morphs into the gallery. Only where the property appears once on the page. */
   transitionPhoto?: boolean;
 };
@@ -85,7 +82,6 @@ export const PropertyCard = ({
   imageSizes = DEFAULT_IMAGE_SIZES,
   priority = false,
   soldLabel,
-  size = "default",
   transitionPhoto = false,
 }: PropertyCardProps) => {
   const slides: CardPhotoSlide[] = property.property_photos.slice(0, MAX_SLIDES).map((photo) => ({
@@ -108,9 +104,9 @@ export const PropertyCard = ({
     // The hover target is this wrapper, which does not move: lifting the hovered element itself makes it jump in a loop
     // when the cursor sits on its bottom edge (the card rises from under the cursor, loses hover, drops back).
     <div className="group h-full">
-      <article className="relative flex h-full flex-col overflow-hidden rounded-2xl bg-card text-card-foreground ring-1 ring-foreground/5 transition-[transform,box-shadow] duration-(--duration-base) ease-(--ease-out-soft) group-hover:-translate-y-1 group-hover:shadow-float has-focus-visible:ring-3 has-focus-visible:ring-ring motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
+      <article className="relative flex h-full flex-col overflow-hidden rounded-2xl bg-card text-card-foreground ring-1 ring-foreground/5 transition-shadow duration-(--duration-base) ease-(--ease-out-soft) group-hover:shadow-float has-focus-visible:ring-3 has-focus-visible:ring-ring motion-reduce:transition-none">
         <MaybeViewTransition name={transitionPhoto ? `property-photo-${property.id}` : undefined}>
-        <div className={cn("relative w-full overflow-hidden bg-muted", size === "lg" ? "aspect-3/2" : "aspect-4/3")}>
+        <div className={"relative aspect-4/3 w-full overflow-hidden bg-muted"}>
           {hasPhoto ? (
             <>
               <CardPhotoSlider slides={slides} sizes={imageSizes} priority={priority} muted={Boolean(soldLabel)} />
@@ -136,19 +132,13 @@ export const PropertyCard = ({
           <FavoriteButton propertyId={property.id} />
         </div>
         </MaybeViewTransition>
-        <div className={cn("flex flex-1 flex-col gap-2 p-5 sm:p-6", size === "lg" && "gap-3 sm:p-8")}>
-          <p className={cn(
-              "flex flex-wrap items-baseline gap-x-2 text-xl font-semibold tabular-nums sm:text-price",
-              size === "lg" && "text-2xl sm:text-4xl",
-            )}>
+        <div className="flex flex-1 flex-col gap-2 p-5 sm:p-6">
+          <p className="flex flex-wrap items-baseline gap-x-2 text-xl font-semibold tabular-nums sm:text-price">
             <span>{amount}</span>
             {unit && <span className="font-sans text-base font-medium text-muted-foreground">/ {unit}</span>}
           </p>
           <h3
-            className={cn(
-              "line-clamp-2 font-sans text-lg font-medium tracking-normal break-words transition-colors duration-(--duration-fast) group-hover:text-brand-text",
-              size === "lg" && "text-xl sm:text-2xl",
-            )}
+            className="line-clamp-2 font-sans text-lg font-medium tracking-normal break-words transition-colors duration-(--duration-fast) group-hover:text-brand-text"
             title={property.title}
           >
             <Link

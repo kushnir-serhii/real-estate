@@ -160,13 +160,24 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
   - [x] `pnpm ui-check` passes; typecheck, lint, test, build green
   - [x] docs describe the new palette, fonts, radii and motion rules
 
+### [x] 10. More about the agency, less space for cards, no card lift
+- **Build:** (user feedback 2026-11-16) «Ексклюзивні об'єкти» → 3 regular-size cards in one row + «Уся колекція →» (`/catalog?exclusive`-style link is not available: link to `/catalog?deal=sell&sort=price_desc`); «Нові пропозиції» unchanged (tabs, 3 each). New agency sections, no years / deal counts / reviews (new agency): **«Чому ми»** (3–4 principles: checked properties and documents, commission agreed up front with no hidden extras, one manager from request to keys, every budget welcome), **«Послуги»** (6 services with lucide icons and one line each: купівля, продаж, оренда, комерційна нерухомість, юридична перевірка, оцінка вартості; each links to the catalog or the lead form), **«Питання та відповіді»** (FAQ, 6–8 questions, native `<details>` accordion that works without JS, `FAQPage` JSON-LD). Remove the hover lift (`-translate-y`) from property and blog cards (shadow / photo zoom stay). Copy in `src/constants/home.ts`, mock, plain Ukrainian.
+- **Files:** `src/app/(site)/page.tsx`, `src/features/home/*`, `src/constants/home.ts`, `src/features/properties/property-card.tsx`, `src/features/blog/blog-card.tsx`, `src/components/seo/*`
+- **Agent:** designer · **Model:** sonnet
+- **Accept:**
+  - [x] home at 1440: two rows of property cards in total (collection 1 + tabs 1)
+  - [x] «Чому ми», «Послуги», FAQ render in the new style at 375 and 1440, light and dark; FAQ opens / closes without JS and by keyboard
+  - [x] FAQ JSON-LD valid (matches the visible questions)
+  - [x] property and blog cards don't move on hover
+  - [x] typecheck, lint, test, build green; ui-check on `root` passes
+
 ## External needs
 - Apply `20261115120000_property_exclusive.sql` to the Supabase project (user; listed in setup.md).
 - Real photos for hero, districts and about (later; placeholders now).
 
 ## Open questions
 - Unpriced properties («Ціна за запитом») are not in the histogram, so its count can be one or two lower than the catalog's «Знайдено N» for the same filters.
-- The exclusive collection is tall at 1440 (6 cards, 2 columns, 3 rows); a lead card + smaller grid is an option.
+- The home lead form has no anchor id, so «Продаж», «Юридична перевірка» and «Оцінка вартості» link to `/contacts`.
 - View transition card → property page works from the catalog only; home cards are excluded because the same property can appear in two home sections (duplicate names abort the transition).
 - `pnpm ui-check` can't start its own dev server while another `next dev` runs in the folder; it was run against `next start` on 3199. The admin dashboard is flaky under 6 workers (networkidle timeout).
 - `database.types.ts` was edited by hand for `is_exclusive`; regenerate against a local DB when one is up.
@@ -186,3 +197,4 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
 | 2026-11-15 | 7 | done | src/features/catalog/price-range/* (trigger + noscript fallback always loaded; panel, Radix Slider, chart, fetch lazy on open); new ui/popover.tsx; home «Бюджет» = popover ≥ 640px / bottom sheet below; catalog inline (count line under the chart), no deal → plain fields + hint; slider snaps to bin edges, off-edge typed values → «≈ N»; debounced fetch with abort + per-query cache; 15 unit tests. First-load JS gz: / 213.9 → 218.4 (+4.5), /catalog 209.4 → 212.8 (+3.4), property 219.7 → 222.9 (+3.2, page doesn't use the filter): Turbopack re-partitioned shared chunks, the filter's own first-load cost ≈ 1.3 KB; accepted under the 5 KB rule (spec aimed ≤ 2 KB). LCP ≈ 0.9 s, CLS 0 |
 | 2026-11-15 | 8 | done | no library. Hero: per-word mask rise (server-split spans inside one h1, 900 ms, 70 ms stagger, 200 ms start), photo curtain + settle from 1.1 (1300 ms), eyebrow / lead / search wipe-and-rise (800 ms; backwards fill, nothing stays clipped); scroll: photo curtains (about, district tiles, exclusive cards) and H2 mask rise in SectionHeading (animation-timeline: view()); card hover zoom already present; React ViewTransition catalog card photo → gallery (Next 16.4 has no experimental.viewTransition flag; types via src/react-experimental.d.ts; home cards excluded: a property can appear twice there); count tween 400 ms rAF with sr-only final value. Reduced motion: no keyframe animations. perf: / 218.4 → 218.4 KB gz, LCP ≈ 0.86 s, CLS 0; /catalog 212.8 → 212.8; property 222.9 → 223.0 |
 | 2026-11-15 | 9 | done | no regressions found; ui-check against next start on 3199 (the user's dev server on 3000 blocks a second next dev): public SPEC=021 ROUTES=root,catalog,catalog/2-kimnatna-kvartyra-na-oboloni-3f9a1c,favorites,about,contacts,blog,blog/yaki-dokumenty-pereviryty-pered-kupivleiu-kvartyry,privacy,design,nonexistent-page → 78 passed; admin SPEC=021-admin (11 routes, --workers=3) → 78 passed (6 workers: /admin dashboard flaky on networkidle). Screenshots reviewed. Docs: product.md design status + principle 1, conventions.md Styling (palette, radii, fonts, motion) + perf baselines. Admin hint copy aligned to «Ексклюзивні об'єкти» |
+| 2026-11-15 | 10 | done | user feedback: collection = 3 regular cards in one row (md:grid-cols-3) + «Уся колекція» → /catalog?deal=sell&sort=price_desc, PropertyCard size lg removed; new «Чому ми / Як ми дбаємо про вашу угоду» (4 numbered principles, brand rules), «Послуги / Чим ми допоможемо» (6 linked tiles; sell / legal / valuation → /contacts, commercial → /catalog?property_type=commercial, 11 results), FAQ (8 questions, native details, FAQPage JSON-LD from the same constants + test); hover lift removed from property and blog cards (shadow + photo zoom kept). ui-check root: 38 passed (one earlier no-js screenshot flake under load). Checked by eye at 1440 and 390. Files: page.tsx, constants/home.ts, features/home/{exclusive-properties,why-us,services,faq}.tsx, property-card, blog-card, features/seo/schemas(.test).ts |

@@ -11,6 +11,9 @@ import { HomeBlog } from "@/features/home/home-blog";
 import { HomeSection } from "@/features/home/home-section";
 import { HomeAbout } from "@/features/home/home-about";
 import { HomeCta } from "@/features/home/home-cta";
+import { Faq } from "@/features/home/faq";
+import { Services } from "@/features/home/services";
+import { WhyUs } from "@/features/home/why-us";
 import { HowWeWork } from "@/features/home/how-we-work";
 import { QuickSearch } from "@/features/home/quick-search";
 import { getPageContent } from "@/features/pages/get-page-content";
@@ -44,6 +47,7 @@ const HomePage = async () => {
               eyebrow={EXCLUSIVE.eyebrow}
               title={EXCLUSIVE.title}
               description={EXCLUSIVE.lead}
+              action={EXCLUSIVE.action}
             />
           </div>
           <ExclusiveProperties />
@@ -57,10 +61,13 @@ const HomePage = async () => {
           <NewProperties />
         </div>
       </HomeSection>
+      <WhyUs />
+      <Services />
       <DistrictPicker />
       <Districts />
       <HowWeWork />
       <HomeAbout body={page.body} />
+      <Faq />
       <HomeBlog />
       <HomeCta />
     </>
