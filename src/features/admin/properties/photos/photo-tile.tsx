@@ -38,7 +38,7 @@ export const PhotoTile = ({ photo, index, total, drag, dragProps, onMove, onDele
         drag === "dragging" && "opacity-50",
         // Where the dropped photo lands: a bar in the gap before / after this one.
         (drag === "before" || drag === "after") &&
-          "before:absolute before:inset-y-0 before:w-1 before:rounded-full before:bg-primary",
+          "before:absolute before:inset-y-0 before:w-1 before:rounded-control before:bg-primary",
         drag === "before" && "before:-left-2",
         drag === "after" && "before:-right-2",
       )}

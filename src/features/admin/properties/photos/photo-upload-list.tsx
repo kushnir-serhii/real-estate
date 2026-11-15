@@ -65,7 +65,7 @@ export const PhotoUploadList = ({ items, onRetry, onDismiss }: PhotoUploadListPr
                   value={item.progress}
                   max={100}
                   aria-label={`${item.name}: ${line.text}`}
-                  className="mt-1.5 h-1.5 min-w-0 flex-1 appearance-none overflow-hidden rounded-full bg-background [&::-moz-progress-bar]:bg-primary [&::-webkit-progress-bar]:bg-background [&::-webkit-progress-value]:bg-primary"
+                  className="mt-1.5 h-1.5 min-w-0 flex-1 appearance-none overflow-hidden rounded-control bg-background [&::-moz-progress-bar]:bg-primary [&::-webkit-progress-bar]:bg-background [&::-webkit-progress-value]:bg-primary"
                 />
               )}
             </div>

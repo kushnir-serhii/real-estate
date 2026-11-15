@@ -5,7 +5,7 @@ import { buttonVariants } from "@/components/ui/button";
 
 export const FavoritesEmpty = () => (
   <div className="flex flex-col items-start gap-5 rounded-2xl border border-dashed border-control bg-card p-6 sm:p-10">
-    <span aria-hidden="true" className="flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground">
+    <span aria-hidden="true" className="flex size-14 items-center justify-center rounded-control bg-primary text-primary-foreground">
       <Heart className="size-6" />
     </span>
     <div className="flex flex-col gap-2">

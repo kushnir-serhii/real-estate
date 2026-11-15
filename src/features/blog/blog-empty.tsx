@@ -17,7 +17,7 @@ export const BlogEmpty = (props: BlogEmptyProps) => {
     <div className="flex flex-col items-start gap-5 rounded-2xl border border-dashed border-control bg-card p-6 sm:p-10">
       <span
         aria-hidden="true"
-        className="flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground"
+        className="flex size-14 items-center justify-center rounded-control bg-primary text-primary-foreground"
       >
         <Newspaper className="size-6" />
       </span>

@@ -63,11 +63,9 @@ const CONTRAST = [
 ] as const;
 
 const RADII = [
-  { name: "sm", className: "rounded-sm" },
-  { name: "md", className: "rounded-md" },
-  { name: "lg", className: "rounded-lg" },
-  { name: "xl", className: "rounded-xl" },
-  { name: "2xl", className: "rounded-2xl" },
+  { name: "картки, плитки, панелі: 0 (rounded-2xl…3xl)", className: "rounded-2xl" },
+  { name: "контроли, іконки-кнопки, чіпи, лічильники: 2px (rounded-control)", className: "rounded-control" },
+  { name: "лише крапки, аватари, спінери: rounded-full", className: "rounded-full" },
 ];
 
 const FONTS = [
@@ -170,10 +168,10 @@ const DesignPage = () => (
       </div>
     </Section>
 
-    <Section title="Радіуси">
-      <ul className="flex flex-wrap gap-3">
+    <Section title="Форми">
+      <ul className="flex flex-wrap gap-6">
         {RADII.map(({ name, className }) => (
-          <li key={name} className="flex flex-col items-center gap-1.5">
+          <li key={name} className="flex max-w-48 flex-col items-center gap-1.5 text-center">
             <div className={`size-14 border bg-muted ${className}`} />
             <span className="text-sm text-muted-foreground">{name}</span>
           </li>

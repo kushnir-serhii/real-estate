@@ -15,7 +15,7 @@ export const BlogCta = () => (
     className="relative isolate flex flex-col gap-4 overflow-hidden rounded-3xl bg-ink p-6 text-on-ink sm:p-8"
   >
     <span aria-hidden="true" className="absolute -top-24 -right-16 -z-10 size-72 rounded-full bg-brand/30 blur-3xl" />
-    <span aria-hidden="true" className="h-1 w-12 rounded-full bg-brand-on-ink" />
+    <span aria-hidden="true" className="h-1 w-12 rounded-control bg-brand-on-ink" />
     <h2 id="blog-cta-title" className="text-h3">
       {BLOG_POST_PAGE.ctaTitle}
     </h2>

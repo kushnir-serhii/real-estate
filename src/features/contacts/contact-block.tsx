@@ -11,7 +11,7 @@ const LINK_CLASS =
 const IconBadge = ({ icon: Icon }: { icon: LucideIcon }) => (
   <span
     aria-hidden="true"
-    className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary text-brand-text"
+    className="flex size-10 shrink-0 items-center justify-center rounded-control bg-secondary text-brand-text"
   >
     <Icon className="size-4" />
   </span>

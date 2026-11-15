@@ -99,13 +99,13 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
   - [x] fonts from local files only; font bytes before / after in the log
   - [x] `pnpm perf` on `/`: LCP < 2.5 s, CLS < 0.1
 
-### [ ] 3. Sharp shapes
+### [x] 3. Sharp shapes
 - **Build:** `--radius: 0`, `--radius-control: 2px`; check every component that hardcodes `rounded-full` / `rounded-2xl` / `rounded-3xl` (cards, tiles, collage, chips, favourite and slider buttons, chat launcher, popovers, sheets); dots, thumbs and avatars stay round.
 - **Files:** `src/app/globals.css`, `src/components/**`, `src/features/**`
 - **Agent:** designer · **Model:** sonnet (grep-and-replace part: haiku)
 - **Accept:**
-  - [ ] public pages and admin: no pill or large radius left except the documented round exceptions, both themes
-  - [ ] focus rings follow the new shape; 44px targets at 375px
+  - [x] public pages and admin: no pill or large radius left except the documented round exceptions, both themes
+  - [x] focus rings follow the new shape; 44px targets at 375px
 
 ### [x] 4. Exclusive flag (data + admin)
 - **Build:** migration + types, demo seed + `seed.sql`, `getExclusiveProperties` with the fallback (both drivers + contract test), sync leaves the flag alone (test), admin checkbox + list column, «Ексклюзив» badge on the property card.
@@ -176,3 +176,4 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
 | 2026-11-15 | 6 | done | fetchPublishedPrices in both drivers (Supabase reuses a shared applyFilters, pages of 1000) + pure buildPriceHistogram (nice step, ≈ 28 bars, open-ended bar from the 95th percentile, stats over all rows); getPriceHistogram facade (cached, tag properties, no deal = sell); GET /api/price-histogram: USD + rates, 400 via strict parseHistogramParams, s-maxage 300. Tests: unit binning, contract (sum = total per deal, aligned range = catalog total). SQL function = later optimisation. Files: src/lib/db/property-histogram*.ts, driver-types, properties (facade, both drivers), driver-contract.test, catalog-params(.test), src/app/api/price-histogram/route.ts |
 | 2026-11-15 | 2 | done | Playfair Display (variable, latin + cyrillic, self-hosted, unicode-range) as --font-display (replaces --font-heading); Sofia Sans Extra Condensed removed (loader + 3 woff2, OFL). Scale fluid 375→1440: display 40→80 / 500 / 1.1, h1 34→56, h2 30→48 / 1.15, h3 Sofia Sans 22→26 / 600; prices, card titles, numbers, ₴ in Sofia Sans semibold tabular-nums (card price 24px from sm). Font bytes 67,176 → 59,556 B. perf: / LCP 900 ms CLS 0; /catalog 964 ms; property 948 ms. Files: src/app/fonts/*, layout, globals.css, design page, 16 former font-heading uses, product.md, setup.md |
 | 2026-11-15 | 4 | done | migration 20261115120000_property_exclusive.sql (column + public column grant, needed by hide_private_property_columns, + partial index); types edited by hand as the generator would (regenerate when a local DB is up); getExclusiveProperties (flagged newest first, topped up with priciest sale, EXCLUSIVE_LIMIT 6), both drivers + contract tests; demo seed flags 5 sale properties, seed.sql regenerated; sync never maps the flag (map-property test; no row-level runSync test: it can't take an injected client); admin checkbox «Ексклюзив (показувати в колекції на головній)» also in Plektan (SEO-only) mode, list badge; card chip «Ексклюзив» (primary pair 15.2:1); diagrams + setup.md updated |
+| 2026-11-15 | 3 | done | --radius 0 (zeroes every rounded-sm…4xl), --radius-control 2px, multiline follows control; rounded-full → rounded-control on counters, nav underline, icon tiles, step numbers, district arrow, accent bars, admin photo bars; kept round: dots, avatars / initials, blurred glows (no Radix slider thumb yet). Checked by eye: home (light + dark, 1440 / 375), catalog, property page; full pass in the slice 9 UI check. Files: globals.css, design page, 13 components |

@@ -22,7 +22,7 @@ export const FavoritesLink = ({ className }: { className?: string }) => {
       {count > 0 && (
         <span
           aria-hidden="true"
-          className="absolute top-0.5 right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-xs font-semibold text-primary-foreground tabular-nums on-hero:bg-on-scrim on-hero:text-ink"
+          className="absolute top-0.5 right-0.5 flex h-5 min-w-5 items-center justify-center rounded-control bg-primary px-1 text-xs font-semibold text-primary-foreground tabular-nums on-hero:bg-on-scrim on-hero:text-ink"
         >
           {count > 99 ? "99+" : count}
         </span>
