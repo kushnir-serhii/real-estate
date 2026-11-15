@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/format/format-price";
 import { cn } from "@/lib/utils";
 import { objectsLabel } from "../objects-label";
+import { CountTween } from "./count-tween";
 import { PriceFields } from "./price-fields";
 import { PriceChartSkeleton } from "./price-chart-skeleton";
 import { PriceHistogramChart } from "./price-histogram-chart";
@@ -85,7 +86,6 @@ export const PriceRangePanel = ({
   const usdTo = value.to === undefined ? undefined : Math.ceil(currencyToUsd(value.to, currency, rates));
   const positions = positionsFor(histogram, usdFrom, usdTo);
   const { count, approx } = countInRange(histogram, usdFrom, usdTo);
-  const countText = `${approx ? "≈ " : ""}${objectsLabel(count)}`;
 
   const fromAt = (p: number) => valueAtPosition(histogram, p, "lower", currency, rates);
   const toAt = (p: number) => valueAtPosition(histogram, p, "upper", currency, rates);
@@ -127,12 +127,16 @@ export const PriceRangePanel = ({
         aria-live="polite"
         className={cn("text-sm text-muted-foreground tabular-nums", showActions && "sr-only")}
       >
-        Знайдено {countText}
+        Знайдено <CountTween count={count} approx={approx} />
       </p>
 
       {showActions && (
         <Actions
-          label={`Показати ${countText}`}
+          label={
+            <>
+              Показати <CountTween count={count} approx={approx} />
+            </>
+          }
           onSubmit={onSubmit}
           onReset={() => onChange({ currency })}
         />
@@ -141,7 +145,7 @@ export const PriceRangePanel = ({
   );
 };
 
-type ActionsProps = { label?: string; onSubmit: () => void; onReset: () => void };
+type ActionsProps = { label?: React.ReactNode; onSubmit: () => void; onReset: () => void };
 
 const Actions = ({ label = "Показати", onSubmit, onReset }: ActionsProps) => (
   <div className="grid grid-cols-[auto_1fr] gap-2">

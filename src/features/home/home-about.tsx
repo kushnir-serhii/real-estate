@@ -18,7 +18,7 @@ export const HomeAbout = ({ body }: { body: string }) => (
           <ArrowRight data-icon="inline-end" aria-hidden="true" />
         </Link>
       </div>
-      <div className="reveal grid grid-cols-5 gap-3 sm:gap-4">
+      <div className="grid grid-cols-5 gap-3 sm:gap-4">
         {/* eslint-disable @next/next/no-img-element -- static placeholders from public/; Workers has no image optimizer */}
         <img
           src={ABOUT.images.main.src}
@@ -27,7 +27,7 @@ export const HomeAbout = ({ body }: { body: string }) => (
           alt=""
           loading="lazy"
           decoding="async"
-          className="col-span-3 aspect-3/4 size-full object-cover"
+          className="reveal-curtain col-span-3 aspect-3/4 size-full object-cover"
         />
         <img
           src={ABOUT.images.secondary.src}
@@ -36,7 +36,7 @@ export const HomeAbout = ({ body }: { body: string }) => (
           alt=""
           loading="lazy"
           decoding="async"
-          className="col-span-2 mt-10 aspect-3/4 size-full object-cover sm:mt-16"
+          className="reveal-curtain col-span-2 mt-10 aspect-3/4 size-full object-cover sm:mt-16"
         />
         {/* eslint-enable @next/next/no-img-element */}
       </div>

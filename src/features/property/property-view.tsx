@@ -84,7 +84,7 @@ export const PropertyView = ({ property }: PropertyViewProps) => {
 
       <div className="mt-2 lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-10">
         <div className="flex min-w-0 flex-col gap-10">
-          <PropertyGallery photos={toGalleryPhotos(property)} title={property.title} />
+          <PropertyGallery photos={toGalleryPhotos(property)} title={property.title} propertyId={property.id} />
 
           <header className="flex flex-col gap-3">
             <p className="eyebrow text-brand-text">

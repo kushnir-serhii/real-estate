@@ -54,7 +54,7 @@ export const CatalogResults = async ({ state, filters }: CatalogResultsProps) =>
           <CatalogGrid>
             {result.page.items.map((property, i) => (
               <li key={property.id}>
-                <PropertyCard property={property} imageSizes={CARD_SIZES} priority={i === 0} />
+                <PropertyCard property={property} imageSizes={CARD_SIZES} priority={i === 0} transitionPhoto />
               </li>
             ))}
           </CatalogGrid>

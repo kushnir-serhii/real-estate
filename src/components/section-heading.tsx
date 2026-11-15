@@ -18,8 +18,8 @@ export const SectionHeading = ({ id, eyebrow, title, description, action, tone =
   <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
     <div className="flex min-w-0 flex-col gap-2">
       {eyebrow && <p className={cn("eyebrow", tone === "ink" ? "text-brand-on-ink" : "text-brand-text")}>{eyebrow}</p>}
-      <h2 id={id} className="text-h2">
-        {title}
+      <h2 id={id} className="text-h2 heading-mask">
+        <span className="heading-mask-inner">{title}</span>
       </h2>
       {description && <p className={cn("max-w-prose", tone === "ink" ? "text-ink-muted" : "text-muted-foreground")}>{description}</p>}
     </div>

@@ -143,14 +143,14 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
   - [x] keyboard only: both thumbs operable, values announced in the chosen currency
   - [x] without JS the home and catalog forms still filter by price
 
-### [ ] 8. Motion
+### [x] 8. Motion
 - **Build:** per **Design direction → Motion**: hero line mask reveal + photo curtain, scroll reveals for photos and H2, card hover zoom, View Transitions card → property page, count tween. No new library (decided); if a piece can't be done without one, drop it and note it in the log.
 - **Files:** `src/app/globals.css`, `src/features/home/hero.tsx`, `src/components/section-heading.tsx`, `src/features/properties/property-card.tsx`, property gallery, `next.config.ts` (view transitions flag if needed)
 - **Agent:** designer · **Model:** sonnet
 - **Accept:**
-  - [ ] `prefers-reduced-motion: reduce` shows everything at once, no movement
-  - [ ] hero H1 text is in the server HTML and readable without JS
-  - [ ] `pnpm perf` on `/`: LCP < 2.5 s, CLS < 0.1, first-load JS not grown by more than ~2 KB gz (before / after in the log)
+  - [x] `prefers-reduced-motion: reduce` shows everything at once, no movement
+  - [x] hero H1 text is in the server HTML and readable without JS
+  - [x] `pnpm perf` on `/`: LCP < 2.5 s, CLS < 0.1, first-load JS not grown by more than ~2 KB gz (before / after in the log)
 
 ### [ ] 9. Regression pass and UI check
 - **Build:** walk every public route and the admin in both themes at 375 / 1280 / 1440 for breakage from the tokens (colours, fonts, radii); fix only regressions; update `docs/product.md` design principles and `docs/conventions.md` (palette, fonts, radii, motion rules); `pnpm ui-check`.
@@ -179,3 +179,4 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
 | 2026-11-15 | 3 | done | --radius 0 (zeroes every rounded-sm…4xl), --radius-control 2px, multiline follows control; rounded-full → rounded-control on counters, nav underline, icon tiles, step numbers, district arrow, accent bars, admin photo bars; kept round: dots, avatars / initials, blurred glows (no Radix slider thumb yet). Checked by eye: home (light + dark, 1440 / 375), catalog, property page; full pass in the slice 9 UI check. Files: globals.css, design page, 13 components |
 | 2026-11-15 | 5 | done | hero takes the quick search as children (no CTA pair, one-line lead; «Знайти» is the only filled button in the first viewport); «Колекція / Ексклюзивні об'єкти» 6 cards (PropertyCard size lg, 2 cols from md); «Нові пропозиції» radio + CSS tabs (.deal-tabs), 3 cards per deal + «Усі об'єкти →»; ProptechFeatures, PROPTECH, open-assistant-button, featured-properties deleted; footer CTA band hidden on the home via body:has([data-home-cta]); about = two unframed photos; districts restyled, both kept. Checked: 1440 / 375 light, 1440 dark, JS off (tabs switch, search submits). Files: page.tsx, globals.css, constants/home.ts, site-footer, property-card, features/home/* |
 | 2026-11-15 | 7 | done | src/features/catalog/price-range/* (trigger + noscript fallback always loaded; panel, Radix Slider, chart, fetch lazy on open); new ui/popover.tsx; home «Бюджет» = popover ≥ 640px / bottom sheet below; catalog inline (count line under the chart), no deal → plain fields + hint; slider snaps to bin edges, off-edge typed values → «≈ N»; debounced fetch with abort + per-query cache; 15 unit tests. First-load JS gz: / 213.9 → 218.4 (+4.5), /catalog 209.4 → 212.8 (+3.4), property 219.7 → 222.9 (+3.2, page doesn't use the filter): Turbopack re-partitioned shared chunks, the filter's own first-load cost ≈ 1.3 KB; accepted under the 5 KB rule (spec aimed ≤ 2 KB). LCP ≈ 0.9 s, CLS 0 |
+| 2026-11-15 | 8 | done | no library. Hero: per-word mask rise (server-split spans inside one h1, 900 ms, 70 ms stagger, 200 ms start), photo curtain + settle from 1.1 (1300 ms), eyebrow / lead / search wipe-and-rise (800 ms; backwards fill, nothing stays clipped); scroll: photo curtains (about, district tiles, exclusive cards) and H2 mask rise in SectionHeading (animation-timeline: view()); card hover zoom already present; React ViewTransition catalog card photo → gallery (Next 16.4 has no experimental.viewTransition flag; types via src/react-experimental.d.ts; home cards excluded: a property can appear twice there); count tween 400 ms rAF with sr-only final value. Reduced motion: no keyframe animations. perf: / 218.4 → 218.4 KB gz, LCP ≈ 0.86 s, CLS 0; /catalog 212.8 → 212.8; property 222.9 → 223.0 |

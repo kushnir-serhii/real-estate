@@ -1,5 +1,6 @@
 import { BedDouble, Building2, Layers, MapPin, Ruler, type LucideIcon } from "lucide-react";
 import Link from "next/link";
+import { ViewTransition } from "react";
 
 import type { PublishedProperty } from "@/lib/db/properties";
 import { formatPrice } from "@/lib/format/format-price";
@@ -20,6 +21,8 @@ type PropertyCardProps = {
   soldLabel?: string;
   /** `lg`: editorial size for the home collection (wider photo, more padding, larger title). */
   size?: "default" | "lg";
+  /** Shared-element transition to the property page: the photo morphs into the gallery. Only where the property appears once on the page. */
+  transitionPhoto?: boolean;
 };
 
 // Fallback intrinsic size when a photo has no stored dimensions; the box is a fixed 4:3 anyway.
@@ -63,6 +66,15 @@ const buildFacts = (p: PublishedProperty): Fact[] => {
   ];
 };
 
+const MaybeViewTransition = ({ name, children }: { name?: string; children: React.ReactNode }) =>
+  name ? (
+    <ViewTransition name={name} share="property-photo" default="none">
+      {children}
+    </ViewTransition>
+  ) : (
+    children
+  );
+
 /**
  * Card is an `article` with the title link stretched over it, so the favorites button
  * (top-right of the photo) and the photo slider buttons (left / right middle) sit above the link without nesting
@@ -74,6 +86,7 @@ export const PropertyCard = ({
   priority = false,
   soldLabel,
   size = "default",
+  transitionPhoto = false,
 }: PropertyCardProps) => {
   const slides: CardPhotoSlide[] = property.property_photos.slice(0, MAX_SLIDES).map((photo) => ({
     src: photoUrl(photo.r2_key),
@@ -96,6 +109,7 @@ export const PropertyCard = ({
     // when the cursor sits on its bottom edge (the card rises from under the cursor, loses hover, drops back).
     <div className="group h-full">
       <article className="relative flex h-full flex-col overflow-hidden rounded-2xl bg-card text-card-foreground ring-1 ring-foreground/5 transition-[transform,box-shadow] duration-(--duration-base) ease-(--ease-out-soft) group-hover:-translate-y-1 group-hover:shadow-float has-focus-visible:ring-3 has-focus-visible:ring-ring motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
+        <MaybeViewTransition name={transitionPhoto ? `property-photo-${property.id}` : undefined}>
         <div className={cn("relative w-full overflow-hidden bg-muted", size === "lg" ? "aspect-3/2" : "aspect-4/3")}>
           {hasPhoto ? (
             <>
@@ -121,6 +135,7 @@ export const PropertyCard = ({
           )}
           <FavoriteButton propertyId={property.id} />
         </div>
+        </MaybeViewTransition>
         <div className={cn("flex flex-1 flex-col gap-2 p-5 sm:p-6", size === "lg" && "gap-3 sm:p-8")}>
           <p className={cn(
               "flex flex-wrap items-baseline gap-x-2 text-xl font-semibold tabular-nums sm:text-price",
