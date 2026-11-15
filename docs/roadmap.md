@@ -26,6 +26,8 @@ Stage 1 (≈7–9 weeks): base site + admin + AI assistant — see [reference/st
 | 016 | [UML diagrams: Supabase, Plektan and where the mock data is](specs/016-uml-diagrams.md) | done | 015 |
 | 017 | [Launch hardening: leads that wait for keys, sync guard, cleanup](specs/017-launch-hardening.md) | done | 016 |
 | 018 | [Redesign: Diplomat Hall brand, new type, wider layout](specs/018-diplomat-hall-redesign.md) | done | 017 |
+| 019 | [Visitor accounts with Google: saved properties on every device](specs/019-user-accounts.md) | draft | 018 |
+| 020 | [Email + password accounts (optional, needs a mail service)](specs/020-email-accounts.md) | draft | 019 |
 
 Statuses: `draft` → `ready` → `in-progress` → `done` (meaning in [process.md](process.md#statuses)). The status here and in the spec's header must match.
 
@@ -49,10 +51,12 @@ Read top to bottom; the next spec is the first one that isn't `done`. Specs in o
 | 12 | 016 |
 | 13 | 017 |
 | 14 | 018 |
+| 15 | 019 |
 
+- 020 is optional and not in a wave: add it when visitors without Google need accounts.
 - To change the order, edit this table.
 - To make a spec buildable, review it and set it to `ready` here and in the spec.
 - New spec: copy [specs/_template.md](specs/_template.md), take the next number, add a row to **Status** and put it in a wave.
 
 ## Later (stage 2+, not specced)
-Reviews; client login (Telegram / Google), saved searches + Telegram alerts, price-drop alerts, XML feed to LUN, simple lead pipeline in the admin. See [reference/stack.md](reference/stack.md) → «Можливий функціонал».
+Reviews; Telegram login (Google accounts: 019; email + password: 020, optional), saved searches + Telegram alerts, price-drop alerts, XML feed to LUN, simple lead pipeline in the admin. See [reference/stack.md](reference/stack.md) → «Можливий функціонал».
