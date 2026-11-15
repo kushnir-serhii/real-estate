@@ -52,6 +52,7 @@ const values = (overrides: Partial<PropertyFormValues> = {}): PropertyFormValues
   wall_material: null,
   housing_class: null,
   is_newbuilding: false,
+  is_exclusive: false,
   locality: "Київ",
   district: "Оболонь",
   street: null,
@@ -133,6 +134,30 @@ describe("demo admin drivers", () => {
       expect(await deleteAdminDraft(id)).toEqual({ ok: false, reason: "published" });
     });
 
+    it("saves the exclusive flag on create and update, lists it, and shows it in the public collection", async () => {
+      const { id, slug } = await create({ is_exclusive: true, price_amount: 9_000_000 });
+      expect((await getAdminProperty(id))?.is_exclusive).toBe(true);
+      await publishAdminProperty(id);
+      expect((await demoPropertiesDriver.fetchExclusiveProperties(6))[0]?.slug).toBe(slug);
+      const stored = await getAdminProperty(id);
+      if (!stored) throw new Error("missing");
+      await updateAdminProperty(id, values({ is_exclusive: false, price_amount: 9_000_000 }), stored);
+      expect((await getAdminProperty(id))?.is_exclusive).toBe(false);
+      // Still the most expensive sale property, so the fallback keeps it first among the non-flagged.
+      const flagged = (await demoPropertiesDriver.fetchExclusiveProperties(6)).filter((p) => p.is_exclusive);
+      expect(flagged.map((p) => p.slug)).not.toContain(slug);
+    });
+
+    it("saves the exclusive flag on a Plektan-sourced property through the SEO-only path", async () => {
+      const row = getDemoStore().properties.find((p) => p.source === "plektan" && p.status === "published");
+      if (!row) throw new Error("seed has no published Plektan property");
+      expect(await updateAdminPropertySeo(row.id, { seo_title: null, seo_description: null, is_exclusive: true })).toMatchObject({ ok: true });
+      expect((await getAdminProperty(row.id))?.is_exclusive).toBe(true);
+      expect((await demoPropertiesDriver.fetchExclusiveProperties(6))[0]?.is_exclusive).toBe(true);
+      expect(await updateAdminPropertySeo(row.id, { seo_title: null, seo_description: null, is_exclusive: false })).toMatchObject({ ok: true });
+      expect((await getAdminProperty(row.id))?.is_exclusive).toBe(false);
+    });
+
     it("refuses to publish an incomplete property", async () => {
       const { id } = await create({ locality: null });
       const result = await publishAdminProperty(id);
@@ -150,7 +175,7 @@ describe("demo admin drivers", () => {
       if (!published) throw new Error("missing");
       const again = await updateAdminProperty(id, values({ title: "Ще одна назва після публікації" }), published);
       expect(again.ok && again.slug).toBe(published.slug);
-      expect(await updateAdminPropertySeo(id, { seo_title: "SEO", seo_description: null })).toMatchObject({ ok: true });
+      expect(await updateAdminPropertySeo(id, { seo_title: "SEO", seo_description: null, is_exclusive: false })).toMatchObject({ ok: true });
       expect((await getAdminProperty(id))?.seo_title).toBe("SEO");
       expect(await updateAdminProperty(crypto.randomUUID(), values(), published)).toEqual({ ok: false, reason: "not_found" });
     });

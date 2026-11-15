@@ -16,6 +16,7 @@ import type {
 /** `raw` and `house` are not granted to the public (migration hide_private_property_columns): never select them here. */
 const PROPERTY_COLUMNS = [
   "id", "source", "external_id", "status", "deal", "property_type", "prop_kind", "price_amount",
+  "is_exclusive",
   "currency", "price_usd", "price_per_m2", "area_total", "area_life", "area_kitchen", "area_lot",
   "room_count", "storey", "storeys", "repair", "wall_material", "housing_class", "is_newbuilding",
   "locality", "district", "street", "lat", "lng", "title", "description", "slug",
@@ -189,6 +190,39 @@ const fetchSimilarProperties = async (target: SimilarTo): Promise<PublishedPrope
   return data;
 };
 
+const fetchExclusiveProperties = async (limit: number): Promise<PublishedProperty[]> => {
+  const supabase = createPublicClient();
+  const flagged = await supabase
+    .from("properties")
+    .select(SELECT)
+    .eq("status", "published")
+    .eq("is_exclusive", true)
+    .order("published_at", { ascending: false, nullsFirst: false })
+    .order("id")
+    .order("position", { referencedTable: "property_photos" })
+    .limit(limit)
+    .overrideTypes<PublishedProperty[], { merge: false }>();
+  if (flagged.error) throw new Error(`getExclusiveProperties failed: ${flagged.error.message}`);
+  const rest = limit - flagged.data.length;
+  if (rest <= 0) return flagged.data;
+
+  // Top up with the most expensive published sale properties that are not flagged (the flagged ones are already in).
+  const topUp = await supabase
+    .from("properties")
+    .select(SELECT)
+    .eq("status", "published")
+    .eq("deal", "sell")
+    .eq("is_exclusive", false)
+    .not("price_usd", "is", null)
+    .order("price_usd", { ascending: false })
+    .order("id")
+    .order("position", { referencedTable: "property_photos" })
+    .limit(rest)
+    .overrideTypes<PublishedProperty[], { merge: false }>();
+  if (topUp.error) throw new Error(`getExclusiveProperties failed: ${topUp.error.message}`);
+  return [...flagged.data, ...topUp.data];
+};
+
 const ukCollator = new Intl.Collator("uk");
 
 const fetchPublishedDistricts = async (): Promise<string[]> => {
@@ -234,6 +268,7 @@ export const supabasePropertiesDriver: PropertiesDriver = {
   fetchPropertyBySlug,
   fetchPropertiesByIds,
   fetchSimilarProperties,
+  fetchExclusiveProperties,
   fetchPublishedDistricts,
   fetchSitemapProperties,
 };

@@ -46,6 +46,7 @@ export type AdminPropertyListItem = Pick<
   | "published_at"
   | "hidden_at"
   | "updated_at"
+  | "is_exclusive"
 > & {
   listStatus: AdminListStatus;
   cover: AdminPropertyCover | null;

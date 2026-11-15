@@ -30,6 +30,15 @@ const toUsd = (amount: number | null, currency: PropertyRow["currency"]): number
   return currency === "USD" ? amount : Math.round(amount / SEED_EXCHANGE_RATES[currency]);
 };
 
+/** The «exclusive» demo listings: the most expensive sale properties (houses and a penthouse), flagged for the home collection. */
+export const EXCLUSIVE_SEED_SLUGS: ReadonlySet<string> = new Set([
+  "prostorii-budynok-u-kozyni-8a52b6",
+  "budynok-v-irpeni-nezalezhnosti-d83f15",
+  "pentkhaus-z-terasoiu-holosiiv-7d02ef",
+  "budynok-u-feofanii-akademika-zabolotnoho-9e4b60",
+  "3-kimnatna-kvartyra-shevchenkivskyi-hlybochytska-7f30c4",
+]);
+
 /** All demo data as of `now`: relative dates in the seed become absolute here. */
 export const buildDemoSeed = (now: number): DemoData => {
   const nowIso = new Date(now).toISOString();
@@ -42,6 +51,7 @@ export const buildDemoSeed = (now: number): DemoData => {
     return {
       ...fields,
       id: propertyId(index),
+      is_exclusive: EXCLUSIVE_SEED_SLUGS.has(fields.slug),
       agent_id: agent ? SEED_AGENTS[agent].id : null,
       price_usd: toUsd(price_amount, fields.currency),
       price_per_m2: price_amount !== null && area_total !== null && area_total > 0 ? Math.round(price_amount / area_total) : null,
@@ -55,6 +65,9 @@ export const buildDemoSeed = (now: number): DemoData => {
   });
 
   const idBySlug = new Map(properties.map((p) => [p.slug, p.id]));
+  for (const slug of EXCLUSIVE_SEED_SLUGS) {
+    if (!idBySlug.has(slug)) throw new Error(`Demo seed: exclusive flag for unknown property "${slug}"`);
+  }
   let photoIndex = 0;
   const property_photos = Object.entries({ ...SEED_PHOTO_SETS, ...EXTRA_PHOTO_SETS }).flatMap(([slug, files]) => {
     const property_id = idBySlug.get(slug);

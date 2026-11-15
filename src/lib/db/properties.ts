@@ -6,6 +6,7 @@ import type { PropertiesDriver } from "./driver-types";
 import { buildPriceHistogram } from "./property-histogram";
 import { HISTOGRAM_DEFAULT_DEAL } from "./property-histogram-values";
 import type { PriceHistogram } from "./property-histogram-values";
+import { EXCLUSIVE_LIMIT } from "./property-query";
 import type {
   FavoriteProperty,
   PropertyBySlug,
@@ -92,6 +93,17 @@ export const getSimilarProperties = (property: SimilarTo): Promise<PublishedProp
     { tags: [CACHE_TAGS.properties] },
   )(target);
 };
+
+/**
+ * The home «exclusive» collection: published properties flagged `is_exclusive` first (newest first), topped up
+ * with the most expensive published sale properties (`price_usd` desc) up to `limit`. Cached under `properties`.
+ */
+export const getExclusiveProperties = (limit: number = EXCLUSIVE_LIMIT): Promise<PublishedProperty[]> =>
+  unstable_cache(
+    async (n: number) => (await loadDriver()).fetchExclusiveProperties(n),
+    ["exclusive-properties", getCacheScope(), String(limit)],
+    { tags: [CACHE_TAGS.properties] },
+  )(limit);
 
 /** Distinct districts of published properties, sorted for Ukrainian. Cached under `properties`. */
 export const getPublishedDistricts = (): Promise<string[]> =>

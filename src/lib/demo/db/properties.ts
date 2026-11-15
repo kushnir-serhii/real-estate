@@ -159,6 +159,18 @@ const fetchSimilarProperties = async (target: SimilarTo): Promise<PublishedPrope
     .map((row) => toPublic(row, data));
 };
 
+const fetchExclusiveProperties = async (limit: number): Promise<PublishedProperty[]> => {
+  const data = getDemoStore();
+  const published = data.properties.filter(isPublished);
+  const flagged = published.filter((row) => row.is_exclusive).sort(comparator("newest")).slice(0, limit);
+  // Top-up: the most expensive published sale properties that are not flagged (a null price never ranks).
+  const topUp = published
+    .filter((row) => !row.is_exclusive && row.deal === "sell" && row.price_usd !== null)
+    .sort(comparator("price_desc"))
+    .slice(0, Math.max(0, limit - flagged.length));
+  return [...flagged, ...topUp].map((row) => toPublic(row, data));
+};
+
 const ukCollator = new Intl.Collator("uk");
 
 const fetchPublishedDistricts = async (): Promise<string[]> => {
@@ -184,6 +196,7 @@ export const demoPropertiesDriver: PropertiesDriver = {
   fetchPropertyBySlug,
   fetchPropertiesByIds,
   fetchSimilarProperties,
+  fetchExclusiveProperties,
   fetchPublishedDistricts,
   fetchSitemapProperties,
 };

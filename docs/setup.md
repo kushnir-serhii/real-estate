@@ -88,6 +88,7 @@ Migrations to apply (in order; add new ones here when a spec adds them):
 | `20261104120000_ai_limits.sql` | 010 | [ ] |
 | `20261105120000_blog.sql` | 015 | [ ] |
 | `20261112120000_leads_telegram_alerted_at.sql` | 017 | [ ] |
+| `20261115120000_property_exclusive.sql` | 021 | [ ] |
 
 ### 4. Check
 - Dashboard → Advisors → Security: no "RLS disabled" warnings.

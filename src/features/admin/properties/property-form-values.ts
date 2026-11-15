@@ -9,11 +9,13 @@ import type { PropertyFormField, PropertyFormRaw } from "./property-form-schema"
 export type PropertyType = (typeof PROPERTY_TYPES)[number];
 
 /** The columns the form edits. */
-export type PropertyFormSource = Pick<AdminProperty, Exclude<PropertyFormField, "is_newbuilding">> & {
+export type PropertyFormSource = Pick<AdminProperty, Exclude<PropertyFormField, "is_newbuilding" | "is_exclusive">> & {
   is_newbuilding: boolean | null;
+  is_exclusive: boolean | null;
 };
 
-export const SEO_FIELDS: readonly PropertyFormField[] = ["seo_title", "seo_description"];
+/** Editable in `plektan` mode too (they live only on the site, the sync never writes them). */
+export const SEO_FIELDS: readonly PropertyFormField[] = ["seo_title", "seo_description", "is_exclusive"];
 
 export const EMPTY_PROPERTY_FORM: PropertyFormRaw = {
   deal: "",
@@ -33,6 +35,7 @@ export const EMPTY_PROPERTY_FORM: PropertyFormRaw = {
   wall_material: "",
   housing_class: "",
   is_newbuilding: "",
+  is_exclusive: "",
   locality: "",
   district: "",
   street: "",
@@ -66,6 +69,7 @@ export const propertyToFormRaw = (p: PropertyFormSource): PropertyFormRaw => ({
   wall_material: text(p.wall_material),
   housing_class: text(p.housing_class),
   is_newbuilding: p.is_newbuilding ? "on" : "",
+  is_exclusive: p.is_exclusive ? "on" : "",
   locality: text(p.locality),
   district: text(p.district),
   street: text(p.street),

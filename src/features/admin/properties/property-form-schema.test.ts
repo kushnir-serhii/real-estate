@@ -41,7 +41,15 @@ describe("parsePropertyFormRaw", () => {
       locality: null,
       agent_id: null,
       is_newbuilding: false,
+      is_exclusive: false,
     });
+  });
+
+  it("reads the exclusive checkbox as a boolean", () => {
+    const on = parsePropertyFormRaw(raw({ is_exclusive: "on" }));
+    expect(on.ok && on.values.is_exclusive).toBe(true);
+    const off = parsePropertyFormRaw(raw({ is_exclusive: "" }));
+    expect(off.ok && off.values.is_exclusive).toBe(false);
   });
 
   it("parses a full form, comma decimals included", () => {
@@ -167,13 +175,14 @@ describe("parsePropertyFormRaw", () => {
 });
 
 describe("parsePropertySeoForm", () => {
-  it("reads only the SEO fields", () => {
+  it("reads only the SEO fields and the exclusive flag", () => {
     const data = new FormData();
     data.set("seo_title", " Title ");
     data.set("seo_description", "");
     data.set("title", "ignored");
+    data.set("is_exclusive", "on");
     const result = parsePropertySeoForm(data);
-    expect(result).toEqual({ ok: true, values: { seo_title: "Title", seo_description: null } });
+    expect(result).toEqual({ ok: true, values: { seo_title: "Title", seo_description: null, is_exclusive: true } });
   });
 
   it("rejects too long values", () => {

@@ -33,6 +33,7 @@ export const PROPERTY_FORM_FIELDS = [
   "wall_material",
   "housing_class",
   "is_newbuilding",
+  "is_exclusive",
   "locality",
   "district",
   "street",
@@ -175,6 +176,7 @@ const propertyShape = {
   wall_material: listField("Матеріал стін", WALL_MATERIALS),
   housing_class: listField("Клас житла", HOUSING_CLASSES),
   is_newbuilding: boolField,
+  is_exclusive: boolField,
   locality: addressField("Населений пункт"),
   district: addressField("Район"),
   street: addressField("Вулиця"),
@@ -198,7 +200,8 @@ export const propertyFormSchema = z.object(propertyShape).superRefine((values, c
 export type PropertyFormValues = z.output<typeof propertyFormSchema>;
 
 /** Plektan mode: only the SEO overrides are editable. */
-export const propertySeoSchema = z.object(seoFields);
+/** Site-only fields editable in every mode (Plektan too): the SEO overrides and the exclusive flag. */
+export const propertySeoSchema = z.object({ ...seoFields, is_exclusive: boolField });
 export type PropertySeoValues = z.output<typeof propertySeoSchema>;
 
 export type PropertyFormResult =
@@ -207,7 +210,7 @@ export type PropertyFormResult =
 
 export type PropertySeoResult =
   | { ok: true; values: PropertySeoValues }
-  | { ok: false; errors: Pick<PropertyFormErrors, "seo_title" | "seo_description"> };
+  | { ok: false; errors: Pick<PropertyFormErrors, "seo_title" | "seo_description" | "is_exclusive"> };
 
 const isFormField = (value: PropertyKey): value is PropertyFormField =>
   PROPERTY_FORM_FIELDS.some((field) => field === value);

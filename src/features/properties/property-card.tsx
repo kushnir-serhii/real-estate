@@ -110,6 +110,11 @@ export const PropertyCard = ({
           <span className="absolute top-3 left-3 max-w-[calc(100%-4.5rem)] truncate rounded-control bg-background/90 px-3 py-1 text-xs font-semibold text-foreground backdrop-blur">
             {soldLabel ?? `${DEAL_LABELS[property.deal]} · ${PROPERTY_TYPE_LABELS[property.property_type]}`}
           </span>
+          {property.is_exclusive && !soldLabel && (
+            <span className="absolute bottom-3 left-3 rounded-control bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
+              Ексклюзив
+            </span>
+          )}
           <FavoriteButton propertyId={property.id} />
         </div>
         <div className="flex flex-1 flex-col gap-2 p-5 sm:p-6">

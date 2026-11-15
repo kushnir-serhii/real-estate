@@ -166,3 +166,16 @@ describe("parseKyivDateTime", () => {
     expect(parseKyivDateTime("вчора")).toBeNull();
   });
 });
+
+describe("admin-only columns", () => {
+  // run-sync spreads the mapped row into its insert / update patch and writes nothing else for the property,
+  // so a column the mapper never returns is never written or reset by a sync (it keeps whatever the admin set).
+  it("never returns is_exclusive, so a sync leaves the flag of an existing row alone", () => {
+    for (const set of [base, next]) {
+      for (const { item, view } of set) {
+        const result = mapProperty(item, view, RATES);
+        if (result.kind === "row") expect(Object.keys(result.row)).not.toContain("is_exclusive");
+      }
+    }
+  });
+});

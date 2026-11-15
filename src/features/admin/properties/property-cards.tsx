@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import type { AdminPropertyListItem } from "@/lib/db/admin-properties";
 import { cn } from "@/lib/utils";
+import { ExclusiveBadge } from "./exclusive-badge";
 import { ListStatusBadge } from "./list-status-badge";
 import { propertyHref } from "./properties-params";
 import { propertyAddress, propertyPrice } from "./property-row-text";
@@ -42,6 +43,7 @@ export const PropertyCards = ({ properties, className }: PropertyCardsProps) => 
 
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted-foreground">
             <ListStatusBadge status={property.listStatus} />
+            {property.is_exclusive && <ExclusiveBadge />}
             <PropertySourceLabel property={property} />
             <PropertyUpdatedAt iso={property.updated_at} layout="inline" />
           </div>

@@ -70,6 +70,7 @@ const fetchAdminProperties: AdminPropertiesDriver["fetchAdminProperties"] = asyn
       published_at: row.published_at,
       hidden_at: row.hidden_at,
       updated_at: row.updated_at,
+      is_exclusive: row.is_exclusive,
       listStatus: toListStatus(row.status, row.published_at),
       cover: cover ? { r2_key: cover.r2_key, sizes: toJson(cover.sizes), width: cover.width, height: cover.height } : null,
     };
@@ -188,6 +189,7 @@ const updatePropertySeo: AdminPropertiesDriver["updatePropertySeo"] = async (id,
   if (!row) return { ok: false, reason: "not_found" };
   row.seo_title = seo.seo_title;
   row.seo_description = seo.seo_description;
+  row.is_exclusive = seo.is_exclusive;
   row.updated_at = new Date().toISOString();
   return { ok: true, slug: row.slug };
 };

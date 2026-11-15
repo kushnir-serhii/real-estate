@@ -326,6 +326,24 @@ const runContract = (name: string, getDrivers: () => Drivers | Promise<Drivers>,
       });
     });
 
+    describe("exclusive collection", () => {
+      it("seed: flagged properties first, published only, topped up with the most expensive sale ones", async () => {
+        const result = await d.properties.fetchExclusiveProperties(6);
+        const flagged = published.filter((r) => r.is_exclusive);
+        expect(flagged.length).toBeGreaterThanOrEqual(4);
+        expect(result).toHaveLength(6);
+        expect(result.every((p) => p.status === "published")).toBe(true);
+        const head = result.slice(0, Math.min(flagged.length, 6));
+        expect(head.every((p) => p.is_exclusive)).toBe(true);
+        expect(new Set(result.map((p) => p.id)).size).toBe(result.length);
+        for (const item of result) expect(item).not.toHaveProperty("raw");
+      });
+
+      it("respects the limit", async () => {
+        expect(await d.properties.fetchExclusiveProperties(2)).toHaveLength(2);
+      });
+    });
+
     describe("blog", () => {
       const seedPosts = buildDemoSeed(Date.now()).posts;
       const publishedPosts = seedPosts.filter((post) => post.status === "published");
@@ -439,6 +457,32 @@ runContract(
 describe("demo store (RLS mirror)", () => {
   beforeAll(() => {
     resetDemoStore();
+  });
+
+  it("exclusive collection: 0 flagged gives the most expensive sale properties, 2 flagged come first", async () => {
+    const store = getDemoStore();
+    const saleByPrice = () =>
+      store.properties
+        .filter((r) => r.status === "published" && r.deal === "sell" && r.price_usd !== null)
+        .sort((a, b) => (b.price_usd as number) - (a.price_usd as number) || (a.id < b.id ? -1 : 1));
+    try {
+      for (const row of store.properties) row.is_exclusive = false;
+      const none = await demoPropertiesDriver.fetchExclusiveProperties(6);
+      expect(none.map((p) => p.id)).toEqual(saleByPrice().slice(0, 6).map((r) => r.id));
+
+      // Two cheap sale properties, plus a flagged draft and a flagged rental that must not matter for «published sale».
+      const cheap = saleByPrice().slice(-2);
+      for (const row of cheap) row.is_exclusive = true;
+      const draft = store.properties.find((r) => r.status !== "published");
+      if (draft) draft.is_exclusive = true;
+      const two = await demoPropertiesDriver.fetchExclusiveProperties(6);
+      expect(two).toHaveLength(6);
+      expect(new Set(two.slice(0, 2).map((p) => p.id))).toEqual(new Set(cheap.map((r) => r.id)));
+      expect(two.slice(2).map((p) => p.id)).toEqual(saleByPrice().filter((r) => !r.is_exclusive).slice(0, 4).map((r) => r.id));
+      expect(two.some((p) => p.id === draft?.id)).toBe(false);
+    } finally {
+      resetDemoStore();
+    }
   });
 
   it("a property hidden longer ago than the sold window is gone", async () => {
