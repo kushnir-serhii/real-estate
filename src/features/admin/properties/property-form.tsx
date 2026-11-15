@@ -481,7 +481,7 @@ export const PropertyForm = ({
             Ексклюзив (показувати в колекції на головній)
           </label>
           <p id={`${propertyFieldId("is_exclusive")}-hint`} className="text-sm text-muted-foreground">
-            Позначені об&apos;єкти йдуть першими в «Ексклюзивних пропозиціях» на головній і мають позначку на картці.
+            Позначені об&apos;єкти йдуть першими в «Ексклюзивних об&apos;єктах» на головній і мають позначку на картці.
           </p>
         </div>
       </PropertyFormSection>

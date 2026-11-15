@@ -54,9 +54,9 @@ Build order and status: [roadmap.md](roadmap.md). Later options (client login vi
 ## Design principles
 **Template, mock data:** the site is a template for the real project. All agency data (name, contacts, messengers, texts, coordinates) is mock and lives only as consts in `src/constants/` and the typed seed in `src/lib/demo/seed/`, so the real agency's data replaces it in one place. Components never hardcode agency data. `supabase/seed.sql` is generated from that seed (`pnpm seed:sql`).
 
-**Design status:** the brand is Diplomat Hall: a monochrome shield mark + a Cormorant SC wordmark («DIPLOMAT / HALL»), Playfair Display headings + Sofia Sans type, the Midnight Sky palette, pill controls, placeholder photos. It is still a demo (fictional) agency and the repo is a template. Everything visual goes through tokens in `globals.css`; the logo lives in `src/components/layout/logo.tsx` + `shield-mark.tsx`, so another brand replaces it without touching pages.
+**Design status:** the brand is Diplomat Hall: a monochrome shield mark + a Cormorant SC wordmark («DIPLOMAT / HALL»), Playfair Display headings + Sofia Sans type, a monochrome blue palette (midnight + one royal-blue accent for details, at most 5% of a screen, no orange), sharp shapes (0px cards and media, 2px controls), editorial motion without libraries (off under reduced motion), placeholder photos. It is still a demo (fictional) agency and the repo is a template. Everything visual goes through tokens in `globals.css`; the logo lives in `src/components/layout/logo.tsx` + `shield-mark.tsx`, so another brand replaces it without touching pages.
 
-1. Photos first; clean, calm, trustworthy. Neutral palette + one accent.
+1. Photos first; clean, calm, trustworthy. Neutral palette + one accent. Premium look that still serves every segment: an exclusive collection on the home plus all listings.
 2. Mobile-first: catalog, property page and forms must be perfect at 375px.
 3. Price always with currency; tabular numbers.
 4. Every state designed: loading (skeleton), empty, error with retry, long values, missing photo.

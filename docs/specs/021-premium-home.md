@@ -1,6 +1,6 @@
 # 021 — Premium home: blue palette, Playfair headings, sharp shapes, price histogram, motion
 
-**Status:** in-progress · **Depends on:** 018 · **Route(s):** `/` (redesigned); `/catalog` (price filter); every other route only inherits the new tokens (fix regressions, no redesign); `/admin` gets one checkbox
+**Status:** done · **Depends on:** 018 · **Route(s):** `/` (redesigned); `/catalog` (price filter); every other route only inherits the new tokens (fix regressions, no redesign); `/admin` gets one checkbox
 
 ## Goal
 The home page reads as a **premium** agency that still serves every segment: a calm monochrome blue palette with no orange, Playfair Display headings that match the classic logo, sharp corners, lighter photos, an «Ексклюзивні об'єкти» showcase managed from the admin, a modern price filter whose histogram shows how many properties are in and around the chosen range (home and catalog), and editorial motion (a line-by-line mask reveal in the hero, not a plain fade).
@@ -152,19 +152,24 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
   - [x] hero H1 text is in the server HTML and readable without JS
   - [x] `pnpm perf` on `/`: LCP < 2.5 s, CLS < 0.1, first-load JS not grown by more than ~2 KB gz (before / after in the log)
 
-### [ ] 9. Regression pass and UI check
+### [x] 9. Regression pass and UI check
 - **Build:** walk every public route and the admin in both themes at 375 / 1280 / 1440 for breakage from the tokens (colours, fonts, radii); fix only regressions; update `docs/product.md` design principles and `docs/conventions.md` (palette, fonts, radii, motion rules); `pnpm ui-check`.
 - **Files:** as needed, `docs/product.md`, `docs/conventions.md`
 - **Agent:** designer · **Model:** sonnet
 - **Accept:**
-  - [ ] `pnpm ui-check` passes; typecheck, lint, test, build green
-  - [ ] docs describe the new palette, fonts, radii and motion rules
+  - [x] `pnpm ui-check` passes; typecheck, lint, test, build green
+  - [x] docs describe the new palette, fonts, radii and motion rules
 
 ## External needs
-- Apply the `is_exclusive` migration to the Supabase project (user).
+- Apply `20261115120000_property_exclusive.sql` to the Supabase project (user; listed in setup.md).
 - Real photos for hero, districts and about (later; placeholders now).
 
 ## Open questions
+- Unpriced properties («Ціна за запитом») are not in the histogram, so its count can be one or two lower than the catalog's «Знайдено N» for the same filters.
+- The exclusive collection is tall at 1440 (6 cards, 2 columns, 3 rows); a lead card + smaller grid is an option.
+- View transition card → property page works from the catalog only; home cards are excluded because the same property can appear in two home sections (duplicate names abort the transition).
+- `pnpm ui-check` can't start its own dev server while another `next dev` runs in the folder; it was run against `next start` on 3199. The admin dashboard is flaky under 6 workers (networkidle timeout).
+- `database.types.ts` was edited by hand for `is_exclusive`; regenerate against a local DB when one is up.
 - **Decided (2026-11-15, user):** motion without any new library; the histogram panel is loaded on open (no first-load growth); copy «Колекція / Ексклюзивні об'єкти / Вибрані квартири та будинки, які ми рекомендуємо», card badge «Ексклюзив», admin checkbox «Ексклюзив (показувати в колекції на головній)»; «Нові пропозиції» tabs show 3 cards each.
 - Which district section stays (picker or bento): the user decides after seeing both in the new style.
 
@@ -180,3 +185,4 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
 | 2026-11-15 | 5 | done | hero takes the quick search as children (no CTA pair, one-line lead; «Знайти» is the only filled button in the first viewport); «Колекція / Ексклюзивні об'єкти» 6 cards (PropertyCard size lg, 2 cols from md); «Нові пропозиції» radio + CSS tabs (.deal-tabs), 3 cards per deal + «Усі об'єкти →»; ProptechFeatures, PROPTECH, open-assistant-button, featured-properties deleted; footer CTA band hidden on the home via body:has([data-home-cta]); about = two unframed photos; districts restyled, both kept. Checked: 1440 / 375 light, 1440 dark, JS off (tabs switch, search submits). Files: page.tsx, globals.css, constants/home.ts, site-footer, property-card, features/home/* |
 | 2026-11-15 | 7 | done | src/features/catalog/price-range/* (trigger + noscript fallback always loaded; panel, Radix Slider, chart, fetch lazy on open); new ui/popover.tsx; home «Бюджет» = popover ≥ 640px / bottom sheet below; catalog inline (count line under the chart), no deal → plain fields + hint; slider snaps to bin edges, off-edge typed values → «≈ N»; debounced fetch with abort + per-query cache; 15 unit tests. First-load JS gz: / 213.9 → 218.4 (+4.5), /catalog 209.4 → 212.8 (+3.4), property 219.7 → 222.9 (+3.2, page doesn't use the filter): Turbopack re-partitioned shared chunks, the filter's own first-load cost ≈ 1.3 KB; accepted under the 5 KB rule (spec aimed ≤ 2 KB). LCP ≈ 0.9 s, CLS 0 |
 | 2026-11-15 | 8 | done | no library. Hero: per-word mask rise (server-split spans inside one h1, 900 ms, 70 ms stagger, 200 ms start), photo curtain + settle from 1.1 (1300 ms), eyebrow / lead / search wipe-and-rise (800 ms; backwards fill, nothing stays clipped); scroll: photo curtains (about, district tiles, exclusive cards) and H2 mask rise in SectionHeading (animation-timeline: view()); card hover zoom already present; React ViewTransition catalog card photo → gallery (Next 16.4 has no experimental.viewTransition flag; types via src/react-experimental.d.ts; home cards excluded: a property can appear twice there); count tween 400 ms rAF with sr-only final value. Reduced motion: no keyframe animations. perf: / 218.4 → 218.4 KB gz, LCP ≈ 0.86 s, CLS 0; /catalog 212.8 → 212.8; property 222.9 → 223.0 |
+| 2026-11-15 | 9 | done | no regressions found; ui-check against next start on 3199 (the user's dev server on 3000 blocks a second next dev): public SPEC=021 ROUTES=root,catalog,catalog/2-kimnatna-kvartyra-na-oboloni-3f9a1c,favorites,about,contacts,blog,blog/yaki-dokumenty-pereviryty-pered-kupivleiu-kvartyry,privacy,design,nonexistent-page → 78 passed; admin SPEC=021-admin (11 routes, --workers=3) → 78 passed (6 workers: /admin dashboard flaky on networkidle). Screenshots reviewed. Docs: product.md design status + principle 1, conventions.md Styling (palette, radii, fonts, motion) + perf baselines. Admin hint copy aligned to «Ексклюзивні об'єкти» |

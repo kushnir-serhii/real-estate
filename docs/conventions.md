@@ -80,6 +80,10 @@ Next.js (App Router) · React · TypeScript (strict) · Tailwind 4 · shadcn/ui 
 - Only Tailwind utilities from the tokens in `src/app/globals.css`. No raw colors, px values or inline styles. New tokens go there first.
 - `cn()` from `@/lib/utils`, `cva` for variants.
 - Mobile-first. Prices use `tabular-nums`.
+- **Palette:** monochrome blue. `primary` / `background` / `foreground` / `card` / `muted` carry the UI (dark `primary` = ivory). `brand` is the one royal-blue accent for details (links, eyebrows, small marks, focus), at most ~5% of a screen: `brand-text` for text, `brand` for fills, `brand-foreground` on a brand fill, `brand-on-ink` on `ink` sections and over photos. `ink` / `ink-muted` / `ink-border` are the dark sections; `veil-*` are the photo scrims and sit only behind text. No orange (`dawn`, `sky` are gone). Button variants: `default`, `inverse` (on ink and photos), `outline`, `secondary`, `ghost`, `destructive`, `link`; one filled button per first viewport.
+- **Radii:** `--radius` is 0, so cards, media, panels and dialogs are square; controls (buttons, inputs, selects, chips, counters) use `rounded-control` (2px). Round only dots, avatars and slider thumbs (`rounded-full`). No pills.
+- **Fonts:** Playfair Display (`font-display`) only for `text-display`, `text-h1`, `text-h2` via the utilities; Sofia Sans for everything else (h3, UI, admin, card titles); Cormorant SC only for the logo (`font-logo`). Numbers, prices and ₴ are Sofia Sans `tabular-nums`, never Playfair.
+- **Motion:** CSS only (keyframes, `animation-timeline: view()`, View Transitions); animate `transform`, `opacity`, `clip-path` only; everything sits inside `@media (prefers-reduced-motion: no-preference)` so reduced motion shows the final state at once; content stays in the server HTML and is never left hidden without JS; motion must not delay LCP or add CLS. No animation library without asking.
 - No `cursor-pointer` on native controls (it comes from the base layer); add it only to custom clickable elements.
 
 ## Copy and locale
@@ -94,7 +98,7 @@ Next.js (App Router) · React · TypeScript (strict) · Tailwind 4 · shadcn/ui 
 ## Performance budget
 Checked with `pnpm perf` (needs `pnpm build`; mobile 375px, 4x CPU throttle, fast 4G; median of 3 warm runs; fails on a non-localhost request). Routes: `/`, `/catalog`, a property page.
 - LCP < 2.5 s, CLS < 0.1.
-- First-load JS (script tags in the HTML, gzip) does not grow: now ~220 KB gz on `/`, ~216 KB on `/catalog`, ~226 KB on a property page. A change that adds more than ~5 KB gz to a route needs a reason in the spec.
+- First-load JS (script tags in the HTML, gzip) does not grow: now ~218 KB gz on `/`, ~213 KB on `/catalog`, ~223 KB on a property page. A change that adds more than ~5 KB gz to a route needs a reason in the spec.
 - Client components import only light modules: no `zod`, no server-side data modules. Put constants / enums that forms and stores need in a `*-values.ts` file and keep the zod schemas in a separate file.
 - The first-screen photo has `fetchPriority="high"` and the right `sizes`; photos below the fold are lazy; the assistant panel is loaded on demand; loading skeletons are at least one viewport tall so the footer does not jump.
 
