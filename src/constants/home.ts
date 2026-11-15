@@ -1,15 +1,26 @@
 // Mock — replace for the real agency.
 export const HERO = {
   eyebrow: "Київ і область",
-  lead: "Квартири, будинки, комерційні приміщення та ділянки в Києві й області. Допоможемо з вибором і супроводимо угоду.",
-  primaryCta: "Підібрати об'єкт",
+  lead: "Квартири, будинки, комерційні приміщення та ділянки в Києві й області.",
   image: { src: "/placeholders/flat-living-2.webp", width: 1280, height: 853 },
 } as const;
 
-export const FEATURED = {
+export const EXCLUSIVE = {
+  eyebrow: "Колекція",
+  title: "Ексклюзивні об'єкти",
+  lead: "Вибрані квартири та будинки, які ми рекомендуємо",
+} as const;
+
+export const NEW_PROPERTIES = {
   eyebrow: "Каталог",
   title: "Нові пропозиції",
-  action: "Усі об'єкти",
+  allAction: "Усі об'єкти",
+  emptyDeal: "У цьому розділі поки немає об'єктів.",
+  tabs: [
+    { deal: "sell", label: "Купити" },
+    { deal: "rent_long", label: "Оренда" },
+    { deal: "rent_day", label: "Подобово" },
+  ],
 } as const;
 
 // Mock — replace for the real agency.
@@ -25,43 +36,12 @@ export const HOW_WE_WORK = {
 } as const;
 
 // Mock — replace for the real agency.
-export const PROPTECH = {
-  eyebrow: "Сервіс",
-  title: "Зручно на кожному кроці",
-  description: "Менше очікування і ручної рутини, більше часу на вибір житла.",
-  assistant: {
-    title: "Віртуальний консультант",
-    text: "Підкаже об'єкти за вашим описом, відповість на питання про агентство і передасть заявку менеджеру. У будь-який час доби.",
-    cta: "Розпочати чат",
-    preview: "Шукаю 2-кімнатну біля метро до 90 000 $",
-  },
-  features: [
-    {
-      icon: "refresh",
-      title: "Синхронізація з CRM",
-      text: "Об'єкти й ціни оновлюються автоматично з Plektan, без застарілих оголошень.",
-    },
-    {
-      icon: "send",
-      title: "Миттєві сповіщення",
-      text: "Щойно ви залишаєте заявку, менеджер отримує повідомлення в Telegram.",
-    },
-    {
-      icon: "heart",
-      title: "Обрані та підбір",
-      text: "Зберігайте об'єкти, порівнюйте їх і шукайте за власними критеріями.",
-    },
-  ],
-} as const;
-
-// Mock — replace for the real agency.
 export const ABOUT = {
   eyebrow: "Про агентство",
   action: "Більше про нас",
   images: {
     main: { src: "/placeholders/house-exterior-2.webp", width: 1100, height: 733 },
     secondary: { src: "/placeholders/flat-kitchen-1.webp", width: 1280, height: 767 },
-    tertiary: { src: "/placeholders/building-facade-1.webp", width: 1100, height: 733 },
   },
 } as const;
 

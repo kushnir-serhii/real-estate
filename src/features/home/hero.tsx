@@ -1,13 +1,9 @@
-import { ArrowRight } from "lucide-react";
-import Link from "next/link";
-
-import { CTA_LINK } from "@/components/layout/nav-config";
-import { Button } from "@/components/ui/button";
 import { HERO } from "@/constants/home";
 
-type HeroProps = { title: string; lead: string };
+type HeroProps = { title: string; lead: string; children: React.ReactNode };
 
-export const Hero = ({ title, lead }: HeroProps) => (
+/** The H1 and the quick search (`children`) are the whole hero: search is the one main action. */
+export const Hero = ({ title, lead, children }: HeroProps) => (
   <section
     data-hero
     className="hero-height relative isolate -mt-header flex flex-col justify-end overflow-hidden bg-ink"
@@ -24,29 +20,11 @@ export const Hero = ({ title, lead }: HeroProps) => (
       className="hero-zoom absolute inset-0 -z-20 size-full object-cover"
     />
     <div className="hero-veil absolute inset-0 -z-10" aria-hidden="true" />
-    <div className="hero-stagger site-container flex flex-col items-start gap-5 pt-34 pb-28 text-on-scrim sm:gap-6 sm:pb-32">
-      <p className="inline-flex max-w-full items-center gap-2 rounded-control bg-on-scrim/10 px-3.5 py-1.5 text-sm font-medium ring-1 ring-on-scrim/20 backdrop-blur">
-        <span className="size-2 shrink-0 rounded-full bg-brand-on-ink" aria-hidden="true" />
-        <span className="min-w-0">{HERO.eyebrow}</span>
-      </p>
+    <div className="hero-stagger site-container flex flex-col items-start gap-4 pt-28 pb-8 text-on-scrim sm:gap-5 sm:pt-34 sm:pb-12">
+      <p className="eyebrow text-on-scrim/90">{HERO.eyebrow}</p>
       <h1 className="text-display max-w-4xl">{title}</h1>
       <p className="max-w-2xl text-base text-pretty text-on-scrim/90 sm:text-lg">{lead}</p>
-      <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-        <Button asChild variant="inverse" size="lg">
-          <Link href="/catalog">
-            {HERO.primaryCta}
-            <ArrowRight aria-hidden="true" data-icon="inline-end" />
-          </Link>
-        </Button>
-        <Button
-          asChild
-          variant="outline"
-          size="lg"
-          className="border-on-scrim/30 bg-on-scrim/10 text-on-scrim backdrop-blur hover:bg-on-scrim/20 hover:text-on-scrim dark:border-on-scrim/30 dark:bg-on-scrim/10 dark:hover:bg-on-scrim/20"
-        >
-          <Link href={CTA_LINK.href}>{CTA_LINK.label}</Link>
-        </Button>
-      </div>
+      <div className="mt-2 w-full sm:mt-4">{children}</div>
     </div>
   </section>
 );

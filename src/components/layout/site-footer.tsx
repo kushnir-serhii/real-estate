@@ -24,7 +24,7 @@ export const SiteFooter = () => {
   return (
     <footer className="bg-ink text-on-ink">
       <div className="site-container">
-        <div className="flex flex-col gap-6 border-b border-ink-border py-12 sm:py-16 lg:flex-row lg:items-end lg:justify-between">
+        <div data-footer-cta className="flex flex-col gap-6 border-b border-ink-border py-12 sm:py-16 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
             <p className="eyebrow mb-3 text-brand-on-ink">{FOOTER.cta.eyebrow}</p>
             <h2 className="text-h1 text-on-ink">{FOOTER.cta.title}</h2>
@@ -41,7 +41,7 @@ export const SiteFooter = () => {
             </Button>
             <a
               href={CONTACTS.phone.href}
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-ink-border px-5 text-base font-medium text-on-ink outline-none transition-colors duration-(--duration-base) hover:bg-on-ink/10 focus-visible:ring-3 focus-visible:ring-brand-on-ink/60"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-control border border-ink-border px-5 text-base font-medium text-on-ink outline-none transition-colors duration-(--duration-base) hover:bg-on-ink/10 focus-visible:ring-3 focus-visible:ring-brand-on-ink/60"
             >
               <Phone className="size-4" aria-hidden="true" />
               <span className="tabular-nums">{CONTACTS.phone.display}</span>

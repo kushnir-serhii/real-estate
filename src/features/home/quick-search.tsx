@@ -48,7 +48,7 @@ export const QuickSearch = () => {
       action="/catalog"
       method="get"
       aria-label="Швидкий пошук"
-      className="flex flex-col gap-5 rounded-3xl bg-card p-4 text-card-foreground shadow-float ring-1 ring-border sm:p-6"
+      className="flex flex-col gap-5 bg-card p-4 text-card-foreground shadow-float ring-1 ring-border sm:p-6"
     >
       <fieldset className="min-w-0">
         <legend className="sr-only">Що потрібно</legend>

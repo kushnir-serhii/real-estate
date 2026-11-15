@@ -551,3 +551,18 @@ optgroup {
     animation: none;
   }
 }
+
+/* «Нові пропозиції» deal tabs (radio inputs, no JS): only the checked tab's panel is shown. */
+.deal-tabs [data-deal-panel] {
+  display: none;
+}
+.deal-tabs:has(input[value="sell"]:checked) [data-deal-panel="sell"],
+.deal-tabs:has(input[value="rent_long"]:checked) [data-deal-panel="rent_long"],
+.deal-tabs:has(input[value="rent_day"]:checked) [data-deal-panel="rent_day"] {
+  display: flex;
+}
+
+/* One CTA block above the footer: the footer's CTA band hides on the home, which has its own (with the form). */
+body:has([data-home-cta]) [data-footer-cta] {
+  display: none;
+}

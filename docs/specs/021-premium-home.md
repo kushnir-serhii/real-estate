@@ -116,15 +116,15 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
   - [x] a sync run does not change `is_exclusive`
   - [x] `pnpm test` green incl. seed drift test; Supabase contract run green when a local DB is up
 
-### [ ] 5. Home layout and content
+### [x] 5. Home layout and content
 - **Build:** hero per **Design direction** (search as the main action, no CTA pair); «Ексклюзивні об'єкти» first (eyebrow «Колекція», title «Ексклюзивні об'єкти», lead «Вибрані квартири та будинки, які ми рекомендуємо»; 6 cards, larger, editorial); «Нові пропозиції» below with deal tabs (Купити / Оренда / Подобово, **3 cards each** + «Усі об'єкти →» to the catalog with that deal; radio + CSS so it works without JS and the page stays static); remove «Зручно на кожному кроці» (and its constants / component if unused elsewhere); merge the two bottom CTAs into one block with the lead form; clean «Про агентство» (no frames, no rounded collage); both district sections restyled, kept.
 - **Files:** `src/app/(site)/page.tsx`, `src/features/home/*`, `src/constants/home.ts`, `src/components/layout/*` (header CTA, footer CTA band)
 - **Agent:** designer · **Model:** sonnet
 - **Accept:**
-  - [ ] first viewport at 1440 and 375: one filled button at most, the H1 and the search are what draws the eye
-  - [ ] no mention of CRM, Plektan or Telegram notifications on the home
-  - [ ] one CTA block above the footer
-  - [ ] page works without JS (search submits, tabs switch or degrade to links)
+  - [x] first viewport at 1440 and 375: one filled button at most, the H1 and the search are what draws the eye
+  - [x] no mention of CRM, Plektan or Telegram notifications on the home
+  - [x] one CTA block above the footer
+  - [x] page works without JS (search submits, tabs switch or degrade to links)
 
 ### [x] 6. Price histogram data
 - **Build:** `getPriceHistogram` (both drivers, contract tests: empty, one price, skewed prices with the open-ended last bin, per deal), `GET /api/price-histogram` validated with the catalog params schema, cached.
@@ -177,3 +177,4 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
 | 2026-11-15 | 2 | done | Playfair Display (variable, latin + cyrillic, self-hosted, unicode-range) as --font-display (replaces --font-heading); Sofia Sans Extra Condensed removed (loader + 3 woff2, OFL). Scale fluid 375→1440: display 40→80 / 500 / 1.1, h1 34→56, h2 30→48 / 1.15, h3 Sofia Sans 22→26 / 600; prices, card titles, numbers, ₴ in Sofia Sans semibold tabular-nums (card price 24px from sm). Font bytes 67,176 → 59,556 B. perf: / LCP 900 ms CLS 0; /catalog 964 ms; property 948 ms. Files: src/app/fonts/*, layout, globals.css, design page, 16 former font-heading uses, product.md, setup.md |
 | 2026-11-15 | 4 | done | migration 20261115120000_property_exclusive.sql (column + public column grant, needed by hide_private_property_columns, + partial index); types edited by hand as the generator would (regenerate when a local DB is up); getExclusiveProperties (flagged newest first, topped up with priciest sale, EXCLUSIVE_LIMIT 6), both drivers + contract tests; demo seed flags 5 sale properties, seed.sql regenerated; sync never maps the flag (map-property test; no row-level runSync test: it can't take an injected client); admin checkbox «Ексклюзив (показувати в колекції на головній)» also in Plektan (SEO-only) mode, list badge; card chip «Ексклюзив» (primary pair 15.2:1); diagrams + setup.md updated |
 | 2026-11-15 | 3 | done | --radius 0 (zeroes every rounded-sm…4xl), --radius-control 2px, multiline follows control; rounded-full → rounded-control on counters, nav underline, icon tiles, step numbers, district arrow, accent bars, admin photo bars; kept round: dots, avatars / initials, blurred glows (no Radix slider thumb yet). Checked by eye: home (light + dark, 1440 / 375), catalog, property page; full pass in the slice 9 UI check. Files: globals.css, design page, 13 components |
+| 2026-11-15 | 5 | done | hero takes the quick search as children (no CTA pair, one-line lead; «Знайти» is the only filled button in the first viewport); «Колекція / Ексклюзивні об'єкти» 6 cards (PropertyCard size lg, 2 cols from md); «Нові пропозиції» radio + CSS tabs (.deal-tabs), 3 cards per deal + «Усі об'єкти →»; ProptechFeatures, PROPTECH, open-assistant-button, featured-properties deleted; footer CTA band hidden on the home via body:has([data-home-cta]); about = two unframed photos; districts restyled, both kept. Checked: 1440 / 375 light, 1440 dark, JS off (tabs switch, search submits). Files: page.tsx, globals.css, constants/home.ts, site-footer, property-card, features/home/* |

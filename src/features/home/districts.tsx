@@ -26,7 +26,7 @@ export const Districts = () => (
           <li key={district.name} className={cn("w-64 shrink-0 snap-start lg:w-auto", SPANS[index])}>
             <Link
               href={`/catalog?district=${encodeURIComponent(district.name)}`}
-              className="group/tile relative isolate flex aspect-4/5 h-full w-full flex-col justify-end overflow-hidden rounded-3xl bg-ink p-5 text-on-scrim outline-none focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background lg:aspect-auto lg:p-6"
+              className="group/tile relative isolate flex aspect-4/5 h-full w-full flex-col justify-end overflow-hidden bg-ink p-5 text-on-scrim outline-none focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background lg:aspect-auto lg:p-6"
             >
               {/* eslint-disable-next-line @next/next/no-img-element -- static placeholders from public/; Workers has no image optimizer */}
               <img

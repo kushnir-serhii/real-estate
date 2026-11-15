@@ -62,7 +62,7 @@ export const DistrictPicker = () => {
       </div>
 
       <div className="site-container">
-        <div className="flex flex-col gap-6 sm:gap-8 lg:min-h-112 lg:justify-between lg:gap-16">
+        <div className="flex flex-col gap-5 sm:gap-6 lg:min-h-112 lg:justify-between lg:gap-12">
           <div className="reveal lg:max-w-md">
             <SectionHeading
               id="district-picker-title"
@@ -81,7 +81,7 @@ export const DistrictPicker = () => {
             height={first.image.height}
             loading="lazy"
             decoding="async"
-            className="aspect-3/2 w-full rounded-3xl bg-muted object-cover sm:aspect-21/9 lg:hidden"
+            className="aspect-3/2 w-full bg-muted object-cover sm:aspect-21/9 lg:hidden"
           />
 
           <ul className="reveal-stagger grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-5 lg:max-w-5xl">
