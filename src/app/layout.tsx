@@ -5,11 +5,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { cormorantSc } from "./fonts/cormorant-sc";
 import { sofiaSansCyrillic, sofiaSansHryvnia, sofiaSansLatin } from "./fonts/sofia-sans";
-import {
-  sofiaSansExtraCondensedCyrillic,
-  sofiaSansExtraCondensedHryvnia,
-  sofiaSansExtraCondensedLatin,
-} from "./fonts/sofia-sans-extra-condensed";
+import { playfairDisplayCyrillic, playfairDisplayLatin } from "./fonts/playfair-display";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -29,9 +25,8 @@ const FONT_VARIABLES = [
   sofiaSansLatin.variable,
   sofiaSansCyrillic.variable,
   sofiaSansHryvnia.variable,
-  sofiaSansExtraCondensedLatin.variable,
-  sofiaSansExtraCondensedCyrillic.variable,
-  sofiaSansExtraCondensedHryvnia.variable,
+  playfairDisplayLatin.variable,
+  playfairDisplayCyrillic.variable,
   cormorantSc.variable,
 ].join(" ");
 

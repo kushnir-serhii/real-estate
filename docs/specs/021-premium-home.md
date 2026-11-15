@@ -90,14 +90,14 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
   - [x] hero text ≥ 4.5:1 over a white test photo
   - [x] typecheck, lint, build green
 
-### [ ] 2. Playfair Display headings
+### [x] 2. Playfair Display headings
 - **Build:** self-host Playfair Display (variable, latin + cyrillic, `unicode-range`), `--font-display`; H1 / H2 / display utilities use it with the re-tuned scale; H3, card titles, prices stay Sofia Sans; remove Sofia Sans Extra Condensed if unused (and its files, OFL entry); `/design` updated.
 - **Files:** `src/app/fonts/*`, `src/app/layout.tsx`, `src/app/globals.css`, `src/app/design/page.tsx`, components using `font-heading`
 - **Agent:** designer · **Model:** sonnet
 - **Accept:**
-  - [ ] «Нерухомість у Києві», «Ґ, Є, Ї, І» render in Playfair (no fallback glyphs)
-  - [ ] fonts from local files only; font bytes before / after in the log
-  - [ ] `pnpm perf` on `/`: LCP < 2.5 s, CLS < 0.1
+  - [x] «Нерухомість у Києві», «Ґ, Є, Ї, І» render in Playfair (no fallback glyphs)
+  - [x] fonts from local files only; font bytes before / after in the log
+  - [x] `pnpm perf` on `/`: LCP < 2.5 s, CLS < 0.1
 
 ### [ ] 3. Sharp shapes
 - **Build:** `--radius: 0`, `--radius-control: 2px`; check every component that hardcodes `rounded-full` / `rounded-2xl` / `rounded-3xl` (cards, tiles, collage, chips, favourite and slider buttons, chat launcher, popovers, sheets); dots, thumbs and avatars stay round.
@@ -174,3 +174,4 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
 | 2026-11-15 | — | drafted | from the design critique; decisions: monochrome blue, Playfair Display (not SC) for H1/H2, 0px cards / 2px controls, CRM block removed, both district sections kept, exclusive = admin flag + price fallback, «Нові пропозиції» kept with deal tabs, histogram on home + catalog, motion «expressive but light» with a line-mask hero |
 | 2026-11-15 | 1 | done | tokens: brand / brand-text / brand-foreground / brand-on-ink replace dawn and sky; dark primary = ivory; button variant dawn → default, new inverse for dark sections and photos; header CTA outline; veils 80/72/0% behind text only, top band 65% (header nav ≥ 4.5:1 over white). Contrast (light/dark): fg/bg 14.8/15.9, muted 6.6/7.6, brand-text/bg 5.8/8.7, brand/bg 5.3/8.7, control 3.6/4.1, brand-on-ink/ink 8.0/7.3; hero h1 worst point 4.5:1. 51 files (globals.css, button.tsx, design page, every former dawn use) |
 | 2026-11-15 | 6 | done | fetchPublishedPrices in both drivers (Supabase reuses a shared applyFilters, pages of 1000) + pure buildPriceHistogram (nice step, ≈ 28 bars, open-ended bar from the 95th percentile, stats over all rows); getPriceHistogram facade (cached, tag properties, no deal = sell); GET /api/price-histogram: USD + rates, 400 via strict parseHistogramParams, s-maxage 300. Tests: unit binning, contract (sum = total per deal, aligned range = catalog total). SQL function = later optimisation. Files: src/lib/db/property-histogram*.ts, driver-types, properties (facade, both drivers), driver-contract.test, catalog-params(.test), src/app/api/price-histogram/route.ts |
+| 2026-11-15 | 2 | done | Playfair Display (variable, latin + cyrillic, self-hosted, unicode-range) as --font-display (replaces --font-heading); Sofia Sans Extra Condensed removed (loader + 3 woff2, OFL). Scale fluid 375→1440: display 40→80 / 500 / 1.1, h1 34→56, h2 30→48 / 1.15, h3 Sofia Sans 22→26 / 600; prices, card titles, numbers, ₴ in Sofia Sans semibold tabular-nums (card price 24px from sm). Font bytes 67,176 → 59,556 B. perf: / LCP 900 ms CLS 0; /catalog 964 ms; property 948 ms. Files: src/app/fonts/*, layout, globals.css, design page, 16 former font-heading uses, product.md, setup.md |

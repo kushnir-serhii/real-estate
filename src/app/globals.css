@@ -13,11 +13,9 @@
   --font-sans:
     var(--font-sofia-sans-cyrillic), var(--font-sofia-sans-hryvnia), var(--font-sofia-sans), ui-sans-serif, system-ui,
     sans-serif;
-  /* Sofia Sans Extra Condensed: headings, hero, prices, big numbers (weights 600-800).
-     Cyrillic and ₴ faces first, as for sans. */
-  --font-heading:
-    var(--font-sofia-sans-extra-condensed-cyrillic), var(--font-sofia-sans-extra-condensed-hryvnia),
-    var(--font-sofia-sans-extra-condensed), var(--font-sans);
+  /* Playfair Display: H1, H2, hero and section titles only (regular case, weights 500-600). Cyrillic face first, as for sans. */
+  --font-display:
+    var(--font-playfair-display-cyrillic), var(--font-playfair-display), ui-serif, Georgia, serif;
   /* Cormorant SC: the logo wordmark only (Latin, weight 600). */
   --font-logo: var(--font-cormorant-sc), ui-serif, Georgia, serif;
 
@@ -74,8 +72,8 @@
      → rounded-control-multiline. Follows --radius-control when that is set lower */
   --radius-control-multiline: min(var(--radius-control), var(--radius-3xl));
 
-  /* property card price (heading font, from sm; text-2xl below) → text-price */
-  --text-price: 1.75rem;
+  /* property card price (Sofia Sans, from sm; text-xl below) → text-price */
+  --text-price: 1.5rem;
   --text-price--line-height: 1.15;
 
   /* AI assistant launcher (round floating button) → size-chat-button */
@@ -276,40 +274,40 @@
   }
 }
 
-/* Type scale for the condensed heading face (Sofia Sans Extra Condensed): big sizes, heavy weights, no negative tracking.
-   Fluid between 375px and 1440px: display 48 -> 104px, h1 40 -> 72px, h2 36 -> 60px, h3 24 -> 32px. Sentence case. */
+/* Type scale. Display, h1, h2: Playfair Display, regular case, medium weight, tight tracking, fluid between 375px and 1440px:
+   display 40 -> 80px, h1 34 -> 56px, h2 30 -> 48px. h3 stays Sofia Sans (22 -> 26px, semibold). */
 @utility text-display {
-  font-family: var(--font-heading);
-  font-size: clamp(3rem, 1.77rem + 5.26vw, 6.5rem);
-  line-height: 0.95;
-  letter-spacing: 0;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 1.62rem + 3.76vw, 5rem);
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  font-weight: 500;
   text-wrap: balance;
   overflow-wrap: break-word;
 }
 @utility text-h1 {
-  font-family: var(--font-heading);
-  font-size: clamp(2.5rem, 1.8rem + 3vw, 4.5rem);
-  line-height: 1;
-  letter-spacing: 0;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: clamp(2.125rem, 1.64rem + 2.07vw, 3.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  font-weight: 500;
   text-wrap: balance;
   overflow-wrap: break-word;
 }
 @utility text-h2 {
-  font-family: var(--font-heading);
-  font-size: clamp(2.25rem, 1.72rem + 2.25vw, 3.75rem);
-  line-height: 1.02;
-  letter-spacing: 0.005em;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: clamp(1.875rem, 1.48rem + 1.69vw, 3rem);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  font-weight: 500;
   text-wrap: balance;
   overflow-wrap: break-word;
 }
 @utility text-h3 {
-  font-family: var(--font-heading);
-  font-size: clamp(1.5rem, 1.32rem + 0.75vw, 2rem);
-  line-height: 1.1;
-  letter-spacing: 0.01em;
+  font-family: var(--font-sans);
+  font-size: clamp(1.375rem, 1.26rem + 0.5vw, 1.625rem);
+  line-height: 1.2;
+  letter-spacing: -0.005em;
   font-weight: 600;
   text-wrap: balance;
   overflow-wrap: break-word;
@@ -468,7 +466,7 @@
   h1,
   h2,
   h3 {
-    @apply font-heading text-balance;
+    @apply text-balance;
   }
   /* Tailwind 4 dropped the pointer cursor on native controls */
   button:not(:disabled),

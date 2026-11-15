@@ -34,7 +34,7 @@ export const AgentTile = ({ agent }: { agent: Agent }) => {
       ) : (
         <span
           aria-hidden="true"
-          className="flex size-24 items-center justify-center rounded-full bg-primary font-heading text-2xl font-semibold text-primary-foreground"
+          className="flex size-24 items-center justify-center rounded-full bg-primary text-2xl font-semibold text-primary-foreground"
         >
           {initials(agent.name)}
         </span>

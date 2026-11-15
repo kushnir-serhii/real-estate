@@ -73,9 +73,9 @@ const RADII = [
 const FONTS = [
   { name: "Sofia Sans", role: "font-sans · текст", className: "font-sans text-2xl", sample: "Нерухомість у Києві · Ґ, Є, Ї, І · Real estate" },
   {
-    name: "Sofia Sans Extra Condensed",
-    role: "font-heading · заголовки",
-    className: "font-heading text-4xl font-bold",
+    name: "Playfair Display",
+    role: "font-display · H1, H2, hero",
+    className: "font-display text-4xl font-medium",
     sample: "Нерухомість у Києві · Ґ, Є, Ї, І",
   },
   { name: "Cormorant SC 600", role: "font-logo · лише логотип", className: "font-logo text-4xl leading-none", sample: "Diplomat Hall" },
@@ -192,29 +192,29 @@ const DesignPage = () => (
         ))}
       </ul>
       <div className="flex flex-col gap-1 rounded-xl border p-4">
-        <span className="text-sm text-muted-foreground">Заголовний шрифт: вага 600 / 700 / 800</span>
-        <p className="text-h2 font-semibold">Нерухомість у Києві · Ґ, Є, Ї, І</p>
-        <p className="text-h2 font-bold">Real estate in Kyiv · Ґ, Є, Ї, І</p>
-        <p className="text-h2 font-extrabold">Нерухомість у Києві · Real estate</p>
+        <span className="text-sm text-muted-foreground">Playfair Display: вага 500 / 600 / 700 (у заголовках 500–600)</span>
+        <p className="text-h2 font-medium">Нерухомість у Києві · Ґ, Є, Ї, І</p>
+        <p className="text-h2 font-semibold">Real estate in Kyiv · Ґ, Є, Ї, І</p>
+        <p className="text-h2 font-bold">Нерухомість у Києві · Real estate</p>
       </div>
     </Section>
 
     <Section title="Типографіка">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <span className="eyebrow text-muted-foreground">Sofia Sans Extra Condensed · display</span>
+          <span className="eyebrow text-muted-foreground">Playfair Display · display · 40 → 80px · 500 · 1.1</span>
           <p className="text-display">Нерухомість у Києві</p>
         </div>
         <div className="flex flex-col gap-1">
-          <span className="eyebrow text-muted-foreground">Sofia Sans Extra Condensed · h1</span>
+          <span className="eyebrow text-muted-foreground">Playfair Display · h1 · 34 → 56px · 500 · 1.1</span>
           <p className="text-h1">Квартири в центрі Києва</p>
         </div>
         <div className="flex flex-col gap-1">
-          <span className="eyebrow text-muted-foreground">Sofia Sans Extra Condensed · h2</span>
+          <span className="eyebrow text-muted-foreground">Playfair Display · h2 · 30 → 48px · 500 · 1.15</span>
           <p className="text-h2">Район, який вам підходить</p>
         </div>
         <div className="flex flex-col gap-1">
-          <span className="eyebrow text-muted-foreground">Sofia Sans Extra Condensed · h3</span>
+          <span className="eyebrow text-muted-foreground">Sofia Sans · h3 · 22 → 26px · 600 · 1.2</span>
           <p className="text-h3">Підзаголовок розділу: Ґ, Є, Ї, І</p>
         </div>
         <div className="flex flex-col gap-1">
@@ -231,8 +231,8 @@ const DesignPage = () => (
         <span className="text-sm text-muted-foreground">
           Ціна (tabular-nums)
         </span>
-        <p className="font-heading text-4xl font-bold tabular-nums">85 000 $</p>
-        <p className="font-heading text-3xl font-semibold tabular-nums">2 450 000 ₴</p>
+        <p className="text-3xl font-semibold tabular-nums">85 000 $</p>
+        <p className="text-2xl font-semibold tabular-nums">2 450 000 ₴</p>
         <p className="text-lg tabular-nums">1 111 111 € / 8 888 888 €</p>
       </div>
     </Section>
@@ -335,7 +335,7 @@ const DesignPage = () => (
           <CardDescription>78 м², 5 поверх із 9</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="font-heading text-2xl font-semibold tabular-nums">85 000 $</p>
+          <p className="text-xl font-semibold tabular-nums">85 000 $</p>
         </CardContent>
         <CardFooter>
           <Button className="w-full">Показати телефон</Button>

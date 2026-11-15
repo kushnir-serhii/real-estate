@@ -40,7 +40,7 @@ export const Districts = () => (
               <span aria-hidden="true" className="tile-veil absolute inset-0 -z-10" />
               <span className="flex items-end justify-between gap-3">
                 <span className="flex min-w-0 flex-col gap-1">
-                  <h3 className={cn("font-heading font-semibold break-words", index === 0 ? "text-h3" : "text-lg")}>
+                  <h3 className={cn("font-semibold break-words", index === 0 ? "text-h3" : "text-lg")}>
                     {district.name}
                   </h3>
                   <span className="text-sm">{district.tagline}</span>

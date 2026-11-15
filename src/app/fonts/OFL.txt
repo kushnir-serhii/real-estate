@@ -1,10 +1,12 @@
 =====================================================================
-Sofia Sans, Sofia Sans Extra Condensed
+Sofia Sans, Playfair Display
 =====================================================================
 
 Copyright 2019 The Sofia Sans Project Authors (https://github.com/lettersoup/Sofia-Sans)
+Copyright 2017 The Playfair Display Project Authors (https://github.com/clauseggers/Playfair-Display),
+with Reserved Font Name "Playfair Display" (files used unmodified)
 
-Modified versions (Diplomat Hall site, 2026): the *-cyrillic-* files map Cyrillic codepoints to the
+Modified versions (Diplomat Hall site, 2026), Sofia Sans only: the sofia-sans-cyrillic-* file map Cyrillic codepoints to the
 fonts' own .loclRUS glyphs (standard instead of Bulgarian letterforms); the *-hryvnia-* files add a
 hryvnia sign (U+20B4) drawn from the fonts' own S and hyphen. Still under the SIL OFL 1.1.
 
