@@ -51,7 +51,7 @@ export const PropertyFacts = ({ rows }: PropertyFactsProps) => {
             >
               <span
                 aria-hidden="true"
-                className="flex size-9 items-center justify-center rounded-full bg-secondary text-dawn-text"
+                className="flex size-9 items-center justify-center rounded-full bg-secondary text-brand-text"
               >
                 <Icon className="size-4" />
               </span>

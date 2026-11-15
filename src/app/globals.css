@@ -45,10 +45,10 @@
   --color-scrim: var(--scrim);
   --color-on-scrim: var(--on-scrim);
   --color-viewer: var(--viewer);
-  --color-dawn: var(--dawn);
-  --color-dawn-foreground: var(--dawn-foreground);
-  --color-dawn-text: var(--dawn-text);
-  --color-sky: var(--sky);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-brand-text: var(--brand-text);
+  --color-brand-on-ink: var(--brand-on-ink);
   --color-ink: var(--ink);
   --color-on-ink: var(--on-ink);
   --color-ink-muted: var(--ink-muted);
@@ -108,43 +108,44 @@
   color-scheme: light;
   --radius: 0.75rem;
 
-  /* Midnight Sky. Neutrals are tinted (warm in light, blue in dark), never pure grey. */
-  --background: oklch(0.967 0.007 88.6);
-  --foreground: oklch(0.22 0.042 256);
-  --card: oklch(0.995 0.003 88);
-  --card-foreground: oklch(0.22 0.042 256);
-  --popover: oklch(0.995 0.003 88);
-  --popover-foreground: oklch(0.22 0.042 256);
-  /* primary = midnight; the main CTA uses dawn */
-  --primary: oklch(0.22 0.042 256);
-  --primary-foreground: oklch(0.97 0.007 88);
-  --secondary: oklch(0.94 0.01 85);
-  --secondary-foreground: oklch(0.26 0.04 256);
-  --muted: oklch(0.94 0.008 85);
-  --muted-foreground: oklch(0.45 0.03 256);
+  /* Midnight + one blue. Neutrals are cool (a faint blue tint), never pure grey and never yellow. The page is cool ivory,
+     cards are white with a hairline border. The main button is midnight (primary); blue is for details only
+     (brand: eyebrows, thin rules, numbers, icons, focus ring, active states; at most ~5% of a screen). */
+  --background: oklch(0.972 0.004 95);
+  --foreground: oklch(0.25 0.055 262);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.25 0.055 262);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.25 0.055 262);
+  --primary: oklch(0.25 0.055 262);
+  --primary-foreground: oklch(0.98 0.004 95);
+  --secondary: oklch(0.945 0.008 255);
+  --secondary-foreground: oklch(0.28 0.05 262);
+  --muted: oklch(0.945 0.008 255);
+  --muted-foreground: oklch(0.46 0.03 258);
   /* subtle hover / selected tint */
-  --accent: oklch(0.92 0.022 80);
-  --accent-foreground: oklch(0.22 0.042 256);
+  --accent: oklch(0.93 0.015 260);
+  --accent-foreground: oklch(0.25 0.055 262);
   --destructive: oklch(0.5 0.2 27);
   /* status text and icons (delivery badges); AA on the page, cards and their own 10% tint */
   --success: oklch(0.46 0.12 150);
   --warning: oklch(0.48 0.11 65);
-  --border: oklch(0.89 0.01 85);
-  --input: oklch(0.89 0.01 85);
+  --border: oklch(0.9 0.008 258);
+  --input: oklch(0.9 0.008 258);
   /* form control outline, needs 3:1 against the page */
-  --control: oklch(0.6 0.03 256);
-  --ring: oklch(0.55 0.07 256);
+  --control: oklch(0.6 0.03 258);
+  --ring: var(--brand);
 
-  /* the one accent: dawn. Always with dawn-foreground (midnight) on it. As text on a light page use dawn-text. */
-  --dawn: oklch(0.764 0.12 63.5);
-  --dawn-foreground: oklch(0.22 0.042 256);
-  --dawn-text: oklch(0.5 0.11 60);
-  /* secondary decoration: map, gradients, icons (3:1 on the page) */
-  --sky: oklch(0.63 0.069 256.5);
+  /* the accent: royal blue. brand = fills and lines (>= 3:1), brand-text = small text on the page and cards (>= 4.5:1),
+     brand-foreground = text on a brand fill, brand-on-ink = the accent on dark sections and over photo veils */
+  --brand: oklch(0.52 0.19 265);
+  --brand-foreground: oklch(1 0 0);
+  --brand-text: oklch(0.5 0.19 265);
+  --brand-on-ink: oklch(0.78 0.11 265);
   /* dark sections (footer, CTA band, how-we-work); text on them uses on-ink / ink-muted */
-  --ink: oklch(0.22 0.042 256);
-  --on-ink: oklch(0.97 0.007 88);
-  --ink-muted: oklch(0.78 0.03 256);
+  --ink: oklch(0.25 0.055 262);
+  --on-ink: oklch(0.972 0.004 95);
+  --ink-muted: oklch(0.8 0.03 258);
   --ink-border: oklch(1 0 0 / 12%);
 
   /* dark veil over photos, same in both themes; text on it uses on-scrim */
@@ -152,12 +153,14 @@
   --on-scrim: oklch(0.985 0.004 88);
   /* fullscreen photo viewer backdrop, same in both themes; text and controls use on-scrim */
   --viewer: oklch(0.13 0.03 258);
-  /* hero veil stops (midnight at different opacity), same in both themes. Text sits on the strong/mid part (>= 85%),
-     which keeps on-scrim text >= 4.5:1 even over a pure white photo; the soft end lets the photo breathe top-right */
-  --veil-strong: oklch(0.15 0.04 258 / 92%);
-  --veil-mid: oklch(0.15 0.04 258 / 85%);
-  --veil-soft: oklch(0.15 0.04 258 / 38%);
-  --veil-top: oklch(0.15 0.04 258 / 60%);
+  /* photo veil stops (midnight at different opacity), same in both themes. Veils sit only behind text (bottom and left of
+     the hero, bottom of tiles); the rest of the photo stays clear. Behind text the alpha is >= 70%, which keeps on-scrim
+     text >= 4.5:1 even over a pure white photo (lead text at 90% included). soft = same colour at 0%, so no grey fringe */
+  --veil-strong: oklch(0.15 0.04 258 / 80%);
+  --veil-mid: oklch(0.15 0.04 258 / 72%);
+  --veil-soft: oklch(0.15 0.04 258 / 0%);
+  /* a band at the top of the hero: 65% keeps the transparent header's 14px nav links >= 4.5:1 over a white photo */
+  --veil-top: oklch(0.15 0.04 258 / 65%);
 
   /* motion */
   --duration-fast: 150ms;
@@ -168,33 +171,33 @@
 .dark {
   color-scheme: dark;
 
-  --background: oklch(0.191 0.036 259.5);
-  --foreground: oklch(0.96 0.008 88);
-  --card: oklch(0.23 0.043 258.7);
-  --card-foreground: oklch(0.96 0.008 88);
-  --popover: oklch(0.23 0.043 258.7);
-  --popover-foreground: oklch(0.96 0.008 88);
-  /* primary = dawn with midnight text */
-  --primary: oklch(0.764 0.12 63.5);
-  --primary-foreground: oklch(0.22 0.042 256);
-  --secondary: oklch(0.28 0.04 258);
-  --secondary-foreground: oklch(0.96 0.008 88);
-  --muted: oklch(0.27 0.035 258);
-  --muted-foreground: oklch(0.74 0.03 256);
-  --accent: oklch(0.31 0.04 258);
-  --accent-foreground: oklch(0.96 0.008 88);
+  --background: oklch(0.215 0.045 262);
+  --foreground: oklch(0.965 0.006 95);
+  --card: oklch(0.26 0.045 262);
+  --card-foreground: oklch(0.965 0.006 95);
+  --popover: oklch(0.26 0.045 262);
+  --popover-foreground: oklch(0.965 0.006 95);
+  /* primary = ivory with midnight text */
+  --primary: oklch(0.965 0.006 95);
+  --primary-foreground: oklch(0.22 0.05 262);
+  --secondary: oklch(0.3 0.04 262);
+  --secondary-foreground: oklch(0.965 0.006 95);
+  --muted: oklch(0.28 0.04 262);
+  --muted-foreground: oklch(0.74 0.03 258);
+  --accent: oklch(0.32 0.045 262);
+  --accent-foreground: oklch(0.965 0.006 95);
   --destructive: oklch(0.74 0.17 22);
   --success: oklch(0.78 0.14 150);
   --warning: oklch(0.82 0.12 80);
-  --border: oklch(0.8 0.05 256 / 16%);
-  --input: oklch(0.8 0.05 256 / 18%);
-  --control: oklch(0.58 0.05 256);
-  --ring: oklch(0.764 0.12 63.5);
+  --border: oklch(0.8 0.05 262 / 16%);
+  --input: oklch(0.8 0.05 262 / 18%);
+  --control: oklch(0.58 0.05 262);
 
-  --dawn-text: oklch(0.764 0.12 63.5);
-  --sky: oklch(0.74 0.07 256.5);
+  --brand: oklch(0.78 0.11 265);
+  --brand-foreground: oklch(0.22 0.05 262);
+  --brand-text: oklch(0.78 0.11 265);
   /* slightly lifted midnight, so ink sections still separate from the page */
-  --ink: oklch(0.25 0.045 257);
+  --ink: oklch(0.28 0.05 262);
   --ink-border: oklch(1 0 0 / 10%);
 }
 
@@ -379,13 +382,22 @@
   }
 }
 @utility hero-veil {
+  /* phones: the text fills the width, so the veil is vertical (strong at the bottom) */
   background-image:
-    linear-gradient(to bottom, var(--veil-top), transparent 22%),
-    linear-gradient(to top right, var(--veil-strong) 0%, var(--veil-mid) 45%, var(--veil-soft) 100%);
+    linear-gradient(to bottom, var(--veil-top), var(--veil-soft) 16%),
+    linear-gradient(to top, var(--veil-strong) 0%, var(--veil-mid) 60%, var(--veil-top) 100%);
+  /* from sm: a band at the bottom and one on the left, where the text sits; the top right of the photo stays clear */
+  @variant sm {
+    background-image:
+      linear-gradient(to bottom, var(--veil-top), var(--veil-soft) 16%),
+      linear-gradient(to top, var(--veil-strong) 0%, var(--veil-strong) 28%, var(--veil-soft) 62%),
+      linear-gradient(to right, var(--veil-mid) 0%, var(--veil-mid) 52%, var(--veil-soft) 100%);
+  }
 }
-/* Photo tile veil (districts): text sits at the bottom, on >= 85% midnight, so on-scrim stays >= 4.5:1 over any photo */
+/* Photo tile veil (districts): text sits at the bottom third, on >= 70% midnight, so on-scrim stays >= 4.5:1 over any
+   photo; above that the photo is clear */
 @utility tile-veil {
-  background-image: linear-gradient(to top, var(--veil-strong) 0%, var(--veil-mid) 40%, var(--veil-soft) 100%);
+  background-image: linear-gradient(to top, var(--veil-strong) 0%, var(--veil-mid) 34%, var(--veil-soft) 85%);
 }
 /* District picker photo (desktop): fades into the page on the left (where the title sits, fully opaque there) and at
    the top and bottom edges, in both themes. Text never sits on the photo itself; the district pills are solid. */

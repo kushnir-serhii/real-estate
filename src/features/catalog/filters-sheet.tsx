@@ -22,7 +22,7 @@ export const FiltersSheet = ({ activeCount, children }: FiltersSheetProps) => (
   <Sheet>
     <SheetTrigger asChild>
       <Button variant="outline">
-        <SlidersHorizontal className="text-dawn-text" aria-hidden="true" />
+        <SlidersHorizontal className="text-brand-text" aria-hidden="true" />
         {activeCount > 0 ? `Фільтри (${activeCount})` : "Фільтри"}
       </Button>
     </SheetTrigger>

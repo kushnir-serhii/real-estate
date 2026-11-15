@@ -5,7 +5,7 @@ import { toTel } from "@/lib/format/to-tel";
 import { photoUrl } from "@/lib/photos/photo-url";
 
 const LINK_CLASS =
-  "inline-flex min-h-11 items-center rounded-md break-all text-foreground underline-offset-4 outline-none hover:text-dawn-text hover:underline focus-visible:ring-3 focus-visible:ring-ring/50";
+  "inline-flex min-h-11 items-center rounded-md break-all text-foreground underline-offset-4 outline-none hover:text-brand-text hover:underline focus-visible:ring-3 focus-visible:ring-ring/50";
 
 export const AgentCard = ({ agent }: { agent: Agent }) => (
   <li className="flex gap-4 rounded-2xl bg-card p-5 ring-1 ring-foreground/10">
@@ -17,12 +17,12 @@ export const AgentCard = ({ agent }: { agent: Agent }) => (
         width={64}
         height={64}
         loading="lazy"
-        className="size-16 shrink-0 rounded-full bg-muted object-cover ring-2 ring-dawn"
+        className="size-16 shrink-0 rounded-full bg-muted object-cover ring-2 ring-brand"
       />
     ) : (
       <div
         aria-hidden="true"
-        className="flex size-16 shrink-0 items-center justify-center rounded-full bg-secondary text-dawn-text ring-2 ring-dawn"
+        className="flex size-16 shrink-0 items-center justify-center rounded-full bg-secondary text-brand-text ring-2 ring-brand"
       >
         <User className="size-7" />
       </div>

@@ -6,7 +6,7 @@ import { toTel } from "@/lib/format/to-tel";
 import { photoUrl } from "@/lib/photos/photo-url";
 
 const LINK =
-  "inline-flex min-h-11 items-center gap-2 rounded-md break-all text-foreground outline-none hover:text-dawn-text focus-visible:ring-3 focus-visible:ring-ring/50";
+  "inline-flex min-h-11 items-center gap-2 rounded-md break-all text-foreground outline-none hover:text-brand-text focus-visible:ring-3 focus-visible:ring-ring/50";
 
 const initials = (name: string) =>
   name
@@ -34,7 +34,7 @@ export const AgentTile = ({ agent }: { agent: Agent }) => {
       ) : (
         <span
           aria-hidden="true"
-          className="flex size-24 items-center justify-center rounded-full bg-dawn font-heading text-2xl font-semibold text-dawn-foreground"
+          className="flex size-24 items-center justify-center rounded-full bg-primary font-heading text-2xl font-semibold text-primary-foreground"
         >
           {initials(agent.name)}
         </span>

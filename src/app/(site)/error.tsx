@@ -17,7 +17,7 @@ const SiteError = ({ reset }: SiteErrorProps) => (
     lead={ERROR_PAGE.lead}
     className="pt-16 pb-24"
   >
-    <Button type="button" variant="dawn" size="lg" onClick={reset}>
+    <Button type="button" variant="default" size="lg" onClick={reset}>
       {ERROR_PAGE.retry}
     </Button>
     <Link href="/" className={buttonVariants({ variant: "outline", size: "lg" })}>

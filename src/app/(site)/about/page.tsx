@@ -35,7 +35,7 @@ const AboutPage = async () => {
         <AboutTeam />
       </div>
       <div className="mx-auto mt-10 flex w-full max-w-3xl flex-wrap gap-3 px-4 sm:px-6">
-        <Link href="/contacts" className={buttonVariants({ variant: "dawn", size: "lg" })}>
+        <Link href="/contacts" className={buttonVariants({ variant: "default", size: "lg" })}>
           {ABOUT_PAGE.contactAction}
           <ArrowRight data-icon="inline-end" aria-hidden="true" />
         </Link>

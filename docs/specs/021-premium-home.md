@@ -1,6 +1,6 @@
 # 021 — Premium home: blue palette, Playfair headings, sharp shapes, price histogram, motion
 
-**Status:** ready · **Depends on:** 018 · **Route(s):** `/` (redesigned); `/catalog` (price filter); every other route only inherits the new tokens (fix regressions, no redesign); `/admin` gets one checkbox
+**Status:** in-progress · **Depends on:** 018 · **Route(s):** `/` (redesigned); `/catalog` (price filter); every other route only inherits the new tokens (fix regressions, no redesign); `/admin` gets one checkbox
 
 ## Goal
 The home page reads as a **premium** agency that still serves every segment: a calm monochrome blue palette with no orange, Playfair Display headings that match the classic logo, sharp corners, lighter photos, an «Ексклюзивні об'єкти» showcase managed from the admin, a modern price filter whose histogram shows how many properties are in and around the chosen range (home and catalog), and editorial motion (a line-by-line mask reveal in the hero, not a plain fade).
@@ -80,15 +80,15 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
 
 ## Slices
 
-### [ ] 1. Blue palette and lighter veils
+### [x] 1. Blue palette and lighter veils
 - **Build:** new light / dark tokens per **Design direction**; `--brand` / `--brand-text` replace `--dawn*`; remove the `dawn` button variant and move every use to `default` (midnight) or `brand` details; lighter hero / district / CTA veils; card = white + hairline. `/design` shows the palette with contrast numbers.
 - **Files:** `src/app/globals.css`, `src/components/ui/button.tsx`, every `dawn` use (`grep -rn dawn src`), `src/app/design/page.tsx`
 - **Agent:** designer · **Model:** sonnet
 - **Accept:**
-  - [ ] `grep -rn dawn src` finds nothing; no orange on any public page or the admin, both themes
-  - [ ] all text pairs AA (body 4.5:1, large and UI 3:1), numbers in the log
-  - [ ] hero text ≥ 4.5:1 over a white test photo
-  - [ ] typecheck, lint, build green
+  - [x] `grep -rn dawn src` finds nothing; no orange on any public page or the admin, both themes
+  - [x] all text pairs AA (body 4.5:1, large and UI 3:1), numbers in the log
+  - [x] hero text ≥ 4.5:1 over a white test photo
+  - [x] typecheck, lint, build green
 
 ### [ ] 2. Playfair Display headings
 - **Build:** self-host Playfair Display (variable, latin + cyrillic, `unicode-range`), `--font-display`; H1 / H2 / display utilities use it with the re-tuned scale; H3, card titles, prices stay Sofia Sans; remove Sofia Sans Extra Condensed if unused (and its files, OFL entry); `/design` updated.
@@ -172,3 +172,4 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
 | Date | Slice | Result | Notes / files |
 | --- | --- | --- | --- |
 | 2026-11-15 | — | drafted | from the design critique; decisions: monochrome blue, Playfair Display (not SC) for H1/H2, 0px cards / 2px controls, CRM block removed, both district sections kept, exclusive = admin flag + price fallback, «Нові пропозиції» kept with deal tabs, histogram on home + catalog, motion «expressive but light» with a line-mask hero |
+| 2026-11-15 | 1 | done | tokens: brand / brand-text / brand-foreground / brand-on-ink replace dawn and sky; dark primary = ivory; button variant dawn → default, new inverse for dark sections and photos; header CTA outline; veils 80/72/0% behind text only, top band 65% (header nav ≥ 4.5:1 over white). Contrast (light/dark): fg/bg 14.8/15.9, muted 6.6/7.6, brand-text/bg 5.8/8.7, brand/bg 5.3/8.7, control 3.6/4.1, brand-on-ink/ink 8.0/7.3; hero h1 worst point 4.5:1. 51 files (globals.css, button.tsx, design page, every former dawn use) |

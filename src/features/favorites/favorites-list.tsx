@@ -106,7 +106,7 @@ export const FavoritesList = ({ suggestions }: FavoritesListProps) => {
             Ваш список збережено. Перевірте з&apos;єднання й спробуйте ще раз.
           </p>
         </div>
-        <Button type="button" variant="dawn" onClick={() => setFailed(false)}>
+        <Button type="button" variant="default" onClick={() => setFailed(false)}>
           <RefreshCw aria-hidden="true" />
           Спробувати ще раз
         </Button>

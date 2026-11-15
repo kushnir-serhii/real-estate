@@ -87,7 +87,7 @@ export const PropertyView = ({ property }: PropertyViewProps) => {
           <PropertyGallery photos={toGalleryPhotos(property)} title={property.title} />
 
           <header className="flex flex-col gap-3">
-            <p className="eyebrow text-dawn-text">
+            <p className="eyebrow text-brand-text">
               {DEAL_LABELS[property.deal]} · {PROPERTY_TYPE_LABELS[property.property_type]}
             </p>
             <h1 className="text-h2 break-words">{property.title}</h1>
@@ -114,7 +114,7 @@ export const PropertyView = ({ property }: PropertyViewProps) => {
               facts={facts}
               action={<FavoriteButton propertyId={property.id} variant="page" />}
             />
-            <a href={`#${REQUEST_ANCHOR}`} className={cn(buttonVariants({ variant: "dawn", size: "lg" }), "mt-5 w-full")}>
+            <a href={`#${REQUEST_ANCHOR}`} className={cn(buttonVariants({ variant: "default", size: "lg" }), "mt-5 w-full")}>
               Залишити заявку
               <ArrowRight data-icon="inline-end" aria-hidden="true" />
             </a>

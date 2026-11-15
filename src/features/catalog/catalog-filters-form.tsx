@@ -206,7 +206,7 @@ export const CatalogFiltersForm = ({
         <Link href={resetHref(state)} className={buttonVariants({ variant: "outline", size: "lg" })}>
           Скинути
         </Link>
-        <Button type="submit" variant="dawn" size="lg">
+        <Button type="submit" variant="default" size="lg">
           Показати
         </Button>
       </div>

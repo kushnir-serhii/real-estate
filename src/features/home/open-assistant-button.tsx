@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 export const OpenAssistantButton = ({ label }: { label: string }) => (
   <Button
     type="button"
-    variant="dawn"
+    variant="inverse"
     size="lg"
     onClick={() => document.querySelector<HTMLElement>("[data-assistant-launcher]")?.click()}
   >

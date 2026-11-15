@@ -11,7 +11,7 @@ export const HomeAbout = ({ body }: { body: string }) => (
   <HomeSection ariaLabel={ABOUT.eyebrow}>
     <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
       <div className="reveal flex flex-col items-start gap-6">
-        <p className="eyebrow text-dawn-text">{ABOUT.eyebrow}</p>
+        <p className="eyebrow text-brand-text">{ABOUT.eyebrow}</p>
         <Markdown className="max-w-prose">{body}</Markdown>
         <Link href="/about" className={buttonVariants({ variant: "outline", size: "lg" })}>
           {ABOUT.action}

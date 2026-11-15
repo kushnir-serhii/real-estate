@@ -68,7 +68,7 @@ export const MobileMenu = () => {
           </ul>
         </nav>
         <div className="flex flex-col gap-4 px-4">
-          <Button asChild variant="dawn" size="lg">
+          <Button asChild variant="default" size="lg">
             <Link href={CTA_LINK.href} onClick={close}>
               {CTA_LINK.label}
               <ArrowRight data-icon="inline-end" aria-hidden="true" />

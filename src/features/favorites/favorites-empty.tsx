@@ -5,7 +5,7 @@ import { buttonVariants } from "@/components/ui/button";
 
 export const FavoritesEmpty = () => (
   <div className="flex flex-col items-start gap-5 rounded-2xl border border-dashed border-control bg-card p-6 sm:p-10">
-    <span aria-hidden="true" className="flex size-14 items-center justify-center rounded-full bg-dawn text-dawn-foreground">
+    <span aria-hidden="true" className="flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground">
       <Heart className="size-6" />
     </span>
     <div className="flex flex-col gap-2">
@@ -14,7 +14,7 @@ export const FavoritesEmpty = () => (
         Тут з&apos;являться об&apos;єкти, які ви збережете. Натисніть ♡ на картці.
       </p>
     </div>
-    <Link href="/catalog" className={buttonVariants({ variant: "dawn", size: "lg" })}>
+    <Link href="/catalog" className={buttonVariants({ variant: "default", size: "lg" })}>
       До каталогу
       <ArrowRight data-icon="inline-end" aria-hidden="true" />
     </Link>

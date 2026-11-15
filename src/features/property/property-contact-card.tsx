@@ -16,7 +16,7 @@ type PropertyContactCardProps = {
 };
 
 const OTHER_PHONE =
-  "inline-flex min-h-11 items-center gap-2 self-start rounded-md font-semibold text-on-ink tabular-nums outline-none hover:text-dawn focus-visible:ring-3 focus-visible:ring-dawn/60";
+  "inline-flex min-h-11 items-center gap-2 self-start rounded-md font-semibold text-on-ink tabular-nums outline-none hover:text-brand-on-ink focus-visible:ring-3 focus-visible:ring-brand-on-ink/60";
 
 /**
  * Who to contact about this property: its agent, else the agency; agency messengers always.
@@ -34,7 +34,7 @@ export const PropertyContactCard = ({ agent, className }: PropertyContactCardPro
       aria-labelledby={`${CONTACT_ANCHOR}-title`}
       className={cn("scroll-mt-24 rounded-2xl bg-ink p-6 text-on-ink ring-1 ring-ink-border", className)}
     >
-      <h2 id={`${CONTACT_ANCHOR}-title`} className="eyebrow text-dawn">
+      <h2 id={`${CONTACT_ANCHOR}-title`} className="eyebrow text-brand-on-ink">
         Зв&apos;язатися щодо об&apos;єкта
       </h2>
 
@@ -47,12 +47,12 @@ export const PropertyContactCard = ({ agent, className }: PropertyContactCardPro
             width={64}
             height={64}
             loading="lazy"
-            className="size-16 shrink-0 rounded-full bg-muted object-cover ring-2 ring-dawn"
+            className="size-16 shrink-0 rounded-full bg-muted object-cover ring-2 ring-brand-on-ink"
           />
         ) : (
           <div
             aria-hidden="true"
-            className="flex size-16 shrink-0 items-center justify-center rounded-full bg-on-ink/10 text-on-ink ring-2 ring-dawn"
+            className="flex size-16 shrink-0 items-center justify-center rounded-full bg-on-ink/10 text-on-ink ring-2 ring-brand-on-ink"
           >
             {agent ? <User className="size-7" /> : <Building2 className="size-7" />}
           </div>
@@ -65,7 +65,7 @@ export const PropertyContactCard = ({ agent, className }: PropertyContactCardPro
         </div>
       </div>
 
-      <a href={main.href} className={cn(buttonVariants({ variant: "dawn", size: "lg" }), "mt-5 w-full tabular-nums")}>
+      <a href={main.href} className={cn(buttonVariants({ variant: "inverse", size: "lg" }), "mt-5 w-full tabular-nums")}>
         <Phone aria-hidden="true" />
         {main.display}
       </a>

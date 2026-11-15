@@ -124,7 +124,7 @@ const ThumbStrip = ({ photos, index, onSelect, thumbClassName, className }: Thum
               onClick={() => onSelect(i)}
               className={cn(
                 "block aspect-4/3 w-full overflow-hidden rounded-xl bg-muted outline-none ring-offset-2 ring-offset-background transition-opacity duration-(--duration-fast) ease-(--ease-out-soft) focus-visible:ring-3 focus-visible:ring-ring",
-                active ? "opacity-100 ring-2 ring-dawn" : "opacity-60 hover:opacity-100 focus-visible:opacity-100",
+                active ? "opacity-100 ring-2 ring-brand" : "opacity-60 hover:opacity-100 focus-visible:opacity-100",
               )}
             >
               {/* eslint-disable-next-line @next/next/no-img-element -- photos come from R2/public; Workers has no image optimizer */}

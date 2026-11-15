@@ -71,7 +71,7 @@ export const NavProgress = () => {
   if (!pending) return null;
   return (
     <div role="progressbar" aria-label="Завантаження" className="nav-progress pointer-events-none fixed inset-x-0 top-0 z-[60] h-0.5 overflow-hidden bg-transparent">
-      <div className="nav-progress-bar h-full w-1/3 bg-dawn" />
+      <div className="nav-progress-bar h-full w-1/3 bg-brand" />
     </div>
   );
 };

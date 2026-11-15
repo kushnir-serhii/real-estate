@@ -26,13 +26,13 @@ export const Hero = ({ title, lead }: HeroProps) => (
     <div className="hero-veil absolute inset-0 -z-10" aria-hidden="true" />
     <div className="hero-stagger site-container flex flex-col items-start gap-5 pt-34 pb-28 text-on-scrim sm:gap-6 sm:pb-32">
       <p className="inline-flex max-w-full items-center gap-2 rounded-control bg-on-scrim/10 px-3.5 py-1.5 text-sm font-medium ring-1 ring-on-scrim/20 backdrop-blur">
-        <span className="size-2 shrink-0 rounded-full bg-dawn" aria-hidden="true" />
+        <span className="size-2 shrink-0 rounded-full bg-brand-on-ink" aria-hidden="true" />
         <span className="min-w-0">{HERO.eyebrow}</span>
       </p>
       <h1 className="text-display max-w-4xl">{title}</h1>
       <p className="max-w-2xl text-base text-pretty text-on-scrim/90 sm:text-lg">{lead}</p>
       <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-        <Button asChild variant="dawn" size="lg">
+        <Button asChild variant="inverse" size="lg">
           <Link href="/catalog">
             {HERO.primaryCta}
             <ArrowRight aria-hidden="true" data-icon="inline-end" />

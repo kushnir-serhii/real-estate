@@ -33,14 +33,14 @@ export const ProptechFeatures = () => (
       <ul className="reveal-stagger grid gap-4 lg:grid-cols-3 lg:gap-6">
         <li className="lg:col-span-2">
           <article className="relative isolate flex h-full flex-col justify-between gap-8 overflow-hidden rounded-3xl bg-ink p-6 text-on-ink sm:p-8">
-            {/* glow: sky from the top right, a warm dawn edge at the bottom left */}
+            {/* glow: brand blue from the top right and the bottom left */}
             <span
               aria-hidden="true"
-              className="absolute -top-24 -right-16 -z-10 size-96 rounded-full bg-sky/40 blur-3xl"
+              className="absolute -top-24 -right-16 -z-10 size-96 rounded-full bg-brand/40 blur-3xl"
             />
             <span
               aria-hidden="true"
-              className="absolute -bottom-32 -left-20 -z-10 size-80 rounded-full bg-dawn/20 blur-3xl"
+              className="absolute -bottom-32 -left-20 -z-10 size-80 rounded-full bg-brand/20 blur-3xl"
             />
             <div className="flex flex-col gap-4">
               <h3 className="text-h3 max-w-md">{PROPTECH.assistant.title}</h3>
@@ -65,7 +65,7 @@ export const ProptechFeatures = () => (
             // The `li` (which does not move) is the hover target, so the lifted card never jumps under a cursor on its edge.
             <li key={feature.title} className={cn("group/card", SPANS[index])}>
               <article className={cn(CARD, "h-full")}>
-                <span className="flex size-12 items-center justify-center rounded-xl bg-muted text-dawn-text transition-colors duration-(--duration-base) group-hover/card:bg-dawn group-hover/card:text-dawn-foreground">
+                <span className="flex size-12 items-center justify-center rounded-xl bg-muted text-brand-text transition-colors duration-(--duration-base) group-hover/card:bg-primary group-hover/card:text-primary-foreground">
                   <Icon className="size-6" aria-hidden="true" />
                 </span>
                 <h3 className="text-h3">{feature.title}</h3>

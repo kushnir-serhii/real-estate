@@ -17,7 +17,7 @@ type SectionHeadingProps = {
 export const SectionHeading = ({ id, eyebrow, title, description, action, tone = "default" }: SectionHeadingProps) => (
   <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
     <div className="flex min-w-0 flex-col gap-2">
-      {eyebrow && <p className={cn("eyebrow", tone === "ink" ? "text-dawn" : "text-dawn-text")}>{eyebrow}</p>}
+      {eyebrow && <p className={cn("eyebrow", tone === "ink" ? "text-brand-on-ink" : "text-brand-text")}>{eyebrow}</p>}
       <h2 id={id} className="text-h2">
         {title}
       </h2>
@@ -26,7 +26,7 @@ export const SectionHeading = ({ id, eyebrow, title, description, action, tone =
     {action && (
       <Link
         href={action.href}
-        className="group/action inline-flex min-h-11 items-center gap-2 font-medium text-foreground outline-none hover:text-dawn-text focus-visible:ring-3 focus-visible:ring-ring/50"
+        className="group/action inline-flex min-h-11 items-center gap-2 font-medium text-foreground outline-none hover:text-brand-text focus-visible:ring-3 focus-visible:ring-ring/50"
       >
         {action.label}
         <ArrowRight

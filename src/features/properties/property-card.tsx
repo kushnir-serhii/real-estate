@@ -102,7 +102,7 @@ export const PropertyCard = ({
               />
             </>
           ) : (
-            <div className="flex size-full flex-col items-center justify-center gap-2 bg-linear-to-br from-sky/25 to-muted text-muted-foreground">
+            <div className="flex size-full flex-col items-center justify-center gap-2 bg-linear-to-br from-brand/15 to-muted text-muted-foreground">
               <Building2 className="size-8" aria-hidden="true" />
               <span className="text-sm">Фото незабаром</span>
             </div>
@@ -118,7 +118,7 @@ export const PropertyCard = ({
             {unit && <span className="font-sans text-base font-medium text-muted-foreground">/ {unit}</span>}
           </p>
           <h3
-            className="line-clamp-2 font-sans text-lg font-medium tracking-normal break-words transition-colors duration-(--duration-fast) group-hover:text-dawn-text"
+            className="line-clamp-2 font-sans text-lg font-medium tracking-normal break-words transition-colors duration-(--duration-fast) group-hover:text-brand-text"
             title={property.title}
           >
             <Link

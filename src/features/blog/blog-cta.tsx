@@ -14,14 +14,14 @@ export const BlogCta = () => (
     aria-labelledby="blog-cta-title"
     className="relative isolate flex flex-col gap-4 overflow-hidden rounded-3xl bg-ink p-6 text-on-ink sm:p-8"
   >
-    <span aria-hidden="true" className="absolute -top-24 -right-16 -z-10 size-72 rounded-full bg-sky/30 blur-3xl" />
-    <span aria-hidden="true" className="h-1 w-12 rounded-full bg-dawn" />
+    <span aria-hidden="true" className="absolute -top-24 -right-16 -z-10 size-72 rounded-full bg-brand/30 blur-3xl" />
+    <span aria-hidden="true" className="h-1 w-12 rounded-full bg-brand-on-ink" />
     <h2 id="blog-cta-title" className="text-h3">
       {BLOG_POST_PAGE.ctaTitle}
     </h2>
     <p className="max-w-xl text-ink-muted">{BLOG_POST_PAGE.ctaLead}</p>
     <div className="flex flex-wrap items-center gap-2">
-      <Link href={CTA_LINK.href} className={buttonVariants({ variant: "dawn", size: "lg" })}>
+      <Link href={CTA_LINK.href} className={buttonVariants({ variant: "inverse", size: "lg" })}>
         {BLOG_POST_PAGE.ctaAction}
         <ArrowRight data-icon="inline-end" aria-hidden="true" />
       </Link>

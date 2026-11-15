@@ -107,7 +107,7 @@ export const QuickSearch = () => {
         </Field>
         <Button
           type="submit"
-          variant="dawn"
+          variant="default"
           size="lg"
           className="self-end sm:col-span-2 lg:col-span-1"
         >

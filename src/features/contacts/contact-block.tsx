@@ -6,12 +6,12 @@ import { CONTACTS } from "@/constants/contacts";
 import { CONTACTS_PAGE } from "@/constants/inner-pages";
 
 const LINK_CLASS =
-  "inline-flex min-h-11 items-center rounded-md break-all text-foreground underline-offset-4 outline-none hover:text-dawn-text hover:underline focus-visible:ring-3 focus-visible:ring-ring/50";
+  "inline-flex min-h-11 items-center rounded-md break-all text-foreground underline-offset-4 outline-none hover:text-brand-text hover:underline focus-visible:ring-3 focus-visible:ring-ring/50";
 
 const IconBadge = ({ icon: Icon }: { icon: LucideIcon }) => (
   <span
     aria-hidden="true"
-    className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary text-dawn-text"
+    className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary text-brand-text"
   >
     <Icon className="size-4" />
   </span>
@@ -31,7 +31,7 @@ export const ContactBlock = () => (
         <IconBadge icon={Phone} />
         <a
           href={CONTACTS.phone.href}
-          className="inline-flex min-h-11 items-center rounded-md font-heading text-2xl font-semibold tabular-nums outline-none hover:text-dawn-text focus-visible:ring-3 focus-visible:ring-ring/50 sm:text-3xl"
+          className="inline-flex min-h-11 items-center rounded-md font-heading text-2xl font-semibold tabular-nums outline-none hover:text-brand-text focus-visible:ring-3 focus-visible:ring-ring/50 sm:text-3xl"
         >
           {CONTACTS.phone.display}
         </a>
