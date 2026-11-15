@@ -9,6 +9,7 @@ import { buildDemoSeed } from "@/lib/demo/seed";
 import type { Database } from "@/lib/supabase/database.types";
 import type { AgentsDriver, PagesDriver, PostsDriver, PropertiesDriver, SettingsDriver } from "./driver-types";
 import { BLOG_PAGE_SIZE, BLOG_RELATED_MAX } from "@/constants/blog";
+import { buildPriceHistogram } from "./property-histogram";
 import { PAGE_SIZE, propertyFiltersSchema } from "./property-query";
 import type { PropertyFiltersInput } from "./property-query";
 
@@ -233,6 +234,44 @@ const runContract = (name: string, getDrivers: () => Drivers | Promise<Drivers>,
         expect(beyond.items).toEqual([]);
         expect(beyond.total).toBe(published.length);
         expect(beyond.page).toBe(99);
+      });
+    });
+
+    describe("price histogram", () => {
+      const prices = (input: PropertyFiltersInput) => d.properties.fetchPublishedPrices(filters(input));
+      const expectedPrices = (predicate: (row: PropertyRow) => boolean) =>
+        published.filter(predicate).flatMap((r) => (r.price_usd === null ? [] : [r.price_usd])).sort((a, b) => a - b);
+
+      it.each(["sell", "rent_long", "rent_day"] as const)("%s: the price list of the deal, published rows only", async (deal) => {
+        const list = (await prices({ deal })).sort((a, b) => a - b);
+        expect(list.length).toBeGreaterThan(0);
+        expect(list).toEqual(expectedPrices((r) => r.deal === deal));
+        const h = buildPriceHistogram(list);
+        expect(h.bins.reduce((n, b) => n + b.count, 0)).toBe(h.total);
+        expect(h.total).toBe(list.length);
+      });
+
+      it("follows the other filters, and an empty context has no prices", async () => {
+        const list = (await prices({ deal: "sell", property_type: "flat", rooms: ["2"] })).sort((a, b) => a - b);
+        expect(list).toEqual(expectedPrices((r) => r.deal === "sell" && r.property_type === "flat" && r.room_count === 2));
+        expect(await prices({ deal: "sell", price_usd_to: 1 })).toEqual([]);
+        expect(buildPriceHistogram([])).toMatchObject({ bins: [], total: 0 });
+      });
+
+      it("bars inside a range aligned to bin edges add up to the catalog's count for that range", async () => {
+        const base = { deal: "sell", property_type: "flat" } as const;
+        const h = buildPriceHistogram(await prices(base));
+        expect(h.bins.length).toBeGreaterThan(2);
+        const lo = h.bins[1]!;
+        const hi = h.bins[Math.min(4, h.bins.length - 2)]!;
+        const inRange = h.bins.filter((b) => b.from_usd >= lo.from_usd && b.to_usd !== null && b.to_usd <= hi.to_usd!);
+        const page = await d.properties.fetchPublishedProperties(
+          filters({ ...base, price_usd_from: lo.from_usd, price_usd_to: hi.to_usd! - 1 }),
+        );
+        expect(inRange.reduce((n, b) => n + b.count, 0)).toBe(page.total);
+        // The whole chart equals the unfiltered catalog count for the context (rows without a price aside).
+        const all = await d.properties.fetchPublishedProperties(filters(base));
+        expect(h.total).toBe(all.total - published.filter((r) => r.deal === "sell" && r.property_type === "flat" && r.price_usd === null).length);
       });
     });
 

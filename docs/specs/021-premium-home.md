@@ -126,13 +126,13 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
   - [ ] one CTA block above the footer
   - [ ] page works without JS (search submits, tabs switch or degrade to links)
 
-### [ ] 6. Price histogram data
+### [x] 6. Price histogram data
 - **Build:** `getPriceHistogram` (both drivers, contract tests: empty, one price, skewed prices with the open-ended last bin, per deal), `GET /api/price-histogram` validated with the catalog params schema, cached.
 - **Files:** `src/lib/db/*`, `src/app/api/price-histogram/route.ts`, `src/features/catalog/catalog-params.ts`
 - **Agent:** backend · **Model:** sonnet
 - **Accept:**
-  - [ ] counts per bin add up to `total`; the selected range count equals the catalog's result count for the same filters
-  - [ ] invalid params → 400; no unpublished rows counted
+  - [x] counts per bin add up to `total`; the selected range count equals the catalog's result count for the same filters
+  - [x] invalid params → 400; no unpublished rows counted
 
 ### [ ] 7. Price range filter component
 - **Build:** histogram + dual-thumb slider + fields + currency + live count per **Price range filter**; in the home quick search (popover / mobile sheet from «Бюджет») and in the catalog filters (form and mobile sheet); no-JS fallback keeps plain inputs.
@@ -173,3 +173,4 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
 | --- | --- | --- | --- |
 | 2026-11-15 | — | drafted | from the design critique; decisions: monochrome blue, Playfair Display (not SC) for H1/H2, 0px cards / 2px controls, CRM block removed, both district sections kept, exclusive = admin flag + price fallback, «Нові пропозиції» kept with deal tabs, histogram on home + catalog, motion «expressive but light» with a line-mask hero |
 | 2026-11-15 | 1 | done | tokens: brand / brand-text / brand-foreground / brand-on-ink replace dawn and sky; dark primary = ivory; button variant dawn → default, new inverse for dark sections and photos; header CTA outline; veils 80/72/0% behind text only, top band 65% (header nav ≥ 4.5:1 over white). Contrast (light/dark): fg/bg 14.8/15.9, muted 6.6/7.6, brand-text/bg 5.8/8.7, brand/bg 5.3/8.7, control 3.6/4.1, brand-on-ink/ink 8.0/7.3; hero h1 worst point 4.5:1. 51 files (globals.css, button.tsx, design page, every former dawn use) |
+| 2026-11-15 | 6 | done | fetchPublishedPrices in both drivers (Supabase reuses a shared applyFilters, pages of 1000) + pure buildPriceHistogram (nice step, ≈ 28 bars, open-ended bar from the 95th percentile, stats over all rows); getPriceHistogram facade (cached, tag properties, no deal = sell); GET /api/price-histogram: USD + rates, 400 via strict parseHistogramParams, s-maxage 300. Tests: unit binning, contract (sum = total per deal, aligned range = catalog total). SQL function = later optimisation. Files: src/lib/db/property-histogram*.ts, driver-types, properties (facade, both drivers), driver-contract.test, catalog-params(.test), src/app/api/price-histogram/route.ts |

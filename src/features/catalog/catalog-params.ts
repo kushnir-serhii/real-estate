@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-import { propertyFiltersSchema } from "@/lib/db/properties";
+import { propertyFiltersSchema, ROOM_OPTIONS } from "@/lib/db/properties";
 import type { PropertyFilters } from "@/lib/db/properties";
-import { CURRENCIES, PROP_KINDS_BY_PROPERTY } from "@/lib/db/property-values";
+import { CURRENCIES, DEALS, PROP_KINDS, PROP_KINDS_BY_PROPERTY, PROPERTY_TYPES } from "@/lib/db/property-values";
 import type { ExchangeRates } from "@/lib/db/settings";
 
 const shape = propertyFiltersSchema.shape;
@@ -207,3 +207,45 @@ const OBJECT_FORMS: Record<Intl.LDMLPluralRule, string> = {
 /** 1 об'єкт, 2 об'єкти, 5 об'єктів (`Intl.PluralRules('uk')`). */
 export const objectsLabel = (n: number): string =>
   `${new Intl.NumberFormat("uk-UA").format(n)} ${OBJECT_FORMS[pluralRules.select(n)]}`;
+
+const strictNumber = z.preprocess(
+  (v) => (v === undefined ? undefined : typeof v === "string" && v.trim() !== "" ? Number(v.replace(/\s/g, "")) : NaN),
+  z.number().finite().nonnegative().optional(),
+);
+
+/** Same filters as the catalog URL, but a bad value is an error (for the API), not silently dropped. Price params are not checked: the histogram ignores them. */
+const strictParamsSchema = z.object({
+  deal: z.enum(DEALS).optional(),
+  property_type: z.enum(PROPERTY_TYPES).optional(),
+  prop_kind: z.array(z.enum(PROP_KINDS)).optional(),
+  rooms: z.array(z.enum(ROOM_OPTIONS)).optional(),
+  currency: currencySchema.optional(),
+  area_from: strictNumber,
+  area_to: strictNumber,
+  district: z.array(z.string().min(1).max(100)).optional(),
+});
+
+/**
+ * Validates the catalog params of `/api/price-histogram`: `ok: false` on any bad value, otherwise the cleaned
+ * state (price bounds dropped: the histogram shows the range around the selection, never narrowed by it).
+ * Empty values (`rooms=`) count as absent, like in the catalog form.
+ */
+export const parseHistogramParams = (params: SearchParams): { ok: true; state: CatalogState } | { ok: false } => {
+  const list = (v: string | string[] | undefined) => {
+    const items = values(v);
+    return items.length ? items : undefined;
+  };
+  const checked = strictParamsSchema.safeParse({
+    deal: first(params.deal),
+    property_type: first(params.property_type),
+    prop_kind: list(params.prop_kind),
+    rooms: list(params.rooms),
+    currency: first(params.currency),
+    area_from: first(params.area_from),
+    area_to: first(params.area_to),
+    district: list(params.district),
+  });
+  if (!checked.success) return { ok: false };
+  const state = parseCatalogState({ ...params, price_from: undefined, price_to: undefined });
+  return { ok: true, state };
+};

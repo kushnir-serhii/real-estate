@@ -62,6 +62,8 @@ import type { ExchangeRates, Settings } from "./settings";
  */
 export type PropertiesDriver = {
   fetchPublishedProperties: (filters: PropertyFilters) => Promise<PropertyPage>;
+  /** `price_usd` of the published rows matching `filters` that have a price (page and sort are ignored). The histogram bins them in `property-histogram.ts`. */
+  fetchPublishedPrices: (filters: PropertyFilters) => Promise<number[]>;
   fetchPropertyBySlug: (slug: string) => Promise<PropertyBySlug | null>;
   fetchPropertiesByIds: (ids: string[]) => Promise<FavoriteProperty[]>;
   fetchSimilarProperties: (target: SimilarTo) => Promise<PublishedProperty[]>;

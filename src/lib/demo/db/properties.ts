@@ -112,6 +112,11 @@ const fetchPublishedProperties = async (filters: PropertyFilters): Promise<Prope
   };
 };
 
+const fetchPublishedPrices = async (filters: PropertyFilters): Promise<number[]> =>
+  getDemoStore().properties.flatMap((row) =>
+    isPublished(row) && matchesFilters(row, filters) && row.price_usd !== null ? [row.price_usd] : [],
+  );
+
 const classify = (row: PropertyRow, data: DemoData): PropertyBySlug | null => {
   if (isPublished(row)) return { kind: "published", property: toPublic(row, data) };
   if (isSoldVisible(row)) return { kind: "sold", property: toPublic(row, data) };
@@ -175,6 +180,7 @@ const fetchSitemapProperties = async (): Promise<SitemapProperty[]> =>
 
 export const demoPropertiesDriver: PropertiesDriver = {
   fetchPublishedProperties,
+  fetchPublishedPrices,
   fetchPropertyBySlug,
   fetchPropertiesByIds,
   fetchSimilarProperties,

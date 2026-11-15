@@ -8,6 +8,7 @@ import {
   isIndexable,
   objectsLabel,
   parseCatalogState,
+  parseHistogramParams,
   resetHref,
   toPropertyFilters,
 } from "./catalog-params";
@@ -133,5 +134,32 @@ describe("links and labels", () => {
     expect(objectsLabel(5)).toBe("5 об'єктів");
     expect(objectsLabel(21)).toBe("21 об'єкт");
     expect(objectsLabel(0)).toBe("0 об'єктів");
+  });
+});
+
+describe("parseHistogramParams", () => {
+  it("accepts valid filters and drops the price bounds", () => {
+    const result = parseHistogramParams({ deal: "sell", rooms: "2,3", price_from: "100", price_to: "200", currency: "EUR", empty: "" });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.state).toMatchObject({ deal: "sell", rooms: ["2", "3"], currency: "EUR", price_from: undefined, price_to: undefined });
+  });
+
+  it("no params is fine (the facade picks the default deal)", () => {
+    expect(parseHistogramParams({}).ok).toBe(true);
+    expect(parseHistogramParams({ rooms: "", district: "" }).ok).toBe(true);
+  });
+
+  it.each([
+    { deal: "buy" },
+    { property_type: "castle" },
+    { rooms: "2,9" },
+    { currency: "PLN" },
+    { area_from: "abc" },
+    { area_to: "-5" },
+    { prop_kind: "nope" },
+    { district: "x".repeat(101) },
+  ])("rejects bad values: %j", (params) => {
+    expect(parseHistogramParams(params).ok).toBe(false);
   });
 });

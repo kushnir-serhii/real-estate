@@ -3,6 +3,9 @@ import { unstable_cache } from "next/cache";
 import { getCacheScope, isDemoMode } from "@/lib/data-driver";
 import { CACHE_TAGS, propertyTag } from "./cache-tags";
 import type { PropertiesDriver } from "./driver-types";
+import { buildPriceHistogram } from "./property-histogram";
+import { HISTOGRAM_DEFAULT_DEAL } from "./property-histogram-values";
+import type { PriceHistogram } from "./property-histogram-values";
 import type {
   FavoriteProperty,
   PropertyBySlug,
@@ -31,6 +34,28 @@ export const getPublishedProperties = (filters: PropertyFilters): Promise<Proper
     ["published-properties", getCacheScope(), JSON.stringify(filters)],
     { tags: [CACHE_TAGS.properties] },
   )(filters);
+
+/**
+ * Price histogram of the published properties matching `filters`, in USD. One deal only (`HISTOGRAM_DEFAULT_DEAL`
+ * when none is given: sale, rent and daily prices are never mixed); the price bounds, sort and page are ignored,
+ * so the chart shows the whole range around the visitor's selection. The drivers return the price list and the
+ * binning is shared pure code. Cached under the `properties` tag.
+ */
+export const getPriceHistogram = (filters: PropertyFilters): Promise<PriceHistogram> => {
+  const context: PropertyFilters = {
+    ...filters,
+    deal: filters.deal ?? HISTOGRAM_DEFAULT_DEAL,
+    price_usd_from: undefined,
+    price_usd_to: undefined,
+    sort: "newest",
+    page: 1,
+  };
+  return unstable_cache(
+    async (f: PropertyFilters) => buildPriceHistogram(await (await loadDriver()).fetchPublishedPrices(f)),
+    ["price-histogram", getCacheScope(), JSON.stringify(context)],
+    { tags: [CACHE_TAGS.properties] },
+  )(context);
+};
 
 /**
  * One property by slug: published, recently hidden («sold»), or null (unknown / hidden longer ago).
