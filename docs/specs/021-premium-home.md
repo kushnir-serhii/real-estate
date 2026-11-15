@@ -134,14 +134,14 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
   - [x] counts per bin add up to `total`; the selected range count equals the catalog's result count for the same filters
   - [x] invalid params → 400; no unpublished rows counted
 
-### [ ] 7. Price range filter component
+### [x] 7. Price range filter component
 - **Build:** histogram + dual-thumb slider + fields + currency + live count per **Price range filter**; in the home quick search (popover / mobile sheet from «Бюджет») and in the catalog filters (form and mobile sheet); no-JS fallback keeps plain inputs.
 - **Files:** `src/components/price-range/*` (or `src/features/catalog/price-range-*`), `src/features/home/quick-search.tsx`, `src/features/catalog/catalog-filters-form.tsx`
 - **Agent:** designer · **Model:** sonnet
 - **Accept:**
-  - [ ] dragging or typing updates bars, fields and «Показати N об'єктів»; switching deal or currency reloads / converts
-  - [ ] keyboard only: both thumbs operable, values announced in the chosen currency
-  - [ ] without JS the home and catalog forms still filter by price
+  - [x] dragging or typing updates bars, fields and «Показати N об'єктів»; switching deal or currency reloads / converts
+  - [x] keyboard only: both thumbs operable, values announced in the chosen currency
+  - [x] without JS the home and catalog forms still filter by price
 
 ### [ ] 8. Motion
 - **Build:** per **Design direction → Motion**: hero line mask reveal + photo curtain, scroll reveals for photos and H2, card hover zoom, View Transitions card → property page, count tween. No new library (decided); if a piece can't be done without one, drop it and note it in the log.
@@ -178,3 +178,4 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
 | 2026-11-15 | 4 | done | migration 20261115120000_property_exclusive.sql (column + public column grant, needed by hide_private_property_columns, + partial index); types edited by hand as the generator would (regenerate when a local DB is up); getExclusiveProperties (flagged newest first, topped up with priciest sale, EXCLUSIVE_LIMIT 6), both drivers + contract tests; demo seed flags 5 sale properties, seed.sql regenerated; sync never maps the flag (map-property test; no row-level runSync test: it can't take an injected client); admin checkbox «Ексклюзив (показувати в колекції на головній)» also in Plektan (SEO-only) mode, list badge; card chip «Ексклюзив» (primary pair 15.2:1); diagrams + setup.md updated |
 | 2026-11-15 | 3 | done | --radius 0 (zeroes every rounded-sm…4xl), --radius-control 2px, multiline follows control; rounded-full → rounded-control on counters, nav underline, icon tiles, step numbers, district arrow, accent bars, admin photo bars; kept round: dots, avatars / initials, blurred glows (no Radix slider thumb yet). Checked by eye: home (light + dark, 1440 / 375), catalog, property page; full pass in the slice 9 UI check. Files: globals.css, design page, 13 components |
 | 2026-11-15 | 5 | done | hero takes the quick search as children (no CTA pair, one-line lead; «Знайти» is the only filled button in the first viewport); «Колекція / Ексклюзивні об'єкти» 6 cards (PropertyCard size lg, 2 cols from md); «Нові пропозиції» radio + CSS tabs (.deal-tabs), 3 cards per deal + «Усі об'єкти →»; ProptechFeatures, PROPTECH, open-assistant-button, featured-properties deleted; footer CTA band hidden on the home via body:has([data-home-cta]); about = two unframed photos; districts restyled, both kept. Checked: 1440 / 375 light, 1440 dark, JS off (tabs switch, search submits). Files: page.tsx, globals.css, constants/home.ts, site-footer, property-card, features/home/* |
+| 2026-11-15 | 7 | done | src/features/catalog/price-range/* (trigger + noscript fallback always loaded; panel, Radix Slider, chart, fetch lazy on open); new ui/popover.tsx; home «Бюджет» = popover ≥ 640px / bottom sheet below; catalog inline (count line under the chart), no deal → plain fields + hint; slider snaps to bin edges, off-edge typed values → «≈ N»; debounced fetch with abort + per-query cache; 15 unit tests. First-load JS gz: / 213.9 → 218.4 (+4.5), /catalog 209.4 → 212.8 (+3.4), property 219.7 → 222.9 (+3.2, page doesn't use the filter): Turbopack re-partitioned shared chunks, the filter's own first-load cost ≈ 1.3 KB; accepted under the 5 KB rule (spec aimed ≤ 2 KB). LCP ≈ 0.9 s, CLS 0 |

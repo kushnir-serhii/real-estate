@@ -194,19 +194,7 @@ export const isIndexable = (s: CatalogState): boolean =>
 export const canonicalPath = (s: CatalogState): string =>
   isIndexable(s) && s.deal ? `/catalog?deal=${s.deal}` : "/catalog";
 
-const pluralRules = new Intl.PluralRules("uk");
-const OBJECT_FORMS: Record<Intl.LDMLPluralRule, string> = {
-  zero: "об'єктів",
-  one: "об'єкт",
-  two: "об'єкти",
-  few: "об'єкти",
-  many: "об'єктів",
-  other: "об'єкта",
-};
-
-/** 1 об'єкт, 2 об'єкти, 5 об'єктів (`Intl.PluralRules('uk')`). */
-export const objectsLabel = (n: number): string =>
-  `${new Intl.NumberFormat("uk-UA").format(n)} ${OBJECT_FORMS[pluralRules.select(n)]}`;
+export { objectsLabel } from "./objects-label";
 
 const strictNumber = z.preprocess(
   (v) => (v === undefined ? undefined : typeof v === "string" && v.trim() !== "" ? Number(v.replace(/\s/g, "")) : NaN),

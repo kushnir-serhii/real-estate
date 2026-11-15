@@ -22,6 +22,9 @@ const CURRENCY_SIGN: Record<Currency, string> = {
 
 const NUMBER = new Intl.NumberFormat("uk-UA", { maximumFractionDigits: 0 });
 
+/** Number with `uk-UA` digit grouping, no currency. */
+export const formatNumber = (amount: number): string => NUMBER.format(amount);
+
 export const PRICE_ON_REQUEST = "Ціна за запитом";
 
 /** Price with currency, `uk-UA` digit grouping. Null amount → «Ціна за запитом». */

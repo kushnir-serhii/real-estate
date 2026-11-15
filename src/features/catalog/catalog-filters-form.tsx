@@ -7,11 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PROP_KIND_LABELS, PROPERTY_TYPE_LABELS } from "@/features/properties/property-labels";
 import { ROOM_OPTIONS } from "@/lib/db/properties";
-import { CURRENCIES, PROP_KINDS_BY_PROPERTY, PROPERTY_TYPES } from "@/lib/db/property-values";
+import { PROP_KINDS_BY_PROPERTY, PROPERTY_TYPES } from "@/lib/db/property-values";
 import { cn } from "@/lib/utils";
 import { resetHref, typeHasArea, typeHasRooms } from "./catalog-params";
 import type { CatalogState } from "./catalog-params";
 import { DEAL_OPTIONS } from "./catalog-labels";
+import { PriceRangeField } from "./price-range/price-range-field";
 
 type CatalogFiltersFormProps = {
   state: CatalogState;
@@ -38,7 +39,7 @@ const Field = ({ label, htmlFor, children }: FieldProps) => (
 
 type RangeProps = {
   idPrefix: string;
-  name: "price" | "area";
+  name: "area";
   label: string;
   from?: number;
   to?: number;
@@ -153,24 +154,13 @@ export const CatalogFiltersForm = ({
 
       <fieldset>
         <legend className={LEGEND_CLASS}>Ціна</legend>
-        <div className="flex flex-col gap-2">
-          <Range idPrefix={idPrefix} name="price" label="Ціна" from={state.price_from} to={state.price_to} />
-          <fieldset className="grid grid-cols-3 gap-2">
-            <legend className="sr-only">Валюта</legend>
-            {CURRENCIES.map((c) => (
-              <label key={c} className={CHIP_CLASS}>
-                <input
-                  type="radio"
-                  name="currency"
-                  value={c}
-                  defaultChecked={state.currency === c}
-                  className="sr-only"
-                />
-                {c}
-              </label>
-            ))}
-          </fieldset>
-        </div>
+        <PriceRangeField
+          variant="inline"
+          id={`${idPrefix}-price`}
+          defaultFrom={state.price_from}
+          defaultTo={state.price_to}
+          defaultCurrency={state.currency}
+        />
       </fieldset>
 
       {typeHasArea(state.property_type) && (

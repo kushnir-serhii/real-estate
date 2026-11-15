@@ -3,10 +3,9 @@ import { useId } from "react";
 
 import { FormSelect } from "@/components/form-select";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PriceRangeField } from "@/features/catalog/price-range/price-range-field";
 import { PROPERTY_TYPE_LABELS } from "@/features/properties/property-labels";
-import { CURRENCIES } from "@/lib/db/property-values";
 
 const DEAL_OPTIONS = [
   { value: "sell", label: "Купити" },
@@ -24,8 +23,6 @@ const ROOM_OPTIONS = [
   ...["1", "2", "3", "4", "5+"].map((r) => ({ value: r, label: r })),
 ];
 
-const CURRENCY_OPTIONS = CURRENCIES.map((c) => ({ value: c, label: c }));
-
 type FieldProps = { label: string; htmlFor: string; children: React.ReactNode };
 
 const Field = ({ label, htmlFor, children }: FieldProps) => (
@@ -41,7 +38,6 @@ export const QuickSearch = () => {
   const typeId = `${id}-type`;
   const roomsId = `${id}-rooms`;
   const budgetId = `${id}-budget`;
-  const currencyId = `${id}-currency`;
 
   return (
     <form
@@ -85,25 +81,8 @@ export const QuickSearch = () => {
             options={ROOM_OPTIONS}
           />
         </Field>
-        <Field label="Бюджет до" htmlFor={budgetId}>
-          <div className="flex gap-2">
-            <Input
-              id={budgetId}
-              name="price_to"
-              type="number"
-              inputMode="numeric"
-              min={0}
-              placeholder="Будь-який"
-            />
-            <FormSelect
-              id={currencyId}
-              name="currency"
-              defaultValue="USD"
-              aria-label="Валюта"
-              options={CURRENCY_OPTIONS}
-              className="w-28 shrink-0"
-            />
-          </div>
+        <Field label="Бюджет" htmlFor={budgetId}>
+          <PriceRangeField variant="popover" id={budgetId} />
         </Field>
         <Button
           type="submit"
