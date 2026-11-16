@@ -29,6 +29,7 @@ Stage 1 (≈7–9 weeks): base site + admin + AI assistant — see [reference/st
 | 019 | [Visitor accounts with Google: saved properties on every device](specs/019-user-accounts.md) | draft | 018 |
 | 020 | [Email + password accounts (optional, needs a mail service)](specs/020-email-accounts.md) | draft | 019 |
 | 021 | [Premium home: blue palette, Playfair headings, sharp shapes, price histogram, motion](specs/021-premium-home.md) | done | 018 |
+| 022 | [Stack move: Railway + Payload CMS + Postgres, Cloudflare in front](specs/022-railway-payload.md) | draft | 021 |
 
 Statuses: `draft` → `ready` → `in-progress` → `done` (meaning in [process.md](process.md#statuses)). The status here and in the spec's header must match.
 
@@ -56,6 +57,7 @@ Read top to bottom; the next spec is the first one that isn't `done`. Specs in o
 | 16 | 019 |
 
 - 020 is optional and not in a wave: add it when visitors without Google need accounts.
+- 022 is on hold and not in a wave: build it only after the client approves the stack change. If it goes ahead, re-plan 019/020 on Payload auth first.
 - To change the order, edit this table.
 - To make a spec buildable, review it and set it to `ready` here and in the spec.
 - New spec: copy [specs/_template.md](specs/_template.md), take the next number, add a row to **Status** and put it in a wave.
