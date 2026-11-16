@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
 
@@ -34,7 +34,7 @@ const NotFound = () => (
       <PageHeader width="narrow" eyebrow={NOT_FOUND_PAGE.eyebrow} title={NOT_FOUND_PAGE.title} lead={NOT_FOUND_PAGE.lead} className="pt-4 pb-16 sm:pt-6 sm:pb-24">
         <Link href="/" className={buttonVariants({ variant: "default", size: "lg" })}>
           {NOT_FOUND_PAGE.home}
-          <ArrowRight data-icon="inline-end" aria-hidden="true" />
+          <ArrowUpRight data-icon="inline-end" aria-hidden="true" />
         </Link>
         <Link href="/catalog" className={buttonVariants({ variant: "outline", size: "lg" })}>
           {NOT_FOUND_PAGE.catalog}

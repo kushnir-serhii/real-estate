@@ -1,4 +1,4 @@
-import { ArrowRight, Heart } from "lucide-react";
+import { ArrowUpRight, Heart } from "lucide-react";
 import Link from "next/link";
 
 import { buttonVariants } from "@/components/ui/button";
@@ -16,7 +16,7 @@ export const FavoritesEmpty = () => (
     </div>
     <Link href="/catalog" className={buttonVariants({ variant: "default", size: "lg" })}>
       До каталогу
-      <ArrowRight data-icon="inline-end" aria-hidden="true" />
+      <ArrowUpRight data-icon="inline-end" aria-hidden="true" />
     </Link>
   </div>
 );

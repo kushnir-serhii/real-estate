@@ -22,7 +22,7 @@ type CardPhotoSliderProps = {
 const SWIPE_MIN = 40;
 
 const BUTTON_CLASS =
-  "nojs-hide absolute top-1/2 z-10 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-control bg-background/75 text-foreground ring-1 ring-foreground/10 outline-none backdrop-blur transition-[opacity,background-color] duration-(--duration-fast) hover:bg-background/95 focus-visible:opacity-100 focus-visible:ring-3 focus-visible:ring-ring group-focus-within:opacity-100 group-hover:opacity-100 pointer-fine:opacity-0 motion-reduce:transition-none";
+  "nojs-hide absolute top-1/2 z-10 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-full bg-background/75 text-foreground ring-1 ring-foreground/10 outline-none backdrop-blur transition-[opacity,background-color] duration-(--duration-fast) hover:bg-background/95 focus-visible:opacity-100 focus-visible:ring-3 focus-visible:ring-ring group-focus-within:opacity-100 group-hover:opacity-100 pointer-fine:opacity-0 motion-reduce:transition-none";
 
 /**
  * Photos of a property card with prev / next buttons, a counter and swipe. Loops. Only the first photo renders until

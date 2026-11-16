@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
 import { JsonLd } from "@/components/seo/json-ld";
@@ -116,7 +116,7 @@ export const PropertyView = ({ property }: PropertyViewProps) => {
             />
             <a href={`#${REQUEST_ANCHOR}`} className={cn(buttonVariants({ variant: "default", size: "lg" }), "mt-5 w-full")}>
               Залишити заявку
-              <ArrowRight data-icon="inline-end" aria-hidden="true" />
+              <ArrowUpRight data-icon="inline-end" aria-hidden="true" />
             </a>
           </div>
           <section

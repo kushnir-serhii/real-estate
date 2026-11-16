@@ -10,6 +10,8 @@ const buttonVariantsBase = cva(
       variant: {
         default:
           "bg-primary text-primary-foreground hover:-translate-y-px hover:bg-[color-mix(in_oklch,var(--primary),var(--primary-foreground)_14%)] hover:shadow-md hover:shadow-foreground/15 motion-reduce:hover:translate-y-0",
+        brand:
+          "bg-brand text-brand-foreground hover:-translate-y-px hover:bg-[color-mix(in_oklch,var(--brand),var(--brand-foreground)_14%)] hover:shadow-md hover:shadow-foreground/15 motion-reduce:hover:translate-y-0",
         inverse:
           "bg-on-ink text-ink hover:-translate-y-px hover:bg-[color-mix(in_oklch,var(--on-ink),var(--ink)_12%)] hover:shadow-md hover:shadow-ink/30 motion-reduce:hover:translate-y-0",
         outline:

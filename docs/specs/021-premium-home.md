@@ -1,6 +1,6 @@
 # 021 — Premium home: blue palette, Playfair headings, sharp shapes, price histogram, motion
 
-**Status:** done · **Depends on:** 018 · **Route(s):** `/` (redesigned); `/catalog` (price filter); every other route only inherits the new tokens (fix regressions, no redesign); `/admin` gets one checkbox
+**Status:** in-progress · **Depends on:** 018 · **Route(s):** `/` (redesigned); `/catalog` (price filter); every other route only inherits the new tokens (fix regressions, no redesign); `/admin` gets one checkbox
 
 ## Goal
 The home page reads as a **premium** agency that still serves every segment: a calm monochrome blue palette with no orange, Playfair Display headings that match the classic logo, sharp corners, lighter photos, an «Ексклюзивні об'єкти» showcase managed from the admin, a modern price filter whose histogram shows how many properties are in and around the chosen range (home and catalog), and editorial motion (a line-by-line mask reveal in the hero, not a plain fade).
@@ -171,6 +171,24 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
   - [x] property and blog cards don't move on hover
   - [x] typecheck, lint, test, build green; ui-check on `root` passes
 
+### [x] 11. Feedback: compact search, blue header CTA, calmer cards, ↗ arrows
+- **Build:** (user feedback 2026-11-16) hero quick search → one compact white row: deal tabs as text above it (active underlined), cells with a small uppercase label and the value (Тип · Кімнат · Бюджет), hairline dividers, no boxed fields, «Знайти» attached on the right; compact stack on mobile; the price-range popover/sheet keeps working from the «Бюджет» cell. Header «Залишити заявку» filled `brand` (royal blue, white text) in every header state. Property cards: no scroll-in effect (remove the curtain / stagger / scale reveals on card grids, home and catalog), favourite heart without the square backing (icon with a soft shadow for legibility, 44px hit area kept), photo slider prev / next buttons `rounded-full` (documented exception to the 2px rule). Arrows in buttons and links that mean "go / open" (`ArrowRight` → `ArrowUpRight`); back links, pagination and slider chevrons stay.
+- **Agent:** designer · **Model:** sonnet
+- **Accept:**
+  - [x] hero search is one row at ≥ 1024px and works without JS; budget popover still opens
+  - [x] header CTA is blue in transparent and scrolled states, both themes, ≥ 4.5:1
+  - [x] cards appear without animation on scroll; heart has no square; slider buttons are round
+  - [x] no `ArrowRight` left in CTA buttons / «Усі …» links
+  - [x] typecheck, lint, test, build green
+
+### [ ] 12. Hero animation instead of video
+- **Build:** three prototypes stacked on `/design/hero` for the user to choose from: A «Кіно-серія кадрів» (4 photos, slow camera drift, vertical-curtain transitions, progress lines with frame names, pause), B «Двері залу» (photo revealed by tall hall panels opening from the centre, then slow drift), C «Креслення → фото» (an SVG line drawing of a facade draws itself on midnight, then the photo develops through it). Then the chosen one goes into the home hero; the lab route is removed.
+- **Agent:** designer · **Model:** sonnet
+- **Accept:**
+  - [ ] `/design/hero` shows A, B, C one under another, each replayable
+  - [ ] (after the choice) home hero uses it; LCP < 2.5 s, CLS 0; off under reduced motion; first photo is the LCP image, others load after
+  - [ ] typecheck, lint, test, build green
+
 ## External needs
 - Apply `20261115120000_property_exclusive.sql` to the Supabase project (user; listed in setup.md).
 - Real photos for hero, districts and about (later; placeholders now).
@@ -198,3 +216,4 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
 | 2026-11-15 | 8 | done | no library. Hero: per-word mask rise (server-split spans inside one h1, 900 ms, 70 ms stagger, 200 ms start), photo curtain + settle from 1.1 (1300 ms), eyebrow / lead / search wipe-and-rise (800 ms; backwards fill, nothing stays clipped); scroll: photo curtains (about, district tiles, exclusive cards) and H2 mask rise in SectionHeading (animation-timeline: view()); card hover zoom already present; React ViewTransition catalog card photo → gallery (Next 16.4 has no experimental.viewTransition flag; types via src/react-experimental.d.ts; home cards excluded: a property can appear twice there); count tween 400 ms rAF with sr-only final value. Reduced motion: no keyframe animations. perf: / 218.4 → 218.4 KB gz, LCP ≈ 0.86 s, CLS 0; /catalog 212.8 → 212.8; property 222.9 → 223.0 |
 | 2026-11-15 | 9 | done | no regressions found; ui-check against next start on 3199 (the user's dev server on 3000 blocks a second next dev): public SPEC=021 ROUTES=root,catalog,catalog/2-kimnatna-kvartyra-na-oboloni-3f9a1c,favorites,about,contacts,blog,blog/yaki-dokumenty-pereviryty-pered-kupivleiu-kvartyry,privacy,design,nonexistent-page → 78 passed; admin SPEC=021-admin (11 routes, --workers=3) → 78 passed (6 workers: /admin dashboard flaky on networkidle). Screenshots reviewed. Docs: product.md design status + principle 1, conventions.md Styling (palette, radii, fonts, motion) + perf baselines. Admin hint copy aligned to «Ексклюзивні об'єкти» |
 | 2026-11-15 | 10 | done | user feedback: collection = 3 regular cards in one row (md:grid-cols-3) + «Уся колекція» → /catalog?deal=sell&sort=price_desc, PropertyCard size lg removed; new «Чому ми / Як ми дбаємо про вашу угоду» (4 numbered principles, brand rules), «Послуги / Чим ми допоможемо» (6 linked tiles; sell / legal / valuation → /contacts, commercial → /catalog?property_type=commercial, 11 results), FAQ (8 questions, native details, FAQPage JSON-LD from the same constants + test); hover lift removed from property and blog cards (shadow + photo zoom kept). ui-check root: 38 passed (one earlier no-js screenshot flake under load). Checked by eye at 1440 and 390. Files: page.tsx, constants/home.ts, features/home/{exclusive-properties,why-us,services,faq}.tsx, property-card, blog-card, features/seo/schemas(.test).ts |
+| 2026-11-15 | 11 | done | hero search = text deal tabs (underlined) + one white row of cells (uppercase label + value, hairlines), «Знайти» attached; stacked below 1024; PriceRangeField appearance «cell»; header and mobile-menu CTA = new brand button variant (white on royal blue 5.8:1) in both header states; scroll-in reveals removed from the home card grids (catalog / favourites / similar / blog had none); favourite heart without square (white + soft shadow, saved = brand-on-ink, 44px); card slider buttons rounded-full (documented exception); ArrowRight → ArrowUpRight in 16 files. Checked: home 1440 / 375, light + dark |

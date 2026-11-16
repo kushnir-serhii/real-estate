@@ -1,4 +1,4 @@
-import { ArrowRight, SearchX } from "lucide-react";
+import { ArrowUpRight, SearchX } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -50,7 +50,7 @@ export const AssistantPropertyResults = ({ part, onNavigate }: AssistantProperty
           <Link href={part.catalogUrl} onClick={onNavigate}>
             {/* One text node: the button's flex gap would split «(N)» apart. */}
             <span className="tabular-nums">{`Усі результати в каталозі (${numberFormat.format(part.total)})`}</span>
-            <ArrowRight aria-hidden="true" />
+            <ArrowUpRight aria-hidden="true" />
           </Link>
         </Button>
       )}

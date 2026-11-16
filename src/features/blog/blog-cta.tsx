@@ -1,4 +1,4 @@
-import { ArrowRight, Phone } from "lucide-react";
+import { ArrowUpRight, Phone } from "lucide-react";
 import Link from "next/link";
 
 import { MessengerLinks } from "@/components/layout/messenger-links";
@@ -23,7 +23,7 @@ export const BlogCta = () => (
     <div className="flex flex-wrap items-center gap-2">
       <Link href={CTA_LINK.href} className={buttonVariants({ variant: "inverse", size: "lg" })}>
         {BLOG_POST_PAGE.ctaAction}
-        <ArrowRight data-icon="inline-end" aria-hidden="true" />
+        <ArrowUpRight data-icon="inline-end" aria-hidden="true" />
       </Link>
       <a
         href={CONTACTS.phone.href}

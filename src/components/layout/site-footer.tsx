@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Clock, Mail, MapPin, Phone } from "lucide-react";
+import { ArrowUpRight, Clock, Mail, MapPin, Phone } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/layout/logo";
@@ -36,7 +36,7 @@ export const SiteFooter = () => {
             <Button asChild variant="inverse" size="lg">
               <Link href={CTA_LINK.href}>
                 {CTA_LINK.label}
-                <ArrowRight data-icon="inline-end" aria-hidden="true" />
+                <ArrowUpRight data-icon="inline-end" aria-hidden="true" />
               </Link>
             </Button>
             <a

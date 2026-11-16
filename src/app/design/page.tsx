@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ArrowRight, Search } from "lucide-react";
+import { ArrowUpRight, Search } from "lucide-react";
 
 import { Logo } from "@/components/layout/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -81,6 +81,7 @@ const FONTS = [
 
 const VARIANTS = [
   "default",
+  "brand",
   "secondary",
   "outline",
   "ghost",
@@ -246,7 +247,7 @@ const DesignPage = () => (
       <div className="flex flex-wrap items-center gap-3">
         <Button size="lg">
           Підібрати об’єкт
-          <ArrowRight data-icon="inline-end" />
+          <ArrowUpRight data-icon="inline-end" />
         </Button>
         <Button size="lg">Великий 48</Button>
         <Button>Звичайний 44</Button>

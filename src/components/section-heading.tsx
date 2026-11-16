@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
 import { cn } from "@/lib/utils";
@@ -29,8 +29,8 @@ export const SectionHeading = ({ id, eyebrow, title, description, action, tone =
         className="group/action inline-flex min-h-11 items-center gap-2 font-medium text-foreground outline-none hover:text-brand-text focus-visible:ring-3 focus-visible:ring-ring/50"
       >
         {action.label}
-        <ArrowRight
-          className="size-4 transition-transform duration-(--duration-base) ease-(--ease-out-soft) group-hover/action:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover/action:translate-x-0"
+        <ArrowUpRight
+          className="size-4 transition-transform duration-(--duration-base) ease-(--ease-out-soft) group-hover/action:translate-x-0.5 group-hover/action:-translate-y-0.5 motion-reduce:transition-none motion-reduce:group-hover/action:translate-0"
           aria-hidden="true"
         />
       </Link>

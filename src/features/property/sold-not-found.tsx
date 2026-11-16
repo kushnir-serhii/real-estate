@@ -1,6 +1,6 @@
 import "server-only";
 
-import { ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -62,7 +62,7 @@ export const SoldNotFound = () => (
     >
       <Link href="/catalog" className={buttonVariants({ variant: "default", size: "lg" })}>
         До каталогу
-        <ArrowRight data-icon="inline-end" aria-hidden="true" />
+        <ArrowUpRight data-icon="inline-end" aria-hidden="true" />
       </Link>
       <Link href="/contacts" className={buttonVariants({ variant: "outline", size: "lg" })}>
         Контакти

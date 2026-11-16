@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
 import { SectionHeading } from "@/components/section-heading";
@@ -46,7 +46,7 @@ export const Districts = () => (
                   <span className="text-sm">{district.tagline}</span>
                 </span>
                 <span className="flex size-11 shrink-0 items-center justify-center rounded-control bg-on-ink text-ink transition-transform duration-(--duration-base) ease-(--ease-out-soft) group-hover/tile:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover/tile:translate-x-0">
-                  <ArrowRight className="size-5" aria-hidden="true" />
+                  <ArrowUpRight className="size-5" aria-hidden="true" />
                   <span className="sr-only">{DISTRICTS.cta}</span>
                 </span>
               </span>
