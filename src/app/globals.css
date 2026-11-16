@@ -546,3 +546,202 @@
     animation: none !important;
   }
 }
+
+/* hero lab (spec 021 slice 12): three hero concepts on /design/hero. Motion only without reduced motion; the default
+   (reduced) state is the final picture: photo visible, text visible, nothing moves. */
+.lab-frame {
+  z-index: 1;
+  clip-path: inset(0 0 100% 0);
+}
+.lab-frame:first-child {
+  clip-path: inset(0);
+}
+.lab-bar-fill {
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.lab-bar:first-child .lab-bar-fill {
+  transform: none;
+}
+.lab-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+.lab-blueprint {
+  opacity: 0.22;
+}
+.lab-text .hero-word-inner {
+  animation-delay: calc(var(--lab-start, 0ms) + 200ms + var(--i, 0) * 70ms);
+}
+@keyframes lab-a-frame {
+  0% {
+    clip-path: inset(0 0 100% 0);
+    z-index: 2;
+    animation-timing-function: var(--ease-out-soft);
+  }
+  5% {
+    clip-path: inset(0);
+    z-index: 2;
+    animation-timing-function: linear;
+  }
+  5.01%,
+  29.99% {
+    clip-path: inset(0);
+    z-index: 1;
+  }
+  30%,
+  100% {
+    clip-path: inset(0 0 100% 0);
+    z-index: 0;
+  }
+}
+@keyframes lab-a-cam {
+  from {
+    transform: var(--cam-from);
+  }
+  30%,
+  to {
+    transform: var(--cam-to);
+  }
+}
+@keyframes lab-a-bar-0 {
+  from {
+    transform: scaleX(0);
+  }
+  25%,
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes lab-a-bar-1 {
+  0%,
+  25% {
+    transform: scaleX(0);
+  }
+  50%,
+  100% {
+    transform: scaleX(1);
+  }
+}
+@keyframes lab-a-bar-2 {
+  0%,
+  50% {
+    transform: scaleX(0);
+  }
+  75%,
+  100% {
+    transform: scaleX(1);
+  }
+}
+@keyframes lab-a-bar-3 {
+  0%,
+  75% {
+    transform: scaleX(0);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+@keyframes lab-door {
+  to {
+    transform: translate3d(calc(var(--dir) * var(--k) * 100%), 0, 0);
+  }
+}
+@keyframes lab-drift {
+  from {
+    transform: scale(1.04) translate3d(-1.5%, 0, 0);
+  }
+  to {
+    transform: scale(1.14) translate3d(1.5%, -1%, 0);
+  }
+}
+@keyframes lab-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+@keyframes lab-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes lab-blueprint-fade {
+  from {
+    opacity: 1;
+  }
+}
+@keyframes lab-develop {
+  from {
+    clip-path: inset(0 100% 0 0);
+    opacity: 0.3;
+  }
+}
+@keyframes lab-scan {
+  from {
+    transform: translate3d(-100%, 0, 0);
+  }
+  85% {
+    opacity: 1;
+  }
+  to {
+    transform: none;
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lab-frame {
+    animation: lab-a-frame 24s linear infinite both;
+    animation-delay: calc(var(--n) * 6s - 1.2s);
+  }
+  .lab-cam {
+    animation: lab-a-cam 24s linear infinite both;
+    animation-delay: calc(var(--n) * 6s - 1.2s);
+  }
+  .lab-bar-fill {
+    animation-duration: 24s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-fill-mode: both;
+    animation-delay: -1.2s;
+  }
+  .lab-bar:nth-child(1) .lab-bar-fill {
+    animation-name: lab-a-bar-0;
+  }
+  .lab-bar:nth-child(2) .lab-bar-fill {
+    animation-name: lab-a-bar-1;
+  }
+  .lab-bar:nth-child(3) .lab-bar-fill {
+    animation-name: lab-a-bar-2;
+  }
+  .lab-bar:nth-child(4) .lab-bar-fill {
+    animation-name: lab-a-bar-3;
+  }
+  .lab-door {
+    animation: lab-door 1600ms var(--ease-out-soft) both;
+    animation-delay: calc(300ms + (3 - var(--k)) * 120ms);
+  }
+  .lab-drift {
+    animation: lab-drift 20s ease-in-out infinite alternate both;
+    animation-delay: var(--drift-delay, 0ms);
+  }
+  .lab-draw {
+    animation: lab-draw 2400ms cubic-bezier(0.65, 0, 0.35, 1) both;
+    animation-delay: calc(var(--d, 0ms) + var(--i, 0) * 70ms);
+  }
+  .lab-bp-text {
+    animation: lab-fade-in 800ms var(--ease-out-soft) both;
+    animation-delay: var(--d, 0ms);
+  }
+  .lab-blueprint {
+    animation: lab-blueprint-fade 1600ms ease-in-out 3400ms both;
+  }
+  .lab-develop {
+    animation: lab-develop 2400ms cubic-bezier(0.65, 0, 0.35, 1) 2600ms both;
+  }
+  .lab-scan {
+    animation: lab-scan 2400ms cubic-bezier(0.65, 0, 0.35, 1) 2600ms both;
+  }
+}
+[data-lab-paused="true"] * {
+  animation-play-state: paused !important;
+}
