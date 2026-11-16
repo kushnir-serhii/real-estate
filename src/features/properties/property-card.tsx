@@ -75,7 +75,8 @@ const MaybeViewTransition = ({ name, children }: { name?: string; children: Reac
 /**
  * Card is an `article` with the title link stretched over it, so the favorites button
  * (top-right of the photo) and the photo slider buttons (left / right middle) sit above the link without nesting
- * interactive elements.
+ * interactive elements. Inside the catalog's switchable grid in its one-column view (`.catalog-list-view` on <html>), the card turns
+ * horizontal from sm: the photo on the left, the details beside it.
  */
 export const PropertyCard = ({
   property,
@@ -104,9 +105,9 @@ export const PropertyCard = ({
     // The hover target is this wrapper, which does not move: lifting the hovered element itself makes it jump in a loop
     // when the cursor sits on its bottom edge (the card rises from under the cursor, loses hover, drops back).
     <div className="group h-full">
-      <article className="relative flex h-full flex-col overflow-hidden rounded-2xl bg-card text-card-foreground ring-1 ring-foreground/5 transition-shadow duration-(--duration-base) ease-(--ease-out-soft) group-hover:shadow-float has-focus-visible:ring-3 has-focus-visible:ring-ring motion-reduce:transition-none">
+      <article className="relative flex h-full flex-col overflow-hidden sm:[.catalog-list-view_[data-catalog-list]_&]:flex-row rounded-2xl bg-card text-card-foreground ring-1 ring-foreground/5 transition-shadow duration-(--duration-base) ease-(--ease-out-soft) group-hover:shadow-float has-focus-visible:ring-3 has-focus-visible:ring-ring motion-reduce:transition-none">
         <MaybeViewTransition name={transitionPhoto ? `property-photo-${property.id}` : undefined}>
-        <div className={"relative aspect-4/3 w-full overflow-hidden bg-muted"}>
+        <div className="relative aspect-4/3 w-full overflow-hidden bg-muted sm:[.catalog-list-view_[data-catalog-list]_&]:aspect-auto sm:[.catalog-list-view_[data-catalog-list]_&]:min-h-60 sm:[.catalog-list-view_[data-catalog-list]_&]:w-2/5 sm:[.catalog-list-view_[data-catalog-list]_&]:shrink-0 lg:[.catalog-list-view_[data-catalog-list]_&]:min-h-64">
           {hasPhoto ? (
             <>
               <CardPhotoSlider slides={slides} sizes={imageSizes} priority={priority} muted={Boolean(soldLabel)} />
@@ -132,7 +133,7 @@ export const PropertyCard = ({
           <FavoriteButton propertyId={property.id} />
         </div>
         </MaybeViewTransition>
-        <div className="flex flex-1 flex-col gap-2 p-5 sm:p-6">
+        <div className="flex min-w-0 flex-1 flex-col gap-2 p-5 sm:p-6 lg:[.catalog-list-view_[data-catalog-list]_&]:p-8">
           <p className="flex flex-wrap items-baseline gap-x-2 text-xl font-semibold tabular-nums sm:text-price">
             <span>{amount}</span>
             {unit && <span className="font-sans text-base font-medium text-muted-foreground">/ {unit}</span>}

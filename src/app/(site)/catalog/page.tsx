@@ -18,6 +18,7 @@ import {
 import type { SearchParams } from "@/features/catalog/catalog-params";
 import { CatalogResults } from "@/features/catalog/catalog-results";
 import { CatalogSort } from "@/features/catalog/catalog-sort";
+import { CatalogViewToggle } from "@/features/catalog/catalog-view-toggle";
 import { FiltersSheet } from "@/features/catalog/filters-sheet";
 import { loadDistrictOptions } from "@/features/catalog/load-district-options";
 import { CATALOG_PAGE } from "@/constants/inner-pages";
@@ -76,7 +77,9 @@ const CatalogPage = async ({ searchParams }: CatalogPageProps) => {
                 <CatalogFiltersForm state={state} districts={districts} idPrefix="filters-sheet" stickyActions />
               </FiltersSheet>
             </div>
-            <div className="ml-auto">
+            <div className="ml-auto flex items-center gap-2">
+              {/* One column is the phone layout anyway: the switch shows from sm. */}
+              <CatalogViewToggle className="hidden sm:inline-flex" />
               <CatalogSort key={query} state={state} />
             </div>
           </div>

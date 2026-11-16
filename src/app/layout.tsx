@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { BRAND, OG_DEFAULT_IMAGE } from "@/constants/brand";
 import { getSiteUrl } from "@/lib/site-url";
+import { CATALOG_VIEW_INIT_SCRIPT } from "@/features/catalog/catalog-view";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { cormorantSc } from "./fonts/cormorant-sc";
 import { sofiaSansCyrillic, sofiaSansHryvnia, sofiaSansLatin } from "./fonts/sofia-sans";
@@ -33,7 +34,7 @@ const FONT_VARIABLES = [
 const RootLayout = ({ children }: { children: React.ReactNode }) => (
   <html lang="uk" className={FONT_VARIABLES} suppressHydrationWarning>
     <head>
-      <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      <script dangerouslySetInnerHTML={{ __html: `${THEME_INIT_SCRIPT};${CATALOG_VIEW_INIT_SCRIPT}` }} />
       <noscript>
         <style>{".nojs-only{display:block!important}.nojs-hide{display:none!important}"}</style>
       </noscript>

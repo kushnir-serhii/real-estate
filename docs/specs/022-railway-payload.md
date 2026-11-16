@@ -23,7 +23,9 @@ Why (stack review, 2026-11-16):
 
 ## Scope
 - In:
-  - Payload 3 (≥ 3.73, needs Next ≥ 16.2) inside the Next app: Postgres adapter in production, SQLite adapter for local dev and demo, so a fresh clone still runs with no Docker, keys or network.
+  - Payload 3 (≥ 3.73, needs Next ≥ 16.2) inside the Next app. **Postgres is the one real database** everywhere: production, previews and local development (a Neon branch). SQLite only for the offline demo, so a fresh clone still runs with no Docker, keys or network.
+    - Why: SQLite and Postgres need two separate Drizzle migration sets and behave differently in SQL (JSON, case sensitivity in `like`, types). Only Postgres migrations are generated and committed; the SQLite demo uses Payload's schema push, no migrations.
+    - Driver contract tests run on Postgres in CI (a Postgres service container in GitHub Actions or a throwaway Neon branch); the SQLite demo gets a smoke test only.
   - Collections mirroring today's data: properties, media (photos, S3 adapter → R2), agents, leads, pages + SEO, settings, posts (blog), admin users with roles.
   - The `src/lib/db/` facades reimplemented on the Payload Local API; public pages and components don't change.
   - Leads pipeline (store first → Plektan `addAdvert` → Telegram, retries) and Plektan sync writing through the Local API; the «one source of truth» setting kept.
@@ -94,17 +96,29 @@ Why (stack review, 2026-11-16):
   - [ ] the same build runs on Railway with only env and DNS changed.
   - [ ] the move steps in `docs/setup.md` are checked end to end on a test project.
 
-### [ ] 7. Cloudflare in front + docs
-- **Build:** image loader for Cloudflare Image Transformations (or sizes on upload); setup steps for proxied DNS, WAF and rate limits, Access on `/admin`, cache rules (static + photos only); update `CLAUDE.md`, `product.md`, `conventions.md`, `diagrams.md`.
+### [ ] 7. Cloudflare in front, origin locked + docs
+- **Build:**
+  - Image loader for Cloudflare Image Transformations (or sizes on upload).
+  - **Origin lock (Cloudflare can't be bypassed):** Railway accepts requests on its generated `*.up.railway.app` domain and for the client's host sent straight to Railway, past Cloudflare, so WAF, rate limits and Access alone guarantee nothing. Therefore:
+    - remove the generated Railway domain; keep only the custom domain;
+    - a Cloudflare Transform Rule adds a secret request header (`X-Origin-Auth: <ORIGIN_SECRET>`) to every proxied request;
+    - Next middleware rejects (403) any request without the right header; exceptions: the health check path (returns only `ok`) and cron calls over Railway's private network carrying `CRON_SECRET`;
+    - for `/admin` and `/api/admin/*` the middleware also verifies the `Cf-Access-Jwt-Assertion` JWT (signature against the team's Access certs, `aud` = the Access app), on top of Payload's own login.
+  - Setup steps in `docs/setup.md`: proxied DNS, **SSL/TLS mode Full — not Full (Strict)** (Railway docs: Strict breaks during Railway's certificate renewals), Transform Rule, WAF and rate limits on `/api/*` and forms, Access application on `/admin`, cache rules (static + photos only), how to rotate `ORIGIN_SECRET`.
+  - Update `CLAUDE.md`, `product.md`, `conventions.md`, `diagrams.md`.
 - **Agent:** backend · **Model:** sonnet (docs: haiku)
 - **Accept:**
+  - [ ] a request to the origin without the secret header gets 403; with it, the site works.
+  - [ ] `/admin` without a valid Access JWT gets 403 even with the origin header; unit tests cover valid, expired and wrong-`aud` tokens.
+  - [ ] health check and private-network cron calls still work.
   - [ ] Core Web Vitals stay green (`pnpm perf`), images served resized.
   - [ ] docs describe the new stack only; `pnpm diagrams` has no drift.
 
 ## Known risks
-- **No database backups in the MVP** (decision 2026-11-16). Mitigation for now: turn on Railway's built-in volume backups; every lead is also sent to Telegram (and Plektan when on), so leads can be restored by hand.
+- **No database backups in the MVP** (decision 2026-11-16). Railway's built-in database and volume backups (scheduled snapshots, point-in-time recovery) are **Pro-only** ($20/month minimum); on Hobby the backup limit is zero (Railway staff answers on station.railway.com, checked 2026-11-16 — recheck before relying on it). So on Hobby the only mitigation is that every lead is also sent to Telegram (and Plektan when on) and can be restored by hand.
   - **Add backups when any of these happens:** the first real client goes live, a few hundred leads are stored, or data appears that can't be rebuilt from Plektan.
-  - **Planned backup scheme:** twice a day `pg_dump` from Railway → dated file in R2 (keep 14–30 days) → `pg_restore --clean` into a free Neon project as a warm standby and a proof that the dump restores. Failover = point `DATABASE_URL` at Neon. `pg_dump` and Neon must match the Railway Postgres major version.
+  - **Options when backups are added:** Railway Pro (built-in snapshots + point-in-time recovery, from $20/month) or stay on Hobby with the scheme below (~$0 extra).
+  - **Planned backup scheme (Hobby):** twice a day `pg_dump` from Railway → dated file in R2 (keep 14–30 days) → `pg_restore --clean` into a free Neon project as a warm standby and a proof that the dump restores. Failover = point `DATABASE_URL` at Neon. `pg_dump` and Neon must match the Railway Postgres major version.
 - Payload versions are tied to Next versions: upgrades go together.
 - Railway Postgres is one container with one disk, no point-in-time recovery; a single region (EU West).
 
@@ -124,3 +138,4 @@ Why (stack review, 2026-11-16):
 | --- | --- | --- | --- |
 | 2026-11-16 | — | spec drafted | stack review; on hold until the client approves |
 | 2026-11-16 | — | stages added | development on Vercel Hobby + Neon Free + Cloudflare Free; production on Railway; portability rule |
+| 2026-11-16 | — | review fixes | origin lock against Cloudflare bypass (slice 7), SSL Full not Strict, Railway backups are Pro-only, Postgres everywhere with SQLite only for the offline demo |

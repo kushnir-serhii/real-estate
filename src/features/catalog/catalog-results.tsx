@@ -51,7 +51,7 @@ export const CatalogResults = async ({ state, filters }: CatalogResultsProps) =>
         <div className="flex flex-col gap-4">
           <Count total={result.page.total} />
           <h2 className="sr-only">Результати</h2>
-          <CatalogGrid>
+          <CatalogGrid switchable>
             {result.page.items.map((property, i) => (
               <li key={property.id}>
                 <PropertyCard property={property} imageSizes={CARD_SIZES} priority={i === 0} transitionPhoto />
