@@ -1,8 +1,8 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 
+import { CarouselArrow } from "@/components/carousel-arrow";
 import { cn } from "@/lib/utils";
 
 export type CardPhotoSlide = { src: string; srcSet?: string; width: number; height: number };
@@ -21,8 +21,9 @@ type CardPhotoSliderProps = {
 // A horizontal swipe has to travel this far (px) and be clearly more horizontal than vertical.
 const SWIPE_MIN = 40;
 
-const BUTTON_CLASS =
-  "nojs-hide absolute top-1/2 z-10 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-full bg-background/75 text-foreground ring-1 ring-foreground/10 outline-none backdrop-blur transition-[opacity,background-color] duration-(--duration-fast) hover:bg-background/95 focus-visible:opacity-100 focus-visible:ring-3 focus-visible:ring-ring group-focus-within:opacity-100 group-hover:opacity-100 pointer-fine:opacity-0 motion-reduce:transition-none";
+// Card-specific placement and behaviour; look, size and states come from CarouselArrow.
+const ARROW_CLASS =
+  "nojs-hide absolute top-1/2 z-10 -translate-y-1/2 focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100 pointer-fine:opacity-0";
 
 /**
  * Photos of a property card with prev / next buttons, a counter and swipe. Loops. Only the first photo renders until
@@ -137,12 +138,8 @@ export const CardPhotoSlider = ({ slides, sizes, priority, muted }: CardPhotoSli
       </div>
       {count > 1 && (
         <>
-          <button type="button" aria-label="Попереднє фото" onClick={onButton(-1)} className={cn(BUTTON_CLASS, "left-2")}>
-            <ChevronLeft className="size-5" aria-hidden="true" />
-          </button>
-          <button type="button" aria-label="Наступне фото" onClick={onButton(1)} className={cn(BUTTON_CLASS, "right-2")}>
-            <ChevronRight className="size-5" aria-hidden="true" />
-          </button>
+          <CarouselArrow direction="prev" size="sm" onClick={onButton(-1)} className={cn(ARROW_CLASS, "left-2")} />
+          <CarouselArrow direction="next" size="sm" onClick={onButton(1)} className={cn(ARROW_CLASS, "right-2")} />
           <span
             aria-hidden="true"
             className="pointer-events-none absolute right-3 bottom-3 z-10 rounded-control bg-background/80 px-2 py-0.5 text-xs font-semibold text-foreground tabular-nums backdrop-blur"

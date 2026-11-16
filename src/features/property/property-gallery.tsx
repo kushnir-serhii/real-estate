@@ -1,10 +1,11 @@
 "use client";
 
-import { Building2, ChevronLeft, ChevronRight, Expand, XIcon } from "lucide-react";
+import { Building2, Expand, XIcon } from "lucide-react";
 import { Dialog } from "radix-ui";
 import { ViewTransition, useEffect, useRef, useState } from "react";
 import type { KeyboardEvent, RefObject, UIEvent } from "react";
 
+import { CarouselArrow } from "@/components/carousel-arrow";
 import { cn } from "@/lib/utils";
 
 /** A photo ready to render: URLs resolved on the server, intrinsic size known. */
@@ -253,28 +254,18 @@ export const PropertyGallery = ({ photos, title, propertyId }: PropertyGalleryPr
 
         {many && (
           <>
-            <button
-              type="button"
-              aria-label="Попереднє фото"
+            <CarouselArrow
+              direction="prev"
+              size="md"
               onClick={() => stepBy(-1)}
-              className={cn(
-                ROUND_BUTTON,
-                "absolute top-1/2 left-3 -translate-y-1/2 bg-background/90 text-foreground shadow-sm hover:bg-background",
-              )}
-            >
-              <ChevronLeft className="size-6" aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              aria-label="Наступне фото"
+              className="absolute top-1/2 left-3 -translate-y-1/2"
+            />
+            <CarouselArrow
+              direction="next"
+              size="md"
               onClick={() => stepBy(1)}
-              className={cn(
-                ROUND_BUTTON,
-                "absolute top-1/2 right-3 -translate-y-1/2 bg-background/90 text-foreground shadow-sm hover:bg-background",
-              )}
-            >
-              <ChevronRight className="size-6" aria-hidden="true" />
-            </button>
+              className="absolute top-1/2 right-3 -translate-y-1/2"
+            />
             <p
               aria-live="polite"
               aria-atomic="true"
@@ -412,22 +403,20 @@ const GalleryViewer = ({ photos, title, start, indexRef, onClosed }: GalleryView
 
           {many && (
             <>
-              <button
-                type="button"
-                aria-label="Попереднє фото"
+              <CarouselArrow
+                direction="prev"
+                size="lg"
+                tone="dark"
                 onClick={() => stepBy(-1)}
-                className={cn(ROUND_BUTTON, "absolute top-1/2 left-2 -translate-y-1/2 bg-scrim hover:bg-on-scrim/15 sm:left-4")}
-              >
-                <ChevronLeft className="size-7" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                aria-label="Наступне фото"
+                className="absolute top-1/2 left-2 -translate-y-1/2 sm:left-4"
+              />
+              <CarouselArrow
+                direction="next"
+                size="lg"
+                tone="dark"
                 onClick={() => stepBy(1)}
-                className={cn(ROUND_BUTTON, "absolute top-1/2 right-2 -translate-y-1/2 bg-scrim hover:bg-on-scrim/15 sm:right-4")}
-              >
-                <ChevronRight className="size-7" aria-hidden="true" />
-              </button>
+                className="absolute top-1/2 right-2 -translate-y-1/2 sm:right-4"
+              />
             </>
           )}
         </div>
