@@ -25,7 +25,7 @@ export const ExclusiveProperties = async () => {
   if (state.kind === "empty") return <PropertiesEmpty />;
   if (state.kind === "error") return <PropertiesError />;
   return (
-    <ul className="reveal-curtain-stagger grid gap-6 md:grid-cols-3 lg:gap-8">
+    <ul className="grid gap-6 md:grid-cols-3 lg:gap-8">
       {state.items.map((property) => (
         <li key={property.id}>
           <PropertyCard

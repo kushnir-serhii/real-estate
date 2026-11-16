@@ -18,6 +18,8 @@ export type PriceRangeProps = {
   /** `popover`: «Бюджет» button + popover / sheet (home). `inline`: the panel in place (catalog filters). */
   variant: "popover" | "inline";
   id: string;
+  /** `cell`: bare trigger for a hairline-divided search row (the parent cell is `relative` and gets the click area). */
+  appearance?: "field" | "cell";
   defaultFrom?: number;
   defaultTo?: number;
   defaultCurrency?: Currency;
@@ -37,6 +39,7 @@ const PanelSkeleton = () => <Skeleton aria-hidden="true" className="h-72 rounded
 export const PriceRange = ({
   variant,
   id,
+  appearance = "field",
   defaultFrom,
   defaultTo,
   defaultCurrency = "USD",
@@ -101,7 +104,9 @@ export const PriceRange = ({
                 setOpen((o) => !o);
               }}
               className={cn(
-                "flex h-11 w-full min-w-0 items-center justify-between gap-2 rounded-control border border-control bg-background ps-4 pe-3.5 text-start text-base outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30",
+                appearance === "cell"
+                  ? "flex w-full min-w-0 items-center justify-between gap-2 bg-transparent text-start text-base font-medium outline-none after:absolute after:inset-0"
+                  : "flex h-11 w-full min-w-0 items-center justify-between gap-2 rounded-control border border-control bg-background ps-4 pe-3.5 text-start text-base outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30",
                 value.from === undefined && value.to === undefined ? "text-muted-foreground" : "text-foreground",
               )}
             >

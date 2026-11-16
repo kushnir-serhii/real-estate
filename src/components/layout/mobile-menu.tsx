@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Menu, Phone } from "lucide-react";
+import { ArrowUpRight, Menu, Phone } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -68,10 +68,10 @@ export const MobileMenu = () => {
           </ul>
         </nav>
         <div className="flex flex-col gap-4 px-4">
-          <Button asChild variant="default" size="lg">
+          <Button asChild variant="brand" size="lg">
             <Link href={CTA_LINK.href} onClick={close}>
               {CTA_LINK.label}
-              <ArrowRight data-icon="inline-end" aria-hidden="true" />
+              <ArrowUpRight data-icon="inline-end" aria-hidden="true" />
             </Link>
           </Button>
           <a

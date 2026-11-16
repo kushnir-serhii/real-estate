@@ -171,6 +171,32 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
   - [x] property and blog cards don't move on hover
   - [x] typecheck, lint, test, build green; ui-check on `root` passes
 
+### [x] 11. Feedback: compact search, blue header CTA, calmer cards, ↗ arrows
+- **Build:** (user feedback 2026-11-16) hero quick search → one compact white row: deal tabs as text above it (active underlined), cells with a small uppercase label and the value (Тип · Кімнат · Бюджет), hairline dividers, no boxed fields, «Знайти» attached on the right; compact stack on mobile; the price-range popover/sheet keeps working from the «Бюджет» cell. Header «Залишити заявку» filled `brand` (royal blue, white text) in every header state. Property cards: no scroll-in effect (remove the curtain / stagger / scale reveals on card grids, home and catalog), favourite heart without the square backing (icon with a soft shadow for legibility, 44px hit area kept), photo slider prev / next buttons `rounded-full` (documented exception to the 2px rule). Arrows in buttons and links that mean "go / open" (`ArrowRight` → `ArrowUpRight`); back links, pagination and slider chevrons stay.
+- **Agent:** designer · **Model:** sonnet
+- **Accept:**
+  - [x] hero search is one row at ≥ 1024px and works without JS; budget popover still opens
+  - [x] header CTA is blue in transparent and scrolled states, both themes, ≥ 4.5:1
+  - [x] cards appear without animation on scroll; heart has no square; slider buttons are round
+  - [x] no `ArrowRight` left in CTA buttons / «Усі …» links
+  - [x] typecheck, lint, test, build green
+
+### [x] 12. Hero animation instead of video
+- **Build:** three prototypes stacked on `/design/hero` for the user to choose from: A «Кіно-серія кадрів» (4 photos, slow camera drift, vertical-curtain transitions, progress lines with frame names, pause), B «Двері залу» (photo revealed by tall hall panels opening from the centre, then slow drift), C «Креслення → фото» (an SVG line drawing of a facade draws itself on midnight, then the photo develops through it). Then the chosen one goes into the home hero. **Decided (2026-11-16, user):** C goes on the home (drawing traced from `house-exterior-1.webp`, photo develops through it); A and B are deleted; `/design/hero` keeps C and D (C opening into the cinematic loop) for later.
+- **Agent:** designer · **Model:** sonnet
+- **Accept:**
+  - [x] `/design/hero` shows the prototypes one under another, each replayable (now C and D)
+  - [x] (after the choice) home hero uses it; LCP < 2.5 s, CLS 0; off under reduced motion; first photo is the LCP image, others load after
+  - [x] typecheck, lint, test, build green
+
+### [x] 13. One prev / next arrow button across the project
+- **Build:** (user feedback 2026-11-16) one shared component for every prev / next arrow button (card photo slider, property gallery, fullscreen photo viewer, any other carousel), round (`rounded-full`), with `size` (e.g. `sm` for cards, `md` for the gallery, `lg` for the viewer) and `tone` (`light` over photos / page, `dark` on the viewer) props via cva; same icon, focus ring, 44px minimum hit area, hover and disabled states everywhere. Replace the local `ROUND_BUTTON` / slider button classes.
+- **Agent:** designer · **Model:** sonnet
+- **Accept:**
+  - [x] the card slider, property gallery and viewer arrows render from the one component and look the same (only size / tone differ)
+  - [x] keyboard and touch work as before; 44px targets
+  - [x] typecheck, lint, test, build green
+
 ## External needs
 - Apply `20261115120000_property_exclusive.sql` to the Supabase project (user; listed in setup.md).
 - Real photos for hero, districts and about (later; placeholders now).
@@ -198,3 +224,6 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
 | 2026-11-15 | 8 | done | no library. Hero: per-word mask rise (server-split spans inside one h1, 900 ms, 70 ms stagger, 200 ms start), photo curtain + settle from 1.1 (1300 ms), eyebrow / lead / search wipe-and-rise (800 ms; backwards fill, nothing stays clipped); scroll: photo curtains (about, district tiles, exclusive cards) and H2 mask rise in SectionHeading (animation-timeline: view()); card hover zoom already present; React ViewTransition catalog card photo → gallery (Next 16.4 has no experimental.viewTransition flag; types via src/react-experimental.d.ts; home cards excluded: a property can appear twice there); count tween 400 ms rAF with sr-only final value. Reduced motion: no keyframe animations. perf: / 218.4 → 218.4 KB gz, LCP ≈ 0.86 s, CLS 0; /catalog 212.8 → 212.8; property 222.9 → 223.0 |
 | 2026-11-15 | 9 | done | no regressions found; ui-check against next start on 3199 (the user's dev server on 3000 blocks a second next dev): public SPEC=021 ROUTES=root,catalog,catalog/2-kimnatna-kvartyra-na-oboloni-3f9a1c,favorites,about,contacts,blog,blog/yaki-dokumenty-pereviryty-pered-kupivleiu-kvartyry,privacy,design,nonexistent-page → 78 passed; admin SPEC=021-admin (11 routes, --workers=3) → 78 passed (6 workers: /admin dashboard flaky on networkidle). Screenshots reviewed. Docs: product.md design status + principle 1, conventions.md Styling (palette, radii, fonts, motion) + perf baselines. Admin hint copy aligned to «Ексклюзивні об'єкти» |
 | 2026-11-15 | 10 | done | user feedback: collection = 3 regular cards in one row (md:grid-cols-3) + «Уся колекція» → /catalog?deal=sell&sort=price_desc, PropertyCard size lg removed; new «Чому ми / Як ми дбаємо про вашу угоду» (4 numbered principles, brand rules), «Послуги / Чим ми допоможемо» (6 linked tiles; sell / legal / valuation → /contacts, commercial → /catalog?property_type=commercial, 11 results), FAQ (8 questions, native details, FAQPage JSON-LD from the same constants + test); hover lift removed from property and blog cards (shadow + photo zoom kept). ui-check root: 38 passed (one earlier no-js screenshot flake under load). Checked by eye at 1440 and 390. Files: page.tsx, constants/home.ts, features/home/{exclusive-properties,why-us,services,faq}.tsx, property-card, blog-card, features/seo/schemas(.test).ts |
+| 2026-11-15 | 11 | done | hero search = text deal tabs (underlined) + one white row of cells (uppercase label + value, hairlines), «Знайти» attached; stacked below 1024; PriceRangeField appearance «cell»; header and mobile-menu CTA = new brand button variant (white on royal blue 5.8:1) in both header states; scroll-in reveals removed from the home card grids (catalog / favourites / similar / blog had none); favourite heart without square (white + soft shadow, saved = brand-on-ink, 44px); card slider buttons rounded-full (documented exception); ArrowRight → ArrowUpRight in 16 files. Checked: home 1440 / 375, light + dark |
+| 2026-11-15 | 13 | done | src/components/carousel-arrow.tsx: CarouselArrow { direction prev|next, size sm 44 / md 48 / lg 56, tone light (background/75 + blur) | dark (scrim) }, cva, rounded-full, focus ring, disabled state, default uk aria-labels; used by the card photo slider (hover-reveal kept via className), property gallery and fullscreen viewer (12 usages); shown on /design. Gallery expand / close buttons still use the gallery's own square-ish ROUND_BUTTON (open question) |
+| 2026-11-15 | 12 | done | user chose C (after A / B / C, then C traced to the photo + D); home hero: midnight → blueprint traced from house-exterior-1.webp draws (0–1.9 s) → scan line + photo develops (1.0–2.8 s) → lines dim to 0.22 on the matching edges (1.8–3.2 s) → slow drift; pure CSS (HeroBackdrop / HeroTracedScene, hero-blueprint, hero-trace-frame; utilities hero-trace*, hero-draw, hero-develop, hero-scan, hero-drift; old hero-zoom / hero-curtain removed); A and B deleted, /design/hero keeps C and D. perf /: LCP 0.86 → 1.07 s (LCP is the H1 while the photo is still clipped; image at 0.26 s with reduced motion), JS 218.7 KB gz, CLS 0. Checked frames at 1.5 / 3 / 8 s, 1440 and 390 |

@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
 import { buttonVariants } from "@/components/ui/button";
@@ -15,7 +15,7 @@ export const HomeAbout = ({ body }: { body: string }) => (
         <Markdown className="max-w-prose">{body}</Markdown>
         <Link href="/about" className={buttonVariants({ variant: "outline", size: "lg" })}>
           {ABOUT.action}
-          <ArrowRight data-icon="inline-end" aria-hidden="true" />
+          <ArrowUpRight data-icon="inline-end" aria-hidden="true" />
         </Link>
       </div>
       <div className="grid grid-cols-5 gap-3 sm:gap-4">

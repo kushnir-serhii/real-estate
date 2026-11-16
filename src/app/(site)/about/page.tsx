@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
 
@@ -37,7 +37,7 @@ const AboutPage = async () => {
       <div className="mx-auto mt-10 flex w-full max-w-3xl flex-wrap gap-3 px-4 sm:px-6">
         <Link href="/contacts" className={buttonVariants({ variant: "default", size: "lg" })}>
           {ABOUT_PAGE.contactAction}
-          <ArrowRight data-icon="inline-end" aria-hidden="true" />
+          <ArrowUpRight data-icon="inline-end" aria-hidden="true" />
         </Link>
         <Link href="/catalog" className={buttonVariants({ variant: "outline", size: "lg" })}>
           {ABOUT_PAGE.catalogAction}

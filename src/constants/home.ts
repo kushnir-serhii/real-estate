@@ -2,7 +2,8 @@
 export const HERO = {
   eyebrow: "Київ і область",
   lead: "Квартири, будинки, комерційні приміщення та ділянки в Києві й області.",
-  image: { src: "/placeholders/flat-living-2.webp", width: 1280, height: 853 },
+  /** The villa photo the hero drawing traces (the drawing's viewBox is these pixels). */
+  image: { src: "/placeholders/house-exterior-1.webp", width: 1280, height: 849 },
 } as const;
 
 export const EXCLUSIVE = {

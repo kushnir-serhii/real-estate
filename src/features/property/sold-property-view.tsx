@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, CircleCheck } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, CircleCheck } from "lucide-react";
 import Link from "next/link";
 
 import { buttonVariants } from "@/components/ui/button";
@@ -69,7 +69,7 @@ export const SoldPropertyView = ({ property }: SoldPropertyViewProps) => {
 
       <Link href="/catalog" className={cn(buttonVariants({ variant: "outline", size: "lg" }), "mt-8")}>
         Усі об&apos;єкти в каталозі
-        <ArrowRight aria-hidden="true" />
+        <ArrowUpRight aria-hidden="true" />
       </Link>
     </div>
   );

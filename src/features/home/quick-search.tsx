@@ -25,12 +25,17 @@ const ROOM_OPTIONS = [
 
 type FieldProps = { label: string; htmlFor: string; children: React.ReactNode };
 
+/** One cell of the row: small label over the value; the control stretches over the whole cell (after:inset-0). */
 const Field = ({ label, htmlFor, children }: FieldProps) => (
-  <div className="flex flex-col gap-2">
-    <Label htmlFor={htmlFor}>{label}</Label>
+  <div className="relative flex min-w-0 flex-col gap-1 px-4 py-3 has-focus-visible:ring-2 has-focus-visible:ring-ring has-focus-visible:ring-inset sm:px-5">
+    <Label htmlFor={htmlFor} className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+      {label}
+    </Label>
     {children}
   </div>
 );
+
+const CELL_SELECT = "h-auto rounded-none border-0 bg-transparent p-0 font-medium focus-visible:border-0 focus-visible:ring-0 dark:bg-transparent after:absolute after:inset-0";
 
 /** Plain GET form to /catalog. Works without JS. */
 export const QuickSearch = () => {
@@ -40,19 +45,14 @@ export const QuickSearch = () => {
   const budgetId = `${id}-budget`;
 
   return (
-    <form
-      action="/catalog"
-      method="get"
-      aria-label="Швидкий пошук"
-      className="flex flex-col gap-5 bg-card p-4 text-card-foreground shadow-float ring-1 ring-border sm:p-6"
-    >
+    <form action="/catalog" method="get" aria-label="Швидкий пошук" className="flex flex-col gap-2">
       <fieldset className="min-w-0">
         <legend className="sr-only">Що потрібно</legend>
-        <div className="grid grid-cols-3 gap-1 rounded-control bg-muted p-1 sm:max-w-md">
+        <div className="flex flex-wrap gap-x-6">
           {DEAL_OPTIONS.map((o) => (
             <label
               key={o.value}
-              className="relative flex h-11 cursor-pointer items-center justify-center rounded-control px-3 text-sm font-semibold text-muted-foreground transition-colors duration-(--duration-fast) hover:text-foreground has-checked:bg-primary has-checked:text-primary-foreground has-checked:hover:text-primary-foreground has-focus-visible:ring-3 has-focus-visible:ring-ring/50"
+              className="relative flex h-11 cursor-pointer items-center border-b-2 border-transparent text-sm font-semibold text-on-scrim/75 transition-colors duration-(--duration-fast) hover:text-on-scrim has-checked:border-on-scrim has-checked:text-on-scrim has-focus-visible:ring-3 has-focus-visible:ring-ring/50"
             >
               <input
                 type="radio"
@@ -66,33 +66,22 @@ export const QuickSearch = () => {
           ))}
         </div>
       </fieldset>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[repeat(3,1fr)_auto]">
+      <div className="grid divide-y divide-border bg-card text-card-foreground shadow-float ring-1 ring-border lg:grid-cols-[1fr_1fr_1.3fr_auto] lg:divide-x lg:divide-y-0">
         <Field label="Тип" htmlFor={typeId}>
-          <FormSelect
-            id={typeId}
-            name="property_type"
-            options={TYPE_OPTIONS}
-          />
+          <FormSelect id={typeId} name="property_type" options={TYPE_OPTIONS} className={CELL_SELECT} />
         </Field>
         <Field label="Кімнат" htmlFor={roomsId}>
-          <FormSelect
-            id={roomsId}
-            name="rooms"
-            options={ROOM_OPTIONS}
-          />
+          <FormSelect id={roomsId} name="rooms" options={ROOM_OPTIONS} className={CELL_SELECT} />
         </Field>
         <Field label="Бюджет" htmlFor={budgetId}>
-          <PriceRangeField variant="popover" id={budgetId} />
+          <PriceRangeField variant="popover" appearance="cell" id={budgetId} />
         </Field>
-        <Button
-          type="submit"
-          variant="default"
-          size="lg"
-          className="self-end sm:col-span-2 lg:col-span-1"
-        >
-          <Search aria-hidden="true" />
-          Знайти
-        </Button>
+        <div className="p-2">
+          <Button type="submit" variant="default" size="lg" className="h-12 w-full lg:h-full lg:px-8">
+            <Search aria-hidden="true" />
+            Знайти
+          </Button>
+        </div>
       </div>
     </form>
   );

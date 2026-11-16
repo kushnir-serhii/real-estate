@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { ArrowRight, Search } from "lucide-react";
+import { ArrowUpRight, Search } from "lucide-react";
 
+import { CarouselArrow } from "@/components/carousel-arrow";
 import { Logo } from "@/components/layout/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -81,6 +82,7 @@ const FONTS = [
 
 const VARIANTS = [
   "default",
+  "brand",
   "secondary",
   "outline",
   "ghost",
@@ -125,6 +127,30 @@ const DesignPage = () => (
       <div className="flex flex-wrap items-center gap-6 rounded-2xl bg-ink p-6">
         <Logo tone="on-ink" size="lg" alwaysShowName />
         <Logo tone="on-ink" variant="mark" />
+      </div>
+    </Section>
+
+    <Section title="Стрілки каруселі">
+      <p className="text-sm text-muted-foreground">
+        Одна кнопка prev / next на весь проєкт: розміри sm (картка) / md (галерея) / lg (перегляд), тони light / dark.
+      </p>
+      <div className="flex flex-wrap items-center gap-4 rounded-2xl bg-muted p-6">
+        {(["sm", "md", "lg"] as const).map((size) => (
+          <div key={size} className="flex items-center gap-2">
+            <CarouselArrow direction="prev" size={size} tone="light" />
+            <CarouselArrow direction="next" size={size} tone="light" />
+            <CarouselArrow direction="next" size={size} tone="light" disabled />
+          </div>
+        ))}
+      </div>
+      <div className="flex flex-wrap items-center gap-4 rounded-2xl bg-viewer p-6">
+        {(["sm", "md", "lg"] as const).map((size) => (
+          <div key={size} className="flex items-center gap-2">
+            <CarouselArrow direction="prev" size={size} tone="dark" />
+            <CarouselArrow direction="next" size={size} tone="dark" />
+            <CarouselArrow direction="next" size={size} tone="dark" disabled />
+          </div>
+        ))}
       </div>
     </Section>
 
@@ -246,7 +272,7 @@ const DesignPage = () => (
       <div className="flex flex-wrap items-center gap-3">
         <Button size="lg">
           Підібрати об’єкт
-          <ArrowRight data-icon="inline-end" />
+          <ArrowUpRight data-icon="inline-end" />
         </Button>
         <Button size="lg">Великий 48</Button>
         <Button>Звичайний 44</Button>

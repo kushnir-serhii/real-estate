@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Phone } from "lucide-react";
+import { ArrowUpRight, Phone } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { FavoritesLink } from "@/components/layout/favorites-link";
@@ -61,10 +61,10 @@ export const SiteHeader = () => (
         </Button>
         <FavoritesLink className={HEADER_ICON_CLASS} />
         <ThemeToggle className={cn("hidden xl:inline-flex", HEADER_ICON_CLASS)} />
-        <Button asChild variant="outline" className="ml-2 hidden xl:inline-flex on-hero:border-on-scrim/50 on-hero:bg-transparent on-hero:text-on-scrim on-hero:hover:bg-on-scrim/15 on-hero:hover:text-on-scrim">
+        <Button asChild variant="brand" className="ml-2 hidden xl:inline-flex">
           <Link href={CTA_LINK.href}>
             {CTA_LINK.label}
-            <ArrowRight data-icon="inline-end" aria-hidden="true" />
+            <ArrowUpRight data-icon="inline-end" aria-hidden="true" />
           </Link>
         </Button>
         <div className="xl:hidden">

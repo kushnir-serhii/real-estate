@@ -8,13 +8,17 @@ type CatalogGridProps = {
    * (favorites) — 3 columns from lg.
    */
   layout?: "sidebar" | "full";
+  /** Follows the catalog's grid / one column switch (`CatalogViewToggle`): one column of wide cards in the list view. */
+  switchable?: boolean;
 };
 
-export const CatalogGrid = ({ children, layout = "sidebar" }: CatalogGridProps) => (
+export const CatalogGrid = ({ children, layout = "sidebar", switchable = false }: CatalogGridProps) => (
   <ul
+    data-catalog-list={switchable ? "" : undefined}
     className={cn(
       "grid gap-4 sm:grid-cols-2 lg:gap-6",
       layout === "sidebar" ? "2xl:grid-cols-3" : "lg:grid-cols-3",
+      switchable && "[.catalog-list-view_&]:grid-cols-1",
     )}
   >
     {children}

@@ -410,18 +410,7 @@
     linear-gradient(to bottom, var(--background) 0%, transparent 18%, transparent 82%, var(--background) 100%);
 }
 /* Hero motion (only without reduced motion; `backwards` fill, so the end state is the plain, unclipped element and the
-   text stays in the HTML and visible without JS). The photo opens like a curtain from the top and settles from a slight
-   scale; each H1 word rises from under its own invisible line (clipped, not faded); the rest wipes in after it. */
-@keyframes hero-curtain {
-  from {
-    clip-path: inset(0 0 38% 0);
-    transform: scale(1.1);
-  }
-  to {
-    clip-path: inset(0);
-    transform: none;
-  }
-}
+   text stays in the HTML and visible without JS). The photo is drawn and developed (hero-trace below); each H1 word rises from under its own invisible line (clipped, not faded); the rest wipes in after it. */
 @keyframes hero-word {
   from {
     transform: translateY(105%);
@@ -438,11 +427,6 @@
   to {
     clip-path: inset(0 0 -1rem 0);
     transform: none;
-  }
-}
-@utility hero-zoom {
-  @media (prefers-reduced-motion: no-preference) {
-    animation: hero-curtain 1300ms var(--ease-out-soft) backwards;
   }
 }
 /* the mask: one wrapper per word, clipped with a little room for ascenders and descenders */
@@ -464,6 +448,103 @@
   @media (prefers-reduced-motion: no-preference) {
     animation: hero-wipe 800ms var(--ease-out-soft) backwards;
     animation-delay: var(--hero-delay, 0ms);
+  }
+}
+
+/* Hero drawing -> photo (spec 021 slice 12). The photo and the SVG trace of it share one cover-sized frame (container
+   units), so lines stay on their edges at any size. Timeline: lines draw 0-1.9 s, the scan line develops the photo
+   1-2.8 s, the lines dim to a faint overlay 1.8-3.2 s, then a slow drift. Motion only without reduced motion; the
+   default state is the final picture (photo shown, lines at overlay level, no scan), also without JS. */
+@utility hero-trace {
+  container-type: size;
+  --fx: 0.62; /* focal point: keeps the building in view on phones, where the photo is cropped to the sides */
+  --fy: 0.5;
+  @variant lg {
+    --fx: 0.5;
+  }
+}
+@utility hero-trace-frame {
+  position: absolute;
+  width: max(100cqw, calc(100cqh * var(--ratio)));
+  height: max(100cqh, calc(100cqw / var(--ratio)));
+  left: calc((100cqw - max(100cqw, calc(100cqh * var(--ratio)))) * var(--fx));
+  top: calc((100cqh - max(100cqh, calc(100cqw / var(--ratio)))) * var(--fy));
+}
+@keyframes hero-drift {
+  from {
+    transform: scale(1.04) translate3d(-1.5%, 0, 0);
+  }
+  to {
+    transform: scale(1.14) translate3d(1.5%, -1%, 0);
+  }
+}
+@keyframes hero-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+@keyframes hero-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes hero-blueprint-fade {
+  from {
+    opacity: 1;
+  }
+}
+@keyframes hero-develop {
+  from {
+    clip-path: inset(0 100% 0 0);
+    opacity: 0.3;
+  }
+}
+@keyframes hero-scan {
+  from {
+    transform: translate3d(-100%, 0, 0);
+  }
+  85% {
+    opacity: 1;
+  }
+  to {
+    transform: none;
+    opacity: 0;
+  }
+}
+@utility hero-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  @media (prefers-reduced-motion: no-preference) {
+    animation: hero-draw 1100ms cubic-bezier(0.65, 0, 0.35, 1) both;
+    animation-delay: calc((var(--d, 0ms) + var(--i, 0) * 40ms) * 0.6);
+  }
+}
+@utility hero-bp-text {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: hero-fade-in 700ms var(--ease-out-soft) both;
+    animation-delay: var(--d, 0ms);
+  }
+}
+@utility hero-blueprint {
+  opacity: 0.22;
+  @media (prefers-reduced-motion: no-preference) {
+    animation: hero-blueprint-fade 1400ms ease-in-out 1800ms both;
+  }
+}
+@utility hero-develop {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: hero-develop 1800ms cubic-bezier(0.65, 0, 0.35, 1) 1000ms both;
+  }
+}
+@utility hero-scan {
+  opacity: 0;
+  @media (prefers-reduced-motion: no-preference) {
+    animation: hero-scan 1800ms cubic-bezier(0.65, 0, 0.35, 1) 1000ms both;
+  }
+}
+@utility hero-drift {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: hero-drift 20s ease-in-out 2800ms infinite alternate both;
   }
 }
 
@@ -545,4 +626,91 @@
   ::view-transition-new(*) {
     animation: none !important;
   }
+}
+
+/* hero lab (spec 021 slice 12): C (= the home hero) and D on /design/hero. D adds a curtain loop after the opening:
+   frame n curtains in at 8 + n*6 s, the traced photo hides at 9.2 s and curtains back in at 26 s (24 s CSS loop). */
+.lab-frame {
+  z-index: 1;
+  clip-path: inset(0 0 100% 0);
+}
+.lab-frame:first-child {
+  clip-path: inset(0);
+}
+.lab-text .hero-word-inner {
+  animation-delay: calc(var(--lab-start, 0ms) + 200ms + var(--i, 0) * 70ms);
+}
+@keyframes lab-a-frame {
+  0% {
+    clip-path: inset(0 0 100% 0);
+    z-index: 2;
+    animation-timing-function: var(--ease-out-soft);
+  }
+  5% {
+    clip-path: inset(0);
+    z-index: 2;
+    animation-timing-function: linear;
+  }
+  5.01%,
+  29.99% {
+    clip-path: inset(0);
+    z-index: 1;
+  }
+  30%,
+  100% {
+    clip-path: inset(0 0 100% 0);
+    z-index: 0;
+  }
+}
+@keyframes lab-a-cam {
+  from {
+    transform: var(--cam-from);
+  }
+  30%,
+  to {
+    transform: var(--cam-to);
+  }
+}
+@keyframes lab-d-first {
+  0%,
+  5% {
+    clip-path: inset(0);
+    z-index: 1;
+  }
+  5.01%,
+  74.99% {
+    clip-path: inset(0 0 100% 0);
+    z-index: 0;
+  }
+  75% {
+    clip-path: inset(0 0 100% 0);
+    z-index: 2;
+    animation-timing-function: var(--ease-out-soft);
+  }
+  80% {
+    clip-path: inset(0);
+    z-index: 2;
+    animation-timing-function: linear;
+  }
+  80.01%,
+  100% {
+    clip-path: inset(0);
+    z-index: 1;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lab-dframe-0 {
+    animation: lab-d-first 24s linear 8s infinite forwards;
+  }
+  .lab-dframe {
+    animation: lab-a-frame 24s linear infinite forwards;
+    animation-delay: calc(8s + var(--n) * 6s);
+  }
+  .lab-dcam {
+    animation: lab-a-cam 24s linear infinite both;
+    animation-delay: calc(8s + var(--n) * 6s);
+  }
+}
+[data-lab-paused="true"] * {
+  animation-play-state: paused !important;
 }
