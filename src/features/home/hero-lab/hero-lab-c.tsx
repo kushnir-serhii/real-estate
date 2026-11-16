@@ -1,23 +1,34 @@
-import { BlueprintElevation } from "./blueprint-elevation";
+import { BlueprintTrace } from "./blueprint-trace";
 import { HeroLabContent } from "./hero-lab-content";
+import { HeroLabTrace } from "./hero-lab-trace";
+import { TRACE_PHOTO } from "./trace";
 
-/** C: the drawing builds itself on midnight (~3.4 s), a scan line develops the photo through it (2.6-5 s), the drawing dims. */
+/** The photo (the drawing's twin) inside the shared frame; `drift` is the camera move, same on photo and drawing. */
+export const TracePhoto = ({ priority = true }: { priority?: boolean }) => (
+  // eslint-disable-next-line @next/next/no-img-element -- lab page, static placeholder
+  <img
+    src={TRACE_PHOTO.src}
+    alt=""
+    width={TRACE_PHOTO.width}
+    height={TRACE_PHOTO.height}
+    fetchPriority={priority ? "high" : "low"}
+    decoding="async"
+    className="absolute inset-0 size-full"
+  />
+);
+
+/** C: the drawing builds itself on midnight (~3 s), a scan line develops the photo it traces (2.6-5 s), the drawing dims onto the edges. */
 export const HeroLabC = () => (
   <>
     <div className="lab-develop absolute inset-0">
-      {/* eslint-disable-next-line @next/next/no-img-element -- lab page, static placeholder */}
-      <img
-        src="/placeholders/house-exterior-2.webp"
-        alt=""
-        width={1280}
-        height={853}
-        fetchPriority="high"
-        decoding="async"
-        className="lab-drift size-full object-cover [--drift-delay:2600ms]"
-      />
-      <div className="hero-veil absolute inset-0" aria-hidden="true" />
+      <HeroLabTrace className="lab-drift [--drift-delay:2600ms]">
+        <TracePhoto />
+      </HeroLabTrace>
     </div>
-    <BlueprintElevation className="pointer-events-none absolute inset-x-0 top-20 h-[52%] w-full sm:inset-y-0 sm:top-0 sm:h-full lg:left-[34%] lg:w-[66%]" />
+    <HeroLabTrace className="lab-drift pointer-events-none [--drift-delay:2600ms]">
+      <BlueprintTrace />
+    </HeroLabTrace>
+    <div className="hero-veil absolute inset-0" aria-hidden="true" />
     <div
       className="lab-scan absolute inset-0 border-r border-brand-on-ink motion-reduce:hidden"
       aria-hidden="true"

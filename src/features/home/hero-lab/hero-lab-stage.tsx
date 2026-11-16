@@ -8,6 +8,8 @@ type HeroLabStageProps = {
   name: string;
   /** Progress strip at the bottom with the pause button (prototype A). */
   footer?: React.ReactNode;
+  /** Only the pause button, no strip (prototype D). */
+  pausable?: boolean;
   children: React.ReactNode;
 };
 
@@ -15,7 +17,7 @@ const chip =
   "inline-flex h-11 items-center gap-2 border border-on-scrim/40 bg-ink/70 px-4 text-sm text-on-scrim transition-colors hover:bg-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-on-scrim";
 
 /** One prototype on the lab page: label, «Повторити» (re-mounts the prototype so its animation restarts) and, for A, pause. */
-export const HeroLabStage = ({ letter, name, footer, children }: HeroLabStageProps) => {
+export const HeroLabStage = ({ letter, name, footer, pausable, children }: HeroLabStageProps) => {
   const [run, setRun] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -27,9 +29,9 @@ export const HeroLabStage = ({ letter, name, footer, children }: HeroLabStagePro
     >
       <div key={run} className="contents">
         {children}
-        {footer ? (
-          <div className="site-container absolute inset-x-0 bottom-4 z-20 flex items-end gap-4 sm:bottom-6">
-            <div className="grid flex-1 grid-cols-4 gap-2 sm:gap-4">{footer}</div>
+        {footer || pausable ? (
+          <div className="site-container absolute inset-x-0 bottom-4 z-20 flex items-end justify-end gap-4 sm:bottom-6">
+            {footer ? <div className="grid flex-1 grid-cols-4 gap-2 sm:gap-4">{footer}</div> : null}
             <button
               type="button"
               aria-pressed={paused}

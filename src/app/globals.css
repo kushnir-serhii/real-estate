@@ -725,8 +725,8 @@
     animation-delay: var(--drift-delay, 0ms);
   }
   .lab-draw {
-    animation: lab-draw 2400ms cubic-bezier(0.65, 0, 0.35, 1) both;
-    animation-delay: calc(var(--d, 0ms) + var(--i, 0) * 70ms);
+    animation: lab-draw 1400ms cubic-bezier(0.65, 0, 0.35, 1) both;
+    animation-delay: calc(var(--d, 0ms) + var(--i, 0) * 40ms);
   }
   .lab-bp-text {
     animation: lab-fade-in 800ms var(--ease-out-soft) both;
@@ -744,4 +744,64 @@
 }
 [data-lab-paused="true"] * {
   animation-play-state: paused !important;
+}
+/* C/D: photo + drawing in one frame, "cover"-sized with container units so the lines stay on the edges at any size. */
+.lab-trace {
+  container-type: size;
+  --fx: 0.62;
+  --fy: 0.5;
+}
+@media (min-width: 64rem) {
+  .lab-trace {
+    --fx: 0.5;
+  }
+}
+.lab-trace-frame {
+  position: absolute;
+  width: max(100cqw, calc(100cqh * var(--ratio)));
+  height: max(100cqh, calc(100cqw / var(--ratio)));
+  left: calc((100cqw - max(100cqw, calc(100cqh * var(--ratio)))) * var(--fx));
+  top: calc((100cqh - max(100cqh, calc(100cqw / var(--ratio)))) * var(--fy));
+}
+/* D: C's opening, then A's curtain loop from 8 s: frame n curtains in at 8 + n*6 s (n = 0..2 here are frames 2-4), the
+   traced photo (frame 1) hides at 9.2 s and curtains back in at 26 s. No backwards fill, so the base state shows meanwhile. */
+@keyframes lab-d-first {
+  0%,
+  5% {
+    clip-path: inset(0);
+    z-index: 1;
+  }
+  5.01%,
+  74.99% {
+    clip-path: inset(0 0 100% 0);
+    z-index: 0;
+  }
+  75% {
+    clip-path: inset(0 0 100% 0);
+    z-index: 2;
+    animation-timing-function: var(--ease-out-soft);
+  }
+  80% {
+    clip-path: inset(0);
+    z-index: 2;
+    animation-timing-function: linear;
+  }
+  80.01%,
+  100% {
+    clip-path: inset(0);
+    z-index: 1;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lab-dframe-0 {
+    animation: lab-d-first 24s linear 8s infinite forwards;
+  }
+  .lab-dframe {
+    animation: lab-a-frame 24s linear infinite forwards;
+    animation-delay: calc(8s + var(--n) * 6s);
+  }
+  .lab-dcam {
+    animation: lab-a-cam 24s linear infinite both;
+    animation-delay: calc(8s + var(--n) * 6s);
+  }
 }
