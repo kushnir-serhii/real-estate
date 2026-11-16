@@ -1,4 +1,4 @@
-import { TRACE_PHOTO } from "./trace";
+import { HERO } from "@/constants/home";
 
 type Group = { delay: number; tone: string; paths: string[] };
 
@@ -93,22 +93,22 @@ const LEVELS = [
   { x: 1216, y: 550, t: "±0.00" },
 ];
 
-/** C: a trace of the photographed villa that draws itself (stroke-dashoffset, groups staggered), then stays as a faint overlay exactly on the edges. */
-export const BlueprintTrace = () => (
+/** A trace of the photographed villa that draws itself (stroke-dashoffset, groups staggered), then stays as a faint overlay exactly on the edges. */
+export const HeroBlueprint = () => (
   <svg
-    viewBox={`0 0 ${TRACE_PHOTO.width} ${TRACE_PHOTO.height}`}
+    viewBox={`0 0 ${HERO.image.width} ${HERO.image.height}`}
     preserveAspectRatio="xMidYMid slice"
     fill="none"
     aria-hidden="true"
     focusable="false"
-    className="lab-blueprint absolute inset-0 size-full stroke-[1.8]"
+    className="hero-blueprint absolute inset-0 size-full stroke-[1.8]"
     strokeLinejoin="round"
     strokeLinecap="round"
   >
     {GROUPS.map((g, gi) => (
       <g key={gi} className={`${g.tone} stroke-current`} style={{ "--d": `${g.delay}ms` } as React.CSSProperties}>
         {g.paths.map((d, i) => (
-          <path key={i} d={d} pathLength={1} className="lab-draw" style={{ "--i": i } as React.CSSProperties} />
+          <path key={i} d={d} pathLength={1} className="hero-draw" style={{ "--i": i } as React.CSSProperties} />
         ))}
       </g>
     ))}
@@ -119,7 +119,7 @@ export const BlueprintTrace = () => (
         y={l.y}
         fontSize={13}
         strokeWidth={0}
-        className="lab-bp-text fill-brand-on-ink font-mono"
+        className="hero-bp-text fill-brand-on-ink font-mono"
         style={{ "--d": "1800ms" } as React.CSSProperties}
       >
         {l.t}

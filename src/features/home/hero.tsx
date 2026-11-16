@@ -1,5 +1,7 @@
 import { HERO } from "@/constants/home";
 
+import { HeroBackdrop } from "./hero-backdrop";
+
 /** The title as one heading: every word sits in its own mask so it can rise on load (CSS only, plain text in the HTML). */
 const MaskedWords = ({ text }: { text: string }) =>
   text.split(/\s+/).filter(Boolean).map((word, i, words) => (
@@ -21,18 +23,9 @@ export const Hero = ({ title, lead, children }: HeroProps) => (
     data-hero
     className="hero-height relative isolate -mt-header flex flex-col justify-end overflow-hidden bg-ink"
   >
-    {/* eslint-disable-next-line @next/next/no-img-element -- static placeholder from public/; Workers has no image optimizer */}
-    <img
-      src={HERO.image.src}
-      alt=""
-      width={HERO.image.width}
-      height={HERO.image.height}
-      fetchPriority="high"
-      decoding="async"
-      sizes="100vw"
-      className="hero-zoom absolute inset-0 -z-20 size-full object-cover"
-    />
-    <div className="hero-veil absolute inset-0 -z-10" aria-hidden="true" />
+    <div className="absolute inset-0 -z-10" aria-hidden="true">
+      <HeroBackdrop />
+    </div>
     <div className="site-container flex flex-col items-start gap-4 pt-28 pb-8 text-on-scrim sm:gap-5 sm:pt-34 sm:pb-12">
       <p className="eyebrow hero-wipe text-on-scrim/90">{HERO.eyebrow}</p>
       <h1 className="text-display max-w-4xl">
