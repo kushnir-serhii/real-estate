@@ -1,10 +1,17 @@
 export const NAV_LINKS = [
-  { href: "/catalog?deal=sell", label: "Купити", activePath: null },
-  { href: "/catalog?deal=rent_long", label: "Орендувати", activePath: null },
-  { href: "/about", label: "Про нас", activePath: "/about" },
-  { href: "/blog", label: "Блог", activePath: "/blog" },
-  { href: "/contacts", label: "Контакти", activePath: "/contacts" },
+  { href: "", label: "Купити", activePath: null },
+  { href: "", label: "Орендувати", activePath: null },
+  { href: "", label: "Про нас", activePath: "" },
+  { href: "", label: "Блог", activePath: "" },
+  { href: "", label: "Контакти", activePath: "" },
 ] as const;
+// export const NAV_LINKS = [
+//   { href: "/catalog?deal=sell", label: "Купити", activePath: null },
+//   { href: "/catalog?deal=rent_long", label: "Орендувати", activePath: null },
+//   { href: "/about", label: "Про нас", activePath: "/about" },
+//   { href: "/blog", label: "Блог", activePath: "/blog" },
+//   { href: "/contacts", label: "Контакти", activePath: "/contacts" },
+// ] as const;
 
 /**
  * A desktop nav item (links and the phone): text in the header colour, a 2px underline in the current text colour
