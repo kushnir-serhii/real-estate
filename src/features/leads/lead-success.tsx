@@ -20,7 +20,7 @@ export const LeadSuccess = ({ onAgain }: LeadSuccessProps) => {
       ref={ref}
       role="status"
       tabIndex={-1}
-      className="flex flex-col items-start gap-4 rounded-lg bg-accent p-5 text-accent-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+      className="flex flex-col items-start gap-4 rounded-control bg-accent p-5 text-accent-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
     >
       <div className="flex items-start gap-3">
         <CircleCheck className="mt-0.5 size-6 shrink-0 text-primary" aria-hidden="true" />

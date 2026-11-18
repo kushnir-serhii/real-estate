@@ -6,7 +6,7 @@ import { CONTACTS } from "@/constants/contacts";
 import { CONTACTS_PAGE } from "@/constants/inner-pages";
 
 const LINK_CLASS =
-  "inline-flex min-h-11 items-center rounded-md break-all text-foreground underline-offset-4 outline-none hover:text-brand-text hover:underline focus-visible:ring-3 focus-visible:ring-ring/50";
+  "inline-flex min-h-11 items-center rounded-control break-all text-foreground underline-offset-4 outline-none hover:text-brand-text hover:underline focus-visible:ring-3 focus-visible:ring-ring/50";
 
 const IconBadge = ({ icon: Icon }: { icon: LucideIcon }) => (
   <span
@@ -31,7 +31,7 @@ export const ContactBlock = () => (
         <IconBadge icon={Phone} />
         <a
           href={CONTACTS.phone.href}
-          className="inline-flex min-h-11 items-center rounded-md text-xl font-semibold tabular-nums outline-none hover:text-brand-text focus-visible:ring-3 focus-visible:ring-ring/50 sm:text-2xl"
+          className="inline-flex min-h-11 items-center rounded-control text-xl font-semibold tabular-nums outline-none hover:text-brand-text focus-visible:ring-3 focus-visible:ring-ring/50 sm:text-2xl"
         >
           {CONTACTS.phone.display}
         </a>

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { BLOG_PAGE, BLOG_POST_PAGE } from "@/constants/blog";
 
 const LINK_CLASS =
-  "inline-flex min-h-11 items-center rounded-md outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50";
+  "inline-flex min-h-11 items-center rounded-control outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50";
 
 /** Головна › Блог › title. The title is the current page and is truncated on one line. */
 export const BlogBreadcrumbs = ({ title }: { title: string }) => (

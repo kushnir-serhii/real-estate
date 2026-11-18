@@ -12,7 +12,7 @@ import { FOOTER } from "@/constants/footer";
 import { isDemoMode } from "@/lib/data-driver";
 
 const LINK_CLASS =
-  "inline-flex min-h-11 items-center gap-2 rounded-md text-sm text-ink-muted outline-none transition-colors duration-(--duration-base) hover:text-on-ink focus-visible:ring-3 focus-visible:ring-brand-on-ink/60";
+  "inline-flex min-h-11 items-center gap-2 rounded-control text-sm text-ink-muted outline-none transition-colors duration-(--duration-base) hover:text-on-ink focus-visible:ring-3 focus-visible:ring-brand-on-ink/60";
 const ROW_CLASS = "flex min-h-11 items-center gap-2 text-sm text-ink-muted";
 const HEADING_CLASS = "eyebrow mb-2 text-on-ink";
 

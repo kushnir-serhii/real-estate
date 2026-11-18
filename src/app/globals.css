@@ -59,8 +59,8 @@
   --shadow-float: 0 1.75rem 3.5rem -1.25rem oklch(0.17 0.04 258 / 35%), 0 0.25rem 1rem oklch(0.17 0.04 258 / 8%);
 
   /* Media and surfaces (cards, tiles, photos, panels, dialogs) are one 12px: lg and every step above it collapse to --radius,
-     so rounded-xl / 2xl / 3xl never grow into big blobs. sm / md stay smaller for inner elements. */
-  --radius-sm: calc(var(--radius) * 0.5);
+     so rounded-xl / 2xl / 3xl never grow into big blobs. sm = control (4px); md (8px) is only for small admin details, never on the public site. */
+  --radius-sm: var(--radius-control);
   --radius-md: calc(var(--radius) * 0.67);
   --radius-lg: var(--radius);
   --radius-xl: var(--radius);

@@ -65,7 +65,7 @@ const CONTRAST = [
 
 const RADII = [
   { name: "картки, плитки, фото, панелі, діалоги: 12px (rounded-lg…3xl)", className: "rounded-2xl" },
-  { name: "контроли, іконки-кнопки, чіпи, лічильники: 4px (rounded-control)", className: "rounded-control" },
+  { name: "контроли, пункти списків, іконки-кнопки, чіпи, лічильники: 4px (rounded-control, rounded-sm)", className: "rounded-control" },
   { name: "лише крапки, аватари, повзунки, стрілки каруселі: rounded-full", className: "rounded-full" },
 ];
 

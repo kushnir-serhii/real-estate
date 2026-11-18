@@ -66,7 +66,7 @@ export const QuickSearch = () => {
           ))}
         </div>
       </fieldset>
-      <div className="grid divide-y divide-border bg-card text-card-foreground shadow-float ring-1 ring-border lg:grid-cols-[1fr_1fr_1.3fr_auto] lg:divide-x lg:divide-y-0">
+      <div className="grid divide-y divide-border overflow-hidden rounded-lg bg-card text-card-foreground shadow-float ring-1 ring-border lg:grid-cols-[1fr_1fr_1.3fr_auto] lg:divide-x lg:divide-y-0">
         <Field label="Тип" htmlFor={typeId}>
           <FormSelect id={typeId} name="property_type" options={TYPE_OPTIONS} className={CELL_SELECT} />
         </Field>

@@ -16,7 +16,7 @@ type PropertyContactCardProps = {
 };
 
 const OTHER_PHONE =
-  "inline-flex min-h-11 items-center gap-2 self-start rounded-md font-semibold text-on-ink tabular-nums outline-none hover:text-brand-on-ink focus-visible:ring-3 focus-visible:ring-brand-on-ink/60";
+  "inline-flex min-h-11 items-center gap-2 self-start rounded-control font-semibold text-on-ink tabular-nums outline-none hover:text-brand-on-ink focus-visible:ring-3 focus-visible:ring-brand-on-ink/60";
 
 /**
  * Who to contact about this property: its agent, else the agency; agency messengers always.

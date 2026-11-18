@@ -7,7 +7,7 @@ import { toTel } from "@/lib/format/to-tel";
 import { photoUrl } from "@/lib/photos/photo-url";
 
 const PHONE_CLASS =
-  "inline-flex min-h-11 items-center gap-2 rounded-md font-medium text-foreground tabular-nums outline-none hover:text-brand-text focus-visible:ring-3 focus-visible:ring-ring/50";
+  "inline-flex min-h-11 items-center gap-2 rounded-control font-medium text-foreground tabular-nums outline-none hover:text-brand-text focus-visible:ring-3 focus-visible:ring-ring/50";
 
 /** Author of the post: the agent with a phone, or the agency when there is none. */
 export const BlogAuthorCard = ({ author }: { author: PropertyAgent | null }) => {

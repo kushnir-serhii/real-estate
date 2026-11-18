@@ -76,7 +76,7 @@ export const MobileMenu = () => {
           </Button>
           <a
             href={CONTACTS.phone.href}
-            className="inline-flex min-h-11 items-center gap-2 rounded-md text-base font-semibold text-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="inline-flex min-h-11 items-center gap-2 rounded-control text-base font-semibold text-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             <Phone className="size-4" aria-hidden="true" />
             <span className="tabular-nums">{CONTACTS.phone.display}</span>
