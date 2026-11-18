@@ -11,7 +11,7 @@ Source: design critique of 2026-11-15 (the orange accent was too loud and everyw
 - In:
   - **Palette, monochrome blue** (light and dark themes): midnight base, one brighter royal blue accent for details, no orange anywhere. Lighter photo veils.
   - **Type:** Playfair Display (regular case, not SC) for H1 / H2; Sofia Sans stays for body, UI, H3, card titles, prices.
-  - **Shapes:** cards, media, sections 0px; buttons, inputs, selects, chips, tabs 2px.
+  - **Shapes:** cards, media, tiles, panels, dialogs 12px (slice 14; was 0); buttons, inputs, selects, chips, tabs 4px (was 2px).
   - **Home content:** hero simplified around the search; «Ексклюзивні об'єкти» first; «Нові пропозиції» below with deal tabs; «Зручно на кожному кроці» (CRM / Telegram block) removed; the two bottom CTAs merged into one; the «Про агентство» collage made clean. **Both district sections stay** (the user picks one later); they get the new palette, shapes and lighter veils.
   - **Exclusive flag:** `is_exclusive` on properties, a checkbox in the admin, a badge on the card; the home section falls back to the most expensive sale properties when fewer than 6 are flagged.
   - **Price range filter with histogram**, one component in the home quick search and in the catalog filters.
@@ -47,7 +47,7 @@ Source: design critique of 2026-11-15 (the orange accent was too loud and everyw
 
 Sofia Sans Extra Condensed is removed if nothing uses it after this (check the admin and the price sign). Playfair is a high-contrast serif: H1 / H2 at medium weight (500–600), never all caps, generous line height (≈ 1.1 for display, 1.15 for H2), sizes re-tuned (hero ≈ 64–80px desktop, ≈ 40–44px at 375px). Eyebrows: Sofia Sans, small caps or uppercase with tracking, `brand-text`, ≥ 13px.
 
-**Shapes.** `--radius: 0` (cards, media, tiles, panels, dialogs, popovers), `--radius-control: 2px` (buttons of every size incl. icon buttons, inputs, selects, chips, badges, tabs, pagination, chat input, textarea). Only true dots stay round (status dot, slider thumbs, avatars). The favourite and photo-slider buttons on cards become 2px squares like the rest.
+**Shapes.** *(Revised in slice 14: `--radius` 0.75rem = 12px, `--radius-control` 4px, cards borderless; the text below is the original 0 / 2px.)* `--radius: 0` (cards, media, tiles, panels, dialogs, popovers), `--radius-control: 2px` (buttons of every size incl. icon buttons, inputs, selects, chips, badges, tabs, pagination, chat input, textarea). Only true dots stay round (status dot, slider thumbs, avatars). The favourite and photo-slider buttons on cards become 2px squares like the rest.
 
 **Hero.** Photo full-bleed and bright (gradient only behind the text). Content: optional eyebrow, the H1, one line of lead, and the **quick search as the main action** (inside or overlapping the hero). No second CTA pair in the hero; the header keeps one «Залишити заявку» as an outlined / quiet button.
 
@@ -197,6 +197,16 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
   - [x] keyboard and touch work as before; 44px targets
   - [x] typecheck, lint, test, build green
 
+### [x] 14. Radius scale 4 / 12px, borderless cards, 10 districts, favorites badge
+- **Build:** `--radius` 0.75rem (12px) with `rounded-lg…4xl` all resolving to it; `--radius-control` 4px; property and blog cards without ring and shadow, transparent, text aligned to the photo edge, hover = photo zoom only; districts 6 → 10 (bento: 2×2 + 9 single, 4 columns, 3 rows); header favorites heart in `foreground`, count badge `brand` with a `ring-background` cut-out.
+- **Files:** `src/app/globals.css`, `src/features/properties/property-card*.tsx`, `src/features/blog/blog-card.tsx`, `src/features/blog/blog-cover.tsx`, `src/features/home/districts.tsx`, `src/constants/home.ts`, `src/components/layout/favorites-link.tsx`, `src/app/design/page.tsx`, docs
+- **Agent:** designer · **Model:** sonnet
+- **Accept:**
+  - [x] no pill left except carousel arrows, avatars, dots, slider thumbs; header CTA is a 4px button
+  - [x] cards: no border or shadow, photo clipped at 12px, grid and list view, both themes
+  - [x] districts: 10 tiles, no holes at lg; snap strip on phones
+  - [x] favorites badge separated from the heart, AA contrast
+
 ## External needs
 - Apply `20261115120000_property_exclusive.sql` to the Supabase project (user; listed in setup.md).
 - Real photos for hero, districts and about (later; placeholders now).
@@ -227,3 +237,4 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
 | 2026-11-15 | 11 | done | hero search = text deal tabs (underlined) + one white row of cells (uppercase label + value, hairlines), «Знайти» attached; stacked below 1024; PriceRangeField appearance «cell»; header and mobile-menu CTA = new brand button variant (white on royal blue 5.8:1) in both header states; scroll-in reveals removed from the home card grids (catalog / favourites / similar / blog had none); favourite heart without square (white + soft shadow, saved = brand-on-ink, 44px); card slider buttons rounded-full (documented exception); ArrowRight → ArrowUpRight in 16 files. Checked: home 1440 / 375, light + dark |
 | 2026-11-15 | 13 | done | src/components/carousel-arrow.tsx: CarouselArrow { direction prev|next, size sm 44 / md 48 / lg 56, tone light (background/75 + blur) | dark (scrim) }, cva, rounded-full, focus ring, disabled state, default uk aria-labels; used by the card photo slider (hover-reveal kept via className), property gallery and fullscreen viewer (12 usages); shown on /design. Gallery expand / close buttons still use the gallery's own square-ish ROUND_BUTTON (open question) |
 | 2026-11-15 | 12 | done | user chose C (after A / B / C, then C traced to the photo + D); home hero: midnight → blueprint traced from house-exterior-1.webp draws (0–1.9 s) → scan line + photo develops (1.0–2.8 s) → lines dim to 0.22 on the matching edges (1.8–3.2 s) → slow drift; pure CSS (HeroBackdrop / HeroTracedScene, hero-blueprint, hero-trace-frame; utilities hero-trace*, hero-draw, hero-develop, hero-scan, hero-drift; old hero-zoom / hero-curtain removed); A and B deleted, /design/hero keeps C and D. perf /: LCP 0.86 → 1.07 s (LCP is the H1 while the photo is still clipped; image at 0.26 s with reduced motion), JS 218.7 KB gz, CLS 0. Checked frames at 1.5 / 3 / 8 s, 1440 and 390 |
+| 2026-11-18 | 14 | done | design critique: --radius 0.75rem (rounded-lg…4xl all = 12px), --radius-control 4px; cards borderless / shadowless with zoom-only hover (blog cover got zoomOnHover); DISTRICTS 6 → 10, bento 2×2 + 9; favorites badge brand + ring-background. Files: globals.css, property-card, property-card-skeleton, blog-card, blog-cover, districts, constants/home.ts, favorites-link, design page, conventions.md |

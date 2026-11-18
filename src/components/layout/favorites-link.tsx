@@ -18,11 +18,11 @@ export const FavoritesLink = ({ className }: { className?: string }) => {
       aria-label={favoritesLinkLabel(count)}
       className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "relative", className)}
     >
-      <Heart aria-hidden="true" className={cn(count > 0 && "fill-current text-primary on-hero:text-on-scrim")} />
+      <Heart aria-hidden="true" className={cn(count > 0 && "fill-current text-foreground on-hero:text-on-scrim")} />
       {count > 0 && (
         <span
           aria-hidden="true"
-          className="absolute top-0.5 right-0.5 flex h-5 min-w-5 items-center justify-center rounded-control bg-primary px-1 text-xs font-semibold text-primary-foreground tabular-nums on-hero:bg-on-scrim on-hero:text-ink"
+          className="absolute top-0 -right-1 flex h-5 min-w-5 items-center justify-center rounded-control bg-brand px-1 text-xs font-semibold text-brand-foreground tabular-nums ring-2 ring-background on-hero:ring-ink"
         >
           {count > 99 ? "99+" : count}
         </span>

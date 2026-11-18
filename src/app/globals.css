@@ -58,16 +58,18 @@
   /* floating panels (home quick search): soft, large, midnight-tinted */
   --shadow-float: 0 1.75rem 3.5rem -1.25rem oklch(0.17 0.04 258 / 35%), 0 0.25rem 1rem oklch(0.17 0.04 258 / 8%);
 
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
+  /* Media and surfaces (cards, tiles, photos, panels, dialogs) are one 12px: lg and every step above it collapse to --radius,
+     so rounded-xl / 2xl / 3xl never grow into big blobs. sm / md stay smaller for inner elements. */
+  --radius-sm: calc(var(--radius) * 0.5);
+  --radius-md: calc(var(--radius) * 0.67);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-xl: var(--radius);
+  --radius-2xl: var(--radius);
+  --radius-3xl: var(--radius);
+  --radius-4xl: var(--radius);
   /* Controls (buttons, inputs, selects, chips, badges, tabs, pagination, icon buttons, counters, the chat launcher):
-     a barely-there 2px. One switch for the whole site: 9999px gives pills → rounded-control */
-  --radius-control: 2px;
+     a firm 4px. One switch for the whole site: 9999px gives pills → rounded-control */
+  --radius-control: 4px;
   /* Multi-line fields (textarea, chat input): follow the control shape → rounded-control-multiline */
   --radius-control-multiline: var(--radius-control);
 
@@ -103,7 +105,7 @@
 
 :root {
   color-scheme: light;
-  --radius: 0;
+  --radius: 0.75rem;
 
   /* Midnight + one blue. Neutrals are cool (a faint blue tint), never pure grey and never yellow. The page is cool ivory,
      cards are white with a hairline border. The main button is midnight (primary); blue is for details only

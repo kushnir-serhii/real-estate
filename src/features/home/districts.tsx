@@ -6,8 +6,19 @@ import { DISTRICTS } from "@/constants/home";
 import { cn } from "@/lib/utils";
 import { HomeSection } from "./home-section";
 
-/** Desktop bento: tile spans per item (one 2x2 hero tile, wide ones, the rest single). Phones use a snap strip. */
-const SPANS = ["lg:col-span-2 lg:row-span-2", "lg:col-span-2", "", "", "lg:col-span-2", "lg:col-span-2"] as const;
+/** Desktop bento: tile spans per item (one 2x2 hero tile, four single, then 2 + 1 + 1 and 2 + 2: 10 tiles fill 4 rows of 4 cells with no holes). Phones use a snap strip. */
+const SPANS = [
+  "lg:col-span-2 lg:row-span-2",
+  "",
+  "",
+  "",
+  "",
+  "lg:col-span-2",
+  "",
+  "",
+  "lg:col-span-2",
+  "lg:col-span-2",
+] as const;
 
 /** District tiles: a bento on desktop, a horizontal scroll-snap strip on phones (scrolls inside itself). */
 export const Districts = () => (
@@ -26,7 +37,7 @@ export const Districts = () => (
           <li key={district.name} className={cn("w-64 shrink-0 snap-start lg:w-auto", SPANS[index])}>
             <Link
               href={`/catalog?district=${encodeURIComponent(district.name)}`}
-              className="group/tile relative isolate flex aspect-4/5 h-full w-full flex-col justify-end overflow-hidden bg-ink p-5 text-on-scrim outline-none focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background lg:aspect-auto lg:p-6"
+              className="group/tile relative isolate flex aspect-4/5 h-full w-full flex-col justify-end overflow-hidden rounded-lg bg-ink p-5 text-on-scrim outline-none focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background lg:aspect-auto lg:p-6"
             >
               {/* eslint-disable-next-line @next/next/no-img-element -- static placeholders from public/; Workers has no image optimizer */}
               <img

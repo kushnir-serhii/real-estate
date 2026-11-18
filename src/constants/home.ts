@@ -107,6 +107,26 @@ export const DISTRICTS = {
       tagline: "Лівий берег, доступні ціни",
       image: { src: "/placeholders/flat-living-3.webp", width: 1280, height: 854 },
     },
+    {
+      name: "Деснянський",
+      tagline: "Троєщина, парки й простір",
+      image: { src: "/placeholders/districts/plot-landscape-1-1000.webp", width: 1000, height: 562 },
+    },
+    {
+      name: "Дніпровський",
+      tagline: "Русанівка, Дніпро поруч",
+      image: { src: "/placeholders/districts/flat-living-2-1000.webp", width: 1000, height: 666 },
+    },
+    {
+      name: "Святошинський",
+      tagline: "Ліс, метро й спокій",
+      image: { src: "/placeholders/districts/flat-kitchen-1-1000.webp", width: 1000, height: 599 },
+    },
+    {
+      name: "Солом'янський",
+      tagline: "Вокзал, аеропорт, нові ЖК",
+      image: { src: "/placeholders/districts/office-interior-1-1000.webp", width: 1000, height: 667 },
+    },
   ],
 } as const;
 
