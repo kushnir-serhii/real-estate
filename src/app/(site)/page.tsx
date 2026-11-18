@@ -4,7 +4,6 @@ import { SectionHeading } from "@/components/section-heading";
 import { EXCLUSIVE, HERO, NEW_PROPERTIES } from "@/constants/home";
 import { ExclusiveProperties } from "@/features/home/exclusive-properties";
 import { NewProperties } from "@/features/home/new-properties";
-import { DistrictPicker } from "@/features/home/district-picker";
 import { Districts } from "@/features/home/districts";
 import { Hero } from "@/features/home/hero";
 import { HomeBlog } from "@/features/home/home-blog";
@@ -63,7 +62,6 @@ const HomePage = async () => {
       </HomeSection>
       <WhyUs />
       <Services />
-      <DistrictPicker />
       <Districts />
       <HowWeWork />
       <HomeAbout body={page.body} />

@@ -11,7 +11,7 @@ Source: design critique of 2026-11-15 (the orange accent was too loud and everyw
 - In:
   - **Palette, monochrome blue** (light and dark themes): midnight base, one brighter royal blue accent for details, no orange anywhere. Lighter photo veils.
   - **Type:** Playfair Display (regular case, not SC) for H1 / H2; Sofia Sans stays for body, UI, H3, card titles, prices.
-  - **Shapes:** cards, media, sections 0px; buttons, inputs, selects, chips, tabs 2px.
+  - **Shapes:** cards, media, tiles, panels, dialogs 12px (slice 14; was 0); buttons, inputs, selects, chips, tabs 4px (was 2px).
   - **Home content:** hero simplified around the search; «Ексклюзивні об'єкти» first; «Нові пропозиції» below with deal tabs; «Зручно на кожному кроці» (CRM / Telegram block) removed; the two bottom CTAs merged into one; the «Про агентство» collage made clean. **Both district sections stay** (the user picks one later); they get the new palette, shapes and lighter veils.
   - **Exclusive flag:** `is_exclusive` on properties, a checkbox in the admin, a badge on the card; the home section falls back to the most expensive sale properties when fewer than 6 are flagged.
   - **Price range filter with histogram**, one component in the home quick search and in the catalog filters.
@@ -47,7 +47,7 @@ Source: design critique of 2026-11-15 (the orange accent was too loud and everyw
 
 Sofia Sans Extra Condensed is removed if nothing uses it after this (check the admin and the price sign). Playfair is a high-contrast serif: H1 / H2 at medium weight (500–600), never all caps, generous line height (≈ 1.1 for display, 1.15 for H2), sizes re-tuned (hero ≈ 64–80px desktop, ≈ 40–44px at 375px). Eyebrows: Sofia Sans, small caps or uppercase with tracking, `brand-text`, ≥ 13px.
 
-**Shapes.** `--radius: 0` (cards, media, tiles, panels, dialogs, popovers), `--radius-control: 2px` (buttons of every size incl. icon buttons, inputs, selects, chips, badges, tabs, pagination, chat input, textarea). Only true dots stay round (status dot, slider thumbs, avatars). The favourite and photo-slider buttons on cards become 2px squares like the rest.
+**Shapes.** *(Revised in slice 14: `--radius` 0.75rem = 12px, `--radius-control` 4px, cards borderless; the text below is the original 0 / 2px.)* `--radius: 0` (cards, media, tiles, panels, dialogs, popovers), `--radius-control: 2px` (buttons of every size incl. icon buttons, inputs, selects, chips, badges, tabs, pagination, chat input, textarea). Only true dots stay round (status dot, slider thumbs, avatars). The favourite and photo-slider buttons on cards become 2px squares like the rest.
 
 **Hero.** Photo full-bleed and bright (gradient only behind the text). Content: optional eyebrow, the H1, one line of lead, and the **quick search as the main action** (inside or overlapping the hero). No second CTA pair in the hero; the header keeps one «Залишити заявку» as an outlined / quiet button.
 
@@ -197,6 +197,34 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
   - [x] keyboard and touch work as before; 44px targets
   - [x] typecheck, lint, test, build green
 
+### [x] 14. Radius scale 4 / 12px, borderless cards, 10 districts, favorites badge
+- **Build:** `--radius` 0.75rem (12px) with `rounded-lg…4xl` all resolving to it; `--radius-control` 4px; property and blog cards without ring and shadow, transparent, text aligned to the photo edge, hover = photo zoom only; districts 6 → 10 (bento: 2×2 + 9 single, 4 columns, 3 rows); header favorites heart in `foreground`, count badge `brand` with a `ring-background` cut-out.
+- **Files:** `src/app/globals.css`, `src/features/properties/property-card*.tsx`, `src/features/blog/blog-card.tsx`, `src/features/blog/blog-cover.tsx`, `src/features/home/districts.tsx`, `src/constants/home.ts`, `src/components/layout/favorites-link.tsx`, `src/app/design/page.tsx`, docs
+- **Agent:** designer · **Model:** sonnet
+- **Accept:**
+  - [x] no pill left except carousel arrows, avatars, dots, slider thumbs; header CTA is a 4px button
+  - [x] cards: no border or shadow, photo clipped at 12px, grid and list view, both themes
+  - [x] districts: 10 tiles, no holes at lg; snap strip on phones
+  - [x] favorites badge separated from the heart, AA contrast
+
+### [x] 15. Radius audit: surfaces left at 0, a two-value scale
+- **Build:** (design critique 2026-11-18) slice 14 raised `--radius`, but surfaces that never had a class kept 0 and now clash with 12px cards. Give `rounded-lg` (+ `overflow-hidden` where children touch the edge) to: hero quick-search panel (`quick-search.tsx`, its «Бюджет» popover is already 12px), the two «Про агентство» photos, the home CTA ink panel and its form card. Inside them nothing may be rounder than the parent: lead-form error and `lead-success` → `rounded-control`. Controls back to 4px: `MessengerLinks` (`rounded-xl` → `rounded-control`), Select items (`rounded-xl` → `rounded-control`). `--radius-sm` → 4px (`var(--radius-control)`); `--radius-md` stays 8px (user: do not collapse both). On the public site (not admin) replace stray `rounded-md` / `rounded-sm` with `rounded-control` (focus rings of logo, footer and mobile-menu links, breadcrumbs, consent link) and give the site skeleton text lines `rounded-control`. CTA accent bar (`home-cta.tsx`, `blog-cta.tsx`) → `rounded-none` (user). Kept as is (user, 2026-11-18): the district tile ↗ stays a 4px square (the whole tile is the link, not a carousel); full-bleed hero, «Послуги» hairline grid, «Чому ми» and FAQ rules stay sharp.
+- **Files:** `src/app/globals.css`, `src/features/home/{quick-search,home-about,home-cta}.tsx`, `src/features/blog/blog-cta.tsx`, site layout links, `property-card-skeleton.tsx`, `src/features/leads/{lead-form,lead-success}.tsx`, `src/components/layout/messenger-links.tsx`, `src/components/ui/select.tsx`, `src/app/design/page.tsx`, `docs/conventions.md` (radii: 4 / 12, `md` 8px only for admin details)
+- **Agent:** designer · **Model:** sonnet
+- **Accept:**
+  - [x] home: every surface and photo 12px, every control 4px; no child rounder than its parent; round only carousel arrows, avatars, dots, slider thumbs, blurred glows
+  - [x] `rounded-sm` renders 4px; no `rounded-md` / `rounded-sm` left on public-site components; the same blocks on blog, contacts and property pages still look right
+  - [x] light + dark, 1440 / 375; typecheck, lint, test, build green
+
+### [x] 16. Card info: heart beside the price, publish date
+- **Build:** (user feedback 2026-11-18) the favourite heart leaves the photo and sits at the right of the price row (bare 24px icon, 44px hit area, edge on the card edge; saved = brand fill); the deal badge on the photo gets the freed width. Under the facts: «Опубліковано 16 лист.» from `published_at` (Kyiv time, `uk-UA` short month; the year is added when it is not the current one; hidden when there is no date).
+- **Files:** `src/features/properties/property-card.tsx`, `src/features/favorites/favorite-button.tsx`, `src/lib/format/format-short-date(.test).ts`
+- **Agent:** designer · **Model:** sonnet
+- **Accept:**
+  - [x] grid and list view: heart right of the price, photo free of controls except the slider arrows and badges
+  - [x] heart click toggles favourite and does not open the property (it sits above the stretched title link)
+  - [x] date line on every card with a `published_at`; typecheck, lint, unit tests green
+
 ## External needs
 - Apply `20261115120000_property_exclusive.sql` to the Supabase project (user; listed in setup.md).
 - Real photos for hero, districts and about (later; placeholders now).
@@ -208,7 +236,8 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
 - `pnpm ui-check` can't start its own dev server while another `next dev` runs in the folder; it was run against `next start` on 3199. The admin dashboard is flaky under 6 workers (networkidle timeout).
 - `database.types.ts` was edited by hand for `is_exclusive`; regenerate against a local DB when one is up.
 - **Decided (2026-11-15, user):** motion without any new library; the histogram panel is loaded on open (no first-load growth); copy «Колекція / Ексклюзивні об'єкти / Вибрані квартири та будинки, які ми рекомендуємо», card badge «Ексклюзив», admin checkbox «Ексклюзив (показувати в колекції на головній)»; «Нові пропозиції» tabs show 3 cards each.
-- Which district section stays (picker or bento): the user decides after seeing both in the new style.
+- **Decided (2026-11-18, user):** the districts bento stays; `DistrictPicker` and `DISTRICT_PICKER` removed.
+- **Decided (2026-11-18, user):** CTA accent bar stays, square (`rounded-none`); `--radius-sm` 4px, `--radius-md` kept at 8px, public site cleaned point by point (slice 15).
 
 ## Log
 | Date | Slice | Result | Notes / files |
@@ -227,3 +256,9 @@ Reference: the user's screenshot (histogram over a dual-thumb slider, min / max 
 | 2026-11-15 | 11 | done | hero search = text deal tabs (underlined) + one white row of cells (uppercase label + value, hairlines), «Знайти» attached; stacked below 1024; PriceRangeField appearance «cell»; header and mobile-menu CTA = new brand button variant (white on royal blue 5.8:1) in both header states; scroll-in reveals removed from the home card grids (catalog / favourites / similar / blog had none); favourite heart without square (white + soft shadow, saved = brand-on-ink, 44px); card slider buttons rounded-full (documented exception); ArrowRight → ArrowUpRight in 16 files. Checked: home 1440 / 375, light + dark |
 | 2026-11-15 | 13 | done | src/components/carousel-arrow.tsx: CarouselArrow { direction prev|next, size sm 44 / md 48 / lg 56, tone light (background/75 + blur) | dark (scrim) }, cva, rounded-full, focus ring, disabled state, default uk aria-labels; used by the card photo slider (hover-reveal kept via className), property gallery and fullscreen viewer (12 usages); shown on /design. Gallery expand / close buttons still use the gallery's own square-ish ROUND_BUTTON (open question) |
 | 2026-11-15 | 12 | done | user chose C (after A / B / C, then C traced to the photo + D); home hero: midnight → blueprint traced from house-exterior-1.webp draws (0–1.9 s) → scan line + photo develops (1.0–2.8 s) → lines dim to 0.22 on the matching edges (1.8–3.2 s) → slow drift; pure CSS (HeroBackdrop / HeroTracedScene, hero-blueprint, hero-trace-frame; utilities hero-trace*, hero-draw, hero-develop, hero-scan, hero-drift; old hero-zoom / hero-curtain removed); A and B deleted, /design/hero keeps C and D. perf /: LCP 0.86 → 1.07 s (LCP is the H1 while the photo is still clipped; image at 0.26 s with reduced motion), JS 218.7 KB gz, CLS 0. Checked frames at 1.5 / 3 / 8 s, 1440 and 390 |
+| 2026-11-18 | 14 | done | design critique: --radius 0.75rem (rounded-lg…4xl all = 12px), --radius-control 4px; cards borderless / shadowless with zoom-only hover (blog cover got zoomOnHover); DISTRICTS 6 → 10, bento 2×2 + 9; favorites badge brand + ring-background. Files: globals.css, property-card, property-card-skeleton, blog-card, blog-cover, districts, constants/home.ts, favorites-link, design page, conventions.md |
+| 2026-11-18 | 15 | drafted | radius audit of the home (design critique): 0px surfaces after slice 14, controls at 12px, sm / md middle values; district arrow kept square (user); stale «round floating button» comment on the chat launcher token fixed in globals.css |
+| 2026-11-18 | 16 | done | heart moved from the photo to the price row (FavoriteButton card variant inline, -me-2.5, saved = text-brand fill), deal badge max width freed; «Опубліковано {date}» under the facts via new formatShortDate (Kyiv tz, year only when not current, 4 tests). Checked in the browser: catalog grid + list view, toggle works without navigating |
+| 2026-11-18 | 15 | done | rounded-lg on hero search panel (+overflow-hidden), about photos (radius survives the reveal-curtain clip-path), home CTA panel + form card; lead error / success, MessengerLinks, Select items → rounded-control; --radius-sm = control 4px, --radius-md kept 8px (admin only); public-site rounded-md / sm / bare rounded → rounded-control (layout links, blog, contacts, about, property, map, consent, assistant bubble tails, skeleton text lines); CTA accent bars rounded-none; alert-dialog (admin-only) untouched. Checked: home at 1440 in the browser (dark), ui-check 66 passed. Files: globals.css, 26 components, design page, conventions.md |
+| 2026-11-18 | — | fix | the home showed two CTAs in a row: slice 8 had dropped `body:has([data-home-cta]) [data-footer-cta] { display: none }` while adding the view-transition block; rule restored in globals.css |
+| 2026-11-18 | UI check | done | SPEC=021 ROUTES=root,catalog,catalog/2-kimnatna-kvartyra-na-oboloni-3f9a1c,favorites,about,contacts,blog,blog/yaki-dokumenty-pereviryty-pered-kupivleiu-kvartyry (+ default extras) against next start on 3199 → 66 passed; screenshots reviewed (full-page shots leave scroll-reveal sections blank, as before; those were checked live) |

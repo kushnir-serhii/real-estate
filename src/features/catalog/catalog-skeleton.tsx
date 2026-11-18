@@ -12,7 +12,7 @@ type CatalogSkeletonProps = {
 /** Results placeholder: count line + card grid (same box sizes as the cards). */
 export const CatalogSkeleton = ({ layout }: CatalogSkeletonProps) => (
   <div aria-busy="true" aria-label="Завантаження об'єктів" className="flex flex-col gap-4">
-    <Skeleton className="h-5 w-40" />
+    <Skeleton className="h-5 w-40 rounded-control" />
     <CatalogGrid layout={layout}>
       {SKELETON_KEYS.map((key) => (
         <li key={key}>

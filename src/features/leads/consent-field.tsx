@@ -22,7 +22,7 @@ export const ConsentField = ({ error }: ConsentFieldProps) => {
           name="consent"
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? errorId : undefined}
-          className="mt-2.5 size-5 shrink-0 rounded accent-primary outline-none focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:outline-2 aria-invalid:outline-destructive"
+          className="mt-2.5 size-5 shrink-0 rounded-control accent-primary outline-none focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:outline-2 aria-invalid:outline-destructive"
         />
         <label htmlFor={id} className="min-h-11 py-2.5 text-sm leading-snug">
           Я погоджуюся на{" "}
@@ -30,7 +30,7 @@ export const ConsentField = ({ error }: ConsentFieldProps) => {
             href="/privacy"
             target="_blank"
             rel="noopener"
-            className="rounded-sm text-primary underline underline-offset-4 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="rounded-control text-primary underline underline-offset-4 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             обробку персональних даних
             <span className="sr-only"> (відкриється в новій вкладці)</span>

@@ -9,8 +9,8 @@ const bubbleVariants = cva(
   {
     variants: {
       from: {
-        user: "self-end rounded-br-md bg-primary text-primary-foreground",
-        assistant: "self-start rounded-bl-md bg-muted text-foreground",
+        user: "self-end rounded-br-control bg-primary text-primary-foreground",
+        assistant: "self-start rounded-bl-control bg-muted text-foreground",
       },
     },
   },

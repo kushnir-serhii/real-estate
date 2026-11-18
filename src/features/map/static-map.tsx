@@ -74,7 +74,7 @@ export const StaticMap = ({ lat, lng, address, approximate = false, className }:
           href={osmUrl(lat, lng, approximate)}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex min-h-11 items-center gap-2 self-start rounded-md text-sm text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 sm:self-auto"
+          className="inline-flex min-h-11 items-center gap-2 self-start rounded-control text-sm text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 sm:self-auto"
         >
           Відкрити на мапі
           <ExternalLink className="size-4" aria-hidden="true" />

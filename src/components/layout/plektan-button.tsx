@@ -12,7 +12,7 @@ export const PlektanButton = () => {
       title="plektan.com"
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex min-h-11 items-center rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+      className="inline-flex min-h-11 items-center rounded-control outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
     >
       <Image
         src="/partners/work-with-plektan-uk.png"

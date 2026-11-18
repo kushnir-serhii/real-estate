@@ -23,6 +23,7 @@ const SPOTS = {
   darnytskyi: { district: "Дарницький", locality: KYIV, lat: 50.44, lng: 30.63 },
   sviatoshynskyi: { district: "Святошинський", locality: KYIV, lat: 50.457, lng: 30.37 },
   dniprovskyi: { district: "Дніпровський", locality: KYIV, lat: 50.47, lng: 30.6 },
+  solomianskyi: { district: "Солом'янський", locality: KYIV, lat: 50.43, lng: 30.43 },
   desnianskyi: { district: "Деснянський", locality: KYIV, lat: 50.52, lng: 30.61 },
   irpin: { district: null, locality: "Ірпінь", lat: 50.5183, lng: 30.2498 },
   bucha: { district: null, locality: "Буча", lat: 50.543, lng: 30.212 },
@@ -135,6 +136,8 @@ const ROWS: Row[] = [
   { slug: "1-kimnatna-kvartyra-podobovo-pozniaky-6f10e3", title: "1-кімнатна квартира подобово на Позняках", deal: "rent_day", type: FLAT, kind: "isolated", price: 2100, cur: "UAH", area: 42, rooms: 1, storey: 12, storeys: 24, spot: "darnytskyi", street: "вул. Милославська", house: "2", days: 16, agent: A5, text: "Нова квартира в сучасному комплексі з охоронюваним двором. Є все для проживання: техніка, посуд, білизна, швидкий інтернет." },
   { slug: "2-kimnatna-kvartyra-podobovo-holosiiv-4e8a21", title: "2-кімнатна квартира подобово біля Голосіївського парку", deal: "rent_day", type: FLAT, kind: "isolated", price: 2600, cur: "UAH", area: 60, rooms: 2, storey: 5, storeys: 9, spot: "holosiivskyi", street: "вул. Васильківська", house: "13", days: 24, agent: A2, text: "Дві спальні, вітальня з диваном, кухня з усім необхідним. Розрахована на 5 гостей. Поруч парк, ресторани і метро «Голосіївська»." },
   { slug: "studiia-podobovo-podil-sahaidachnoho-9a2d73", title: "Студія подобово на Подолі, вул. Сагайдачного", deal: "rent_day", type: FLAT, kind: "studio", price: 1400, cur: "UAH", area: 25, rooms: 1, storey: 3, storeys: 5, spot: "podilskyi", street: "вул. Петра Сагайдачного", house: "20", days: 5, agent: A4, text: "Компактна студія в самому серці Подолу. Є все для короткого проживання, поруч кафе, галереї й набережна." },
+  { slug: "2-kimnatna-kvartyra-solomianka-heroiv-aviatsii-7d41b8", title: "2-кімнатна квартира в Солом'янському районі, вул. Героїв авіації", deal: "sell", type: FLAT, kind: "isolated", price: 64000, cur: "USD", area: 52, rooms: 2, storey: 4, storeys: 9, spot: "solomianskyi", street: "вул. Героїв авіації", house: "12", days: 9, agent: A2, text: "Двокімнатна квартира з косметичним ремонтом, роздільні кімнати, кухня 8 м². Поруч метро «Святошин» і парк, до залізничного вокзалу близько 15 хвилин транспортом." },
+  { slug: "1-kimnatna-kvartyra-orenda-solomianka-donetska-b52e90", title: "1-кімнатна квартира в оренду в Солом'янському районі, вул. Донецька", deal: "rent_long", type: FLAT, kind: "isolated", price: 17000, cur: "UAH", area: 38, rooms: 1, storey: 5, storeys: 10, spot: "solomianskyi", street: "вул. Донецька", house: "7", days: 12, agent: A5, text: "Світла квартира з євроремонтом, меблями та технікою. Поруч станція метро, супермаркет і школа. Підійде для однієї людини або пари." },
 ];
 
 const FLAT_PHOTOS: readonly SeedPhotoFile[] = ["flat-living-1", "flat-living-2", "flat-living-3", "flat-kitchen-1", "flat-bedroom-1", "flat-bathroom-1"];

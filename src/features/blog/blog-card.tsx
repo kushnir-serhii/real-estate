@@ -14,9 +14,9 @@ export const BlogCard = ({ post, imageSizes, priority = false }: BlogCardProps) 
     // The hover target is this wrapper, which does not move: lifting the hovered element itself makes it jump in a loop
     // when the cursor sits on its bottom edge (the card rises from under the cursor, loses hover, drops back).
     <div className="group h-full">
-      <article className="relative flex h-full flex-col overflow-hidden rounded-2xl bg-card text-card-foreground ring-1 ring-foreground/5 transition-shadow duration-(--duration-base) ease-(--ease-out-soft) group-hover:shadow-float has-focus-visible:ring-3 has-focus-visible:ring-ring motion-reduce:transition-none">
-        <BlogCover coverKey={post.cover_key} alt={null} sizes={imageSizes} priority={priority} />
-        <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
+      <article className="relative flex h-full flex-col rounded-lg bg-transparent text-card-foreground has-focus-visible:ring-3 has-focus-visible:ring-ring has-focus-visible:ring-offset-2 has-focus-visible:ring-offset-background">
+        <BlogCover coverKey={post.cover_key} alt={null} zoomOnHover sizes={imageSizes} priority={priority} />
+        <div className="flex flex-1 flex-col gap-3 pt-4">
           <p className="eyebrow text-brand-text">{blogCategoryLabel(post.category)}</p>
           <h3
             className="line-clamp-3 text-xl leading-tight font-semibold break-words transition-colors duration-(--duration-fast) group-hover:text-brand-text"

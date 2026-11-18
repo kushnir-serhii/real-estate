@@ -76,7 +76,7 @@ export const PropertyView = ({ property }: PropertyViewProps) => {
       {listing ? <JsonLd data={listing} /> : null}
       <Link
         href={`/catalog?deal=${property.deal}`}
-        className="inline-flex min-h-11 items-center gap-2 rounded-md text-sm font-medium text-muted-foreground outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
+        className="inline-flex min-h-11 items-center gap-2 rounded-control text-sm font-medium text-muted-foreground outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
       >
         <ArrowLeft className="size-4" aria-hidden="true" />
         {PROPERTY_PAGE.back}

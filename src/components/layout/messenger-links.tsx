@@ -41,7 +41,7 @@ export const MessengerLinks = ({ className, tone = "default" }: MessengerLinksPr
             <a
               href={url}
               className={cn(
-                "inline-flex min-h-11 items-center gap-2 rounded-xl border px-3 text-sm font-medium outline-none transition-colors duration-(--duration-base) focus-visible:ring-3 focus-visible:ring-ring/50",
+                "inline-flex min-h-11 items-center gap-2 rounded-control border px-3 text-sm font-medium outline-none transition-colors duration-(--duration-base) focus-visible:ring-3 focus-visible:ring-ring/50",
                 LINK_TONE[tone],
               )}
               {...(url.startsWith("http")

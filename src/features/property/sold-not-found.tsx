@@ -44,7 +44,7 @@ const NewestProperties = async () => {
 
 const NewestSkeleton = () => (
   <div className="mt-16" aria-hidden="true">
-    <Skeleton className="h-8 w-48" />
+    <Skeleton className="h-8 w-48 rounded-control" />
     <div className="mt-4">
       <FeaturedSkeleton count={NEWEST_COUNT} />
     </div>

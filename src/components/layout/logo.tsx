@@ -43,7 +43,7 @@ export const Logo = ({
       aria-label={`${BRAND.name}: на головну`}
       onClick={onNavigate}
       className={cn(
-        "logo-lockup min-h-11 shrink-0 rounded-md outline-none transition-colors duration-(--duration-base) focus-visible:ring-3 focus-visible:ring-ring/50",
+        "logo-lockup min-h-11 shrink-0 rounded-control outline-none transition-colors duration-(--duration-base) focus-visible:ring-3 focus-visible:ring-ring/50",
         SIZE[size],
         TONE[tone],
         className,

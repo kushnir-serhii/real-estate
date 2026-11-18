@@ -165,7 +165,7 @@ export const LeadForm = ({
             <p
               id={messageId}
               role="alert"
-              className="rounded-lg bg-destructive/10 px-4 py-3 text-sm font-medium break-words text-destructive"
+              className="rounded-control bg-destructive/10 px-4 py-3 text-sm font-medium break-words text-destructive"
             >
               {message}
             </p>

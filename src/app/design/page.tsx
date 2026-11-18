@@ -64,9 +64,9 @@ const CONTRAST = [
 ] as const;
 
 const RADII = [
-  { name: "картки, плитки, панелі: 0 (rounded-2xl…3xl)", className: "rounded-2xl" },
-  { name: "контроли, іконки-кнопки, чіпи, лічильники: 2px (rounded-control)", className: "rounded-control" },
-  { name: "лише крапки, аватари, спінери: rounded-full", className: "rounded-full" },
+  { name: "картки, плитки, фото, панелі, діалоги: 12px (rounded-lg…3xl)", className: "rounded-2xl" },
+  { name: "контроли, пункти списків, іконки-кнопки, чіпи, лічильники: 4px (rounded-control, rounded-sm)", className: "rounded-control" },
+  { name: "лише крапки, аватари, повзунки, стрілки каруселі: rounded-full", className: "rounded-full" },
 ];
 
 const FONTS = [
