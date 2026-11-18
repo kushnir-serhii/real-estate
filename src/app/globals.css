@@ -630,6 +630,11 @@
   }
 }
 
+/* One CTA block above the footer: the footer's CTA band hides on the home, which has its own (with the form). */
+body:has([data-home-cta]) [data-footer-cta] {
+  display: none;
+}
+
 /* hero lab (spec 021 slice 12): C (= the home hero) and D on /design/hero. D adds a curtain loop after the opening:
    frame n curtains in at 8 + n*6 s, the traced photo hides at 9.2 s and curtains back in at 26 s (24 s CSS loop). */
 .lab-frame {

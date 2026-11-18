@@ -1,6 +1,6 @@
 # 021 — Premium home: blue palette, Playfair headings, sharp shapes, price histogram, motion
 
-**Status:** in-progress · **Depends on:** 018 · **Route(s):** `/` (redesigned); `/catalog` (price filter); every other route only inherits the new tokens (fix regressions, no redesign); `/admin` gets one checkbox
+**Status:** done · **Depends on:** 018 · **Route(s):** `/` (redesigned); `/catalog` (price filter); every other route only inherits the new tokens (fix regressions, no redesign); `/admin` gets one checkbox
 
 ## Goal
 The home page reads as a **premium** agency that still serves every segment: a calm monochrome blue palette with no orange, Playfair Display headings that match the classic logo, sharp corners, lighter photos, an «Ексклюзивні об'єкти» showcase managed from the admin, a modern price filter whose histogram shows how many properties are in and around the chosen range (home and catalog), and editorial motion (a line-by-line mask reveal in the hero, not a plain fade).
