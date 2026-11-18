@@ -4,6 +4,8 @@ import { ViewTransition } from "react";
 
 import type { PublishedProperty } from "@/lib/db/properties";
 import { formatPrice } from "@/lib/format/format-price";
+import { formatShortDate } from "@/lib/format/format-short-date";
+import { cn } from "@/lib/utils";
 import { photoSrcSet } from "@/lib/photos/photo-src-set";
 import { photoUrl } from "@/lib/photos/photo-url";
 import { FavoriteButton } from "@/features/favorites/favorite-button";
@@ -74,7 +76,7 @@ const MaybeViewTransition = ({ name, children }: { name?: string; children: Reac
 
 /**
  * Card is an `article` with the title link stretched over it, so the favorites button
- * (top-right of the photo) and the photo slider buttons (left / right middle) sit above the link without nesting
+ * (beside the price) and the photo slider buttons (left / right middle) sit above the link without nesting
  * interactive elements. Inside the catalog's switchable grid in its one-column view (`.catalog-list-view` on <html>), the card turns
  * horizontal from sm: the photo on the left, the details beside it.
  */
@@ -93,6 +95,7 @@ export const PropertyCard = ({
   }));
   const hasPhoto = slides.length > 0;
   const facts = buildFacts(property);
+  const published = formatShortDate(property.published_at);
   // Missing currency on a priced row is a data gap: treat it as price on request.
   const price =
     property.price_amount !== null && property.currency !== null
@@ -122,7 +125,7 @@ export const PropertyCard = ({
               <span className="text-sm">Фото незабаром</span>
             </div>
           )}
-          <span className="absolute top-3 left-3 max-w-[calc(100%-4.5rem)] truncate rounded-control bg-background/90 px-3 py-1 text-xs font-semibold text-foreground backdrop-blur">
+          <span className="absolute top-3 left-3 max-w-[calc(100%-1.5rem)] truncate rounded-control bg-background/90 px-3 py-1 text-xs font-semibold text-foreground backdrop-blur">
             {soldLabel ?? `${DEAL_LABELS[property.deal]} · ${PROPERTY_TYPE_LABELS[property.property_type]}`}
           </span>
           {property.is_exclusive && !soldLabel && (
@@ -130,14 +133,17 @@ export const PropertyCard = ({
               Ексклюзив
             </span>
           )}
-          <FavoriteButton propertyId={property.id} />
         </div>
         </MaybeViewTransition>
         <div className="flex min-w-0 flex-1 flex-col gap-2 pt-4 sm:[.catalog-list-view_[data-catalog-list]_&]:px-6 sm:[.catalog-list-view_[data-catalog-list]_&]:py-1 lg:[.catalog-list-view_[data-catalog-list]_&]:px-8 lg:[.catalog-list-view_[data-catalog-list]_&]:py-2">
-          <p className="flex flex-wrap items-baseline gap-x-2 text-xl font-semibold tabular-nums sm:text-price">
-            <span>{amount}</span>
-            {unit && <span className="font-sans text-base font-medium text-muted-foreground">/ {unit}</span>}
-          </p>
+          <div className="flex items-start justify-between gap-2">
+            <p className="flex min-w-0 flex-wrap items-baseline gap-x-2 pt-1.5 text-xl font-semibold tabular-nums sm:text-price">
+              <span>{amount}</span>
+              {unit && <span className="font-sans text-base font-medium text-muted-foreground">/ {unit}</span>}
+            </p>
+            {/* -me-2.5 puts the heart's edge on the card's edge; the 44px hit area stays. Above the stretched title link (z-10). */}
+            <FavoriteButton propertyId={property.id} className="-me-2.5" />
+          </div>
           <h3
             className="line-clamp-2 font-sans text-lg font-medium tracking-normal break-words transition-colors duration-(--duration-fast) group-hover:text-brand-text"
             title={property.title}
@@ -158,6 +164,11 @@ export const PropertyCard = ({
                 </li>
               ))}
             </ul>
+          )}
+          {published && (
+            <p className={cn("text-sm text-muted-foreground", facts.length === 0 && "mt-auto pt-3")}>
+              Опубліковано <time dateTime={property.published_at ?? undefined}>{published}</time>
+            </p>
           )}
         </div>
       </article>

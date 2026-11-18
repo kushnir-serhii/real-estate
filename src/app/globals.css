@@ -77,7 +77,7 @@
   --text-price: 1.5rem;
   --text-price--line-height: 1.15;
 
-  /* AI assistant launcher (round floating button) → size-chat-button */
+  /* AI assistant launcher (floating button, rounded-control like every button) → size-chat-button */
   --spacing-chat-button: 3.5rem;
   /* site header slot (its tallest state). On the home page the hero slides under it → -mt-header */
   --spacing-header: 5rem;
